@@ -3,6 +3,7 @@ package it.unical.ea_project_javafx.controller.home;
 import it.unical.ea_project_javafx.model.MainNavigator;
 import it.unical.ea_project_javafx.model.UserSession;
 import it.unical.ea_project_javafx.util.SceneNavigator;
+import it.unical.ea_project_javafx.util.TokenStorage;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -34,40 +35,34 @@ public class NavbarController {
 
     @FXML
     void handleHome(MouseEvent event) {
-        if (navigator != null) {
-            navigator.goToHome((Node) event.getSource());
-        }
+        // Naviga direttamente alla home principale
+        SceneNavigator.getInstance().goToHome("/it/unical/ea_project_javafx/fxml/home/mainview.fxml");
     }
 
     @FXML
     void handleLogin(MouseEvent event) {
-        if (navigator != null) {
-            navigator.goToLogin((Node) event.getSource());
-        }
+        // Naviga alla schermata di login
+        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/login/login.fxml");
     }
 
     @FXML
     void handleOrganizer(MouseEvent event) {
-        if (navigator != null && "ORGANIZER".equalsIgnoreCase(UserSession.getInstance().getRole())) {
-            navigator.goToProfile((Node) event.getSource());
+        if ("ORGANIZER".equalsIgnoreCase(UserSession.getInstance().getRole())) {
+            SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/profile/profile.fxml");
         }
     }
 
     @FXML
     void handleProfilo(ActionEvent event) {
-        if (navigator != null) {
-            Node sourceNode = (userMenuButton != null) ? userMenuButton : (Node) event.getSource();
-            navigator.goToProfile(sourceNode);
-        }
+        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/profile/profile.fxml");
     }
 
     @FXML
     void handleLogout(ActionEvent event) {
         UserSession.getInstance().clear();
-        it.unical.ea_project_javafx.util.TokenStorage.clear();
+        TokenStorage.clear();
 
-        if (userMenuButton != null) {
-            SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/home/mainview.fxml");
-        }
+        // Ricarica la mainview resettando lo stato
+        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/home/mainview.fxml");
     }
 }
