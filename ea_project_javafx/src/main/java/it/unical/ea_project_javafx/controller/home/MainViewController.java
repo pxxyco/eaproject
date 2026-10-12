@@ -107,6 +107,9 @@ public class MainViewController implements MainNavigator {
             }
 
             navbarContainer.getChildren().setAll(navbarView);
+            if (experienceListController != null) {
+                experienceListController.loadHomeForCurrentUser();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -114,13 +117,24 @@ public class MainViewController implements MainNavigator {
 
     private void setupBackgroundResize() {
         if (bgImageView == null) return;
-
         bgImageView.sceneProperty().addListener((obs, oldScene, newScene) -> {
-            if (newScene != null && bgImageView.getParent() instanceof StackPane parentPane) {
-                bgImageView.fitWidthProperty().bind(parentPane.widthProperty());
-                bgImageView.fitHeightProperty().bind(parentPane.heightProperty());
+            if (newScene != null) {
+                bindBackgroundToParent();
             }
         });
+        if (bgImageView.getScene() != null) {
+            bindBackgroundToParent();
+        }
+    }
+
+    private void bindBackgroundToParent() {
+        if (bgImageView.getParent() instanceof StackPane parentPane) {
+            bgImageView.fitWidthProperty().unbind();
+            bgImageView.fitHeightProperty().unbind();
+
+            bgImageView.fitWidthProperty().bind(parentPane.widthProperty());
+            bgImageView.fitHeightProperty().bind(parentPane.heightProperty());
+        }
     }
 
     @Override
@@ -131,16 +145,6 @@ public class MainViewController implements MainNavigator {
     @Override
     public void goToLogin(Node sourceNode) {
         SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/login/login.fxml");
-    }
-
-    @Override
-    public void goToExperiences(Node sourceNode) {
-        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/experiences.fxml");
-    }
-
-    @Override
-    public void goToItinerari(Node sourceNode) {
-        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/itinerari.fxml");
     }
 
     @Override

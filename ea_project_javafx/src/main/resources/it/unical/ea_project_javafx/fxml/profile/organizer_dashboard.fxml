@@ -44,6 +44,9 @@
                             </children>
                         </HBox>
 
+                        <Label fx:id="dashboardErrorLabel" managed="false" visible="false" wrapText="true"
+                               styleClass="dashboard-error" />
+
                         <HBox fx:id="kpiContainer" spacing="20.0">
                             <children>
                                 <VBox minWidth="200.0" styleClass="kpi-card" HBox.hgrow="ALWAYS">
@@ -60,7 +63,7 @@
                                 </VBox>
                                 <VBox minWidth="200.0" styleClass="kpi-card" HBox.hgrow="ALWAYS">
                                     <children>
-                                        <Label styleClass="kpi-title" text="Valore offerte" />
+                                        <Label styleClass="kpi-title" text="Incassi da pagamenti" />
                                         <Label fx:id="totalRevenueLabel" styleClass="kpi-value-green" text="€ 0.00" />
                                     </children>
                                 </VBox>
@@ -69,8 +72,8 @@
 
                         <VBox spacing="12.0">
                             <children>
-                                <Label styleClass="section-header" text="Le Tue Attività Gestite" />
-                                <ListView fx:id="activitiesListView" focusTraversable="false" minHeight="185.0" orientation="HORIZONTAL" prefHeight="185.0" styleClass="horizontal-list-view" VBox.vgrow="NEVER" />
+                                <Label styleClass="section-header" text="Le Tue Offerte" />
+                                <ListView fx:id="activitiesListView" focusTraversable="false" minHeight="225.0" orientation="HORIZONTAL" prefHeight="225.0" styleClass="horizontal-list-view" VBox.vgrow="NEVER" />
                             </children>
                         </VBox>
 

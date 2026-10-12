@@ -9,7 +9,7 @@ import it.unical.ea_project_javafx.util.AppConfig;
 import it.unical.ea_project_javafx.util.SceneNavigator;
 
 /**
- * JavaFX App Main Entry Point
+ * JavaFX App
  */
 public class App extends Application {
 
@@ -32,4 +32,5 @@ public class App extends Application {
     public static void main(String[] args) {
         launch(args);
     }
+
 }

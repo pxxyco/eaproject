@@ -8,7 +8,7 @@
 
 <VBox fx:id="cardRoot" prefHeight="378.0" prefWidth="325.0" styleClass="experience-card" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.home.ExperienceCardController">
 
-    <StackPane fx:id="imageContainer" styleClass="card-image-container" prefHeight="136.0" prefWidth="315.0">
+    <StackPane fx:id="imageContainer" styleClass="card-image-container" prefHeight="199.0" prefWidth="315.0">
         <VBox.margin>
             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
         </VBox.margin>

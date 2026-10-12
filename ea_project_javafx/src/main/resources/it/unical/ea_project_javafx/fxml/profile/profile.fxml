@@ -35,13 +35,7 @@
 
                         <VBox spacing="5.0">
                             <Label fx:id="greetingLabel" styleClass="profile-title" />
-                            <Label styleClass="profile-subtitle" text="Questa e la tua area personale." />
-                        </VBox>
-
-                        <VBox spacing="8.0" styleClass="identity-panel">
-                            <Label fx:id="fullNameLabel" styleClass="identity-name" />
-                            <Label fx:id="emailLabel" styleClass="identity-detail" />
-                            <Label fx:id="roleLabel" styleClass="role-badge" />
+                            <Label styleClass="profile-subtitle" text="Bentornato nella tua area personale." />
                         </VBox>
 
                         <VBox fx:id="dashboardContainer" spacing="18.0" />

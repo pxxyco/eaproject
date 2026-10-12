@@ -4,23 +4,16 @@
             "type": "java",
             "name": "App",
             "request": "launch",
-            "mainClass": "it.unical.ea_project_javafx/it.unical.ea_project_javafx.App"
-        },
-        {
-            "type": "java",
-            "name": "App",
-            "request": "launch",
             "mainClass": "it.unical.ea_project_javafx/it.unical.ea_project_javafx.App",
             "projectName": "ea_project_javafx"
         },
         {
             "type": "java",
-            "name": "Spring Boot-EaProjectApplication<ea-project>",
+            "name": "Spring Boot Backend",
             "request": "launch",
             "cwd": "${workspaceFolder}",
             "mainClass": "it.unical.ea_project.EaProjectApplication",
             "projectName": "ea-project",
-            "args": "",
             "envFile": "${workspaceFolder}/.env"
         }
     ]

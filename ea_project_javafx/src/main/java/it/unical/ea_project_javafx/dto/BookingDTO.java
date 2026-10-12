@@ -23,6 +23,16 @@ public class BookingDTO {
 
     private Long activityId;
 
+    private String participantName;
+
+    private String participantEmail;
+
+    private String itemTitle;
+
+    private String itemDate;
+
+    private String itemLocation;
+
     private Integer seats;
 
     // Booking.BookingType: TRIP, ACTIVITY

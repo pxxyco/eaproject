@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -40,7 +39,7 @@ public class ActivityDTO {
 
     private Integer durationMinutes;
 
-    private Long price;
+    private Double price;
 
     private Integer maxSeats;
 

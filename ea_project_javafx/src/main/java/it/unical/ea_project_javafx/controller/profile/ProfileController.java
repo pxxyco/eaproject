@@ -25,9 +25,6 @@ public class ProfileController implements MainNavigator {
     @FXML private StackPane navbarContainer;
     @FXML private VBox dashboardContainer;
     @FXML private Label greetingLabel;
-    @FXML private Label fullNameLabel;
-    @FXML private Label emailLabel;
-    @FXML private Label roleLabel;
     @FXML private NavbarController navbarController;
 
     private final UserSession userSession = UserSession.getInstance();
@@ -44,13 +41,7 @@ public class ProfileController implements MainNavigator {
 
     private void populateUserDetails() {
         String displayName = firstNonBlank(userSession.getFullName(), userSession.getUsername(), "Utente");
-        String email = firstNonBlank(userSession.getEmail(), "Email non disponibile");
-        String role = firstNonBlank(userSession.getRole(), "TRAVELER").toUpperCase();
-
-        greetingLabel.setText("Ciao, " + displayName + "!");
-        fullNameLabel.setText(displayName);
-        emailLabel.setText(email);
-        roleLabel.setText(role);
+        greetingLabel.setText("È bello rivederti, " + displayName + "!");
     }
 
     private void loadRoleDashboard() {
@@ -124,16 +115,6 @@ public class ProfileController implements MainNavigator {
     @Override
     public void goToLogin(Node sourceNode) {
         SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/login/login.fxml");
-    }
-
-    @Override
-    public void goToExperiences(Node sourceNode) {
-        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/experiences.fxml");
-    }
-
-    @Override
-    public void goToItinerari(Node sourceNode) {
-        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/itinerari.fxml");
     }
 
     @Override

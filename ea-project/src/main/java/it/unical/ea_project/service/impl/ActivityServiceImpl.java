@@ -11,6 +11,7 @@ import it.unical.ea_project.repository.ActivityImageRepository;
 import it.unical.ea_project.repository.ActivityRepository;
 import it.unical.ea_project.repository.UserRepository;
 import it.unical.ea_project.service.ActivityService;
+import it.unical.ea_project.util.PageUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -96,7 +97,7 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     @Transactional(readOnly = true)
     public List<Activity> getTopActivities(int page, int size) {
-        return activityRepository.findByDeletedAtIsNullOrderByAverageRatingDesc(PageRequest.of(page, size));
+        return activityRepository.findByDeletedAtIsNullOrderByAverageRatingDesc(PageUtils.of(page, size));
     }
 
     @Override
@@ -123,6 +124,12 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<ActivityDTO> getActivityDtosByCreator(Long creatorId) {
+        return toActivityDtos(activityRepository.findByCreatedByIdAndDeletedAtIsNullOrderByCreatedAtDesc(creatorId));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<ActivityHomeDTO> getTopActivityHomeDtos(int page, int size) {
         return toHomeDtos(getTopActivities(page, size));
     }
@@ -131,7 +138,7 @@ public class ActivityServiceImpl implements ActivityService {
     @Transactional(readOnly = true)
     public List<ActivityHomeDTO> searchActivityHomeDtos(String query, Activity.Category category, LocalDate date, int page, int size) {
         String normalizedQuery = query == null ? "" : query.trim();
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageUtils.of(page, size);
 
         List<Activity> activities;
         if (date == null) {
@@ -150,7 +157,7 @@ public class ActivityServiceImpl implements ActivityService {
         if (query == null || query.isBlank()) {
             return List.of();
         }
-        return activityRepository.findSuggestions(query.trim(), PageRequest.of(0, limit));
+        return activityRepository.findSuggestions(query.trim(), PageUtils.suggestions(limit));
     }
 
     private List<ActivityDTO> toActivityDtos(List<Activity> activities) {
@@ -239,7 +246,7 @@ public class ActivityServiceImpl implements ActivityService {
                 .map(ActivityImage::getImageUrl)
                 .filter(url -> url != null && !url.isBlank())
                 .findFirst()
-                .orElse(null);
+                .orElse("/photo/default/experience.jpg");
 
         return new ActivityHomeDTO(
                 activity.getActivityId(),
@@ -254,4 +261,3 @@ public class ActivityServiceImpl implements ActivityService {
         );
     }
 }
-

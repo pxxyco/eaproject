@@ -23,8 +23,6 @@
                  </padding>
                  <Label styleClass="logo" text="EA Project" />
                  <Region HBox.hgrow="ALWAYS" />
-                 <Button styleClass="nav-link" text="Esperienze" />
-                 <Button styleClass="nav-link" text="Itinerari Pubblici" />
                  <Button styleClass="btn-login-pill" text="Login" />
              </HBox>
          </top>

@@ -22,6 +22,7 @@ public interface ActivityService {
     Optional<ActivityDTO> getActivityDtoById(Long id);
     List<ActivityDTO> getTopActivityDtos(int page, int size);
     List<ActivityDTO> getActivityDtosByCategory(Activity.Category category);
+    List<ActivityDTO> getActivityDtosByCreator(Long creatorId);
 
     List<ActivityHomeDTO> getTopActivityHomeDtos(int page, int size);
 

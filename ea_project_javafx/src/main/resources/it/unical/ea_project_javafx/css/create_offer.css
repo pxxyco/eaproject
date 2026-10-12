@@ -23,6 +23,16 @@
     -fx-text-fill: #ffffff;
 }
 
+.dashboard-error {
+    -fx-background-color: rgba(127, 29, 29, 0.55);
+    -fx-background-radius: 8px;
+    -fx-border-color: rgba(252, 165, 165, 0.55);
+    -fx-border-radius: 8px;
+    -fx-padding: 10px 14px;
+    -fx-text-fill: #fecaca;
+    -fx-font-size: 12px;
+}
+
 .btn-icon-close {
     -fx-background-color: rgba(255, 255, 255, 0.08);
     -fx-border-color: rgba(255, 255, 255, 0.2);
@@ -130,6 +140,11 @@
     -fx-prompt-text-fill: rgba(255, 255, 255, 0.45);
     -fx-padding: 9px 12px;
     -fx-font-size: 13px;
+}
+
+.custom-textarea .content {
+    -fx-background-color: rgba(231, 229, 228, 0.08);
+    -fx-background-radius: 7px;
 }
 
 .custom-input:focused,
@@ -321,6 +336,23 @@
 
 .btn-secondary:hover {
     -fx-background-color: #57534e;
+    -fx-text-fill: #ffffff;
+}
+
+.btn-remove-stage {
+    -fx-background-color: rgba(127, 29, 29, 0.35);
+    -fx-border-color: rgba(252, 165, 165, 0.55);
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-text-fill: #fecaca;
+    -fx-font-weight: bold;
+    -fx-padding: 6px 10px;
+    -fx-cursor: hand;
+}
+
+.btn-remove-stage:hover {
+    -fx-background-color: rgba(185, 28, 28, 0.75);
+    -fx-border-color: #fca5a5;
     -fx-text-fill: #ffffff;
 }
 

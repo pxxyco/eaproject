@@ -30,6 +30,9 @@
             <Button text="X" onAction="#handleClose" styleClass="btn-icon-close" />
         </HBox>
 
+        <Label fx:id="offerErrorLabel" managed="false" visible="false" wrapText="true"
+               styleClass="dashboard-error" />
+
         <StackPane VBox.vgrow="ALWAYS">
             <padding>
                 <Insets top="20.0" right="28.0" bottom="24.0" left="28.0" />
@@ -148,7 +151,7 @@
                 <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="form-footer">
                     <Button text="← Torna alla selezione" onAction="#handleBackToChoose" styleClass="btn-link" />
                     <Region HBox.hgrow="ALWAYS" />
-                    <Button text="Pubblica Viaggio" onAction="#handleSaveTrip" styleClass="btn-primary" />
+                    <Button fx:id="saveTripButton" text="Pubblica Viaggio" onAction="#handleSaveTrip" styleClass="btn-primary" />
                 </HBox>
             </VBox>
 
@@ -216,7 +219,7 @@
                 <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="form-footer">
                     <Button text="← Torna alla selezione" onAction="#handleBackToChoose" styleClass="btn-link" />
                     <Region HBox.hgrow="ALWAYS" />
-                    <Button text="Pubblica Attività" onAction="#handleSaveActivity" styleClass="btn-primary" />
+                    <Button fx:id="saveActivityButton" text="Pubblica Attività" onAction="#handleSaveActivity" styleClass="btn-primary" />
                 </HBox>
             </VBox>
 

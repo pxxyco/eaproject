@@ -11,28 +11,27 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
 import java.time.LocalDate;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
+import java.util.Optional;
 
 public class WallpaperService {
 
     private static final String BING_API_URL = "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=it-IT";
     private static final String LOCAL_FALLBACK_RESOURCE = "/it/unical/ea_project_javafx/images/fallback_bg.avif";
+    private static final String CACHE_FILE_PREFIX = "bing_wallpaper_";
+    private static final String CACHE_FILE_SUFFIX = ".jpg";
 
-    public static String getDailyWallpaperUrl() {
+    public static synchronized String getDailyWallpaperUrl() {
 
         String todayStr = LocalDate.now().toString();
         Path cacheDir = getSystemCacheDir();
-        Path targetFile = cacheDir.resolve("bing_wallpaper_" + todayStr + ".jpg");
+        String todayPrefix = CACHE_FILE_PREFIX + todayStr + "_";
 
         try {
-            // Se l'immagine odierna esiste già in cache, usiamo quella locale
-            if (Files.exists(targetFile)) {
-                return targetFile.toUri().toString();
-            }
-
-            // Controllo che la cartella di cache esista
-            if (!Files.exists(cacheDir)) {
-                Files.createDirectories(cacheDir);
-            }
+            Files.createDirectories(cacheDir);
+            cleanOldCacheFiles(cacheDir, todayStr);
 
             URL apiUrl = URI.create(BING_API_URL).toURL();
             try (InputStream is = apiUrl.openStream();
@@ -45,14 +44,21 @@ public class WallpaperService {
                     JsonObject firstImage = imagesArray.get(0).getAsJsonObject();
                     String relativeUrl = firstImage.get("url").getAsString();
                     String bingImageUrl = "https://www.bing.com" + relativeUrl;
+                    Path targetFile = cacheDir.resolve(todayPrefix + hashUrl(bingImageUrl) + CACHE_FILE_SUFFIX);
 
-                    // 3. Scarica l'immagine e la salva nella cache
-                    try (InputStream imageStream = URI.create(bingImageUrl).toURL().openStream()) {
-                        Files.copy(imageStream, targetFile, StandardCopyOption.REPLACE_EXISTING);
+                    if (!Files.exists(targetFile)) {
+                        Path temporaryFile = cacheDir.resolve(targetFile.getFileName() + ".part");
+                        try (InputStream imageStream = URI.create(bingImageUrl).toURL().openStream()) {
+                            Files.copy(imageStream, temporaryFile, StandardCopyOption.REPLACE_EXISTING);
+                        }
+                        try {
+                            Files.move(temporaryFile, targetFile,
+                                    StandardCopyOption.ATOMIC_MOVE,
+                                    StandardCopyOption.REPLACE_EXISTING);
+                        } catch (AtomicMoveNotSupportedException e) {
+                            Files.move(temporaryFile, targetFile, StandardCopyOption.REPLACE_EXISTING);
+                        }
                     }
-
-                    // Pulizia dalla cache le vecchie immagini per liberare spazio sul disco
-                    cleanOldCacheFiles(cacheDir, todayStr);
 
                     return targetFile.toUri().toString();
                 }
@@ -61,13 +67,16 @@ public class WallpaperService {
             System.err.println("Impossibile scaricare lo sfondo da Bing, uso il fallback locale: " + e.getMessage());
         }
 
-        // 4. Fallback locale in assenza di connessione o in caso di errori
+        Optional<Path> cachedWallpaper = findCachedWallpaper(cacheDir, todayPrefix);
+        if (cachedWallpaper.isPresent()) {
+            return cachedWallpaper.get().toUri().toString();
+        }
+
         URL resourceUrl = WallpaperService.class.getResource(LOCAL_FALLBACK_RESOURCE);
         if (resourceUrl != null) {
             return resourceUrl.toExternalForm();
         }
 
-        // Chiamata dall'URL in caso l'immagine non viene trovata in locale
         return "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80";
 
     }
@@ -77,13 +86,47 @@ public class WallpaperService {
      */
     private static void cleanOldCacheFiles(Path cacheDir, String todayStr) {
 
-        try (DirectoryStream<Path> stream = Files.newDirectoryStream(cacheDir, "bing_wallpaper_*.jpg")) {
+        String todayPrefix = CACHE_FILE_PREFIX + todayStr + "_";
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(cacheDir, CACHE_FILE_PREFIX + "*.jpg")) {
             for (Path entry : stream) {
-                if (!entry.getFileName().toString().contains(todayStr)) {
+                if (!entry.getFileName().toString().startsWith(todayPrefix)) {
                     Files.deleteIfExists(entry);
                 }
             }
-        } catch (Exception ignored) {
+        } catch (DirectoryIteratorException | java.io.IOException e) {
+            System.err.println("Impossibile pulire la cache degli sfondi: " + e.getMessage());
+        }
+
+    }
+
+    private static Optional<Path> findCachedWallpaper(Path cacheDir, String todayPrefix) {
+
+        if (!Files.isDirectory(cacheDir)) {
+            return Optional.empty();
+        }
+
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(cacheDir, todayPrefix + "*" + CACHE_FILE_SUFFIX)) {
+            for (Path entry : stream) {
+                if (Files.isRegularFile(entry)) {
+                    return Optional.of(entry);
+                }
+            }
+        } catch (DirectoryIteratorException | java.io.IOException e) {
+            System.err.println("Impossibile leggere la cache degli sfondi: " + e.getMessage());
+        }
+
+        return Optional.empty();
+
+    }
+
+    private static String hashUrl(String url) {
+
+        try {
+            byte[] digest = MessageDigest.getInstance("SHA-256")
+                    .digest(url.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(digest, 0, 8);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("Algoritmo SHA-256 non disponibile", e);
         }
 
     }
@@ -122,4 +165,5 @@ public class WallpaperService {
         }
 
     }
+
 }

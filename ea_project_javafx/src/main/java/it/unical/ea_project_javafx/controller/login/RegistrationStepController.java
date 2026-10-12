@@ -133,7 +133,7 @@ public class RegistrationStepController {
                 res -> Platform.runLater(() -> {
                     if (res.statusCode() == 200 || res.statusCode() == 201) {
                         clearFields();
-                        navigator.showSuccessMessage("Profilo creato con successo. Puoi accedere al tuo account.");
+                        navigator.showSuccessMessage("Puoi accedere al tuo account.");
                     } else if (res.statusCode() == 409) {
                         showError("Username o Email già registrati.");
                     } else if (res.statusCode() == 400) {

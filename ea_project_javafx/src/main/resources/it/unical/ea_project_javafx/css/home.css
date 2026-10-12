@@ -54,6 +54,11 @@
     -fx-padding: 6px 10px;
 }
 
+.search-field:hover {
+    -fx-background-color: rgba(0, 0, 0, 0.32);
+    -fx-border-color: rgba(231, 229, 228, 0.32);
+}
+
 .date-picker.search-field,
 .combo-box.search-field {
     -fx-background-color: transparent;
@@ -182,7 +187,6 @@
     -fx-font-size: 14px;
 }
 
-/* Stile del MenuButton per farlo sembrare coerente con il btn-nav-login */
 .menu-button {
     -fx-background-color: rgba(255, 255, 255, 0.12);
     -fx-border-color: rgba(255, 255, 255, 0.25);
@@ -197,7 +201,6 @@
     -fx-border-color: #e7e5e4;
 }
 
-/* Colore e stile del testo dentro il bottone principale */
 .menu-button > .label {
     -fx-text-fill: #ffffff;
     -fx-font-size: 13px;
@@ -208,16 +211,14 @@
     -fx-text-fill: #1c1917;
 }
 
-/* Nasconde o adatta la freccetta del MenuButton (opzionale, per un look più pulito) */
 .menu-button > .arrow-button > .arrow {
     -fx-background-color: #ffffff;
 }
 
 .menu-button:hover > .arrow-button > .arrow {
-    -fx-background-color: #0f172a;
+    -fx-background-color: #1c1917;
 }
 
-/* Stile del menu a tendina (popup) che si apre al click */
 .context-menu {
     -fx-background-color: rgba(28, 28, 27, 0.98);
     -fx-border-color: rgba(231, 229, 228, 0.24);
@@ -227,7 +228,6 @@
     -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.5), 16, 0, 0, 8);
 }
 
-/* Stile delle singole voci (MenuItem) nel menu a tendina */
 .context-menu .menu-item {
     -fx-background-color: transparent;
     -fx-background-radius: 6px;
@@ -241,7 +241,6 @@
     -fx-font-weight: 600;
 }
 
-/* Effetto hover sulle voci del menu */
 .context-menu .menu-item:hover,
 .context-menu .menu-item:focused {
     -fx-background-color: rgba(231, 229, 228, 0.18);
@@ -252,16 +251,13 @@
     -fx-text-fill: #ffffff;
 }
 
-/* Carica Altro Label */
-.label-loading
-{
+.label-loading {
     -fx-opacity: 0.6;
     -fx-cursor: default;
     -fx-font-weight: normal;
 }
 
-.load-more-label
-{
+.load-more-label {
     -fx-cursor: hand;
     -fx-font-weight: bold;
 }

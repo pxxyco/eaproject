@@ -1,28 +1,22 @@
 package it.unical.ea_project.service;
 
 
-import it.unical.ea_project.domain.Booking;
+import it.unical.ea_project.dto.BookingDTO;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 public interface BookingService {
 
-    Booking creaPrenotazioneTrip(
-            Long userId,
-            Long tripId,
-            Integer seats,
-            BigDecimal price
-    );
+    BookingDTO creaPrenotazioneTrip(Long userId, Long tripId, Integer seats);
 
-    Booking creaPrenotazioneActivity(
-            Long userId,
-            Long activityId,
-            Integer seats,
-            BigDecimal price
-    );
+    BookingDTO creaPrenotazioneActivity(Long userId, Long activityId, Integer seats);
 
-    void cancella(Long bookingId);
+    List<BookingDTO> getPrenotazioniUtente(Long userId);
+
+    List<BookingDTO> getPrenotazioniOrganizzatore(Long organizerId);
+
+    void cancella(Long bookingId, Long userId);
 
 }

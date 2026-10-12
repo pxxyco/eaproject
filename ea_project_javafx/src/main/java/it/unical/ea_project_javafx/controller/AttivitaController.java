@@ -7,7 +7,10 @@ import it.unical.ea_project_javafx.controller.attivita.*;
 import it.unical.ea_project_javafx.controller.attivita.recensioni.NewRecensioneController;
 import it.unical.ea_project_javafx.dto.ActivityDTO;
 import it.unical.ea_project_javafx.dto.TripDTO;
+import it.unical.ea_project_javafx.model.UserSession;
 import it.unical.ea_project_javafx.util.ApiService;
+import it.unical.ea_project_javafx.util.WallpaperService;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -55,6 +58,8 @@ public class AttivitaController {
     @FXML private Label lblTitolo;
 
     @FXML private Label lblTotale;
+    @FXML private Button btnPrenota;
+    @FXML private javafx.scene.layout.VBox bookingCard;
 
     @FXML private LoadingOverlayController loadingCardController;
     @FXML private StackPane loadingOverlay;
@@ -65,6 +70,9 @@ public class AttivitaController {
 
     @FXML private ScrollPane contentScroll;
     @FXML private StackPane hero;
+
+    @FXML private StackPane navbarContainer;
+    @FXML private ImageView bgImageView;
 
     private List<Button> sectionButtons;
 
@@ -85,7 +93,7 @@ public class AttivitaController {
             .registerTypeAdapter(LocalTime.class, (JsonDeserializer<LocalTime>) (json, type, ctx) ->
                     LocalTime.parse(json.getAsString()))
             .create();
-    
+
     public enum Type {
         ACTIVITY, TRIP
     }
@@ -94,13 +102,64 @@ public class AttivitaController {
 
     @FXML
     void initialize() {
+
+        setupNavbar();
+        setupBackground();
         
         loadingOverlay.setVisible(true);
+        boolean isOrganizer = "ORGANIZER".equalsIgnoreCase(UserSession.getInstance().getRole());
+        bookingCard.setVisible(!isOrganizer);
+        bookingCard.setManaged(!isOrganizer);
         
         btnInitialize();
 
         // USE FOR DEBUG AND TEST
-        // loadData(Type.ACTIVITY, "1");
+        //loadData(Type.ACTIVITY, "1");
+    }
+
+    private void setupNavbar() {
+        try {
+            boolean isLoggedIn = UserSession.getInstance().isLoggedIn(); // O il tuo metodo per verificare la sessione
+            String navbarPath = isLoggedIn
+                    ? "/it/unical/ea_project_javafx/fxml/home/navbar-logged-in.fxml"
+                    : "/it/unical/ea_project_javafx/fxml/home/navbar-logged-out.fxml";
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(navbarPath));
+            Node navbar = loader.load();
+            navbarContainer.getChildren().setAll(navbar);
+        } catch (IOException e) {
+            System.err.println("Errore nel caricamento della navbar: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private void setupBackground() {
+        if (bgImageView == null) {
+            return;
+        }
+        if (root != null) {
+            bgImageView.fitWidthProperty().bind(root.widthProperty());
+            bgImageView.fitHeightProperty().bind(root.heightProperty());
+        }
+        loadBackground();
+    }
+
+    private void loadBackground() {
+        if (bgImageView == null) {
+            return;
+        }
+
+        new Thread(() -> {
+            String imageUrl = WallpaperService.getDailyWallpaperUrl();
+            Platform.runLater(() -> bgImageView.setImage(new Image(
+                    imageUrl,
+                    1920,
+                    1080,
+                    true,
+                    true,
+                    true
+            )));
+        }).start();
     }
 
     public void loadData(Type type, String id) {
@@ -160,7 +219,8 @@ public class AttivitaController {
         if (activity.getImages().isEmpty()) {
             heroImage.setImage(null);
         } else {
-            heroImage.setImage(new Image(ApiService.BASE_URL + activity.getImages().getFirst().getImageUrl()));
+            // heroImage.setImage(new Image(ApiService.BASE_URL + activity.getImages().getFirst().getImageUrl()));
+            heroImage.setImage(null);
         }
 
         if (activity.getStartDate() != null) {
@@ -335,6 +395,50 @@ public class AttivitaController {
         spinnerPartecipanti.valueProperty().addListener((obs, oldValue, newValue) -> {
             aggiornaPrezzoTotale(newValue);
         });
+    }
+
+    @FXML
+    private void handlePrenota() {
+        if ("ORGANIZER".equalsIgnoreCase(UserSession.getInstance().getRole())) {
+            return;
+        }
+        if (!UserSession.getInstance().isLoggedIn()) {
+            showAlert(Alert.AlertType.WARNING, "Accesso richiesto", "Devi effettuare il login per prenotare.");
+            return;
+        }
+
+        Integer seats = spinnerPartecipanti.getValue();
+        BigDecimal total = (myType == Type.ACTIVITY)
+                ? BigDecimal.valueOf(activity.getPrice()).multiply(BigDecimal.valueOf(seats))
+                : trip.getTotalPrice().multiply(BigDecimal.valueOf(seats));
+        Alert confirmation = new Alert(
+                Alert.AlertType.CONFIRMATION,
+                "Partecipanti: " + seats + "\nTotale: " + setMoneyCurrency(total) + "\nConfermi la prenotazione?",
+                ButtonType.CANCEL,
+                ButtonType.OK
+        );
+        confirmation.setHeaderText("Conferma prenotazione");
+        if (confirmation.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
+            return;
+        }
+
+        String endpoint = myType == Type.TRIP
+                ? "/api/bookings/trips/" + trip.getTripId()
+                : "/api/bookings/activities/" + activity.getActivityId();
+
+        ApiService.post(
+                ApiService.BASE_URL + endpoint + "?seats=" + seats,
+                null,
+                response -> showAlert(Alert.AlertType.INFORMATION, "Prenotazione completata", "La prenotazione è stata registrata."),
+                () -> showAlert(Alert.AlertType.ERROR, "Prenotazione non completata", "Non è stato possibile completare la prenotazione."),
+                null
+        );
+    }
+
+    private void showAlert(Alert.AlertType type, String title, String message) {
+        Alert alert = new Alert(type, message);
+        alert.setHeaderText(title);
+        alert.showAndWait();
     }
 
     private void aggiornaPrezzoTotale(Integer newValue) {

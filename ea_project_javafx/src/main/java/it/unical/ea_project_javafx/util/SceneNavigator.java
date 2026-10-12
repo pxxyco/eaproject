@@ -8,6 +8,7 @@ import javafx.stage.Stage;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.function.Consumer;
 
 public class SceneNavigator {
 
@@ -18,9 +19,7 @@ public class SceneNavigator {
 
     private SceneNavigator() {}
 
-    /**
-     * Restituisce l'istanza unica del navigator.
-     */
+
     public static synchronized SceneNavigator getInstance() {
         if (instance == null) {
             instance = new SceneNavigator();
@@ -28,33 +27,36 @@ public class SceneNavigator {
         return instance;
     }
 
-    /**
-     * Inizializza il navigator con lo Stage principale.
-     * Da chiamare nel metodo start() della classe Main application.
-     */
+
     public void init(Stage stage) {
         this.mainStage = stage;
     }
-
-    /**
-     * Carica una nuova scena e aggiunge la schermata corrente allo storico.
-     * 
-     * @param fxmlPath Il percorso del file FXML (es. "/views/HomeView.fxml")
-     */
     public void loadScene(String fxmlPath) {
+        loadScene(fxmlPath, null);
+    }
+
+    public void loadScene(String fxmlPath, Consumer<Object> controllerInitializer) {
         if (mainStage == null) {
-            throw new IllegalStateException("SceneNavigator non inizializzato. Chiamare il metodo init(Stage) prima");
+            throw new IllegalStateException("SceneNavigator non inizializzato.");
         }
 
         try {
-            // Se c'è già una vista visualizzata, la salva nello storico
             if (mainStage.getScene() != null && mainStage.getScene().getUserData() != null) {
                 String currentView = (String) mainStage.getScene().getUserData();
                 history.push(currentView);
             }
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            java.net.URL fxmlUrl = getClass().getResource(fxmlPath);
+            if (fxmlUrl == null) {
+                throw new IllegalArgumentException("Risorsa FXML non trovata al percorso: " + fxmlPath);
+            }
+
+            FXMLLoader loader = new FXMLLoader(fxmlUrl);
             Parent root = loader.load();
+
+            if (controllerInitializer != null) {
+                controllerInitializer.accept(loader.getController());
+            }
 
             Scene scene;
             if (mainStage.getScene() != null) {
@@ -62,7 +64,6 @@ public class SceneNavigator {
             } else {
                 scene = new Scene(root, AppConfig.WINDOW_WIDTH, AppConfig.WINDOW_HEIGHT);
             }
-            // Salva il percorso FXML nei metadati della scena
             scene.setUserData(fxmlPath);
 
             mainStage.setScene(scene);
@@ -74,9 +75,6 @@ public class SceneNavigator {
         }
     }
 
-    /**
-     * Torna alla vista precedente nello storico.
-     */
     public void goBack() {
         if (hasHistory()) {
             String previousView = history.pop();
@@ -96,18 +94,12 @@ public class SceneNavigator {
         }
     }
 
-    /**
-     * Svuota lo storico e carica direttamente la schermata iniziale.
-     * Utile per pulsanti tipo "Home" o dopo il Logout.
-     */
+
     public void goToHome(String homeFxmlPath) {
         history.clear();
         loadScene(homeFxmlPath);
     }
 
-    /**
-     * Verifica se c'è almeno una schermata precedente nello storico.
-     */
     public boolean hasHistory() {
         return !history.isEmpty();
     }

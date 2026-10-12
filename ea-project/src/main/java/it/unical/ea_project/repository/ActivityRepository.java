@@ -3,7 +3,6 @@ package it.unical.ea_project.repository;
 import it.unical.ea_project.domain.Activity;
 import it.unical.ea_project.domain.User;
 import it.unical.ea_project.dto.home.ActivitySuggestionDTO;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,6 +18,8 @@ public interface ActivityRepository
         extends JpaRepository<Activity, Long> {
 
     List<Activity> findByCreatedBy(User createdBy);
+
+    List<Activity> findByCreatedByIdAndDeletedAtIsNullOrderByCreatedAtDesc(Long creatorId);
 
     List<Activity> findByDeletedAtIsNull();
 

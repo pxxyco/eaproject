@@ -1,9 +1,11 @@
 package it.unical.ea_project_javafx.controller.home;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 import it.unical.ea_project_javafx.dto.home.ActivityHomeDTO;
 import it.unical.ea_project_javafx.dto.home.TripHomeDTO;
+import it.unical.ea_project_javafx.model.UserSession;
 import it.unical.ea_project_javafx.util.ApiService;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -20,6 +22,9 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class ExperienceListController {
@@ -43,12 +48,25 @@ public class ExperienceListController {
     private LocalDate currentDateFilter = null;
     private static final Gson GSON = new Gson();
 
-    public enum SearchMode { TOP, ACTIVITY, TRIP }
+    public enum SearchMode { TOP, ACTIVITY, TRIP, ALL }
     private SearchMode mode = SearchMode.TOP;
+    private boolean organizerHome;
 
-    @FXML
-    public void initialize() {
-        loadActivities();
+    public void loadHomeForCurrentUser() {
+        organizerHome = "ORGANIZER".equalsIgnoreCase(UserSession.getInstance().getRole());
+        mode = organizerHome ? SearchMode.ALL : SearchMode.TOP;
+        label1.setText(organizerHome ? "Tutti i viaggi e le attività" : "Esperienze più apprezzate dai viaggiatori");
+        label2.setText(organizerHome ? "Esplora le offerte pubblicate" : "Valutate da utenti reali che hanno partecipato alle attività");
+        currentQuery = "";
+        currentCategoryFilter = null;
+        currentDateFilter = null;
+        currentPage = 0;
+        loading = false;
+        requestCounter++;
+        if (cardsContainer != null) cardsContainer.getChildren().clear();
+        resetLoadMoreLabel();
+        if (searchBarController != null) searchBarController.reset();
+        loadNextPage();
     }
 
     private boolean resetButtonExists() {
@@ -134,6 +152,80 @@ public class ExperienceListController {
         loadPage(url.toString(), type, this::appendTripCards);
     }
 
+    private void loadAllResults() {
+        if (loading) return;
+        loading = true;
+        showLoading(true);
+
+        int request = requestCounter;
+        int page = currentPage;
+        AtomicInteger remaining = new AtomicInteger(2);
+        AtomicBoolean failed = new AtomicBoolean();
+        AtomicReference<List<ActivityHomeDTO>> activities = new AtomicReference<>(List.of());
+        AtomicReference<List<TripHomeDTO>> trips = new AtomicReference<>(List.of());
+        Runnable complete = () -> {
+            if (remaining.decrementAndGet() != 0) return;
+            Platform.runLater(() -> {
+                if (request != requestCounter) return;
+                loading = false;
+                showLoading(false);
+                if (failed.get()) {
+                    resetLoadMoreLabel();
+                    loadMoreLabel.setText("Errore nel caricamento. Clicca per riprovare.");
+                    return;
+                }
+
+                currentPage++;
+                if (activities.get().size() < PAGE_SIZE && trips.get().size() < PAGE_SIZE) {
+                    disableLoadMore();
+                } else {
+                    resetLoadMoreLabel();
+                }
+                appendActivityCards(activities.get());
+                appendTripCards(trips.get());
+            });
+        };
+
+        Type activityType = new TypeToken<List<ActivityHomeDTO>>() {}.getType();
+        Type tripType = new TypeToken<List<TripHomeDTO>>() {}.getType();
+        ApiService.get(
+                ApiService.BASE_URL + "/api/activities/search?page=" + page + "&size=" + PAGE_SIZE,
+                response -> {
+                    try {
+                        List<ActivityHomeDTO> results = GSON.fromJson(response.body(), activityType);
+                        activities.set(results != null ? results : List.of());
+                    } catch (JsonParseException exception) {
+                        failed.set(true);
+                    } finally {
+                        complete.run();
+                    }
+                },
+                () -> {
+                    failed.set(true);
+                    complete.run();
+                },
+                null
+        );
+        ApiService.get(
+                ApiService.BASE_URL + "/api/trips/search?page=" + page + "&size=" + PAGE_SIZE,
+                response -> {
+                    try {
+                        List<TripHomeDTO> results = GSON.fromJson(response.body(), tripType);
+                        trips.set(results != null ? results : List.of());
+                    } catch (JsonParseException exception) {
+                        failed.set(true);
+                    } finally {
+                        complete.run();
+                    }
+                },
+                () -> {
+                    failed.set(true);
+                    complete.run();
+                },
+                null
+        );
+    }
+
     @FXML
     public void handleLoadMore(MouseEvent mouseEvent) {
         if (loading) return;
@@ -146,6 +238,7 @@ public class ExperienceListController {
             case TOP      -> loadActivities();
             case ACTIVITY -> loadSearchResults();
             case TRIP     -> loadTripResults();
+            case ALL       -> loadAllResults();
         }
     }
 
@@ -240,12 +333,12 @@ public class ExperienceListController {
     }
 
     public void resetSearch() {
-        label1.setText("Esperienze più apprezzate dai viaggiatori");
-        label2.setText("Valutate da utenti reali che hanno partecipato alle attività");
+        label1.setText(organizerHome ? "Tutti i viaggi e le attività" : "Esperienze più apprezzate dai viaggiatori");
+        label2.setText(organizerHome ? "Esplora le offerte pubblicate" : "Valutate da utenti reali che hanno partecipato alle attività");
         currentQuery = "";
         currentCategoryFilter = null;
         currentDateFilter = null;
-        mode = SearchMode.TOP;
+        mode = organizerHome ? SearchMode.ALL : SearchMode.TOP;
         currentPage = 0;
         loading = false;
         requestCounter++;
@@ -260,7 +353,7 @@ public class ExperienceListController {
         if (searchBarController != null) {
             searchBarController.reset();
         }
-        loadActivities();
+        loadNextPage();
     }
 
     private void showResetButton(boolean show) {

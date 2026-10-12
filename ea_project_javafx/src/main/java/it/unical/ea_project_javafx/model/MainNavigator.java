@@ -6,7 +6,5 @@ import javafx.scene.Node;
 public interface MainNavigator {
     void goToHome(Node sourceNode);
     void goToLogin(Node sourceNode);
-    void goToExperiences(Node sourceNode);
-    void goToItinerari(Node sourceNode);
     void goToProfile(Node sourceNode);
 }

@@ -87,7 +87,7 @@ public class Booking {
             throw new IllegalStateException("il TYPE non coincide con il campo inserito, TRIP");
         }
 
-        if(hasActivity && bookingType == BookingType.ACTIVITY) {
+        if(hasActivity && bookingType != BookingType.ACTIVITY) {
             throw new IllegalStateException("il TYPE non coincide con il campo inserito, ACTIVITY");
         }
     }
