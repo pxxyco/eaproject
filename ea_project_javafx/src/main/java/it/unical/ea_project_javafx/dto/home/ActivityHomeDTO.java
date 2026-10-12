@@ -26,4 +26,5 @@ public class ActivityHomeDTO {
     private String startDate;
 
     private String endDate;
+
 }

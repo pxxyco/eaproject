@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox minWidth="400.0" spacing="4" styleClass="risposta-item" stylesheets="@../../../css/attivita/recensione/risposta.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+<VBox minWidth="400.0" spacing="4" styleClass="risposta-item" stylesheets="@../../../css/activity/review/review-response.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
 
     <HBox alignment="CENTER_LEFT" spacing="8">
         <Label styleClass="risposta-badge" text="Risposta del proprietario" />

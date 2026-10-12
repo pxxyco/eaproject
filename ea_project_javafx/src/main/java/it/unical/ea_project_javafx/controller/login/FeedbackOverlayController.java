@@ -1,6 +1,6 @@
 package it.unical.ea_project_javafx.controller.login;
 
-import it.unical.ea_project_javafx.model.StepNavigator;
+import it.unical.ea_project_javafx.navigation.StepNavigator;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -22,9 +22,11 @@ public class FeedbackOverlayController {
 
     @FXML
     private void handleContinue() {
+
         if (navigator != null) {
             navigator.goToLoginStep();
         }
+
     }
 
     public void hide() {

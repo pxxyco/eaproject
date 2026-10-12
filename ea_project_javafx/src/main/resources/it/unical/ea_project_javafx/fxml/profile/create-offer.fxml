@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.shape.SVGPath?>
+
+<StackPane fx:id="rootPane" alignment="CENTER"
+           xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="it.unical.ea_project_javafx.controller.profile.CreateOfferController">
+    <stylesheets>
+        <URL value="@../../css/style.css" />
+        <URL value="@../../css/profile.css" />
+        <URL value="@../../css/create-offer.css" />
+    </stylesheets>
+
+    <ImageView fx:id="bgImageView" preserveRatio="false" pickOnBounds="true" />
+    <Region styleClass="glass-overlay" />
+
+    <VBox fx:id="modalCard" prefWidth="920.0" prefHeight="720.0" maxWidth="920.0" maxHeight="720.0" styleClass="main-modal-card" StackPane.alignment="CENTER">
+
+        <HBox alignment="CENTER_LEFT" styleClass="modal-header">
+            <padding>
+                <Insets top="18.0" right="24.0" bottom="18.0" left="24.0" />
+            </padding>
+            <Label fx:id="headerTitleLabel" text="Crea Nuova Offerta" styleClass="modal-title" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button text="X" onAction="#handleClose" styleClass="btn-icon-close" />
+        </HBox>
+
+        <Label fx:id="offerErrorLabel" managed="false" visible="false" wrapText="true"
+               styleClass="dashboard-error" />
+
+        <StackPane VBox.vgrow="ALWAYS">
+            <padding>
+                <Insets top="20.0" right="28.0" bottom="24.0" left="28.0" />
+            </padding>
+
+            <VBox fx:id="stepChoose" alignment="CENTER" spacing="28.0">
+                <VBox alignment="CENTER" spacing="8.0">
+                    <Label text="Cosa desideri pubblicare?" styleClass="section-heading" />
+                    <Label text="Scegli tra un itinerario strutturato su più giorni o una singola attività/escursione" styleClass="section-subheading" />
+                </VBox>
+
+                <HBox spacing="24.0" alignment="CENTER">
+
+                    <VBox onMouseClicked="#handleSelectTrip" styleClass="choice-card" HBox.hgrow="ALWAYS" maxWidth="400.0" spacing="14.0">
+                        <HBox alignment="CENTER_LEFT" spacing="12.0">
+                            <StackPane styleClass="choice-icon-badge">
+
+                                <SVGPath content="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"
+                                         styleClass="choice-svg-icon" />
+                            </StackPane>
+                            <Label text="Viaggio Completo" styleClass="choice-title" />
+                        </HBox>
+
+                        <Label text="Pacchetto turistico su più giorni con programma dettagliato in tappe giornaliere (Stage)." wrapText="true" styleClass="choice-desc" />
+
+                        <VBox spacing="6.0" styleClass="feature-list">
+                            <Label text="✓ Tappe giornaliere con orari e categorie" styleClass="feature-item" />
+                            <Label text="✓ Destinazione, città e date inizio/fine" styleClass="feature-item" />
+                            <Label text="✓ Prezzo a pacchetto per partecipante" styleClass="feature-item" />
+                        </VBox>
+                    </VBox>
+
+
+                    <VBox onMouseClicked="#handleSelectActivity" styleClass="choice-card" HBox.hgrow="ALWAYS" maxWidth="400.0" spacing="14.0">
+                        <HBox alignment="CENTER_LEFT" spacing="12.0">
+                            <StackPane styleClass="choice-icon-badge">
+
+                                <SVGPath content="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-14.88v2.09c-2.83.48-5.06 2.71-5.54 5.54H3.37C3.88 7.38 7.38 3.88 11 3.12zM14.12 11l-3.23 3.23.71.71 3.23-3.23V11zm-.12-7.88C17.62 3.88 21.12 7.38 21.63 11h-2.09c-.48-2.83-2.71-5.06-5.54-5.54V3.12z"
+                                         styleClass="choice-svg-icon" />
+                            </StackPane>
+                            <Label text="Attività Singola" styleClass="choice-title" />
+                        </HBox>
+
+                        <Label text="Escursione, degustazione o visita guidata standalone prenotabile autonomamente." wrapText="true" styleClass="choice-desc" />
+
+                        <VBox spacing="6.0" styleClass="feature-list">
+                            <Label text="✓ Durata in minuti o data singola" styleClass="feature-item" />
+                            <Label text="✓ Categoria specifica " styleClass="feature-item" />
+                            <Label text="✓ Gestione posti e prezzo indipendente" styleClass="feature-item" />
+                        </VBox>
+                    </VBox>
+                </HBox>
+            </VBox>
+
+            <VBox fx:id="stepTrip" visible="false" managed="false" spacing="16.0">
+                <ScrollPane fitToWidth="true" styleClass="transparent-scroll" VBox.vgrow="ALWAYS">
+                    <VBox spacing="14.0">
+                        <VBox spacing="4.0">
+                            <Label text="Titolo del Viaggio *" styleClass="form-label" />
+                            <TextField fx:id="tripTitleField" promptText="Es. Gran Tour della Sila e Costa Tirrenica" styleClass="custom-input" />
+                        </VBox>
+
+                        <HBox spacing="14.0">
+                            <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                <Label text="Paese di Destinazione *" styleClass="form-label" />
+                                <TextField fx:id="tripCountryField" promptText="Es. Italia" styleClass="custom-input" />
+                            </VBox>
+                            <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                <Label text="Città Principale *" styleClass="form-label" />
+                                <TextField fx:id="tripCityField" promptText="Es. Cosenza" styleClass="custom-input" />
+                            </VBox>
+                        </HBox>
+
+                        <HBox spacing="14.0">
+                            <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                <Label text="Data Inizio *" styleClass="form-label" />
+                                <DatePicker fx:id="tripStartDatePicker" maxWidth="Infinity" styleClass="custom-datepicker" />
+                            </VBox>
+                            <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                <Label text="Data Fine *" styleClass="form-label" />
+                                <DatePicker fx:id="tripEndDatePicker" maxWidth="Infinity" styleClass="custom-datepicker" />
+                            </VBox>
+                            <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                <Label text="Prezzo Totale (€) *" styleClass="form-label" />
+                                <TextField fx:id="tripPriceField" promptText="0.00" styleClass="custom-input" />
+                            </VBox>
+                        </HBox>
+
+                        <HBox spacing="14.0">
+                            <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                <Label text="Posti Massimi *" styleClass="form-label" />
+                                <TextField fx:id="tripMaxSeatsField" promptText="20" styleClass="custom-input" />
+                            </VBox>
+                            <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                <Label text="URL Foto Copertina" styleClass="form-label" />
+                                <TextField fx:id="tripCoverUrlField" promptText="https://..." styleClass="custom-input" />
+                            </VBox>
+                        </HBox>
+
+                        <VBox spacing="4.0">
+                            <Label text="Descrizione" styleClass="form-label" />
+                            <TextArea fx:id="tripDescriptionArea" promptText="Descrivi il viaggio..." prefRowCount="3" styleClass="custom-textarea" />
+                        </VBox>
+
+                        <VBox spacing="10.0" styleClass="stage-section-container">
+                            <HBox alignment="CENTER_LEFT">
+                                <Label text="Tappe dell'Itinerario" styleClass="sub-heading" />
+                                <Region HBox.hgrow="ALWAYS" />
+                                <Button text="+ Aggiungi Tappa" onAction="#handleAddStageRow" styleClass="btn-secondary" />
+                            </HBox>
+                            <VBox fx:id="stagesContainer" spacing="8.0" />
+                        </VBox>
+                    </VBox>
+                </ScrollPane>
+
+                <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="form-footer">
+                    <Button text="← Torna alla selezione" onAction="#handleBackToChoose" styleClass="btn-link" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button fx:id="saveTripButton" text="Pubblica Viaggio" onAction="#handleSaveTrip" styleClass="btn-primary" />
+                </HBox>
+            </VBox>
+
+            <VBox fx:id="stepActivity" visible="false" managed="false" spacing="16.0">
+                <ScrollPane fitToWidth="true" styleClass="transparent-scroll" VBox.vgrow="ALWAYS">
+                    <VBox spacing="14.0">
+                        <VBox spacing="4.0">
+                            <Label text="Titolo Attività *" styleClass="form-label" />
+                            <TextField fx:id="actTitleField" promptText="Es. Tour Guidato in Quad nei Pini della Sila" styleClass="custom-input" />
+                        </VBox>
+
+                        <HBox spacing="14.0">
+                            <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                <Label text="Categoria *" styleClass="form-label" />
+                                <ComboBox fx:id="actCategoryCombo" maxWidth="Infinity" styleClass="custom-combo" promptText="Seleziona Categoria" />
+                            </VBox>
+                            <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                <Label text="Nome Luogo / Ritrovo *" styleClass="form-label" />
+                                <TextField fx:id="actPlaceField" promptText="Es. Lago Cecita" styleClass="custom-input" />
+                            </VBox>
+                        </HBox>
+
+                        <HBox spacing="14.0">
+                            <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                <Label text="Città *" styleClass="form-label" />
+                                <TextField fx:id="actCityField" promptText="Es. Spezzano della Sila" styleClass="custom-input" />
+                            </VBox>
+                            <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                <Label text="Durata (Minuti) *" styleClass="form-label" />
+                                <TextField fx:id="actDurationField" promptText="240" styleClass="custom-input" />
+                            </VBox>
+                            <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                <Label text="Prezzo Singolo (€) *" styleClass="form-label" />
+                                <TextField fx:id="actPriceField" promptText="45.00" styleClass="custom-input" />
+                            </VBox>
+                        </HBox>
+
+                        <HBox spacing="14.0">
+                            <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                <Label text="Posti Massimi *" styleClass="form-label" />
+                                <TextField fx:id="actMaxSeatsField" promptText="15" styleClass="custom-input" />
+                            </VBox>
+                            <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                <Label text="Data Inizio *" styleClass="form-label" />
+                                <DatePicker fx:id="actStartDatePicker" maxWidth="Infinity" styleClass="custom-datepicker" />
+                            </VBox>
+                            <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                <Label text="Data Fine *" styleClass="form-label" />
+                                <DatePicker fx:id="actEndDatePicker" maxWidth="Infinity" styleClass="custom-datepicker" />
+                            </VBox>
+                        </HBox>
+
+                        <VBox spacing="4.0">
+                            <Label text="Descrizione" styleClass="form-label" />
+                            <TextArea fx:id="actDescriptionArea" promptText="Descrivi l'attività, punti di interesse..." prefRowCount="3" styleClass="custom-textarea" />
+                        </VBox>
+
+                        <VBox spacing="4.0">
+                            <Label text="Note Aggiuntive" styleClass="form-label" />
+                            <TextArea fx:id="actNotesArea" promptText="Es. Consigliato abbigliamento a strati..." prefRowCount="2" styleClass="custom-textarea" />
+                        </VBox>
+                    </VBox>
+                </ScrollPane>
+
+                <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="form-footer">
+                    <Button text="← Torna alla selezione" onAction="#handleBackToChoose" styleClass="btn-link" />
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Button fx:id="saveActivityButton" text="Pubblica Attività" onAction="#handleSaveActivity" styleClass="btn-primary" />
+                </HBox>
+            </VBox>
+
+        </StackPane>
+
+    </VBox>
+
+</StackPane>

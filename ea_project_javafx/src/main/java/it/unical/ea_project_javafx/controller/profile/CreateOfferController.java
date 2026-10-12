@@ -1,11 +1,8 @@
 package it.unical.ea_project_javafx.controller.profile;
 
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.effect.GaussianBlur;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.Node;
 import javafx.scene.layout.HBox;
@@ -13,8 +10,8 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
-import it.unical.ea_project_javafx.util.WallpaperService;
 import it.unical.ea_project_javafx.util.ApiService;
+import it.unical.ea_project_javafx.util.BackgroundHelper;
 import it.unical.ea_project_javafx.dto.ActivityDTO;
 import it.unical.ea_project_javafx.dto.TripDTO;
 
@@ -67,6 +64,9 @@ public class CreateOfferController {
 
     @FXML
     public void initialize() {
+
+        BackgroundHelper.setupBackground(bgImageView);
+
         Rectangle rootClip = new Rectangle();
         rootClip.setArcWidth(36);
         rootClip.setArcHeight(36);
@@ -81,22 +81,10 @@ public class CreateOfferController {
         clip.heightProperty().bind(modalCard.heightProperty());
         modalCard.setClip(clip);
 
-        bgImageView.setEffect(new GaussianBlur(18));
-        bgImageView.fitWidthProperty().bind(rootPane.widthProperty());
-        bgImageView.fitHeightProperty().bind(rootPane.heightProperty());
-        loadBackground();
-
         if (actCategoryCombo != null) {
             actCategoryCombo.getItems().setAll("Escursione", "Visita guidata", "Trasporto", "Hotel", "Pasto", "Altro");
         }
-    }
 
-    private void loadBackground() {
-        new Thread(() -> {
-            String imageUrl = WallpaperService.getDailyWallpaperUrl();
-            Platform.runLater(() -> bgImageView.setImage(new Image(
-                    imageUrl, 1920, 1080, true, true, true)));
-        }).start();
     }
 
     @FXML

@@ -164,7 +164,7 @@ public class SplashScreenController {
     }
 
     private void restartAppManually() {
-        loadView("/it/unical/ea_project_javafx/fxml/SplashScreen.fxml");
+        loadView("/it/unical/ea_project_javafx/fxml/splash-screen.fxml");
     }
 
     private void loadMainApp() {
@@ -172,6 +172,6 @@ public class SplashScreenController {
     }
 
     private void loadView(String fxmlPath) {
-        Platform.runLater(() -> SceneNavigator.getInstance().loadScene(fxmlPath));
+        Platform.runLater(() -> SceneNavigator.getInstance().loadScene(fxmlPath, null));
     }
 }

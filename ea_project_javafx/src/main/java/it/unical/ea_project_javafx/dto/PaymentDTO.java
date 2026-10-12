@@ -20,12 +20,12 @@ public class PaymentDTO {
 
     private BigDecimal amount;
 
-    // Payment.PaymentStatus: PENDING, COMPLETED, CONFIRMED, CANCELLED
-    private String status;
+    private String status;  // Payment.PaymentStatus: PENDING, COMPLETED, CONFIRMED, CANCELLED
 
     private String transactionId;
 
     private LocalDateTime createdAt;
 
     private LocalDateTime deletedAt;
+
 }

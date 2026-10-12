@@ -1,0 +1,262 @@
+.app-root {
+    -fx-font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Gestione sfondo affidata a BackgroundHelper.java */
+.bg-overlay {
+    -fx-background-color: rgba(12, 12, 12, 0.82);
+}
+
+.app-shell {
+    -fx-background-color: transparent;
+}
+
+.navbar {
+    -fx-background-color: rgba(10, 10, 10, 0.30);
+    -fx-border-color: transparent transparent rgba(255, 255, 255, 0.08) transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.logo {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.nav-link {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(255, 255, 255, 0.85);
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+}
+
+.nav-link:hover {
+    -fx-text-fill: #ffffff;
+}
+
+.btn-login-pill {
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+    -fx-border-color: rgba(255, 255, 255, 0.25);
+    -fx-text-fill: #ffffff;
+    -fx-background-radius: 20px;
+    -fx-border-radius: 20px;
+    -fx-padding: 6px 18px;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+}
+
+.btn-login-pill:hover {
+    -fx-background-color: #e7e5e4;
+    -fx-text-fill: #1c1917;
+}
+
+.content-scroll,
+.content-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.content-scroll .scroll-bar:vertical,
+.content-scroll .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+    -fx-opacity: 0.3;
+}
+
+.content-rows {
+    -fx-spacing: 10px;
+}
+
+.content-wrapper {
+    -fx-background-color: transparent;
+}
+
+.back-link {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(255, 255, 255, 0.85);
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+    -fx-padding: 0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 1);
+}
+
+.back-link:hover {
+    -fx-text-fill: #ffffff;
+}
+
+.section-button {
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-font-size: 11px;
+    -fx-text-fill: #ffffff;
+    -fx-cursor: hand;
+}
+
+.section-button-active {
+    -fx-background-color: rgba(231, 229, 228, 0.22);
+    -fx-text-fill: #ffffff;
+    -fx-border-color: #e7e5e4;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 3px 10px;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.section-button:hover,
+.section-button-active:hover {
+    -fx-translate-y: -3px;
+    -fx-effect: dropshadow(gaussian, rgba(231, 229, 228, 0.4), 16, 0.2, 0, 4);
+}
+
+.hero {
+    -fx-background-radius: 14px;
+    -fx-background-insets: 0;
+}
+
+.hero-content {
+    -fx-background-color: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.1) 65%);
+    -fx-background-radius: 14px;
+}
+
+.hero-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7), 8, 0, 0, 2);
+}
+
+.hero-subtitle {
+    -fx-text-fill: rgba(255, 255, 255, 0.85);
+    -fx-font-size: 13px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7), 6, 0, 0, 1);
+}
+
+.badge-category {
+    -fx-background-color: rgba(0, 0, 0, 0.65);
+    -fx-text-fill: #e7e5e4;
+    -fx-border-color: rgba(231, 229, 228, 0.4);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 3px 10px;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.badge-rating {
+    -fx-background-color: rgba(0, 0, 0, 0.65);
+    -fx-text-fill: #f5a623;
+    -fx-border-color: rgba(245, 166, 35, 0.4);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 3px 10px;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.booking-card {
+    -fx-background-color: rgba(28, 28, 27, 0.88);
+    -fx-background-radius: 14px;
+    -fx-border-color: rgba(231, 229, 228, 0.2);
+    -fx-border-radius: 14px;
+}
+
+.price-big {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.price-suffix {
+    -fx-text-fill: rgba(255, 255, 255, 0.65);
+    -fx-font-size: 12px;
+}
+
+.price-total {
+    -fx-text-fill: #e7e5e4;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.field-label {
+    -fx-text-fill: rgba(255, 255, 255, 0.7);
+    -fx-font-size: 12px;
+}
+
+.hint {
+    -fx-text-fill: rgba(255, 255, 255, 0.5);
+    -fx-font-size: 11px;
+}
+
+.btn-primary {
+    -fx-background-color: #e7e5e4;
+    -fx-text-fill: #1c1917;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px 0;
+    -fx-cursor: hand;
+}
+
+.btn-primary:hover {
+    -fx-background-color: #fafaf9;
+}
+
+.text-field, .spinner .text-field {
+    -fx-background-color: rgba(231, 229, 228, 0.08);
+    -fx-text-fill: #ffffff;
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+}
+
+/* Spinner */
+.spinner > .increment-arrow-button,
+.spinner > .decrement-arrow-button {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+}
+
+.spinner > .increment-arrow-button:hover,
+.spinner > .decrement-arrow-button:hover {
+    -fx-background-color: rgba(231, 229, 228, 0.18);
+}
+
+.spinner > .increment-arrow-button:pressed,
+.spinner > .decrement-arrow-button:pressed {
+    -fx-background-color: rgba(231, 229, 228, 0.28);
+}
+
+.spinner > .increment-arrow-button > .increment-arrow,
+.spinner > .decrement-arrow-button > .decrement-arrow {
+    -fx-background-color: #d6d3d1;
+}
+
+/* Date Picker allineato allo stile generale */
+.date-picker {
+    -fx-background-color: rgba(231, 229, 228, 0.08);
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+}
+
+.date-picker > .text-field {
+    -fx-background-color: transparent;
+    -fx-text-fill: #ffffff;
+    -fx-prompt-text-fill: rgba(255, 255, 255, 0.5);
+}
+
+.date-picker > .arrow-button {
+    -fx-background-color: transparent;
+    -fx-cursor: hand;
+}
+
+.date-picker > .arrow-button:hover {
+    -fx-background-color: rgba(231, 229, 228, 0.18);
+}
+
+.date-picker > .arrow-button > .arrow {
+    -fx-background-color: #d6d3d1;
+}

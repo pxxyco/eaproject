@@ -1,5 +1,5 @@
 .root {
-    -fx-font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+    -fx-font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     -fx-font-size: 14px;
     -fx-accent: #e7e5e4;
     -fx-focus-color: #d6d3d1;
@@ -10,13 +10,11 @@
     -fx-background-color: rgba(12, 12, 12, 0.82);
 }
 
-.main-scroll {
-    -fx-background-color: transparent;
-    -fx-background: transparent;
-}
-
+/* Scrollbar Generiche */
+.main-scroll,
 .main-scroll > .viewport {
     -fx-background-color: transparent;
+    -fx-background: transparent;
 }
 
 .main-scroll .scroll-bar:vertical,
@@ -25,7 +23,7 @@
     -fx-opacity: 0.3;
 }
 
-
+/* Navbar */
 .navbar {
     -fx-background-color: linear-gradient(to bottom, rgba(10, 10, 10, 0.42), rgba(10, 10, 10, 0.0));
     -fx-border-color: transparent;
@@ -53,9 +51,10 @@
     -fx-text-fill: #e7e5e4;
 }
 
+/* Pulsante Primario Predefinito */
 .btn-primary {
-    -fx-background-color: rgba(231, 229, 228, 0.92);
-    -fx-text-fill: #ffffff;
+    -fx-background-color: #e7e5e4;
+    -fx-text-fill: #1c1917;
     -fx-font-weight: bold;
     -fx-font-size: 13px;
     -fx-background-radius: 8px;
@@ -67,7 +66,7 @@
     -fx-background-color: #fafaf9;
 }
 
-
+/* Input Trasparente */
 .transparent-input {
     -fx-background-color: transparent;
     -fx-text-fill: #ffffff;
@@ -83,6 +82,7 @@
     -fx-faint-focus-color: transparent;
 }
 
+/* Combo Box */
 .combo-box, .transparent-combo {
     -fx-background-color: transparent;
     -fx-focus-color: transparent;
@@ -159,6 +159,7 @@
     -fx-background-radius: 4px;
 }
 
+/* Date Picker */
 .date-picker, .transparent-datepicker {
     -fx-background-color: transparent;
     -fx-focus-color: transparent;
@@ -331,52 +332,7 @@
     -fx-text-fill: rgba(255, 255, 255, 0.3) !important;
 }
 
-.splash-pane {
-    -fx-background-color: #1c1c1b;
-}
-
-.splash-content {
-    -fx-alignment: center;
-    -fx-spacing: 20px;
-}
-
-.splash-logo {
-    -fx-font-size: 40px;
-}
-
-.splash-label {
-    -fx-text-fill: rgba(255, 255, 255, 0.9);
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
-}
-
-.btn-splash {
-    -fx-background-color: #e7e5e4;
-    -fx-text-fill: #1c1917;
-    -fx-font-weight: bold;
-    -fx-font-size: 13px;
-    -fx-background-radius: 8px;
-    -fx-padding: 8px 16px;
-    -fx-cursor: hand;
-}
-
-.btn-splash:hover {
-    -fx-background-color: #fafaf9;
-}
-
-.splash-progress .percentage {
-    -fx-fill: transparent;
-}
-
-.splash-progress > .indicator {
-    -fx-background-color: transparent;
-}
-
-.splash-progress .spinner {
-    -fx-progress-color: #d6d3d1;
-}
-
-
+/* Checkbox */
 .checkbox {
     -fx-cursor: hand;
     -fx-text-fill: rgba(255, 255, 255, 0.9);

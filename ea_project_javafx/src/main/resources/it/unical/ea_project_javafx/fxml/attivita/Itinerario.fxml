@@ -8,8 +8,8 @@
 
 <HBox maxHeight="Infinity" maxWidth="Infinity" spacing="20" styleClass="container" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.attivita.ItinerarioController">
     <stylesheets>
-        <URL value="@../../css/attivita/common.css" />
-        <URL value="@../../css/attivita/itinerario.css" />
+        <URL value="@../../css/activity/activity-common.css" />
+        <URL value="@../../css/activity/itinerary.css" />
     </stylesheets>
 
     <children>

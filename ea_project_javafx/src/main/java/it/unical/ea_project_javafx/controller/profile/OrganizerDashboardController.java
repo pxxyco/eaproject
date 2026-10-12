@@ -4,7 +4,7 @@ import com.google.gson.reflect.TypeToken;
 import it.unical.ea_project_javafx.dto.ActivityDTO;
 import it.unical.ea_project_javafx.dto.BookingDTO;
 import it.unical.ea_project_javafx.dto.TripDTO;
-import it.unical.ea_project_javafx.model.UserSession;
+import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.util.ApiService;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -88,7 +88,7 @@ public class OrganizerDashboardController implements ProfileDashboardController 
         clearDashboardError("offer-form");
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(
-                    "/it/unical/ea_project_javafx/fxml/profile/create_offer.fxml"));
+                    "/it/unical/ea_project_javafx/fxml/profile/create-offer.fxml"));
             Parent popup = loader.load();
             if (tripToEdit != null || activityToEdit != null) {
                 CreateOfferController controller = loader.getController();

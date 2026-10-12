@@ -21,8 +21,8 @@
     <stylesheets>
         <URL value="@../css/style.css" />
         <URL value="@../css/home.css" />
-        <URL value="@../css/attivita.css" />
-        <URL value="@../css/attivita/common.css" />
+        <URL value="@../css/activity-details.css" />
+        <URL value="@../css/activity/activity-common.css" />
     </stylesheets>
 
     <!-- Immagine di sfondo e overlay -->

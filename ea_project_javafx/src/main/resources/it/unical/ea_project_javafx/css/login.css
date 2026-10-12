@@ -3,7 +3,7 @@
     -fx-border-color: rgba(255, 255, 255, 0.25);
     -fx-border-radius: 50%;
     -fx-background-radius: 50%;
-    -fx-text-fill: white;
+    -fx-text-fill: #ffffff;
     -fx-font-size: 14px;
     -fx-pref-width: 44px;
     -fx-pref-height: 44px;
@@ -28,7 +28,7 @@
 .header-title {
     -fx-font-size: 24px;
     -fx-font-weight: bold;
-    -fx-text-fill: white;
+    -fx-text-fill: #ffffff;
     -fx-alignment: center;
     -fx-padding: 0 0 10 0;
 }
@@ -43,7 +43,7 @@
     -fx-border-color: rgba(231, 229, 228, 0.28);
     -fx-border-radius: 8px;
     -fx-background-radius: 8px;
-    -fx-text-fill: white;
+    -fx-text-fill: #ffffff;
     -fx-prompt-text-fill: rgba(255, 255, 255, 0.5);
     -fx-padding: 10px;
 }
@@ -70,7 +70,7 @@
 }
 
 .custom-link, .custom-link-bold {
-    -fx-text-fill: white;
+    -fx-text-fill: #ffffff;
     -fx-underline: true;
     -fx-border-color: transparent;
 }
@@ -97,8 +97,8 @@
 }
 
 .btn-submit {
-    -fx-background-color: white;
-    -fx-text-fill: #111827;
+    -fx-background-color: #e7e5e4;
+    -fx-text-fill: #1c1917;
     -fx-font-weight: bold;
     -fx-font-size: 14px;
     -fx-border-radius: 8px;
@@ -108,7 +108,7 @@
 }
 
 .btn-submit:hover {
-    -fx-background-color: #f3f4f6;
+    -fx-background-color: #fafaf9;
 }
 
 .btn-back {
@@ -120,7 +120,7 @@
 }
 
 .btn-back:hover {
-    -fx-text-fill: white;
+    -fx-text-fill: #ffffff;
 }
 
 .role-card {
@@ -145,14 +145,13 @@
 .role-title {
     -fx-font-size: 16px;
     -fx-font-weight: bold;
-    -fx-text-fill: white;
+    -fx-text-fill: #ffffff;
 }
 
 .role-desc {
     -fx-font-size: 11px;
     -fx-text-fill: rgba(255, 255, 255, 0.7);
 }
-
 
 .loading-overlay {
     -fx-background-color: rgba(28, 28, 27, 0.94);
@@ -168,7 +167,7 @@
 .loading-label {
     -fx-font-weight: bold;
     -fx-font-size: 14px;
-    -fx-text-fill: white;
+    -fx-text-fill: #ffffff;
 }
 
 .feedback-overlay {
@@ -198,7 +197,7 @@
 .feedback-title {
     -fx-font-size: 22px;
     -fx-font-weight: bold;
-    -fx-text-fill: white;
+    -fx-text-fill: #ffffff;
 }
 
 .feedback-message {
@@ -211,7 +210,7 @@
 
 .feedback-button {
     -fx-background-color: rgba(231, 229, 228, 0.96);
-    -fx-text-fill: #111827;
+    -fx-text-fill: #1c1917;
     -fx-font-weight: bold;
     -fx-font-size: 13px;
     -fx-padding: 10px 22px;
@@ -221,7 +220,7 @@
 }
 
 .feedback-button:hover {
-    -fx-background-color: white;
+    -fx-background-color: #fafaf9;
 }
 
 .password-hint {

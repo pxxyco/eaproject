@@ -18,8 +18,8 @@ public class ListSharingDTO {
 
     private Long userId;
 
-    // ListSharing.SharingPermission: VIEW, EDIT
-    private String permission;
+    private String permission;  // ListSharing.SharingPermission: VIEW, EDIT
 
     private LocalDateTime sharedAt;
+
 }

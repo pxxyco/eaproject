@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+
+<BorderPane styleClass="navbar" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.NavbarController">
+    <left>
+        <HBox alignment="CENTER_LEFT" spacing="16.0">
+            <children>
+                <ImageView fitHeight="32.0" fitWidth="32.0" preserveRatio="true" styleClass="nav-logo">
+                    <image>
+                        <Image url="@../../images/logo_448x448.png" />
+                    </image>
+                </ImageView>
+                <Separator orientation="VERTICAL" styleClass="nav-divider" />
+                <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="nav-links">
+                    <children>
+                        <Label onMouseClicked="#handleHome" styleClass="nav-item" text="Home" />
+                    </children>
+                </HBox>
+            </children>
+        </HBox>
+    </left>
+    
+    <right>
+        <HBox alignment="CENTER_RIGHT" spacing="10.0" BorderPane.alignment="CENTER">
+            <children>
+                <!-- logged out -->
+                <Label fx:id="loginLabel" onMouseClicked="#handleLogin" styleClass="btn-nav-login" text="Login" />
+
+                <!-- logged in -->
+                <MenuButton fx:id="userMenuButton" styleClass="btn-nav-login" text="Utente">
+                    <items>
+                        <MenuItem onAction="#handleDashboard" text="Dashboard" />
+                        <MenuItem onAction="#handleProfileInfos" text="Il mio Profilo" />
+                        <MenuItem onAction="#handleBookings" text="Prenotazioni" />
+                        <MenuItem onAction="#handleFavorites" text="Preferiti" />
+                        <SeparatorMenuItem />
+                        <MenuItem onAction="#handleSettings" text="Impostazioni &amp; Sicurezza" />
+                        <MenuItem onAction="#handlePaymentMethods" text="Metodi di Pagamento" />
+                        <SeparatorMenuItem />
+                        <MenuItem onAction="#handleSupport" text="Centro Assistenza" />
+                        <SeparatorMenuItem />
+                        <MenuItem onAction="#handleLogout" styleClass="logout-item" text="Logout" />
+                    </items>
+                </MenuButton>
+            </children>
+        </HBox>
+    </right>
+    
+    <padding>
+        <Insets bottom="15.0" left="20.0" right="20.0" top="15.0" />
+    </padding>
+</BorderPane>

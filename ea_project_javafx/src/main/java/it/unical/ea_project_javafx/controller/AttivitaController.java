@@ -7,10 +7,9 @@ import it.unical.ea_project_javafx.controller.attivita.*;
 import it.unical.ea_project_javafx.controller.attivita.recensioni.NewRecensioneController;
 import it.unical.ea_project_javafx.dto.ActivityDTO;
 import it.unical.ea_project_javafx.dto.TripDTO;
-import it.unical.ea_project_javafx.model.UserSession;
+import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.util.ApiService;
-import it.unical.ea_project_javafx.util.WallpaperService;
-import javafx.application.Platform;
+import it.unical.ea_project_javafx.util.BackgroundHelper;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -29,7 +28,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 
 public class AttivitaController {
@@ -103,13 +101,14 @@ public class AttivitaController {
     @FXML
     void initialize() {
 
+        BackgroundHelper.setupBackground(bgImageView);
+
         setupNavbar();
-        setupBackground();
         
         loadingOverlay.setVisible(true);
         boolean isOrganizer = "ORGANIZER".equalsIgnoreCase(UserSession.getInstance().getRole());
-        bookingCard.setVisible(!isOrganizer);
-        bookingCard.setManaged(!isOrganizer);
+        // bookingCard.setVisible(!isOrganizer);
+        // bookingCard.setManaged(!isOrganizer);
         
         btnInitialize();
 
@@ -119,47 +118,13 @@ public class AttivitaController {
 
     private void setupNavbar() {
         try {
-            boolean isLoggedIn = UserSession.getInstance().isLoggedIn(); // O il tuo metodo per verificare la sessione
-            String navbarPath = isLoggedIn
-                    ? "/it/unical/ea_project_javafx/fxml/home/navbar-logged-in.fxml"
-                    : "/it/unical/ea_project_javafx/fxml/home/navbar-logged-out.fxml";
-
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(navbarPath));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/it/unical/ea_project_javafx/fxml/navbar.fxml"));
             Node navbar = loader.load();
             navbarContainer.getChildren().setAll(navbar);
         } catch (IOException e) {
             System.err.println("Errore nel caricamento della navbar: " + e.getMessage());
             e.printStackTrace();
         }
-    }
-
-    private void setupBackground() {
-        if (bgImageView == null) {
-            return;
-        }
-        if (root != null) {
-            bgImageView.fitWidthProperty().bind(root.widthProperty());
-            bgImageView.fitHeightProperty().bind(root.heightProperty());
-        }
-        loadBackground();
-    }
-
-    private void loadBackground() {
-        if (bgImageView == null) {
-            return;
-        }
-
-        new Thread(() -> {
-            String imageUrl = WallpaperService.getDailyWallpaperUrl();
-            Platform.runLater(() -> bgImageView.setImage(new Image(
-                    imageUrl,
-                    1920,
-                    1080,
-                    true,
-                    true,
-                    true
-            )));
-        }).start();
     }
 
     public void loadData(Type type, String id) {

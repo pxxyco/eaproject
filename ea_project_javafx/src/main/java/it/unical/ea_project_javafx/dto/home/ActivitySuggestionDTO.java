@@ -9,8 +9,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ActivitySuggestionDTO {
+
     private Long activityId;
+
     private String title;
+
     private String category;
+
     private String city;
+
 }

@@ -7,7 +7,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonParseException;
 import it.unical.ea_project_javafx.dto.UserDTO;
-import it.unical.ea_project_javafx.model.UserSession;
+import it.unical.ea_project_javafx.security.UserSession;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import lombok.Setter;
@@ -252,7 +252,7 @@ public class ApiService {
     private static void forceLogout() {
         UserSession.getInstance().clear();
         TokenStorage.clear();
-        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/pre-main.fxml");
+        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/splash-screen.fxml", null);
     }
 
     private static HttpRequest buildRequest(String url, String body, Method method) {

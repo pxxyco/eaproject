@@ -1,0 +1,12 @@
+.location-text {
+    -fx-text-fill: #ffffff;
+}
+
+.number-label {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 11px;
+}
+
+.itinerario-box {
+    -fx-cursor: hand;
+}

@@ -6,7 +6,7 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializer;
 import it.unical.ea_project_javafx.dto.UserDTO;
-import it.unical.ea_project_javafx.model.StepNavigator;
+import it.unical.ea_project_javafx.navigation.StepNavigator;
 import it.unical.ea_project_javafx.util.ApiService;
 import it.unical.ea_project_javafx.util.PasswordPolicy;
 import it.unical.ea_project_javafx.util.SceneNavigator;
@@ -39,6 +39,7 @@ public class RegistrationStepController {
 
     @FXML
     public void initialize() {
+
         TextField[] fields = {regFirstNameField, regLastNameField, regUsernameField, regEmailField, regPasswordField, regConfirmPasswordField};
         for (TextField field : fields) {
             if (field != null) {
@@ -49,15 +50,19 @@ public class RegistrationStepController {
                 });
             }
         }
+
     }
 
     public void setSelectedRole(String role) {
+
         this.selectedRole = role;
         wizardTitle.setText(role.equals("ORGANIZER") ? "Profilo Business" : "Profilo Personal");
         btnRegister.setDefaultButton(true);
+
     }
 
     public void showError(String message) {
+
         Platform.runLater(() -> {
             if (errorLabel != null) {
                 errorLabel.setText(message);
@@ -65,24 +70,30 @@ public class RegistrationStepController {
                 errorLabel.setManaged(true);
             }
         });
+
     }
 
     public void clearError() {
+
         if (errorLabel != null) {
             errorLabel.setText("");
             errorLabel.setVisible(false);
             errorLabel.setManaged(false);
         }
+
     }
 
     @FXML
     void backToRoleSelection() {
+
         clearError();
         navigator.goToRoleStep();
+
     }
 
     @FXML
     void handleRegistrationSubmit(ActionEvent event) {
+
         clearError();
         String firstName = regFirstNameField.getText().trim();
         String lastName = regLastNameField.getText().trim();
@@ -96,10 +107,12 @@ public class RegistrationStepController {
             showError("Verifica che tutti i campi siano compilati e che le password coincidano.");
             return;
         }
+
         if (!PasswordPolicy.isValid(password)) {
             showError("La password deve contenere almeno 8 caratteri, una lettera, un numero e un carattere speciale.");
             return;
         }
+
         if (!email.contains("@")) {
             showError("Inserisci un'email valida.");
             return;
@@ -143,19 +156,21 @@ public class RegistrationStepController {
                     }
                 }),
                 () -> Platform.runLater(() -> {
-                    //it.unical.ea_project_javafx.util.ViewNavigator.loadScene(btnRegister, "/it/unical/ea_project_javafx/fxml/pre-main.fxml", false);
-                    SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/pre-main.fxml");
+                    SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/pre-main.fxml", null);
                 }),
                 navigator::setLoading
         );
+
     }
 
     private void clearFields() {
+
         regFirstNameField.clear();
         regLastNameField.clear();
         regUsernameField.clear();
         regEmailField.clear();
         regPasswordField.clear();
         regConfirmPasswordField.clear();
+
     }
 }

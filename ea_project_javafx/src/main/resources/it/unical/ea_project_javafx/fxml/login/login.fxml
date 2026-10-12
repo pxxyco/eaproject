@@ -25,7 +25,6 @@
         <HBox spacing="12.0">
             <children>
                 <Button onAction="#goToHomeFromButton" styleClass="control-btn" text="←"/>
-                <!--- <Button onAction="#stopAnimation" styleClass="control-btn" text="▣"/>  cambio animazione schermata-->
             </children>
         </HBox>
     </StackPane>

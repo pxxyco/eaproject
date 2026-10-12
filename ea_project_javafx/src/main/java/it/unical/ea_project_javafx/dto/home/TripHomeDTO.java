@@ -12,11 +12,19 @@ import java.math.BigDecimal;
 public class TripHomeDTO {
 
     private Long tripId;
+
     private String title;
+
     private String location;
+
     private BigDecimal totalPrice;
+
     private BigDecimal averageRating;
+
     private String coverPhotoUrl;
+
     private String startDate;
+
     private String endDate;
+
 }

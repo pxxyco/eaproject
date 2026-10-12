@@ -22,8 +22,7 @@ public class StageDTO {
 
     private String description;
 
-    // Stage.StageCategory: EXCURSION, VISIT, HOTEL, MEAL, TRANSPORT, OTHER
-    private String category;
+    private String category;    // Stage.StageCategory: EXCURSION, VISIT, HOTEL, MEAL, TRANSPORT, OTHER
 
     private String locationName;
 
@@ -50,4 +49,5 @@ public class StageDTO {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
 }

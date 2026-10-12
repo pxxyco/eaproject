@@ -82,6 +82,17 @@ public class WallpaperService {
     }
 
     /**
+    * Restituisce il percorso dell'immagine di oggi se è già presente nella cache locale.
+    */
+    public static Optional<Path> getTodayCachedWallpaper() {
+
+        String todayPrefix = CACHE_FILE_PREFIX + LocalDate.now().toString() + "_";
+
+        return findCachedWallpaper(getSystemCacheDir(), todayPrefix);
+
+    }
+
+    /**
      * Elimina i vecchi file di sfondo salvati in precedenza.
      */
     private static void cleanOldCacheFiles(Path cacheDir, String todayStr) {
