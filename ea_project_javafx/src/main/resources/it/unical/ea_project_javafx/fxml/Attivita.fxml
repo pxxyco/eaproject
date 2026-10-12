@@ -118,7 +118,7 @@
 
                                 <!-- Box di Prenotazione (Lato Destro) -->
                                 <right>
-                                    <VBox maxHeight="400.0" minWidth="250.0" prefWidth="320" spacing="14" styleClass="booking-card" BorderPane.alignment="TOP_CENTER">
+                                    <VBox fx:id="bookingCard" maxHeight="400.0" minWidth="250.0" prefWidth="320" spacing="14" styleClass="booking-card" BorderPane.alignment="TOP_CENTER">
                                         <padding>
                                             <Insets bottom="22" left="22" right="22" top="22" />
                                         </padding>

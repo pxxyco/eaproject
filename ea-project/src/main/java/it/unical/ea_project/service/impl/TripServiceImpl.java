@@ -11,6 +11,7 @@ import it.unical.ea_project.repository.TripImageRepository;
 import it.unical.ea_project.repository.TripRepository;
 import it.unical.ea_project.repository.UserRepository;
 import it.unical.ea_project.service.TripService;
+import it.unical.ea_project.util.PageUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -75,7 +76,7 @@ public class TripServiceImpl implements TripService {
 
     @Override
     public List<Trip> getTopTrips(int page, int size) {
-        return tripRepository.findTopTrips(TripStatus.PUBLISHED, PageRequest.of(page, size));
+        return tripRepository.findTopTrips(TripStatus.PUBLISHED, PageUtils.of(page, size));
     }
 
     @Override
@@ -190,7 +191,7 @@ public class TripServiceImpl implements TripService {
     @Override
     public List<TripHomeDTO> searchTripHomeDtos(String query, LocalDate date, int page, int size) {
         String normalizedQuery = (query == null) ? "" : query.trim();
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageUtils.of(page, size);
 
         List<Trip> trips = (date == null)
                 ? tripRepository.searchPublished(normalizedQuery, TripStatus.PUBLISHED, pageable)
@@ -204,7 +205,7 @@ public class TripServiceImpl implements TripService {
         if (query == null || query.isBlank()) {
             return List.of();
         }
-        return tripRepository.findSuggestions(query.trim(), TripStatus.PUBLISHED, PageRequest.of(0, limit));
+        return tripRepository.findSuggestions(query.trim(), TripStatus.PUBLISHED, PageUtils.suggestions(limit));
     }
 
     @Override
