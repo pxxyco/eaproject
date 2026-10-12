@@ -2,7 +2,6 @@
     -fx-font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
-
 .main-scroll {
     -fx-background-color: transparent;
     -fx-background: transparent;
@@ -21,7 +20,6 @@
 .dashboard-container {
     -fx-max-width: infinity;
 }
-
 
 .dash-title {
     -fx-font-size: 22px;
@@ -50,8 +48,8 @@
     -fx-font-size: 12px;
 }
 
-
-.btn-new-activity {
+.btn-new-activity,
+.btn-card-action {
     -fx-background-color: #e7e5e4;
     -fx-text-fill: #1c1917;
     -fx-font-weight: bold;
@@ -61,24 +59,10 @@
     -fx-cursor: hand;
 }
 
-.btn-new-activity:hover {
-    -fx-background-color: #fafaf9;
-}
-
-.btn-card-action {
-    -fx-background-color: #e7e5e4;
-    -fx-text-fill: #1c1917;
-    -fx-font-size: 13px;
-    -fx-font-weight: bold;
-    -fx-background-radius: 8px;
-    -fx-padding: 8px 16px;
-    -fx-cursor: hand;
-}
-
+.btn-new-activity:hover,
 .btn-card-action:hover {
     -fx-background-color: #fafaf9;
 }
-
 
 .kpi-card {
     -fx-background-color: rgba(255, 255, 255, 0.08);
@@ -106,7 +90,6 @@
     -fx-font-weight: bold;
     -fx-text-fill: #34d399;
 }
-
 
 .horizontal-list-view {
     -fx-background-color: transparent;
@@ -178,7 +161,6 @@
     -fx-text-fill: #d6d3d1;
 }
 
-
 .btn-card-delete {
     -fx-background-color: rgba(239, 68, 68, 0.3);
     -fx-text-fill: #fca5a5;
@@ -192,7 +174,6 @@
 .btn-card-delete:hover {
     -fx-background-color: rgba(239, 68, 68, 0.5);
 }
-
 
 .custom-table {
     -fx-background-color: rgba(255, 255, 255, 0.04);
@@ -224,7 +205,6 @@
 .custom-table .show-hide-columns-button {
     -fx-background-color: transparent;
 }
-
 
 .custom-table .virtual-flow .clipped-container .sheet .table-row-cell:empty {
     -fx-background-color: transparent;

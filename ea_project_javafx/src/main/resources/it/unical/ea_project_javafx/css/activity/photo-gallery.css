@@ -1,0 +1,103 @@
+.app-root {
+    -fx-font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Gestione sfondo affidata a BackgroundHelper.java */
+.bg-overlay {
+    -fx-background-color: rgba(12, 12, 12, 0.82);
+}
+
+.app-shell {
+    -fx-background-color: transparent;
+}
+
+.navbar {
+    -fx-background-color: rgba(10, 10, 10, 0.30);
+    -fx-border-color: transparent transparent rgba(255, 255, 255, 0.08) transparent;
+    -fx-border-width: 0 0 1 0;
+}
+
+.logo {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.nav-link {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(255, 255, 255, 0.85);
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+}
+
+.nav-link:hover {
+    -fx-text-fill: #ffffff;
+}
+
+.btn-login-pill {
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+    -fx-border-color: rgba(255, 255, 255, 0.25);
+    -fx-text-fill: #ffffff;
+    -fx-background-radius: 20px;
+    -fx-padding: 6px 18px;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+}
+
+.btn-login-pill:hover {
+    -fx-background-color: #e7e5e4;
+    -fx-text-fill: #1c1917;
+}
+
+.content-scroll,
+.content-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.content-scroll .scroll-bar:vertical,
+.content-scroll .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+    -fx-opacity: 0.3;
+}
+
+.back-link {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(255, 255, 255, 0.85);
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+    -fx-padding: 0;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 1);
+}
+
+.back-link:hover {
+    -fx-text-fill: #ffffff;
+}
+
+.more-button {
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-font-size: 11px;
+    -fx-text-fill: #ffffff;
+    -fx-cursor: hand;
+}
+
+.more-button:hover {
+    -fx-translate-y: -3px;
+    -fx-effect: dropshadow(gaussian, rgba(231, 229, 228, 0.4), 16, 0.2, 0, 4);
+}
+
+.photo-container {
+    -fx-background-color: rgba(0, 0, 0, 0.50);
+    -fx-background-radius: 12px;
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-control-inner-background: transparent;
+}
+
+.title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
+}

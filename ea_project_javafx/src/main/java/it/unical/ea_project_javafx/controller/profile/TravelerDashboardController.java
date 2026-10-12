@@ -1,12 +1,16 @@
 package it.unical.ea_project_javafx.controller.profile;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializer;
 import com.google.gson.reflect.TypeToken;
 import it.unical.ea_project_javafx.controller.home.ExperienceCardController;
 import it.unical.ea_project_javafx.dto.BookingDTO;
 import it.unical.ea_project_javafx.dto.home.ActivityHomeDTO;
 import it.unical.ea_project_javafx.dto.home.TripHomeDTO;
-import it.unical.ea_project_javafx.model.UserSession;
+import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.util.ApiService;
 import javafx.application.Platform;
 import javafx.animation.PauseTransition;
@@ -28,6 +32,9 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class TravelerDashboardController implements ProfileDashboardController {
@@ -76,7 +83,7 @@ public class TravelerDashboardController implements ProfileDashboardController {
                 ApiService.BASE_URL + "/api/activities/top/cards?page=0&size=6",
                 response -> {
                     Type type = new TypeToken<List<ActivityHomeDTO>>() { }.getType();
-                    List<ActivityHomeDTO> activities = new Gson().fromJson(response.body(), type);
+                    List<ActivityHomeDTO> activities = GSON.fromJson(response.body(), type);
                     Platform.runLater(() -> renderActivityCards(activities));
                 },
                 () -> Platform.runLater(() -> recommendedContainer.getChildren().clear()),
@@ -114,17 +121,28 @@ public class TravelerDashboardController implements ProfileDashboardController {
         ApiService.get(url, response -> {
             if (trips) {
                 Type type = new TypeToken<List<TripHomeDTO>>() { }.getType();
-                List<TripHomeDTO> results = new Gson().fromJson(response.body(), type);
+                List<TripHomeDTO> results = GSON.fromJson(response.body(), type);
                 Platform.runLater(() -> renderTripCards(results));
             } else {
                 Type type = new TypeToken<List<ActivityHomeDTO>>() { }.getType();
-                List<ActivityHomeDTO> results = new Gson().fromJson(response.body(), type);
+                List<ActivityHomeDTO> results = GSON.fromJson(response.body(), type);
                 Platform.runLater(() -> renderActivityCards(results));
             }
         },
                 () -> Platform.runLater(() -> recommendedContainer.getChildren().clear()),
                 null);
     }
+
+    private static final Gson GSON = new GsonBuilder()
+        .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, typeOfT, context) -> 
+            LocalDateTime.parse(json.getAsString(), DateTimeFormatter.ISO_LOCAL_DATE_TIME))
+        .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>) (src, typeOfSrc, context) -> 
+            new JsonPrimitive(src.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
+        .registerTypeAdapter(LocalDate.class, (JsonDeserializer<LocalDate>) (json, typeOfT, context) -> 
+            LocalDate.parse(json.getAsString(), DateTimeFormatter.ISO_LOCAL_DATE))
+        .registerTypeAdapter(LocalDate.class, (JsonSerializer<LocalDate>) (src, typeOfSrc, context) -> 
+            new JsonPrimitive(src.format(DateTimeFormatter.ISO_LOCAL_DATE)))
+        .create();
 
     private void renderActivityCards(List<ActivityHomeDTO> activities) {
         recommendedContainer.getChildren().clear();
@@ -196,7 +214,7 @@ public class TravelerDashboardController implements ProfileDashboardController {
                 ApiService.BASE_URL + "/api/bookings/mine",
                 response -> {
                     Type listType = new TypeToken<List<BookingDTO>>() { }.getType();
-                    List<BookingDTO> bookings = new Gson().fromJson(response.body(), listType);
+                    List<BookingDTO> bookings = GSON.fromJson(response.body(), listType);
                     Platform.runLater(() -> renderBookings(bookings));
                 },
                 () -> Platform.runLater(() -> renderBookings(List.of())),

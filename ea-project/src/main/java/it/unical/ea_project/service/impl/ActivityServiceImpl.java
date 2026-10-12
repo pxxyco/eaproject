@@ -245,7 +245,7 @@ public class ActivityServiceImpl implements ActivityService {
                 .map(ActivityImage::getImageUrl)
                 .filter(url -> url != null && !url.isBlank())
                 .findFirst()
-                .orElse(null);
+                .orElse("/photo/default/experience.jpg");
 
         return new ActivityHomeDTO(
                 activity.getActivityId(),

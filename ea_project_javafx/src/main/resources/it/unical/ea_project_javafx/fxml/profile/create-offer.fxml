@@ -13,7 +13,7 @@
     <stylesheets>
         <URL value="@../../css/style.css" />
         <URL value="@../../css/profile.css" />
-        <URL value="@../../css/create_offer.css" />
+        <URL value="@../../css/create-offer.css" />
     </stylesheets>
 
     <ImageView fx:id="bgImageView" preserveRatio="false" pickOnBounds="true" />

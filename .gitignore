@@ -242,3 +242,5 @@ application-local.properties
 application-local.yml
 *.pem
 *.key
+
+photo/

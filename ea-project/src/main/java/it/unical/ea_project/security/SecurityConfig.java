@@ -34,6 +34,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                         .requestMatchers("/api/health").permitAll()
+                        .requestMatchers("/photo/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/users/login", "/api/users", "/api/users/refresh").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/exists").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/me").authenticated()

@@ -1,4 +1,4 @@
-package it.unical.ea_project_javafx.model;
+package it.unical.ea_project_javafx.security;
 
 import it.unical.ea_project_javafx.dto.UserDTO;
 import lombok.Getter;
@@ -6,28 +6,37 @@ import lombok.Getter;
 @Getter
 public class UserSession {
 
-    private static final UserSession INSTANCE = new UserSession();
-
     private Long id;
+    
     private String username;
     private String email;
     private String fullName;
     private String profilePhotoUrl;
-    private String role;
-    private boolean oauthProvider;
-    private boolean loggedIn = false;
-
+    private String role;    
     private String jwtToken;
     private String accessToken;
     private String refreshToken;
+    
+    private boolean oauthProvider;
+    private boolean loggedIn = false;
+    
+    private static UserSession instance;
 
-    private UserSession() {}
+    private UserSession() {
+    }
 
-    public static UserSession getInstance() {
-        return INSTANCE;
+    public static synchronized UserSession getInstance() {
+
+        if (instance == null) {
+            instance = new UserSession();
+        }
+
+        return instance;
+
     }
 
     public void setSession(UserDTO userDTO) {
+
         if (userDTO != null) {
             this.id = userDTO.getId();
             this.username = userDTO.getUsername();
@@ -36,13 +45,13 @@ public class UserSession {
             this.profilePhotoUrl = userDTO.getProfilePhotoUrl();
             this.role = userDTO.getRole();
             this.oauthProvider = userDTO.isOauthProvider();
-            this.jwtToken = jwtToken;
-            this.accessToken = accessToken;
             this.loggedIn = true;
         }
+
     }
 
     public void clear() {
+
         this.id = null;
         this.username = null;
         this.email = null;
@@ -54,11 +63,14 @@ public class UserSession {
         this.accessToken = null;
         this.refreshToken = null;
         this.loggedIn = false;
+
     }
 
     public void setTokens(String access, String refresh) {
+
         this.accessToken = access;
         this.jwtToken = access;
         this.refreshToken = refresh;
+
     }
 }

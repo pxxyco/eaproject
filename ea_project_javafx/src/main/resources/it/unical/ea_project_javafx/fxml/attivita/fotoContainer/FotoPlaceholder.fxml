@@ -9,7 +9,7 @@
            minHeight="150.0" minWidth="150.0"
            prefHeight="150.0" prefWidth="150.0"
            onMouseClicked="#handleClick"
-           styleClass="foto-placeholder" stylesheets="@../../../css/attivita/common.css"
+           styleClass="foto-placeholder" stylesheets="@../../../css/activity/activity-common.css"
            fx:controller="it.unical.ea_project_javafx.controller.attivita.fotoContainer.FotoPlaceholderController"
            xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
    <children>

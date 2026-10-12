@@ -19,4 +19,5 @@ public class ListTripsDTO {
     private Long tripId;
 
     private LocalDateTime addedAt;
+
 }

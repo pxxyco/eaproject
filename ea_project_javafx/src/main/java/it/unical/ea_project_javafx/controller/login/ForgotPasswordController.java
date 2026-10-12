@@ -1,6 +1,6 @@
 package it.unical.ea_project_javafx.controller.login;
 
-import it.unical.ea_project_javafx.model.StepNavigator;
+import it.unical.ea_project_javafx.navigation.StepNavigator;
 import it.unical.ea_project_javafx.util.ApiService;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -29,6 +29,7 @@ public class ForgotPasswordController {
 
     @FXML
     void handleResetPassword(ActionEvent event) {
+
         clearMessage();
         String email = emailField.getText().trim();
 
@@ -52,12 +53,15 @@ public class ForgotPasswordController {
                 () -> Platform.runLater(() -> showError("Errore di connessione al server.")),
                 navigator::setLoading
         );
+
     }
 
     @FXML
     void goToLogin(ActionEvent event) {
+
         clearMessage();
         navigator.goToLoginStep();
+
     }
 
     public void showError(String message) {
@@ -69,17 +73,21 @@ public class ForgotPasswordController {
     }
 
     private void showMessage(String message, String styleClass) {
+
         messageLabel.setText(message);
         messageLabel.getStyleClass().removeAll("message-error", "message-success");
         messageLabel.getStyleClass().add(styleClass);
         messageLabel.setVisible(true);
         messageLabel.setManaged(true);
+
     }
 
     public void clearMessage() {
+
         messageLabel.setText("");
         messageLabel.getStyleClass().removeAll("message-error", "message-success");
         messageLabel.setVisible(false);
         messageLabel.setManaged(false);
+
     }
 }

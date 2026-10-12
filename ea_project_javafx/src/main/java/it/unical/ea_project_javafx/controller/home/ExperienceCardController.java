@@ -4,14 +4,15 @@ import it.unical.ea_project_javafx.controller.AttivitaController;
 import it.unical.ea_project_javafx.dto.home.ActivityHomeDTO;
 import it.unical.ea_project_javafx.dto.home.TripHomeDTO;
 import it.unical.ea_project_javafx.util.SceneNavigator;
-import javafx.fxml.FXML;
+import it.unical.ea_project_javafx.util.ImageUtils;
+import javafx.beans.value.ChangeListener;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
+import javafx.fxml.FXML;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -19,10 +20,11 @@ import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static it.unical.ea_project_javafx.controller.AttivitaController.Type.ACTIVITY;
+
 public class ExperienceCardController {
 
     @FXML private VBox cardRoot;
-    @FXML private StackPane imageContainer;
     @FXML private ImageView imageView;
     @FXML private Label categoryLabel;
     @FXML private Label ratingLabel;
@@ -44,8 +46,9 @@ public class ExperienceCardController {
     };
 
     private static final DateTimeFormatter CARD_DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
     private AttivitaController.Type detailType;
-    private Long detailId;
+    private String detailId;
 
     @FXML
     public void initialize() {
@@ -78,17 +81,13 @@ public class ExperienceCardController {
     }
 
     private void hideImageLoader() {
-        if (imageLoader != null) {
-            imageLoader.setVisible(false);
-            imageLoader.setManaged(false);
-        }
+        imageLoader.setVisible(false);
+        imageLoader.setManaged(false);
     }
 
     private void showImageLoader() {
-        if (imageLoader != null) {
-            imageLoader.setVisible(true);
-            imageLoader.setManaged(true);
-        }
+        imageLoader.setVisible(true);
+        imageLoader.setManaged(true);
     }
 
     public void setData(String title, String location, String category, String price, String rating, String imageUrl, String dateInfo) {
@@ -103,22 +102,23 @@ public class ExperienceCardController {
         dateLabel.setManaged(dateLabel.isVisible());
 
         loadImage(imageUrl);
-        cardRoot.setOnMouseClicked(event -> handleCardClick());
     }
 
     public void setData(TripHomeDTO dto) {
         if (dto == null) return;
 
         detailType = AttivitaController.Type.TRIP;
-        detailId = dto.getTripId();
+        detailId = dto.getTripId() != null ? dto.getTripId().toString() : "";
 
         String title = dto.getTitle() != null ? dto.getTitle() : "Senza Titolo";
         String location = dto.getLocation() != null ? dto.getLocation() : "";
         String category = "Viaggio";
         String price = String.format("€%.0f", dto.getTotalPrice() != null ? dto.getTotalPrice().doubleValue() : 0.0);
         String rating = dto.getAverageRating() != null ? String.format("%.1f", dto.getAverageRating().doubleValue()) : "-";
-        String imageUrl = dto.getCoverPhotoUrl() != null ? dto.getCoverPhotoUrl() : "";
+        String imageUrl = dto.getCoverPhotoUrl();
         String dateInfo = formatDateRange(dto.getStartDate(), dto.getEndDate());
+
+        cardRoot.setOnMouseClicked(event -> handleCardClick(detailType, detailId));
 
         setData(title, location, category, price, rating, imageUrl, dateInfo);
     }
@@ -126,53 +126,53 @@ public class ExperienceCardController {
     public void setData(ActivityHomeDTO dto) {
         if (dto == null) return;
 
-        detailType = AttivitaController.Type.ACTIVITY;
-        detailId = dto.getActivityId();
+        detailType = ACTIVITY;
+        detailId = dto.getActivityId() != null ? dto.getActivityId().toString() : "";
 
         String title = dto.getTitle() != null ? dto.getTitle() : "Senza Titolo";
         String location = dto.getCity() != null ? dto.getCity() : "";
         String category = dto.getCategory() != null ? dto.getCategory() : "Attività";
         String price = String.format("€%.0f", dto.getPrice() != null ? dto.getPrice() : 0.0);
         String rating = String.format("%.1f", dto.getAverageRating() != null ? dto.getAverageRating() : 5.0);
-        String imageUrl = dto.getImageUrl() != null ? dto.getImageUrl() : "";
+        String imageUrl = dto.getImageUrl();
         String dateInfo = formatDateRange(dto.getStartDate(), dto.getEndDate());
+
+        cardRoot.setOnMouseClicked(event -> handleCardClick(detailType, detailId));
 
         setData(title, location, category, price, rating, imageUrl, dateInfo);
     }
 
     private String formatDateRange(String startDate, String endDate) {
-        if (startDate == null || endDate == null || startDate.isBlank() || endDate.isBlank() || startDate.equals("null") || endDate.equals("null")) {
+        if (startDate == null || endDate == null || startDate.isBlank() || endDate.isBlank()) {
             return "";
         }
+
         try {
             LocalDate start = LocalDate.parse(startDate.substring(0, 10));
             LocalDate end = LocalDate.parse(endDate.substring(0, 10));
             String formattedStart = start.format(CARD_DATE_FORMAT);
+
             return start.equals(end) ? formattedStart : formattedStart + " - " + end.format(CARD_DATE_FORMAT);
         } catch (DateTimeParseException | IndexOutOfBoundsException e) {
             return "";
         }
     }
 
-    private void loadImage(String imageUrl) {
-        if (imageUrl == null || imageUrl.isBlank()) {
-            imageView.setImage(null);
-            hideImageLoader();
-            return;
-        }
+    private void loadImage(String rawImageUrl) {
+        String fullUrl = ImageUtils.buildFullUrl(rawImageUrl);
 
         showImageLoader();
 
-        Image image = getCachedImage(imageUrl);
+        Image image = getCachedImage(fullUrl);
         if (image == null) {
-            image = createAndCacheImage(imageUrl);
+            image = createAndCacheImage(fullUrl);
         }
 
         imageView.setImage(image);
 
         if (image.isError()) {
-            removeCachedImage(imageUrl, image);
-            hideImageLoader();
+            removeCachedImage(fullUrl, image);
+            handleImageError(fullUrl);
             return;
         }
 
@@ -181,16 +181,54 @@ public class ExperienceCardController {
             return;
         }
 
-        ImageLoadListener listener = new ImageLoadListener(imageUrl, image, this::hideImageLoader);
-        listener.attach();
+        Image targetImage = image;
+        final String currentUrl = fullUrl;
+
+        ChangeListener<Number> progressListener = new ChangeListener<>() {
+            @Override
+            public void changed(javafx.beans.value.ObservableValue<? extends Number> obs, Number oldVal, Number newVal) {
+                if (newVal.doubleValue() >= 1.0) {
+                    hideImageLoader();
+                    targetImage.progressProperty().removeListener(this);
+                }
+            }
+        };
+        image.progressProperty().addListener(progressListener);
+
+        ChangeListener<Boolean> errorListener = new ChangeListener<>() {
+            @Override
+            public void changed(javafx.beans.value.ObservableValue<? extends Boolean> obs, Boolean oldVal, Boolean isError) {
+                if (Boolean.TRUE.equals(isError)) {
+                    targetImage.errorProperty().removeListener(this);
+                    removeCachedImage(currentUrl, targetImage);
+                    handleImageError(currentUrl);
+                }
+            }
+        };
+        image.errorProperty().addListener(errorListener);
     }
 
-    private void handleCardClick() {
-        if (detailType == null || detailId == null) return;
+    private void handleImageError(String failedUrl) {
+        hideImageLoader();
 
-        SceneNavigator.getInstance().loadScene(
-                "/it/unical/ea_project_javafx/fxml/Attivita.fxml",
-                controller -> ((AttivitaController) controller).loadData(detailType, detailId.toString())
+        String defaultUrl = ImageUtils.getDefaultImageUrl();
+
+        if (failedUrl != null && !failedUrl.equals(defaultUrl)) {
+            loadImage(defaultUrl);
+        } else {
+            imageView.setImage(null);
+        }
+    }
+
+    private void handleCardClick(AttivitaController.Type type, String id) {
+        if (type == null || id == null || id.isBlank()) return;
+
+        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/Attivita.fxml",
+                controller -> {
+                    if (controller instanceof AttivitaController attivitaCtrl) {
+                        attivitaCtrl.loadData(type, id);
+                    }
+                }
         );
     }
 }

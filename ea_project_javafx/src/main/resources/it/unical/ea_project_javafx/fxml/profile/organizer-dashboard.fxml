@@ -20,7 +20,7 @@
     <stylesheets>
         <URL value="@../../css/style.css" />
         <URL value="@../../css/profile.css" />
-        <URL value="@../../css/dashboard.css" />
+        <URL value="@../../css/organizer-dashboard.css" />
     </stylesheets>
     <children>
         <ScrollPane fitToHeight="true" fitToWidth="true" styleClass="main-scroll">

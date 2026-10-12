@@ -35,7 +35,7 @@
 
                         <VBox spacing="5.0">
                             <Label fx:id="greetingLabel" styleClass="profile-title" />
-                            <Label styleClass="profile-subtitle" text="Questa e la tua area personale." />
+                            <Label styleClass="profile-subtitle" text="Bentornato nella tua area personale." />
                         </VBox>
 
                         <VBox fx:id="dashboardContainer" spacing="18.0" />
