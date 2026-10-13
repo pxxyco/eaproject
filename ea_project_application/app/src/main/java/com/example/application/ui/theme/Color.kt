@@ -2,10 +2,19 @@ package com.example.application.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+val Stone50 = Color(0xFFFAFAF9)
+val Stone200 = Color(0xFFE7E5E4)
+val Stone300 = Color(0xFFD6D3D1)
+val Stone400 = Color(0xFFA8A29E)
+val Stone600 = Color(0xFF57534E)
+val Stone900 = Color(0xFF1C1917)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val PopupSurface = Color(0xFF242423)
+val ScreenBackground = Color(0xFF0C0C0C)
+val RatingAmber = Color(0xFFF59E0B)
+
+val GlassFill = Color.White.copy(alpha = 0.07f)
+val GlassFillStrong = Color.White.copy(alpha = 0.12f)
+val GlassBorder = Color.White.copy(alpha = 0.15f)
+val GlassBorderStrong = Color.White.copy(alpha = 0.20f)
+val OverlayDark = Color(0xFF0C0C0C).copy(alpha = 0.82f)
