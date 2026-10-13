@@ -127,10 +127,24 @@
                                 <TextField fx:id="tripMaxSeatsField" promptText="20" styleClass="custom-input" />
                             </VBox>
                             <VBox spacing="4.0" HBox.hgrow="ALWAYS">
-                                <Label text="URL Foto Copertina" styleClass="form-label" />
-                                <TextField fx:id="tripCoverUrlField" promptText="https://..." styleClass="custom-input" />
+                                <Label text="Copertina del viaggio" styleClass="form-label" />
+                                <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                    <ImageView fx:id="tripCoverPreview" fitWidth="72.0" fitHeight="48.0"
+                                               preserveRatio="true" styleClass="photo-preview" />
+                                    <Button text="Scegli copertina..." onAction="#handleChooseTripCover" styleClass="btn-secondary" />
+                                    <Label fx:id="tripCoverFileLabel" text="Nessuna copertina selezionata" styleClass="form-label" />
+                                </HBox>
                             </VBox>
                         </HBox>
+
+                        <VBox spacing="4.0">
+                            <Label text="Foto secondarie del viaggio" styleClass="form-label" />
+                            <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                <Button text="+ Aggiungi foto secondarie..." onAction="#handleAddTripPhotos" styleClass="btn-secondary" />
+                                <Label fx:id="tripSecondaryPhotosLabel" text="Nessuna foto secondaria selezionata" styleClass="form-label" />
+                            </HBox>
+                            <FlowPane fx:id="tripSecondaryPhotoPreview" hgap="8.0" vgap="6.0" />
+                        </VBox>
 
                         <VBox spacing="4.0">
                             <Label text="Descrizione" styleClass="form-label" />
@@ -205,6 +219,25 @@
                         </HBox>
 
                         <VBox spacing="4.0">
+                            <Label text="Copertina dell'attività" styleClass="form-label" />
+                            <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                <ImageView fx:id="actCoverPreview" fitWidth="72.0" fitHeight="48.0"
+                                           preserveRatio="true" styleClass="photo-preview" />
+                                <Button text="Scegli copertina..." onAction="#handleChooseActivityCover" styleClass="btn-secondary" />
+                                <Label fx:id="actCoverFileLabel" text="Nessuna copertina selezionata" styleClass="form-label" />
+                            </HBox>
+                        </VBox>
+
+                        <VBox spacing="4.0">
+                            <Label text="Foto secondarie dell'attività" styleClass="form-label" />
+                            <HBox alignment="CENTER_LEFT" spacing="8.0">
+                                <Button text="+ Aggiungi foto secondarie..." onAction="#handleAddActivityPhotos" styleClass="btn-secondary" />
+                                <Label fx:id="actSecondaryPhotosLabel" text="Nessuna foto secondaria selezionata" styleClass="form-label" />
+                            </HBox>
+                            <FlowPane fx:id="actSecondaryPhotoPreview" hgap="8.0" vgap="6.0" />
+                        </VBox>
+
+                        <VBox spacing="4.0">
                             <Label text="Descrizione" styleClass="form-label" />
                             <TextArea fx:id="actDescriptionArea" promptText="Descrivi l'attività, punti di interesse..." prefRowCount="3" styleClass="custom-textarea" />
                         </VBox>
@@ -217,7 +250,7 @@
                 </ScrollPane>
 
                 <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="form-footer">
-                    <Button text="← Torna alla selezione" onAction="#handleBackToChoose" styleClass="btn-link" />
+                    <Button fx:id="activityBackButton" text="← Torna alla selezione" onAction="#handleBackToChoose" styleClass="btn-link" />
                     <Region HBox.hgrow="ALWAYS" />
                     <Button fx:id="saveActivityButton" text="Pubblica Attività" onAction="#handleSaveActivity" styleClass="btn-primary" />
                 </HBox>

@@ -9,6 +9,7 @@
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
@@ -21,6 +22,7 @@
         <URL value="@../../css/style.css" />
         <URL value="@../../css/profile.css" />
         <URL value="@../../css/organizer-dashboard.css" />
+        <URL value="@../../css/home.css" />
     </stylesheets>
     <children>
         <ScrollPane fitToHeight="true" fitToWidth="true" styleClass="main-scroll">
@@ -72,8 +74,19 @@
 
                         <VBox spacing="12.0">
                             <children>
-                                <Label styleClass="section-header" text="Le Tue Offerte" />
-                                <ListView fx:id="activitiesListView" focusTraversable="false" minHeight="225.0" orientation="HORIZONTAL" prefHeight="225.0" styleClass="horizontal-list-view" VBox.vgrow="NEVER" />
+                                <Label styleClass="section-header" text="Le Tue Attività" />
+                                <FlowPane fx:id="activityCardsContainer" hgap="16.0" vgap="16.0" />
+                                <Label fx:id="activitiesPlaceholderLabel" text="Non hai ancora pubblicato attività."
+                                       managed="false" visible="false" styleClass="dash-subtitle" />
+                            </children>
+                        </VBox>
+
+                        <VBox spacing="12.0">
+                            <children>
+                                <Label styleClass="section-header" text="I Tuoi Viaggi" />
+                                <FlowPane fx:id="tripCardsContainer" hgap="16.0" vgap="16.0" />
+                                <Label fx:id="tripsPlaceholderLabel" text="Non hai ancora pubblicato viaggi."
+                                       managed="false" visible="false" styleClass="dash-subtitle" />
                             </children>
                         </VBox>
 

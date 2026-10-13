@@ -112,8 +112,6 @@ public class TripServiceImpl implements TripService {
         existing.setMaxSeats(details.getMaxSeats());
         existing.setAvailableSeats(details.getAvailableSeats());
         existing.setStatus(details.getStatus());
-        existing.setCoverPhotoUrl(details.getCoverPhotoUrl());
-
         return tripRepository.save(existing);
     }
 

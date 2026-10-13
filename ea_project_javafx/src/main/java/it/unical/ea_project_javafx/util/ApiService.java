@@ -13,6 +13,11 @@ import javafx.concurrent.Task;
 import lombok.Setter;
 
 import java.net.URI;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -20,6 +25,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -133,6 +139,107 @@ public class ApiService {
 
     public static void call(String url, String body, Method method, Consumer<HttpResponse<String>> onSuccess, Runnable onFailure, Consumer<Boolean> loadingSetter) {
         call(url, body, method, onSuccess, onFailure, loadingSetter, true);
+    }
+
+    public static void uploadFile(String url, Path file, Consumer<HttpResponse<String>> onSuccess,
+                                  Runnable onFailure, Consumer<Boolean> loadingSetter) {
+        uploadFiles(url, java.util.List.of(file), "file", onSuccess, onFailure, null, loadingSetter);
+    }
+
+    public static void uploadFileDetailed(String url, Path file, Consumer<HttpResponse<String>> onSuccess,
+                                          Runnable onFailure, Consumer<String> onServerFailure,
+                                          Consumer<Boolean> loadingSetter) {
+        uploadFiles(url, java.util.List.of(file), "file", onSuccess, onFailure, onServerFailure, loadingSetter);
+    }
+
+    public static void uploadFiles(String url, java.util.List<Path> files, Consumer<HttpResponse<String>> onSuccess,
+                                   Runnable onFailure, Consumer<Boolean> loadingSetter) {
+        uploadFiles(url, files, "files", onSuccess, onFailure, null, loadingSetter);
+    }
+
+    public static void uploadFilesDetailed(String url, java.util.List<Path> files,
+                                           Consumer<HttpResponse<String>> onSuccess, Runnable onFailure,
+                                           Consumer<String> onServerFailure, Consumer<Boolean> loadingSetter) {
+        uploadFiles(url, files, "files", onSuccess, onFailure, onServerFailure, loadingSetter);
+    }
+
+    private static void uploadFiles(String url, java.util.List<Path> files, String formField,
+                                    Consumer<HttpResponse<String>> onSuccess, Runnable onFailure,
+                                    Consumer<String> onServerFailure, Consumer<Boolean> loadingSetter) {
+        uploadFiles(url, files, formField, onSuccess, onFailure, onServerFailure, loadingSetter, true);
+    }
+
+    private static void uploadFiles(String url, java.util.List<Path> files, String formField,
+                                    Consumer<HttpResponse<String>> onSuccess, Runnable onFailure,
+                                    Consumer<String> onServerFailure, Consumer<Boolean> loadingSetter,
+                                    boolean allowRefresh) {
+        setLoadingOnFxThread(loadingSetter, true);
+
+        String sentToken = UserSession.getInstance().getAccessToken();
+        boolean hadToken = sentToken != null && !sentToken.isBlank();
+
+        Task<HttpResponse<String>> task = new Task<>() {
+            @Override
+            protected HttpResponse<String> call() throws Exception {
+                return CLIENT.send(buildMultipartRequest(url, files, formField), HttpResponse.BodyHandlers.ofString());
+            }
+        };
+
+        task.setOnSucceeded(event -> {
+            HttpResponse<String> response = task.getValue();
+            if (response.statusCode() == 401 && hadToken && allowRefresh) {
+                CompletableFuture<Boolean> future;
+                synchronized (ApiService.class) {
+                    if (isRefreshing.compareAndSet(false, true)) {
+                        refreshFuture = new CompletableFuture<>();
+                        executeRefreshTokenCall();
+                    }
+                    future = refreshFuture;
+                }
+                future.thenAcceptAsync(success -> {
+                    if (Boolean.TRUE.equals(success)) {
+                        uploadFiles(url, files, formField, onSuccess, onFailure, onServerFailure, loadingSetter, false);
+                    } else {
+                        setLoadingOnFxThread(loadingSetter, false);
+                        forceLogout();
+                    }
+                }, Platform::runLater);
+                return;
+            }
+
+            setLoadingOnFxThread(loadingSetter, false);
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                if (onSuccess != null) onSuccess.accept(response);
+            } else if (onServerFailure != null) {
+                String details = response.body() == null ? "" : response.body().trim();
+                if (details.length() > 300) details = details.substring(0, 300) + "...";
+                String message = "Errore HTTP " + response.statusCode()
+                        + (details.isBlank() ? "" : ": " + details);
+                Platform.runLater(() -> onServerFailure.accept(message));
+            } else {
+                handleFailure(onFailure);
+            }
+        });
+
+        task.setOnFailed(event -> {
+            setLoadingOnFxThread(loadingSetter, false);
+            if (onServerFailure != null) {
+                Throwable exception = task.getException();
+                String details = exception == null
+                        ? "causa non disponibile"
+                        : exception.getClass().getSimpleName()
+                        + (exception.getMessage() == null || exception.getMessage().isBlank()
+                        ? ""
+                        : ": " + exception.getMessage());
+                if (details.length() > 300) details = details.substring(0, 300) + "...";
+                String message = "Errore durante la richiesta di upload: " + details;
+                Platform.runLater(() -> onServerFailure.accept(message));
+            } else {
+                handleFailure(onFailure);
+            }
+        });
+
+        EXECUTOR.execute(task);
     }
 
     private static void call(String url, String body, Method method, Consumer<HttpResponse<String>> onSuccess, Runnable onFailure, Consumer<Boolean> loadingSetter, boolean allowRefresh) {
@@ -285,6 +392,30 @@ public class ApiService {
         }
 
         return builder.build();
+    }
+
+    private static HttpRequest buildMultipartRequest(String url, java.util.List<Path> files, String formField) throws IOException {
+        String boundary = "----CopilotUpload" + UUID.randomUUID();
+        ByteArrayOutputStream body = new ByteArrayOutputStream();
+        for (Path file : files) {
+            body.write(("--" + boundary + "\r\n"
+                    + "Content-Disposition: form-data; name=\"" + formField + "\"; filename=\""
+                    + file.getFileName().toString().replace("\"", "").replace("\r", "").replace("\n", "") + "\"\r\n"
+                    + "Content-Type: application/octet-stream\r\n\r\n").getBytes(StandardCharsets.UTF_8));
+            body.write(Files.readAllBytes(file));
+            body.write("\r\n".getBytes(StandardCharsets.UTF_8));
+        }
+        body.write(("--" + boundary + "--\r\n").getBytes(StandardCharsets.UTF_8));
+
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .timeout(Duration.ofSeconds(30))
+                .header("Content-Type", "multipart/form-data; boundary=" + boundary);
+        String token = UserSession.getInstance().getAccessToken();
+        if (token != null && !token.isBlank()) {
+            builder.header("Authorization", "Bearer " + token);
+        }
+        return builder.POST(HttpRequest.BodyPublishers.ofByteArray(body.toByteArray())).build();
     }
 
     private static void handleFailure(Runnable onFailure) {

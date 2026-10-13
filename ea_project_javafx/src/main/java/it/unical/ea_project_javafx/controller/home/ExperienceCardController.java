@@ -6,13 +6,14 @@ import it.unical.ea_project_javafx.dto.home.TripHomeDTO;
 import it.unical.ea_project_javafx.util.SceneNavigator;
 import it.unical.ea_project_javafx.util.ImageUtils;
 import javafx.beans.value.ChangeListener;
+import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.Button;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
-import javafx.fxml.FXML;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -33,6 +34,8 @@ public class ExperienceCardController {
     @FXML private Label dateLabel;
     @FXML private Label priceLabel;
     @FXML private ProgressIndicator imageLoader;
+    @FXML private Button editButton;
+    @FXML private Button deleteButton;
 
     private static final double IMAGE_WIDTH = 315;
     private static final double IMAGE_HEIGHT = 199;
@@ -49,6 +52,7 @@ public class ExperienceCardController {
 
     private AttivitaController.Type detailType;
     private String detailId;
+    private Runnable editAction;
 
     @FXML
     public void initialize() {
@@ -58,6 +62,8 @@ public class ExperienceCardController {
         clip.setArcHeight(24);
         clip.heightProperty().bind(imageView.fitHeightProperty());
         imageView.setClip(clip);
+        editButton.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_CLICKED, javafx.event.Event::consume);
+        deleteButton.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_CLICKED, javafx.event.Event::consume);
     }
 
     private static synchronized Image getCachedImage(String imageUrl) {
@@ -102,6 +108,25 @@ public class ExperienceCardController {
         dateLabel.setManaged(dateLabel.isVisible());
 
         loadImage(imageUrl);
+    }
+
+    public void setEditAction(Runnable editAction) {
+        this.editAction = editAction;
+        editButton.setVisible(editAction != null);
+        editButton.setManaged(editAction != null);
+        editButton.setOnAction(event -> {
+            event.consume();
+            if (this.editAction != null) this.editAction.run();
+        });
+    }
+
+    public void setDeleteAction(Runnable deleteAction) {
+        deleteButton.setVisible(deleteAction != null);
+        deleteButton.setManaged(deleteAction != null);
+        deleteButton.setOnAction(event -> {
+            event.consume();
+            if (deleteAction != null) deleteAction.run();
+        });
     }
 
     public void setData(TripHomeDTO dto) {
