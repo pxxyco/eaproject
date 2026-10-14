@@ -22,7 +22,7 @@ import java.util.Objects;
 
 public class SplashScreenController {
 
-    private static final String SPLASH_FXML = "/it/unical/ea_project_javafx/fxml/SplashScreen.fxml";
+    private static final String SPLASH_FXML = "/it/unical/ea_project_javafx/fxml/splash-screen.fxml";
     private static final String HOME_FXML = "/it/unical/ea_project_javafx/fxml/home/mainview.fxml";
 
     private static final int MIN_WAIT_SECONDS = 5;

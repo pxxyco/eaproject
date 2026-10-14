@@ -31,6 +31,10 @@ public class SceneNavigator {
         this.mainStage = stage;
     }
 
+    public void loadScene(String fxmlPath) {
+        loadScene(fxmlPath, null);
+    }
+
     public void loadScene(String fxmlPath, Consumer<Object> controllerInitializer) {
 
         if (mainStage == null) {
