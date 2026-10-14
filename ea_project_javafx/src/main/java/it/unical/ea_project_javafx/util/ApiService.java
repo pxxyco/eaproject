@@ -68,6 +68,19 @@ public class ApiService {
         return GSON.toJson(value);
     }
 
+    public static String resolveUrl(String path) {
+        if (path == null || path.isBlank()) {
+            return "";
+        }
+        if (path.startsWith("http://") || path.startsWith("https://")) {
+            return path;
+        }
+        if (!path.startsWith("/")) {
+            path = "/" + path;
+        }
+        return BASE_URL + path;
+    }
+
     private static LocalDate deserializeLocalDate(JsonElement json) {
         if (!json.isJsonArray()) {
             return LocalDate.parse(json.getAsString());
@@ -118,8 +131,13 @@ public class ApiService {
         );
     }
 
+
     @Setter
     private static Runnable onNetworkFailureGlobal;
+
+
+    @Setter
+    private static Consumer<Integer> onRateLimitedGlobal;
 
     public static void get(String url, Consumer<HttpResponse<String>> onSuccess, Runnable onFailure, Consumer<Boolean> loadingSetter) {
         call(url, null, Method.GET, onSuccess, onFailure, loadingSetter);
@@ -267,9 +285,11 @@ public class ApiService {
                 synchronized (ApiService.class) {
                     if (isRefreshing.compareAndSet(false, true)) {
                         refreshFuture = new CompletableFuture<>();
+                        future = refreshFuture;
                         executeRefreshTokenCall();
+                    } else {
+                        future = refreshFuture;
                     }
-                    future = refreshFuture;
                 }
 
                 future.thenAcceptAsync(success -> {
@@ -290,8 +310,19 @@ public class ApiService {
                 if (onSuccess != null) {
                     onSuccess.accept(response);
                 }
-            } else {
-                handleFailure(onFailure);
+            } else if (response.statusCode() == 429) {
+                int retryAfter = response.headers().firstValue("Retry-After")
+                        .map(v -> {
+                            try { return Integer.parseInt(v.trim()); }
+                            catch (NumberFormatException ex) { return 60; }
+                        })
+                        .orElse(60);
+                if (onRateLimitedGlobal != null) {
+                    onRateLimitedGlobal.accept(retryAfter);
+                }
+                if (onFailure != null) {
+                    onFailure.run();
+                }
             }
         });
 
@@ -440,12 +471,8 @@ public class ApiService {
                     .GET()
                     .build();
 
-            HttpResponse<Void> response = CLIENT.send(
-                    request,
-                    HttpResponse.BodyHandlers.discarding()
-            );
-
-            return response.statusCode() == 200;
+            CLIENT.send(request, HttpResponse.BodyHandlers.discarding());
+            return true;
         } catch (Exception e) {
             return false;
         }

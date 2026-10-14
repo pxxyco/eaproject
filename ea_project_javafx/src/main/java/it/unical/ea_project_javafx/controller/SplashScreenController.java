@@ -3,6 +3,8 @@ package it.unical.ea_project_javafx.controller;
 import it.unical.ea_project_javafx.util.ApiService;
 import it.unical.ea_project_javafx.util.AppErrorCode;
 import it.unical.ea_project_javafx.util.SceneNavigator;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -14,10 +16,17 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.util.Objects;
 
 public class SplashScreenController {
+
+    private static final String SPLASH_FXML = "/it/unical/ea_project_javafx/fxml/SplashScreen.fxml";
+    private static final String HOME_FXML = "/it/unical/ea_project_javafx/fxml/home/mainview.fxml";
+
+    private static final int MIN_WAIT_SECONDS = 5;
+    private static final int MAX_WAIT_SECONDS = 120;
 
     @FXML private VBox splashContent;
     @FXML private Label iconLabel;
@@ -31,13 +40,31 @@ public class SplashScreenController {
     @FXML private Button exitButton;
 
     private static boolean isMonitoringConnection = false;
+    private static boolean rateLimitScreenActive = false;
+    private static int pendingRateLimitSeconds = 0;
+
+    private Timeline rateLimitCountdown;
+    public static void showRateLimited(int retryAfterSeconds) {
+        if (rateLimitScreenActive) {
+            return;
+        }
+        rateLimitScreenActive = true;
+        pendingRateLimitSeconds = Math.clamp(retryAfterSeconds, MIN_WAIT_SECONDS, MAX_WAIT_SECONDS);
+        Platform.runLater(() -> SceneNavigator.getInstance().loadScene(SPLASH_FXML));
+    }
 
     @FXML
     public void initialize() {
         ApiService.setOnNetworkFailureGlobal(this::restartAppManually);
+        ApiService.setOnRateLimitedGlobal(SplashScreenController::showRateLimited);
 
         retryButton.setOnAction(e -> checkBackendConnection());
         exitButton.setOnAction(e -> Platform.exit());
+
+        if (rateLimitScreenActive) {
+            showRateLimitState(pendingRateLimitSeconds);
+            return;
+        }
 
         checkBackendConnection();
     }
@@ -70,13 +97,12 @@ public class SplashScreenController {
     }
 
     private void setLoadingState() {
-        // Mostra componenti di caricamento
+
         progressIndicator.setVisible(true);
         progressIndicator.setManaged(true);
         statusLabel.setVisible(true);
         statusLabel.setManaged(true);
 
-        // Nasconde componenti di errore
         errorTitleLabel.setVisible(false);
         errorTitleLabel.setManaged(false);
         errorMessageLabel.setVisible(false);
@@ -89,27 +115,11 @@ public class SplashScreenController {
 
     private void showErrorState(AppErrorCode errorCode) {
         Platform.runLater(() -> {
-            // Nasconde spinner e messaggio di caricamento
-            progressIndicator.setVisible(false);
-            progressIndicator.setManaged(false);
-            statusLabel.setVisible(false);
-            statusLabel.setManaged(false);
+            hideLoadingComponents();
+            showErrorImage();
 
-            // Carica l'immagine d'errore
-            try {
-                Image dinoImage = new Image(Objects.requireNonNull(
-                    getClass().getResourceAsStream("/it/unical/ea_project_javafx/images/sad-dino.png")
-                ));
-                errorImageView.setImage(dinoImage);
-                errorImageView.setVisible(true);
-                errorImageView.setManaged(true);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            // Imposta il messaggio dinamico combinato
-            String fullErrorMessage = String.format("Codice Errore: %s. %s", 
-                    errorCode.getCode(), 
+            String fullErrorMessage = String.format("Codice Errore: %s. %s",
+                    errorCode.getCode(),
                     errorCode.getDefaultDescription());
             errorMessageLabel.setText(fullErrorMessage);
             errorMessageLabel.setVisible(true);
@@ -118,20 +128,77 @@ public class SplashScreenController {
             errorTitleLabel.setVisible(true);
             errorTitleLabel.setManaged(true);
 
-            // Gestione visibilità Esci: visibile SOLO se in Fullscreen
-            boolean isFullScreen = isWindowFullScreen();
-            exitButton.setVisible(isFullScreen);
-            exitButton.setManaged(isFullScreen);
-
-            buttonBox.setVisible(true);
-            buttonBox.setManaged(true);
+            showButtons();
         });
 
         startAutoRecoveryMonitor();
     }
+    private void showRateLimitState(int seconds) {
+        hideLoadingComponents();
+        showErrorImage();
+
+        errorTitleLabel.setVisible(true);
+        errorTitleLabel.setManaged(true);
+        errorMessageLabel.setVisible(true);
+        errorMessageLabel.setManaged(true);
+
+        updateRateLimitTexts(seconds);
+        showButtons();
+        retryButton.setDisable(true);
+
+        final int[] remaining = {seconds};
+        rateLimitCountdown = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
+            remaining[0]--;
+            if (remaining[0] <= 0) {
+                rateLimitCountdown.stop();
+                rateLimitScreenActive = false;
+                loadMainApp();
+            } else {
+                updateRateLimitTexts(remaining[0]);
+            }
+        }));
+        rateLimitCountdown.setCycleCount(Timeline.INDEFINITE);
+        rateLimitCountdown.play();
+    }
+
+    private void updateRateLimitTexts(int secondsLeft) {
+        AppErrorCode code = AppErrorCode.ERR_RATE_LIMITED;
+        errorMessageLabel.setText(String.format("Codice Errore: %s. %s Riprova tra %d s.",
+                code.getCode(), code.getDefaultDescription(), secondsLeft));
+        retryButton.setText("Riprova tra " + secondsLeft + " s");
+    }
+
+    private void hideLoadingComponents() {
+        progressIndicator.setVisible(false);
+        progressIndicator.setManaged(false);
+        statusLabel.setVisible(false);
+        statusLabel.setManaged(false);
+    }
+
+    private void showErrorImage() {
+        try {
+            Image dinoImage = new Image(Objects.requireNonNull(
+                    getClass().getResourceAsStream("/it/unical/ea_project_javafx/images/sad-dino.png")
+            ));
+            errorImageView.setImage(dinoImage);
+            errorImageView.setVisible(true);
+            errorImageView.setManaged(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void showButtons() {
+        boolean isFullScreen = isWindowFullScreen();
+        exitButton.setVisible(isFullScreen);
+        exitButton.setManaged(isFullScreen);
+
+        buttonBox.setVisible(true);
+        buttonBox.setManaged(true);
+    }
 
     private boolean isWindowFullScreen() {
-        if (splashContent != null && splashContent.getScene() != null 
+        if (splashContent != null && splashContent.getScene() != null
                 && splashContent.getScene().getWindow() instanceof Stage stage) {
             return stage.isFullScreen();
         }
@@ -164,14 +231,14 @@ public class SplashScreenController {
     }
 
     private void restartAppManually() {
-        loadView("/it/unical/ea_project_javafx/fxml/splash-screen.fxml");
+        loadView(SPLASH_FXML);
     }
 
     private void loadMainApp() {
-        loadView("/it/unical/ea_project_javafx/fxml/home/mainview.fxml");
+        loadView(HOME_FXML);
     }
 
     private void loadView(String fxmlPath) {
-        Platform.runLater(() -> SceneNavigator.getInstance().loadScene(fxmlPath, null));
+        Platform.runLater(() -> SceneNavigator.getInstance().loadScene(fxmlPath));
     }
 }

@@ -72,6 +72,13 @@ public class SearchBarController {
             suggestionsPopup = new ContextMenu();
             debounce.setOnFinished(event -> fetchSuggestions(searchField.getText()));
 
+            searchField.setOnAction(event -> {
+                if (suggestionsPopup != null) {
+                    suggestionsPopup.hide();
+                }
+                handleSearch(event);
+            });
+
             searchField.textProperty().addListener((observable, oldValue, newValue) -> {
                 suggestionRequestId++;
                 debounce.stop();
