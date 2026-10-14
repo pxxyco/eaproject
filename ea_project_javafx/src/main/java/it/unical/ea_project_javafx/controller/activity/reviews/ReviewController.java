@@ -1,8 +1,7 @@
-package it.unical.ea_project_javafx.controller.attivita.recensioni;
+package it.unical.ea_project_javafx.controller.activity.reviews;
 
 import it.unical.ea_project_javafx.dto.ReviewDTO;
 import it.unical.ea_project_javafx.service.ReviewService;
-import it.unical.ea_project_javafx.util.ApiService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -14,39 +13,29 @@ import lombok.Setter;
 
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.logging.Logger;
 
-public class NewRecensioneController {
-
-    @FXML private HBox containerStelle;
-
-    @FXML private Button star1;
-
-    @FXML private Button star2;
-
-    @FXML private Button star3;
-
-    @FXML private Button star4;
-
-    @FXML private Button star5;
-
-    @FXML private TextArea txtCommento;
-
-    @FXML private StackPane root;
-
-    private int value;
-    private Long tripId;
-    private Long activityId;
+public class ReviewController {
 
     @Setter
     private Runnable onClose;
     @Setter
     private Consumer<ReviewDTO> onReviewCreated;
 
+    @FXML private HBox containerStelle;
+    @FXML private Button star1;
+    @FXML private Button star2;
+    @FXML private Button star3;
+    @FXML private Button star4;
+    @FXML private Button star5;
+    @FXML private TextArea txtCommento;
+    @FXML private StackPane root;
 
-    List<Button> stars ;
-    final private String FULL_STAR = "★";
-    final private String EMPTY_STAR = "☆";
+    private int value;
+    private Long tripId;
+    private Long activityId;
+    private final String FULL_STAR = "★";
+    private final String EMPTY_STAR = "☆";
+    List<Button> stars;
 
     @FXML
     private void initialize() {
@@ -54,18 +43,22 @@ public class NewRecensioneController {
     }
 
     public void setType(Long tripId, Long activityId) {
+
         this.tripId = tripId;
         this.activityId = activityId;
 
         reset();
+
     }
 
 
     @FXML
     void handleCloseButton(ActionEvent event) {
+
         if (onClose != null) {
             onClose.run();
         }
+
     }
 
     @FXML
@@ -88,15 +81,17 @@ public class NewRecensioneController {
                     if(onReviewCreated != null) onReviewCreated.accept(created);
                     if(onClose != null) onClose.run();
                 },
-                () -> {
-                    // TODO: set error message
-                },
-                null);
+                () -> {},
+                null
+        );
+
     }
 
     public void reset(){
+
         handleStar(0);
         txtCommento.clear();
+
     }
 
     @FXML
@@ -125,6 +120,7 @@ public class NewRecensioneController {
     }
 
     private void handleStar(int value) {
+
         this.value = value;
 
         for(int i = 0; i < stars.size(); i++) {
@@ -139,10 +135,12 @@ public class NewRecensioneController {
                 stars.get(i).setText(EMPTY_STAR);
             }
         }
+
     }
 
     @FXML
     public void handleMainFocus(MouseEvent mouseEvent) {
         root.requestFocus();
     }
+
 }

@@ -16,13 +16,13 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<StackPane fx:id="root" prefHeight="760" prefWidth="1300" styleClass="app-root" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.AttivitaController">
+<StackPane fx:id="root" prefHeight="760" prefWidth="1300" styleClass="app-root" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.activity.ActivityDetailsController">
 
     <stylesheets>
-        <URL value="@../css/style.css" />
-        <URL value="@../css/home.css" />
-        <URL value="@../css/activity-details.css" />
-        <URL value="@../css/activity/activity-common.css" />
+        <URL value="@../../css/style.css" />
+        <URL value="@../../css/home.css" />
+        <URL value="@../../css/activity-details.css" />
+        <URL value="@../../css/activity/activity-common.css" />
     </stylesheets>
 
     <!-- Immagine di sfondo e overlay -->
@@ -43,7 +43,7 @@
                     <StackPane fx:id="loadingOverlay" alignment="CENTER" styleClass="loading-overlay">
                         <children>
                             <Button fx:id="btnIndietro1" styleClass="back-link" text="←  Torna alle esperienze" StackPane.alignment="TOP_LEFT" />
-                            <fx:include fx:id="loadingCard" source="loading-overlay.fxml" />
+                            <fx:include fx:id="loadingCard" source="../common/loading-overlay.fxml" />
                         </children>
                     </StackPane>
 
@@ -154,7 +154,7 @@
                     </ScrollPane>
 
                     <!-- Card Nuova Recensione -->
-                    <fx:include fx:id="newRecCard" source="attivita/NewRecensione.fxml" />
+                    <fx:include fx:id="newRecCard" source="reviews/review.fxml" />
                 </children>
             </StackPane>
         </center>

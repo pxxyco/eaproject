@@ -4,7 +4,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxWidth="Infinity" spacing="10.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.attivita.DescrizioneController">
+<VBox maxWidth="Infinity" spacing="10.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.activity.ActivityDescriptionController">
    <children>
       <Label fx:id="lblDescrizione" alignment="TOP_LEFT" minHeight="150.0" minWidth="450.0" prefWidth="900.0" styleClass="descrizione" text="Nessuna descrizione disponibile">
          <padding>

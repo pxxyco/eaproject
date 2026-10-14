@@ -1,4 +1,4 @@
-package it.unical.ea_project_javafx.controller;
+package it.unical.ea_project_javafx.controller.common;
 
 import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.util.SceneNavigator;
@@ -47,6 +47,7 @@ public class NavbarController {
      * Configura la visibilità e il testo dei componenti in base al contesto dell'utente loggato.
      */
     public void updateNavbarState() {
+
         boolean isLoggedIn = UserSession.getInstance().isLoggedIn();
         boolean isOrganizer = "ORGANIZER".equalsIgnoreCase(UserSession.getInstance().getRole());
 
@@ -65,6 +66,7 @@ public class NavbarController {
         if (organizerNavItem != null) {
             organizerNavItem.setVisible(isLoggedIn && isOrganizer);
         }
+
     }
 
     @FXML

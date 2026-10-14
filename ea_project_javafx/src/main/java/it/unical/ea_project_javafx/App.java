@@ -32,7 +32,7 @@ public class App extends Application {
         stage.setMinHeight(AppConfig.MIN_WINDOW_HEIGHT);
 
         SceneNavigator.getInstance().init(stage);
-        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/splash-screen.fxml", null);
+        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/common/splash-screen.fxml", null);
 
         stage.show();
     }

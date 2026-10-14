@@ -1,6 +1,6 @@
 package it.unical.ea_project_javafx.controller.home;
 
-import it.unical.ea_project_javafx.controller.AttivitaController;
+import it.unical.ea_project_javafx.controller.activity.ActivityDetailsController;
 import it.unical.ea_project_javafx.dto.home.ActivityHomeDTO;
 import it.unical.ea_project_javafx.dto.home.TripHomeDTO;
 import it.unical.ea_project_javafx.util.SceneNavigator;
@@ -14,13 +14,13 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.fxml.FXML;
 
+import static it.unical.ea_project_javafx.controller.activity.ActivityDetailsController.Type.ACTIVITY;
+
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import static it.unical.ea_project_javafx.controller.AttivitaController.Type.ACTIVITY;
 
 public class ExperienceCardController {
 
@@ -47,7 +47,7 @@ public class ExperienceCardController {
 
     private static final DateTimeFormatter CARD_DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    private AttivitaController.Type detailType;
+    private ActivityDetailsController.Type detailType;
     private String detailId;
 
     @FXML
@@ -107,7 +107,7 @@ public class ExperienceCardController {
     public void setData(TripHomeDTO dto) {
         if (dto == null) return;
 
-        detailType = AttivitaController.Type.TRIP;
+        detailType = ActivityDetailsController.Type.TRIP;
         detailId = dto.getTripId() != null ? dto.getTripId().toString() : "";
 
         String title = dto.getTitle() != null ? dto.getTitle() : "Senza Titolo";
@@ -220,12 +220,12 @@ public class ExperienceCardController {
         }
     }
 
-    private void handleCardClick(AttivitaController.Type type, String id) {
+    private void handleCardClick(ActivityDetailsController.Type type, String id) {
         if (type == null || id == null || id.isBlank()) return;
 
-        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/Attivita.fxml",
+        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/activity/activity-details.fxml",
                 controller -> {
-                    if (controller instanceof AttivitaController attivitaCtrl) {
+                    if (controller instanceof ActivityDetailsController attivitaCtrl) {
                         attivitaCtrl.loadData(type, id);
                     }
                 }

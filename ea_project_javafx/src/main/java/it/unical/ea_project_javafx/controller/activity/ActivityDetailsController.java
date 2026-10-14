@@ -1,10 +1,14 @@
-package it.unical.ea_project_javafx.controller;
+package it.unical.ea_project_javafx.controller.activity;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
-import it.unical.ea_project_javafx.controller.attivita.*;
-import it.unical.ea_project_javafx.controller.attivita.recensioni.NewRecensioneController;
+
+import it.unical.ea_project_javafx.controller.activity.photo.PhotoContainerController;
+import it.unical.ea_project_javafx.controller.activity.photo.PhotoGalleryController;
+import it.unical.ea_project_javafx.controller.activity.reviews.ReviewController;
+import it.unical.ea_project_javafx.controller.activity.reviews.ReviewsContainerController;
+import it.unical.ea_project_javafx.controller.common.LoadingOverlayController;
 import it.unical.ea_project_javafx.dto.ActivityDTO;
 import it.unical.ea_project_javafx.dto.TripDTO;
 import it.unical.ea_project_javafx.security.UserSession;
@@ -21,6 +25,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -30,50 +35,45 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
-public class AttivitaController {
+public class ActivityDetailsController {
 
     @FXML private StackPane root;
     @FXML private StackPane bodyContainer;
+    @FXML private StackPane loadingOverlay;
+    @FXML private StackPane newRecCard;
+    @FXML private StackPane hero;
+    @FXML private StackPane navbarContainer;
 
     @FXML private Button btnDescrizione;
     @FXML private Button btnFoto;
     @FXML private Button btnItinerario;
     @FXML private Button btnRecensioni;
-    
-    @FXML private Spinner<Integer> spinnerPartecipanti;
-    @FXML private DatePicker datePicker;
-    
-    @FXML private ImageView heroImage;
-
-    @FXML private Label lblCategoria;
-
-    @FXML private Label lblLocalita;
-
-    @FXML private Label lblPrezzo;
-
-    @FXML private Label lblRating;
-
-    @FXML private Label lblTitolo;
-
-    @FXML private Label lblTotale;
     @FXML private Button btnPrenota;
-    @FXML private javafx.scene.layout.VBox bookingCard;
 
-    @FXML private LoadingOverlayController loadingCardController;
-    @FXML private StackPane loadingOverlay;
+    @FXML private Spinner<Integer> spinnerPartecipanti;
 
-    @FXML private StackPane newRecCard;
-    @FXML private NewRecensioneController newRecCardController;
-    private RecensioniContainerController recensioniController;
+    @FXML private DatePicker datePicker;
 
-    @FXML private ScrollPane contentScroll;
-    @FXML private StackPane hero;
-
-    @FXML private StackPane navbarContainer;
+    @FXML private ImageView heroImage;
     @FXML private ImageView bgImageView;
 
-    private List<Button> sectionButtons;
+    @FXML private Label lblCategoria;
+    @FXML private Label lblLocalita;
+    @FXML private Label lblPrezzo;
+    @FXML private Label lblRating;
+    @FXML private Label lblTitolo;
+    @FXML private Label lblTotale;
 
+    @FXML private VBox bookingCard;
+
+    @FXML private LoadingOverlayController loadingCardController;
+    @FXML private ReviewController newRecCardController;
+    
+    @FXML private ScrollPane contentScroll;
+    
+    private ReviewsContainerController recensioniController;
+    
+    private List<Button> sectionButtons;
     private Node itinerarioNode;
     private Node descrizioneNode;
     private Node fotoNode;
@@ -96,7 +96,7 @@ public class AttivitaController {
         ACTIVITY, TRIP
     }
 
-    final String path = "/it/unical/ea_project_javafx/fxml/attivita";
+    final String path = "/it/unical/ea_project_javafx/fxml/activity";
 
     @FXML
     void initialize() {
@@ -117,14 +117,18 @@ public class AttivitaController {
     }
 
     private void setupNavbar() {
+
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/it/unical/ea_project_javafx/fxml/navbar.fxml"));
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml"));
             Node navbar = loader.load();
             navbarContainer.getChildren().setAll(navbar);
+
         } catch (IOException e) {
             System.err.println("Errore nel caricamento della navbar: " + e.getMessage());
             e.printStackTrace();
         }
+
     }
 
     public void loadData(Type type, String id) {
@@ -181,6 +185,7 @@ public class AttivitaController {
     }
 
     private void setActivityData() {
+
         if (activity.getImages().isEmpty()) {
             heroImage.setImage(null);
         } else {
@@ -190,8 +195,7 @@ public class AttivitaController {
 
         if (activity.getStartDate() != null) {
             datePicker.setValue(LocalDate.from(activity.getStartDate()));
-        }
-        else {
+        } else {
             datePicker.setValue(LocalDate.now());
         }
 
@@ -199,8 +203,7 @@ public class AttivitaController {
         lblTitolo.setText(activity.getTitle());
         if (activity.getAverageRating() != null) {
             lblRating.setText( "★ " + BigDecimal.valueOf(activity.getAverageRating()));
-        }
-        else {
+        } else {
             lblRating.setText("★ " + BigDecimal.ZERO);
         }
 
@@ -212,17 +215,16 @@ public class AttivitaController {
     }
 
     private void setTripData() {
+
         if (trip.getCoverPhotoUrl() == null) {
             heroImage.setImage(null);
         } else {
-
             heroImage.setImage(new Image(ApiService.BASE_URL + trip.getCoverPhotoUrl()));
         }
 
         if (trip.getStartDate() != null) {
             datePicker.setValue(trip.getStartDate());
-        }
-        else {
+        } else {
             datePicker.setValue(LocalDate.now());
         }
 
@@ -231,29 +233,30 @@ public class AttivitaController {
 
         if(trip.getAverageRating() != null) {
             lblRating.setText( "★ " + trip.getAverageRating());
-        }
-        else {
+        } else {
             lblRating.setText( "★ " + BigDecimal.ZERO);
         }
 
         lblPrezzo.setText(setMoneyCurrency(trip.getTotalPrice()));
         lblTotale.setText(setMoneyCurrency(trip.getTotalPrice()));
+
     }
 
     private Node loadSection(String fxmlName) {
+
         try {
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource(path + "/" + fxmlName));
             Node node = loader.load();
             Object controller = loader.getController();
 
-            if (controller instanceof FotoContainerController fcc) {
+            if (controller instanceof PhotoContainerController fcc) {
                 fcc.setOnGalleryRequested(this::openGallery);
             }
 
-            if(controller instanceof RecensioniContainerController rcc){
+            if (controller instanceof ReviewsContainerController rcc) {
                 rcc.setOnNewReviewRequested(this::openNewReview);
                 recensioniController = rcc;
-
             }
 
             if (myType == Type.ACTIVITY && activity != null
@@ -265,16 +268,19 @@ public class AttivitaController {
             }
 
             return node;
+
         } catch (IOException e) {
             throw new UncheckedIOException("Impossibile caricare la sezione: " + fxmlName, e);
         }
     }
 
     private void openGallery(List<String> urls) {
+
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(path + "/FotoGallery.fxml"));
+    
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(path + "photo/photo-gallery.fxml"));
             Node galleryNode = loader.load();
-            FotoGalleryController controller = loader.getController();
+            PhotoGalleryController controller = loader.getController();
 
             controller.setImages(urls);
 
@@ -294,9 +300,11 @@ public class AttivitaController {
         } catch (IOException e) {
             throw new UncheckedIOException("Impossibile caricare la galleria", e);
         }
+
     }
 
-    private void openNewReview(){
+    private void openNewReview() {
+
         newRecCardController.setOnClose( () -> {
             newRecCard.setManaged(false);
             newRecCard.setVisible(false);
@@ -315,6 +323,7 @@ public class AttivitaController {
         newRecCard.setDisable(false);
         newRecCard.setManaged(true);
         newRecCard.setVisible(true);
+
     }
 
     private void showSection(Node node) {
@@ -325,28 +334,28 @@ public class AttivitaController {
     @FXML
     private void handleDescrizione(ActionEvent event) {
         setActiveButton(btnDescrizione);
-        descrizioneNode = loadSection("Descrizione.fxml");
+        descrizioneNode = loadSection("activity-description.fxml");
         showSection(descrizioneNode);
     }
 
     @FXML
     private void handleItinerario(ActionEvent event) {
         setActiveButton(btnItinerario);
-        itinerarioNode = loadSection("Itinerario.fxml");
+        itinerarioNode = loadSection("itinerary.fxml");
         showSection(itinerarioNode);
     }
 
     @FXML
     protected void handleFoto(ActionEvent event) {
         setActiveButton(btnFoto);
-        fotoNode = loadSection("FotoContainer.fxml");
+        fotoNode = loadSection("photo/photo-container.fxml");
         showSection(fotoNode);
     }
 
     @FXML
     protected void handleRecensioni(ActionEvent event) {
         setActiveButton(btnRecensioni);
-        recensioniNode = loadSection("RecensioniContainer.fxml");
+        recensioniNode = loadSection("reviews/reviews-container.fxml");
         showSection(recensioniNode);
     }
 

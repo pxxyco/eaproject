@@ -1,6 +1,7 @@
-package it.unical.ea_project_javafx.controller.attivita;
+package it.unical.ea_project_javafx.controller.activity.reviews;
 
-import it.unical.ea_project_javafx.controller.attivita.recensioni.RecensioneItemController;
+import it.unical.ea_project_javafx.controller.activity.ActivitySectionController;
+import it.unical.ea_project_javafx.controller.activity.TripSectionController;
 import it.unical.ea_project_javafx.dto.ActivityDTO;
 import it.unical.ea_project_javafx.dto.ReviewDTO;
 import it.unical.ea_project_javafx.dto.TripDTO;
@@ -15,7 +16,7 @@ import lombok.Setter;
 
 import java.util.List;
 
-public class RecensioniContainerController implements ActivitySectionController, TripSectionController{
+public class ReviewsContainerController implements ActivitySectionController, TripSectionController{
 
     @FXML private VBox bodyContainer;
     @FXML private Button previousButton;
@@ -93,10 +94,10 @@ public class RecensioniContainerController implements ActivitySectionController,
 
         for(int i = startIndex; i < endIndex; i++){
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource(path + "/attivita/recensioniContainer/RecensioneItem.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource(path + "/attivita/recensioniContainer/review-item.fxml"));
                 Node r = loader.load();
 
-                RecensioneItemController controller = loader.getController();
+                ReviewItemController controller = loader.getController();
                 controller.setData(reviews.get(i));
 
                 bodyContainer.getChildren().add(r);

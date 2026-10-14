@@ -63,7 +63,7 @@ public class MainViewController {
 
         try {
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/it/unical/ea_project_javafx/fxml/navbar.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml"));
             Parent navbarView = loader.load();
 
             navbarContainer.getChildren().setAll(navbarView);

@@ -1,11 +1,11 @@
-package it.unical.ea_project_javafx.controller.attivita;
+package it.unical.ea_project_javafx.controller.activity;
 
 import it.unical.ea_project_javafx.dto.ActivityDTO;
 import it.unical.ea_project_javafx.dto.TripDTO;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 
-public class DescrizioneController implements  ActivitySectionController, TripSectionController{
+public class ActivityDescriptionController implements  ActivitySectionController, TripSectionController{
 
     @FXML
     private Label lblDescrizione;
@@ -23,15 +23,16 @@ public class DescrizioneController implements  ActivitySectionController, TripSe
             lblNota.setText("NOTE AGGIUNTIVE: \n\n" + activity.getNotes());
         }
 
-
     }
 
     @Override
     public void setData(TripDTO trip) {
-        lblNota.setVisible(false);
 
+        lblNota.setVisible(false);
         if(trip.getDescription() != null) {
             lblDescrizione.setText(trip.getDescription());
         }
+
     }
+
 }

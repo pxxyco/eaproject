@@ -283,7 +283,7 @@ public class ApiService {
     private static void forceLogout() {
         UserSession.getInstance().clear();
         TokenStorage.clear();
-        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/splash-screen.fxml", null);
+        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/common/splash-screen.fxml", null);
     }
 
     private static HttpRequest buildRequest(String url, String body, Method method) {

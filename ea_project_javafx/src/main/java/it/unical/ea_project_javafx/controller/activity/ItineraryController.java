@@ -1,4 +1,4 @@
-package it.unical.ea_project_javafx.controller.attivita;
+package it.unical.ea_project_javafx.controller.activity;
 
 import com.gluonhq.maps.MapPoint;
 import com.gluonhq.maps.MapView;
@@ -17,28 +17,34 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
-public class ItinerarioController implements ActivitySectionController, TripSectionController {
+public class ItineraryController implements ActivitySectionController, TripSectionController {
 
+    @FXML  
+    public StackPane mapContainer;
+    @FXML  
+    private VBox itinerarioContainer;
 
-    @FXML  public StackPane mapContainer;
-    @FXML  private VBox itinerarioContainer;
     private MapPoint standard = new MapPoint(41.8719, 12.5674);
-
     private MapView mapView;
 
     @Override
     public void setData(ActivityDTO activity) {
+
         setMap(activity);
         setItinerario(activity);
+
     }
 
     @Override
     public void setData(TripDTO trip) {
+
         setMap(trip);
         setItinerario(trip);
+
     }
 
-    private void setItinerario(ActivityDTO activity) {;
+    private void setItinerario(ActivityDTO activity) {
+
         String name = activity.getPlaceName() + ", " + activity.getCity();
 
         Node location = creaRigaTappa("1", name);
@@ -51,6 +57,7 @@ public class ItinerarioController implements ActivitySectionController, TripSect
         });
 
         itinerarioContainer.getChildren().add(location);
+
     }
 
     private void setItinerario(TripDTO trip) {
@@ -73,12 +80,12 @@ public class ItinerarioController implements ActivitySectionController, TripSect
                 });
                 itinerarioContainer.getChildren().add(location);
             }
-        }
-        else {
+        } else {
             Label lbl = new Label("Nessun itinerario disponibile!");
             lbl.setStyle("-fx-text-fill: white");
             itinerarioContainer.getChildren().add(lbl);
         }
+
     }
 
     private void setMap(ActivityDTO activity) {
@@ -95,13 +102,13 @@ public class ItinerarioController implements ActivitySectionController, TripSect
             mapView.addLayer(markerLayer);
             mapView.addEventHandler(ScrollEvent.SCROLL, ScrollEvent::consume);
 
-        }
-        else {
+        } else {
             mapView.setCenter(standard);
             mapView.setZoom(4);
         }
 
         mapContainer.getChildren().setAll(mapView);
+
     }
 
     private void setMap(TripDTO trip) {
@@ -122,8 +129,7 @@ public class ItinerarioController implements ActivitySectionController, TripSect
             }
             mapView.addEventHandler(ScrollEvent.SCROLL, ScrollEvent::consume);
 
-        }
-        else {
+        } else {
             mapView.setCenter(standard);
             mapView.setZoom(4);
         }
@@ -133,6 +139,7 @@ public class ItinerarioController implements ActivitySectionController, TripSect
     }
 
     private Node creaRigaTappa(String numero, String nome) {
+
         Circle pallino = new Circle(10, Color.BLACK);
         pallino.setStroke(Color.WHITE);
         pallino.setStrokeWidth(2);
@@ -147,5 +154,7 @@ public class ItinerarioController implements ActivitySectionController, TripSect
         HBox riga = new HBox(10, cerchio, nomeLbl);
         riga.setAlignment(Pos.CENTER_LEFT);
         return riga;
+
     }
+
 }

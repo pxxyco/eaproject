@@ -1,6 +1,6 @@
 package it.unical.ea_project_javafx.controller.profile;
 
-import it.unical.ea_project_javafx.controller.NavbarController;
+import it.unical.ea_project_javafx.controller.common.NavbarController;
 import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.util.BackgroundHelper;
 import javafx.fxml.FXML;
@@ -74,7 +74,7 @@ public class ProfileController {
         try {
 
             FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/it/unical/ea_project_javafx/fxml/navbar.fxml")
+                getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml")
             );
             Parent navbar = loader.load();
             navbarController = loader.getController();
