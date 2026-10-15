@@ -63,7 +63,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/payments/organizer/**").hasRole("ORGANIZER")
                         .requestMatchers(HttpMethod.GET,
                                 "/api/activities/**", "/api/trips/**",
-                                "/api/activity-images/**", "/api/trip-images/**").permitAll()
+                                "/api/activity-images/**", "/api/trip-images/**",
+                                "/api/reviews/**").permitAll()
                         .requestMatchers(HttpMethod.POST,
                                 "/api/activities/**", "/api/trips/**",
                                 "/api/activity-images/**", "/api/trip-images/**").hasRole("ORGANIZER")
