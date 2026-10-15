@@ -29,6 +29,9 @@ public class FotoContainerController implements ActivitySectionController, TripS
     @Setter
     private Consumer<List<String>> onGalleryRequested;
 
+    @Setter
+    private Consumer<String> onFotoRequested;
+
     private List<String> imageUrls;
 
     @FXML
@@ -84,6 +87,11 @@ public class FotoContainerController implements ActivitySectionController, TripS
 
             FotoItemController controller = loader.getController();
             controller.setFoto(url);
+            controller.setOnFotoClickedCallBack( u-> {
+                if(onFotoRequested != null){
+                    onFotoRequested.accept(u);
+                }
+            });
 
             imgsContainer.getChildren().add(foto);
         }

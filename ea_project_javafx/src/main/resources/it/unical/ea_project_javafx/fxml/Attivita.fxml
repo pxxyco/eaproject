@@ -70,7 +70,7 @@
                                                         <children>
                                                             <HBox spacing="10">
                                                                 <children>
-                                                                    <Label fx:id="lblCategoria" styleClass="badge-category" text="Quad &amp; 4x4" />
+                                                                    <Label fx:id="lblCategoria" styleClass="badge-category"/>
                                                                     <Label fx:id="lblRating" styleClass="badge-rating" text="★ 4.9" />
                                                                 </children>
                                                             </HBox>

@@ -9,6 +9,7 @@ import it.unical.ea_project_javafx.dto.ActivityDTO;
 import it.unical.ea_project_javafx.dto.TripDTO;
 import it.unical.ea_project_javafx.model.UserSession;
 import it.unical.ea_project_javafx.util.ApiService;
+import it.unical.ea_project_javafx.util.FullscreenPhotoViewer;
 import it.unical.ea_project_javafx.util.WallpaperService;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -219,8 +220,13 @@ public class AttivitaController {
         if (activity.getImages().isEmpty()) {
             heroImage.setImage(null);
         } else {
-            // heroImage.setImage(new Image(ApiService.BASE_URL + activity.getImages().getFirst().getImageUrl()));
-            heroImage.setImage(null);
+            heroImage.setImage(new Image(ApiService.BASE_URL + activity.getImages().getFirst().getImageUrl()));
+        }
+
+        if(activity.getCategory() != null) lblCategoria.setText(activity.getCategory());
+        else {
+            lblCategoria.setManaged(false);
+            lblCategoria.setVisible(false);
         }
 
         if (activity.getStartDate() != null) {
@@ -261,6 +267,7 @@ public class AttivitaController {
             datePicker.setValue(LocalDate.now());
         }
 
+        lblCategoria.setText("TRIP");
         lblLocalita.setText(trip.getDestinationCity());
         lblTitolo.setText(trip.getTitle());
 
@@ -283,6 +290,7 @@ public class AttivitaController {
 
             if (controller instanceof FotoContainerController fcc) {
                 fcc.setOnGalleryRequested(this::openGallery);
+                fcc.setOnFotoRequested(url -> FullscreenPhotoViewer.mostra(root, url));
             }
 
             if(controller instanceof RecensioniContainerController rcc){
