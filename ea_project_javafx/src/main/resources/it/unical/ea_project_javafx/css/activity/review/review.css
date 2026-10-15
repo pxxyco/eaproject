@@ -17,20 +17,7 @@
     -fx-font-weight: bold;
 }
 
-.btn-elimina {
-    -fx-background-color: transparent;
-    -fx-text-fill: rgba(255, 255, 255, 0.65);
-    -fx-font-size: 13px;
-    -fx-cursor: hand;
-    -fx-padding: 2px 8px;
-}
-
-.btn-elimina:hover {
-    -fx-text-fill: #ef4444;
-    -fx-background-color: rgba(239, 68, 68, 0.1);
-    -fx-background-radius: 50%;
-}
-
+/* Valutazione a Stelle */
 .rating-stelle {
     -fx-padding: 4px 0;
 }
@@ -43,28 +30,12 @@
     -fx-padding: 0 2px;
 }
 
-.stella:hover {
-    -fx-text-fill: #f5a623;
-}
-
+.stella:hover,
 .stella-piena {
     -fx-text-fill: #f5a623;
 }
 
-.btn-invia {
-    -fx-background-color: #e7e5e4;
-    -fx-text-fill: #1c1917;
-    -fx-font-weight: bold;
-    -fx-font-size: 13px;
-    -fx-background-radius: 8px;
-    -fx-padding: 8px 20px;
-    -fx-cursor: hand;
-}
-
-.btn-invia:hover {
-    -fx-background-color: #fafaf9;
-}
-
+/* Area Testo & Input */
 .textarea-recensione {
     -fx-background-color: rgba(231, 229, 228, 0.08);
     -fx-background-radius: 10px;
@@ -131,4 +102,19 @@
 
 .textarea-recensione .scroll-bar:vertical .thumb:hover {
     -fx-background-color: #a8a29e;
+}
+
+/* Bottone Invio */
+.btn-invia {
+    -fx-background-color: #e7e5e4;
+    -fx-text-fill: #1c1917;
+    -fx-font-weight: bold;
+    -fx-font-size: 13px;
+    -fx-background-radius: 8px;
+    -fx-padding: 8px 20px;
+    -fx-cursor: hand;
+}
+
+.btn-invia:hover {
+    -fx-background-color: #fafaf9;
 }

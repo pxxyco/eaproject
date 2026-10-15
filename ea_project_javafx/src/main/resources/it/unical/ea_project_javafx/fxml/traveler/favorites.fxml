@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="it.unical.ea_project_javafx.controller.traveler.FavoritesController">
+    <stylesheets>
+        <URL value="@../../css/common/style.css" />
+        <URL value="@../../css/home/home.css" />
+        <URL value="@../../css/profile/profile.css" />
+        <URL value="@../../css/traveler/traveler.css" />
+    </stylesheets>
+
+    <ImageView fx:id="bgImageView" pickOnBounds="true" preserveRatio="false" />
+    <Region styleClass="profile-overlay" />
+
+    <BorderPane>
+        <top>
+            <StackPane fx:id="navbarContainer" />
+        </top>
+        <center>
+            <ScrollPane fitToWidth="true" styleClass="main-scroll">
+                <content>
+                    <VBox alignment="TOP_CENTER" spacing="24.0">
+                        <padding>
+                            <Insets bottom="40.0" left="32.0" right="32.0" top="28.0" />
+                        </padding>
+
+                        <VBox maxWidth="1050.0" spacing="20.0" styleClass="glass-card">
+                            <padding>
+                                <Insets bottom="28.0" left="28.0" right="28.0" top="28.0" />
+                            </padding>
+
+                            <HBox alignment="CENTER_LEFT" spacing="16.0">
+                                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                    <Label styleClass="dash-title" text="Liste Itinerari &amp; Preferiti" />
+                                    <Label styleClass="dash-subtitle" text="Crea e gestisci le tue liste di viaggi private o condivise con i tuoi amici." />
+                                </VBox>
+                            </HBox>
+
+                            <Label fx:id="statusMessageLabel" managed="false" visible="false" wrapText="true" />
+
+                            <Separator styleClass="nav-divider" />
+
+                            <VBox spacing="10.0" styleClass="booking-count-card">
+                                <Label styleClass="section-header" text="+ Crea Nuova Lista Itinerari" />
+                                <HBox spacing="12.0" alignment="CENTER_LEFT">
+                                    <TextField fx:id="newListNameField" promptText="Nome lista (es. Viaggio estivo Sila)" styleClass="custom-input" HBox.hgrow="ALWAYS" />
+                                    <ComboBox fx:id="newListVisibilityCombo" promptText="Visibilità" styleClass="traveler-search-type" prefWidth="160.0" />
+                                    <Button text="Crea Lista" onAction="#handleCreateList" styleClass="btn-primary" />
+                                </HBox>
+                            </VBox>
+
+                            <HBox spacing="20.0" VBox.vgrow="ALWAYS">
+                                <VBox spacing="10.0" prefWidth="280.0">
+                                    <Label styleClass="section-header" text="Le Tue Liste" />
+                                    <ListView fx:id="listsListView" prefHeight="350.0" styleClass="custom-table" />
+                                </VBox>
+
+                                <VBox spacing="12.0" HBox.hgrow="ALWAYS">
+                                    <HBox alignment="CENTER_LEFT">
+                                        <VBox spacing="2.0">
+                                            <Label fx:id="selectedListNameLabel" styleClass="section-title" text="Seleziona una lista" />
+                                            <Label fx:id="selectedListVisibilityLabel" styleClass="section-subtitle" text="-" />
+                                        </VBox>
+                                        <Region HBox.hgrow="ALWAYS" />
+                                        <Button fx:id="shareListButton" text="🔗 Condividi / Permessi" onAction="#handleShareList" styleClass="btn-secondary" visible="false" />
+                                    </HBox>
+
+                                    <FlowPane fx:id="favoritesCardsContainer" hgap="16.0" vgap="16.0" />
+                                </VBox>
+                            </HBox>
+
+                        </VBox>
+                    </VBox>
+                </content>
+            </ScrollPane>
+        </center>
+    </BorderPane>
+</StackPane>

@@ -1,0 +1,153 @@
+.booking-dashboard-row {
+    -fx-alignment: top-left;
+}
+
+.booking-count-card {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-border-color: rgba(255, 255, 255, 0.18);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 14px;
+    -fx-spacing: 3px;
+}
+
+.booking-count-value {
+    -fx-font-size: 34px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e7e5e4;
+}
+
+.stat-label {
+    -fx-text-fill: rgba(255, 255, 255, 0.68);
+}
+
+/* Barra di Ricerca */
+.traveler-search-bar {
+    -fx-padding: 4px 0;
+}
+
+.search-icon-button {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-border-color: rgba(255, 255, 255, 0.22);
+    -fx-border-radius: 18px;
+    -fx-background-radius: 18px;
+    -fx-min-width: 36px;
+    -fx-min-height: 36px;
+    -fx-max-width: 36px;
+    -fx-max-height: 36px;
+    -fx-padding: 0;
+    -fx-font-size: 20px;
+    -fx-text-fill: #e7e5e4;
+    -fx-cursor: hand;
+}
+
+.search-icon-button:hover {
+    -fx-background-color: rgba(231, 229, 228, 0.22);
+    -fx-border-color: #e7e5e4;
+}
+
+.traveler-search-bar .custom-input {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-background-radius: 8px;
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-radius: 8px;
+    -fx-text-fill: #ffffff;
+    -fx-prompt-text-fill: rgba(255, 255, 255, 0.48);
+    -fx-padding: 9px 12px;
+}
+
+.traveler-search-type {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-background-radius: 8px;
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-radius: 8px;
+    -fx-padding: 2px 5px;
+}
+
+.traveler-search-type .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #e7e5e4;
+    -fx-padding: 7px 8px;
+}
+
+.traveler-search-type .arrow {
+    -fx-background-color: #d6d3d1;
+}
+
+/* Scroll Orizzontale & Carosello */
+.profile-horizontal-scroll,
+.profile-horizontal-scroll > .viewport {
+    -fx-background-color: transparent;
+}
+
+.profile-horizontal-scroll .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+    -fx-opacity: 0.45;
+}
+
+.profile-horizontal-scroll .scroll-bar:horizontal .thumb {
+    -fx-background-color: rgba(231, 229, 228, 0.35);
+    -fx-background-radius: 5px;
+}
+
+.carousel-button {
+    -fx-min-width: 34px;
+    -fx-min-height: 34px;
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-border-color: rgba(255, 255, 255, 0.22);
+    -fx-border-radius: 18px;
+    -fx-background-radius: 18px;
+    -fx-text-fill: #ffffff;
+    -fx-cursor: hand;
+}
+
+.carousel-button:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.24);
+}
+
+/* Tabella Prenotazioni Viaggiatore */
+.profile-table {
+    -fx-background-color: rgba(255, 255, 255, 0.04);
+    -fx-border-color: rgba(255, 255, 255, 0.14);
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.profile-table .column-header-background {
+    -fx-background-color: rgba(0, 0, 0, 0.28);
+}
+
+.profile-table .column-header,
+.profile-table .filler {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent rgba(255, 255, 255, 0.1) transparent;
+}
+
+.profile-table .column-header .label {
+    -fx-text-fill: rgba(255, 255, 255, 0.72);
+    -fx-font-weight: bold;
+}
+
+.profile-table .table-row-cell {
+    -fx-background-color: transparent;
+}
+
+.profile-table .table-row-cell:filled:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+}
+
+.profile-table .table-cell {
+    -fx-text-fill: rgba(255, 255, 255, 0.82);
+    -fx-border-color: transparent transparent rgba(255, 255, 255, 0.07) transparent;
+}
+
+.danger-action-button {
+    -fx-background-color: rgba(239, 68, 68, 0.3);
+    -fx-text-fill: #fca5a5;
+    -fx-background-radius: 8px;
+    -fx-cursor: hand;
+}
+
+.danger-action-button:hover {
+    -fx-background-color: rgba(239, 68, 68, 0.5);
+}

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.StackPane?>
+
+
+<StackPane maxHeight="150.0" maxWidth="150.0"
+           minHeight="150.0" minWidth="150.0"
+           fx:controller="it.unical.ea_project_javafx.controller.activity.photo.PhotoItemController"
+           stylesheets="@../../../css/activity/photo/photo-style.css"
+           xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <ImageView fx:id="image" fitHeight="150.0" fitWidth="150.0" onMouseClicked="#handleClick" pickOnBounds="true" preserveRatio="true" styleClass="foto-item" />
+   </children>
+</StackPane>

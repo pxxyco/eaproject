@@ -26,6 +26,8 @@ module it.unical.ea_project_javafx {
     opens it.unical.ea_project_javafx.controller.common to javafx.fxml;
     opens it.unical.ea_project_javafx.controller.home to com.google.gson, javafx.fxml;
     opens it.unical.ea_project_javafx.controller.login to com.google.gson, javafx.fxml;
-    opens it.unical.ea_project_javafx.controller.profile to com.google.gson, javafx.fxml;
-    
+    opens it.unical.ea_project_javafx.controller.organizer to com.google.gson, javafx.fxml;
+    opens it.unical.ea_project_javafx.controller.profile to javafx.fxml;
+    opens it.unical.ea_project_javafx.controller.traveler to com.google.gson, javafx.fxml;
+
 }

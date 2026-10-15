@@ -21,9 +21,19 @@
                     </image>
                 </ImageView>
                 <Separator orientation="VERTICAL" styleClass="nav-divider" />
+                
                 <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="nav-links">
                     <children>
                         <Label onMouseClicked="#handleHome" styleClass="nav-item" text="Home" />
+                        <Label fx:id="dashboardNavItem" onMouseClicked="#handleDashboard" styleClass="nav-item" text="Dashboard" />
+
+                        <!-- Voci Traveler -->
+                        <Label fx:id="travelerBookingsNavItem" onMouseClicked="#handleBookings" styleClass="nav-item" text="Prenotazioni" />
+                        <Label fx:id="travelerFavoritesNavItem" onMouseClicked="#handleFavorites" styleClass="nav-item" text="Preferiti" />
+
+                        <!-- Voci Organizer -->
+                        <Label fx:id="organizerEventsNavItem" onMouseClicked="#handleOrganizerEvents" styleClass="nav-item" text="Offerte ed Eventi" />
+                        <Label fx:id="organizerAttendeesNavItem" onMouseClicked="#handleOrganizerAttendees" styleClass="nav-item" text="Prenotazioni &amp; Iscritti" />
                     </children>
                 </HBox>
             </children>
@@ -33,19 +43,13 @@
     <right>
         <HBox alignment="CENTER_RIGHT" spacing="10.0" BorderPane.alignment="CENTER">
             <children>
-                <!-- logged out -->
                 <Label fx:id="loginLabel" onMouseClicked="#handleLogin" styleClass="btn-nav-login" text="Login" />
 
-                <!-- logged in -->
                 <MenuButton fx:id="userMenuButton" styleClass="btn-nav-login" text="Utente">
                     <items>
-                        <MenuItem onAction="#handleDashboard" text="Dashboard" />
                         <MenuItem onAction="#handleProfileInfos" text="Il mio Profilo" />
-                        <MenuItem onAction="#handleBookings" text="Prenotazioni" />
-                        <MenuItem onAction="#handleFavorites" text="Preferiti" />
-                        <SeparatorMenuItem />
                         <MenuItem onAction="#handleSettings" text="Impostazioni &amp; Sicurezza" />
-                        <MenuItem onAction="#handlePaymentMethods" text="Metodi di Pagamento" />
+                        <MenuItem fx:id="paymentsMenuItem" onAction="#handlePaymentMethods" text="Metodi di Pagamento" />
                         <SeparatorMenuItem />
                         <MenuItem onAction="#handleSupport" text="Centro Assistenza" />
                         <SeparatorMenuItem />

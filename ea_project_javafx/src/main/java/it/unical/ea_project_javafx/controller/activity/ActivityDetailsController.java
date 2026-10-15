@@ -238,17 +238,38 @@ public class ActivityDetailsController {
     }
 
     private void setHeroImage(String imageUrl) {
+
         String defaultImageUrl = "/photo/default/experience.jpg";
-        String requestedImageUrl = imageUrl == null || imageUrl.isBlank() ? defaultImageUrl : imageUrl;
-        Image image = new Image(ApiService.BASE_URL + requestedImageUrl, true);
-        if (!defaultImageUrl.equals(requestedImageUrl)) {
+        String requestedImageUrl = (imageUrl == null || imageUrl.isBlank()) ? defaultImageUrl : imageUrl;
+
+        String targetUrl = resolveUrl(requestedImageUrl);
+        String fallbackUrl = resolveUrl(defaultImageUrl);
+
+        Image image = new Image(targetUrl, true);
+
+        if (!targetUrl.equals(fallbackUrl)) {
             image.errorProperty().addListener((observable, wasError, isError) -> {
                 if (isError) {
-                    heroImage.setImage(new Image(ApiService.BASE_URL + defaultImageUrl, true));
+                    heroImage.setImage(new Image(fallbackUrl, true));
                 }
             });
         }
+
         heroImage.setImage(image);
+
+    }
+
+    private String resolveUrl(String url) {
+
+        if (url == null || url.isBlank()) {
+            return ApiService.BASE_URL + "/photo/default/experience.jpg";
+        }
+
+        if (url.startsWith("http://") || url.startsWith("https://")) {
+            return url;
+        }
+
+        return ApiService.BASE_URL + (url.startsWith("/") ? url : "/" + url);
     }
 
     private Node loadSection(String fxmlName) {
@@ -287,7 +308,7 @@ public class ActivityDetailsController {
 
         try {
     
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(path + "photo/photo-gallery.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(path + "/photo/photo-gallery.fxml"));
             Node galleryNode = loader.load();
             PhotoGalleryController controller = loader.getController();
 

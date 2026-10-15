@@ -1,15 +1,15 @@
 package it.unical.ea_project_javafx.controller.profile;
 
-import it.unical.ea_project_javafx.controller.common.NavbarController;
 import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.util.BackgroundHelper;
+import it.unical.ea_project_javafx.util.SceneNavigator;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 
@@ -17,88 +17,51 @@ public class ProfileController {
 
     @FXML private ImageView bgImageView;
     @FXML private StackPane navbarContainer;
-    @FXML private VBox dashboardContainer;
-    @FXML private Label greetingLabel;
-    @FXML private NavbarController navbarController;
+
+    @FXML private Label fullNameLabel;
+    @FXML private Label roleBadgeLabel;
+    @FXML private Label usernameValueLabel;
+    @FXML private Label emailValueLabel;
+    @FXML private Label roleValueLabel;
 
     private final UserSession userSession = UserSession.getInstance();
 
     @FXML
     public void initialize() {
-
         BackgroundHelper.setupBackground(bgImageView);
-        populateUserDetails();
         loadNavbar();
-        loadRoleDashboard();
-
-    }
-
-    private void populateUserDetails() {
-
-        greetingLabel.setText("È bello rivederti, " 
-            + firstNonBlank(userSession.getFullName(), userSession.getUsername()) 
-            + "!"
-        );
-
-    }
-
-    private void loadRoleDashboard() {
-
-        String role = userSession.getRole();
-        String dashboardFile = "ORGANIZER".equalsIgnoreCase(role)
-                ? "organizer-dashboard.fxml"
-                : "traveler-dashboard.fxml";
-
-        try {
-
-            FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/it/unical/ea_project_javafx/fxml/profile/" + dashboardFile)
-            );
-            Parent dashboard = loader.load();
-            Object controller = loader.getController();
-            if (controller instanceof ProfileDashboardController profileDashboardController) {
-                profileDashboardController.setUser(userSession);
-            }
-
-            dashboardContainer.getChildren().setAll(dashboard);
-
-        } catch (IOException e) {
-            dashboardContainer.getChildren().setAll(new Label("Impossibile caricare la dashboard del profilo."));
-            e.printStackTrace();
-        }
-
+        populateUserData();
     }
 
     private void loadNavbar() {
-
         try {
-
             FXMLLoader loader = new FXMLLoader(
-                getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml")
+                    getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml")
             );
             Parent navbar = loader.load();
-            navbarController = loader.getController();
-
             navbarContainer.getChildren().setAll(navbar);
-
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
-    private String firstNonBlank(String first, String last) {
+    private void populateUserData() {
+        String name = userSession.getFullName();
+        if (name == null || name.isBlank()) {
+            name = userSession.getUsername();
+        }
+        fullNameLabel.setText(name);
         
-        if (first != null && !first.isBlank()) {
-            return first;
-        }
+        String role = userSession.getRole() != null ? userSession.getRole().toUpperCase() : "UTENTE";
+        roleBadgeLabel.setText(role);
+        roleValueLabel.setText("ORGANIZER".equals(role) ? "Organizzatore / Partner" : "Viaggiatore (Traveler)");
 
-        if (last != null && !last.isBlank()) {
-            return last;
-        }
-
-        return "User";
-
+        usernameValueLabel.setText(userSession.getUsername() != null ? userSession.getUsername() : "-");
+        emailValueLabel.setText(userSession.getEmail() != null ? userSession.getEmail() : "-");
     }
 
+    @FXML
+    private void handleGoToSettings(ActionEvent event) {
+        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/profile/settings.fxml", null);
+    }
 }

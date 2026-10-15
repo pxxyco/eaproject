@@ -13,8 +13,8 @@
            fx:controller="it.unical.ea_project_javafx.controller.login.AuthWizardController"
            styleClass="root-pane">
     <stylesheets>
-        <URL value="@../../css/style.css" />
-        <URL value="@../../css/login.css" />
+        <URL value="@../../css/common/style.css" />
+        <URL value="@../../css/login/login.css" />
     </stylesheets>
 
     <ImageView fx:id="bgImageView" pickOnBounds="true" preserveRatio="false" />

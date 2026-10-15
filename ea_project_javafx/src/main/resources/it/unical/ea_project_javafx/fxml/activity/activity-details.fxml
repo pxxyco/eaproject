@@ -19,9 +19,9 @@
 <StackPane fx:id="root" prefHeight="760" prefWidth="1300" styleClass="app-root" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.activity.ActivityDetailsController">
 
     <stylesheets>
-        <URL value="@../../css/style.css" />
-        <URL value="@../../css/home.css" />
-        <URL value="@../../css/activity-details.css" />
+        <URL value="@../../css/common/style.css" />
+        <URL value="@../../css/home/home.css" />
+        <URL value="@../../css/activity/activity-details.css" />
         <URL value="@../../css/activity/activity-common.css" />
     </stylesheets>
 
