@@ -3,21 +3,30 @@ package it.unical.ea_project_javafx.controller.profile;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.Node;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import it.unical.ea_project_javafx.util.ApiService;
 import it.unical.ea_project_javafx.util.BackgroundHelper;
 import it.unical.ea_project_javafx.dto.ActivityDTO;
+import it.unical.ea_project_javafx.dto.ActivityImageDTO;
 import it.unical.ea_project_javafx.dto.TripDTO;
+import it.unical.ea_project_javafx.dto.TripImageDTO;
+import it.unical.ea_project_javafx.util.ImageUtils;
 
 import java.math.BigDecimal;
+import java.io.File;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,11 +50,15 @@ public class CreateOfferController {
     @FXML private DatePicker tripEndDatePicker;
     @FXML private TextField tripPriceField;
     @FXML private TextField tripMaxSeatsField;
-    @FXML private TextField tripCoverUrlField;
+    @FXML private Label tripCoverFileLabel;
+    @FXML private Label tripSecondaryPhotosLabel;
+    @FXML private ImageView tripCoverPreview;
+    @FXML private FlowPane tripSecondaryPhotoPreview;
     @FXML private TextArea tripDescriptionArea;
 
     @FXML private Button saveTripButton;
     @FXML private Button saveActivityButton;
+    @FXML private Button activityBackButton;
 
     @FXML private TextField actTitleField;
     @FXML private ComboBox<String> actCategoryCombo;
@@ -54,6 +67,10 @@ public class CreateOfferController {
     @FXML private TextField actDurationField;
     @FXML private TextField actPriceField;
     @FXML private TextField actMaxSeatsField;
+    @FXML private Label actCoverFileLabel;
+    @FXML private Label actSecondaryPhotosLabel;
+    @FXML private ImageView actCoverPreview;
+    @FXML private FlowPane actSecondaryPhotoPreview;
     @FXML private DatePicker actStartDatePicker;
     @FXML private DatePicker actEndDatePicker;
     @FXML private TextArea actDescriptionArea;
@@ -61,6 +78,10 @@ public class CreateOfferController {
 
     private TripDTO tripToEdit;
     private ActivityDTO activityToEdit;
+    private File tripCoverFile;
+    private List<File> tripSecondaryPhotoFiles = new ArrayList<>();
+    private File activityCoverFile;
+    private List<File> activitySecondaryPhotoFiles = new ArrayList<>();
 
     @FXML
     public void initialize() {
@@ -84,6 +105,14 @@ public class CreateOfferController {
         if (actCategoryCombo != null) {
             actCategoryCombo.getItems().setAll("Escursione", "Visita guidata", "Trasporto", "Hotel", "Pasto", "Altro");
         }
+        tripCoverFileLabel.setText("Nessuna nuova copertina selezionata");
+        tripSecondaryPhotosLabel.setText("Nessuna foto secondaria selezionata");
+        tripCoverPreview.setVisible(false);
+        tripCoverPreview.setManaged(false);
+        actCoverFileLabel.setText("Nessuna nuova copertina selezionata");
+        actSecondaryPhotosLabel.setText("Nessuna foto secondaria selezionata");
+        actCoverPreview.setVisible(false);
+        actCoverPreview.setManaged(false);
 
     }
 
@@ -119,6 +148,123 @@ public class CreateOfferController {
         stepChoose.setVisible(true);
         stepChoose.setManaged(true);
         headerTitleLabel.setText("Crea Nuova Offerta");
+    }
+
+    @FXML
+    private void handleChooseTripCover() {
+        tripCoverFile = chooseCover();
+        if (tripCoverFile != null) {
+            tripCoverFileLabel.setText(tripCoverFile.getName());
+            showLocalPreview(tripCoverPreview, tripCoverFile);
+        }
+    }
+
+    @FXML
+    private void handleChooseActivityCover() {
+        activityCoverFile = chooseCover();
+        if (activityCoverFile != null) {
+            actCoverFileLabel.setText(activityCoverFile.getName());
+            showLocalPreview(actCoverPreview, activityCoverFile);
+        }
+    }
+
+    @FXML
+    private void handleAddTripPhotos() {
+        List<File> selectedFiles = choosePhotos();
+        tripSecondaryPhotoFiles.addAll(selectedFiles);
+        updateSecondaryPhotosLabel(tripSecondaryPhotosLabel, tripSecondaryPhotoFiles);
+        selectedFiles.forEach(file -> addPhotoPreview(tripSecondaryPhotoPreview, file.toURI().toString(), "Nuova foto"));
+    }
+
+    @FXML
+    private void handleAddActivityPhotos() {
+        List<File> selectedFiles = choosePhotos();
+        activitySecondaryPhotoFiles.addAll(selectedFiles);
+        updateSecondaryPhotosLabel(actSecondaryPhotosLabel, activitySecondaryPhotoFiles);
+        selectedFiles.forEach(file -> addPhotoPreview(actSecondaryPhotoPreview, file.toURI().toString(), "Nuova foto"));
+    }
+
+    private File chooseCover() {
+        FileChooser chooser = createImageChooser("Seleziona la foto di copertina");
+        return chooser.showOpenDialog(rootPane.getScene().getWindow());
+    }
+
+    private List<File> choosePhotos() {
+        FileChooser chooser = createImageChooser("Seleziona una o più foto secondarie");
+        List<File> selectedFiles = chooser.showOpenMultipleDialog(rootPane.getScene().getWindow());
+        return selectedFiles == null ? List.of() : List.copyOf(selectedFiles);
+    }
+
+    private FileChooser createImageChooser(String title) {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle(title);
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("Immagini", "*.jpg", "*.jpeg", "*.png")
+        );
+        return chooser;
+    }
+
+    private void updateSecondaryPhotosLabel(Label label, List<File> files) {
+        if (files.isEmpty()) {
+            label.setText("Nessuna foto secondaria selezionata");
+            return;
+        }
+        label.setText(files.size() + (files.size() == 1 ? " foto secondaria" : " foto secondarie"));
+    }
+
+    private void loadExistingTripPhotoPreviews(TripDTO trip) {
+        if (trip.getTripId() == null) return;
+        ApiService.get(ApiService.BASE_URL + "/api/trip-images/trip/" + trip.getTripId(),
+                response -> {
+                    TripImageDTO[] images = ApiService.fromJson(response.body(), TripImageDTO[].class);
+                    if (images == null) return;
+                    List<TripImageDTO> orderedImages = Arrays.stream(images)
+                            .filter(image -> image != null && image.getImageUrl() != null)
+                            .sorted(Comparator.comparing(TripImageDTO::getOrderIndex,
+                                    Comparator.nullsLast(Comparator.naturalOrder())))
+                            .toList();
+                    javafx.application.Platform.runLater(() -> {
+                        if (tripCoverFile == null && (trip.getCoverPhotoUrl() == null || trip.getCoverPhotoUrl().isBlank())
+                                && !orderedImages.isEmpty()) {
+                            showRemotePreview(tripCoverPreview, orderedImages.getFirst().getImageUrl());
+                        }
+                        orderedImages.stream().skip(1)
+                                .forEach(image -> addPhotoPreview(tripSecondaryPhotoPreview, image.getImageUrl(), "Foto attuale"));
+                    });
+                },
+                () -> javafx.application.Platform.runLater(() ->
+                        showOfferError("Anteprima delle foto del viaggio non disponibile; puoi comunque modificarlo.")),
+                null);
+    }
+
+    private void showRemotePreview(ImageView preview, String imageUrl) {
+        if (imageUrl == null || imageUrl.isBlank()) {
+            preview.setImage(null);
+            preview.setVisible(false);
+            preview.setManaged(false);
+            return;
+        }
+        preview.setImage(new Image(ImageUtils.buildFullUrl(imageUrl), 96, 64, true, true, true));
+        preview.setVisible(true);
+        preview.setManaged(true);
+    }
+
+    private void showLocalPreview(ImageView preview, File file) {
+        preview.setImage(new Image(file.toURI().toString(), 96, 64, true, true, true));
+        preview.setVisible(true);
+        preview.setManaged(true);
+    }
+
+    private void addPhotoPreview(FlowPane container, String imageUrl, String caption) {
+        ImageView thumbnail = new ImageView();
+        thumbnail.setFitWidth(72);
+        thumbnail.setFitHeight(48);
+        thumbnail.setPreserveRatio(true);
+        thumbnail.setImage(new Image(ImageUtils.buildFullUrl(imageUrl), 72, 48, true, true, true));
+        Label label = new Label(caption);
+        label.getStyleClass().add("form-label");
+        VBox tile = new VBox(3, thumbnail, label);
+        container.getChildren().add(tile);
     }
 
     @FXML
@@ -174,13 +320,23 @@ public class CreateOfferController {
         tripEndDatePicker.setValue(trip.getEndDate());
         tripPriceField.setText(trip.getTotalPrice() == null ? "" : trip.getTotalPrice().toPlainString());
         tripMaxSeatsField.setText(trip.getMaxSeats() == null ? "" : String.valueOf(trip.getMaxSeats()));
-        tripCoverUrlField.setText(valueOrEmpty(trip.getCoverPhotoUrl()));
+        tripCoverFile = null;
+        tripSecondaryPhotoFiles.clear();
+        tripCoverFileLabel.setText(trip.getCoverPhotoUrl() == null || trip.getCoverPhotoUrl().isBlank()
+                ? "Nessuna copertina attuale"
+                : "Copertina attuale presente");
+        showRemotePreview(tripCoverPreview, trip.getCoverPhotoUrl());
+        tripSecondaryPhotoPreview.getChildren().clear();
+        loadExistingTripPhotoPreviews(trip);
+        updateSecondaryPhotosLabel(tripSecondaryPhotosLabel, tripSecondaryPhotoFiles);
         tripDescriptionArea.setText(valueOrEmpty(trip.getDescription()));
         if (saveTripButton != null) saveTripButton.setText("Salva modifiche");
     }
 
     public void setActivityToEdit(ActivityDTO activity) {
         activityToEdit = activity;
+        activityBackButton.setVisible(false);
+        activityBackButton.setManaged(false);
         stepChoose.setVisible(false);
         stepChoose.setManaged(false);
         stepActivity.setVisible(true);
@@ -197,6 +353,22 @@ public class CreateOfferController {
         actEndDatePicker.setValue(activity.getEndDate() == null ? null : activity.getEndDate().toLocalDate());
         actDescriptionArea.setText(valueOrEmpty(activity.getDescription()));
         actNotesArea.setText(valueOrEmpty(activity.getNotes()));
+        activityCoverFile = null;
+        activitySecondaryPhotoFiles.clear();
+        actCoverFileLabel.setText(activity.getImages() == null || activity.getImages().isEmpty()
+                ? "Nessuna copertina attuale"
+                : "Copertina attuale presente");
+        List<ActivityImageDTO> images = activity.getImages() == null
+                ? List.of()
+                : activity.getImages().stream()
+                .sorted(Comparator.comparing(ActivityImageDTO::getOrderIndex,
+                        Comparator.nullsLast(Comparator.naturalOrder())))
+                .toList();
+        showRemotePreview(actCoverPreview, images.isEmpty() ? null : images.getFirst().getImageUrl());
+        actSecondaryPhotoPreview.getChildren().clear();
+        images.stream().skip(1)
+                .forEach(image -> addPhotoPreview(actSecondaryPhotoPreview, image.getImageUrl(), "Foto attuale"));
+        updateSecondaryPhotosLabel(actSecondaryPhotosLabel, activitySecondaryPhotoFiles);
         if (saveActivityButton != null) saveActivityButton.setText("Salva modifiche");
     }
 
@@ -229,7 +401,6 @@ public class CreateOfferController {
             payload.put("status", tripToEdit != null && tripToEdit.getStatus() != null
                     ? tripToEdit.getStatus()
                     : "PUBLISHED");
-            payload.put("coverPhotoUrl", emptyToNull(tripCoverUrlField.getText()));
             payload.put("description", emptyToNull(tripDescriptionArea.getText()));
             payload.put("stages", collectStages());
 
@@ -238,7 +409,7 @@ public class CreateOfferController {
                     ApiService.BASE_URL + (tripToEdit == null ? "/api/trips" : "/api/trips/" + tripToEdit.getTripId()),
                     ApiService.toJson(payload),
                     tripToEdit == null ? ApiService.Method.POST : ApiService.Method.PUT,
-                    response -> closeAfterSave(),
+                    this::handleTripSaved,
                     () -> {
                         if (saveTripButton != null) saveTripButton.setDisable(false);
                         showSaveError("Impossibile pubblicare il viaggio. Verifica i dati e riprova.");
@@ -295,7 +466,7 @@ public class CreateOfferController {
                             : "/api/activities/" + activityToEdit.getActivityId()),
                     ApiService.toJson(payload),
                     activityToEdit == null ? ApiService.Method.POST : ApiService.Method.PUT,
-                    response -> closeAfterSave(),
+                    this::handleActivitySaved,
                     () -> {
                         if (saveActivityButton != null) saveActivityButton.setDisable(false);
                         showSaveError("Impossibile pubblicare l'attività. Verifica i dati e riprova.");
@@ -304,6 +475,130 @@ public class CreateOfferController {
             );
         } catch (NumberFormatException exception) {
             showValidationError("Inserisci prezzo, durata e posti con valori validi.");
+        }
+    }
+
+    private void handleTripSaved(java.net.http.HttpResponse<String> response) {
+        if (tripCoverFile == null && tripSecondaryPhotoFiles.isEmpty()) {
+            closeAfterSave();
+            return;
+        }
+        TripDTO savedTrip = ApiService.fromJson(response.body(), TripDTO.class);
+        if (savedTrip == null || savedTrip.getTripId() == null) {
+            if (saveTripButton != null) saveTripButton.setDisable(false);
+            showSaveError("Il viaggio è stato salvato, ma non è stato possibile recuperare l'ID per caricare la copertina.");
+            return;
+        }
+        boolean isNewTrip = tripToEdit == null;
+        tripToEdit = savedTrip;
+        uploadTripPhotos(savedTrip, isNewTrip);
+    }
+
+    private void handleActivitySaved(java.net.http.HttpResponse<String> response) {
+        if (activityCoverFile == null && activitySecondaryPhotoFiles.isEmpty()) {
+            closeAfterSave();
+            return;
+        }
+        ActivityDTO savedActivity = ApiService.fromJson(response.body(), ActivityDTO.class);
+        if (savedActivity == null || savedActivity.getActivityId() == null) {
+            if (saveActivityButton != null) saveActivityButton.setDisable(false);
+            showSaveError("L'attività è stata salvata, ma non è stato possibile recuperare l'ID per caricare la copertina.");
+            return;
+        }
+        boolean isNewActivity = activityToEdit == null;
+        activityToEdit = savedActivity;
+        uploadActivityPhotos(savedActivity, isNewActivity);
+    }
+
+    private void uploadTripPhotos(TripDTO trip, boolean isNewTrip) {
+        String imageBaseUrl = ApiService.BASE_URL + "/api/trip-images/trip/" + trip.getTripId();
+        Runnable onFailure = () -> {
+            if (saveTripButton != null) saveTripButton.setDisable(false);
+            showSaveError("Il viaggio è stato salvato, ma non è stato possibile caricare tutte le foto. Riprova.");
+        };
+        Runnable uploadSecondaryPhotos = () -> {
+            if (tripSecondaryPhotoFiles.isEmpty()) {
+                closeAfterSave();
+                return;
+            }
+            ApiService.uploadFilesDetailed(imageBaseUrl + "/photos",
+                    tripSecondaryPhotoFiles.stream().map(File::toPath).toList(),
+                    ignored -> closeAfterSave(), onFailure,
+                    details -> showPhotoUploadError(true, "foto", details), null);
+        };
+        if (tripCoverFile == null) {
+            if (isNewTrip && !tripSecondaryPhotoFiles.isEmpty()) {
+                List<File> initialPhotos = new ArrayList<>(tripSecondaryPhotoFiles);
+                ApiService.uploadFilesDetailed(imageBaseUrl + "/photos", initialPhotos.stream().map(File::toPath).toList(),
+                        ignored -> closeAfterSave(), onFailure,
+                        details -> showPhotoUploadError(true, "foto", details), null);
+            } else {
+                uploadSecondaryPhotos.run();
+            }
+            return;
+        }
+        if (isNewTrip) {
+            List<File> initialPhotos = new ArrayList<>();
+            initialPhotos.add(tripCoverFile);
+            initialPhotos.addAll(tripSecondaryPhotoFiles);
+            ApiService.uploadFilesDetailed(imageBaseUrl + "/photos", initialPhotos.stream().map(File::toPath).toList(),
+                    ignored -> closeAfterSave(), onFailure,
+                    details -> showPhotoUploadError(true, "foto", details), null);
+            return;
+        }
+        ApiService.uploadFileDetailed(imageBaseUrl + "/cover", tripCoverFile.toPath(),
+                ignored -> uploadSecondaryPhotos.run(), onFailure,
+                details -> showPhotoUploadError(true, "copertina", details), null);
+    }
+
+    private void uploadActivityPhotos(ActivityDTO activity, boolean isNewActivity) {
+        String imageBaseUrl = ApiService.BASE_URL + "/api/activity-images/activity/" + activity.getActivityId();
+        Runnable onFailure = () -> {
+            if (saveActivityButton != null) saveActivityButton.setDisable(false);
+            showSaveError("L'attività è stata salvata, ma non è stato possibile caricare tutte le foto. Riprova.");
+        };
+        Runnable uploadSecondaryPhotos = () -> {
+            if (activitySecondaryPhotoFiles.isEmpty()) {
+                closeAfterSave();
+                return;
+            }
+            ApiService.uploadFilesDetailed(imageBaseUrl + "/photos",
+                    activitySecondaryPhotoFiles.stream().map(File::toPath).toList(),
+                    ignored -> closeAfterSave(), onFailure,
+                    details -> showPhotoUploadError(false, "foto", details), null);
+        };
+        if (activityCoverFile == null) {
+            if (isNewActivity && !activitySecondaryPhotoFiles.isEmpty()) {
+                ApiService.uploadFilesDetailed(imageBaseUrl + "/photos",
+                        activitySecondaryPhotoFiles.stream().map(File::toPath).toList(),
+                        ignored -> closeAfterSave(), onFailure,
+                        details -> showPhotoUploadError(false, "foto", details), null);
+            } else {
+                uploadSecondaryPhotos.run();
+            }
+            return;
+        }
+        if (isNewActivity) {
+            List<File> initialPhotos = new ArrayList<>();
+            initialPhotos.add(activityCoverFile);
+            initialPhotos.addAll(activitySecondaryPhotoFiles);
+            ApiService.uploadFilesDetailed(imageBaseUrl + "/photos", initialPhotos.stream().map(File::toPath).toList(),
+                    ignored -> closeAfterSave(), onFailure,
+                    details -> showPhotoUploadError(false, "foto", details), null);
+            return;
+        }
+        ApiService.uploadFileDetailed(imageBaseUrl + "/cover", activityCoverFile.toPath(),
+                ignored -> uploadSecondaryPhotos.run(), onFailure,
+                details -> showPhotoUploadError(false, "copertina", details), null);
+    }
+
+    private void showPhotoUploadError(boolean isTrip, String photoType, String details) {
+        if (isTrip) {
+            if (saveTripButton != null) saveTripButton.setDisable(false);
+            showSaveError("Viaggio salvato, ma caricamento " + photoType + " fallito: " + details);
+        } else {
+            if (saveActivityButton != null) saveActivityButton.setDisable(false);
+            showSaveError("Attività salvata, ma caricamento " + photoType + " fallito: " + details);
         }
     }
 

@@ -95,6 +95,7 @@ public class TripController {
     public ResponseEntity<TripDTO> createTrip(@RequestBody Trip trip,
                                               @AuthenticationPrincipal AuthUser user) {
         trip.setTripId(null);
+        trip.setCoverPhotoUrl(null);
         return ResponseEntity.ok(tripService.createTripDto(trip, user.id()));
     }
 

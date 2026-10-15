@@ -129,6 +129,13 @@
     -fx-text-fill: rgba(255, 255, 255, 0.68);
 }
 
+.photo-preview {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+}
+
 .custom-input,
 .custom-textarea {
     -fx-background-color: rgba(231, 229, 228, 0.08);

@@ -185,13 +185,10 @@ public class ActivityDetailsController {
     }
 
     private void setActivityData() {
-
-        if (activity.getImages().isEmpty()) {
-            heroImage.setImage(null);
-        } else {
-            // heroImage.setImage(new Image(ApiService.BASE_URL + activity.getImages().getFirst().getImageUrl()));
-            heroImage.setImage(null);
-        }
+        String imageUrl = activity.getImages() == null || activity.getImages().isEmpty()
+                ? "/photo/default/experience.jpg"
+                : activity.getImages().getFirst().getImageUrl();
+        setHeroImage(imageUrl);
 
         if (activity.getStartDate() != null) {
             datePicker.setValue(LocalDate.from(activity.getStartDate()));
@@ -215,12 +212,10 @@ public class ActivityDetailsController {
     }
 
     private void setTripData() {
-
-        if (trip.getCoverPhotoUrl() == null) {
-            heroImage.setImage(null);
-        } else {
-            heroImage.setImage(new Image(ApiService.BASE_URL + trip.getCoverPhotoUrl()));
-        }
+        String imageUrl = trip.getCoverPhotoUrl() == null || trip.getCoverPhotoUrl().isBlank()
+                ? "/photo/default/experience.jpg"
+                : trip.getCoverPhotoUrl();
+        setHeroImage(imageUrl);
 
         if (trip.getStartDate() != null) {
             datePicker.setValue(trip.getStartDate());
@@ -240,6 +235,20 @@ public class ActivityDetailsController {
         lblPrezzo.setText(setMoneyCurrency(trip.getTotalPrice()));
         lblTotale.setText(setMoneyCurrency(trip.getTotalPrice()));
 
+    }
+
+    private void setHeroImage(String imageUrl) {
+        String defaultImageUrl = "/photo/default/experience.jpg";
+        String requestedImageUrl = imageUrl == null || imageUrl.isBlank() ? defaultImageUrl : imageUrl;
+        Image image = new Image(ApiService.BASE_URL + requestedImageUrl, true);
+        if (!defaultImageUrl.equals(requestedImageUrl)) {
+            image.errorProperty().addListener((observable, wasError, isError) -> {
+                if (isError) {
+                    heroImage.setImage(new Image(ApiService.BASE_URL + defaultImageUrl, true));
+                }
+            });
+        }
+        heroImage.setImage(image);
     }
 
     private Node loadSection(String fxmlName) {

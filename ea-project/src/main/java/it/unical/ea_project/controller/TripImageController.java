@@ -2,10 +2,13 @@ package it.unical.ea_project.controller;
 
 import it.unical.ea_project.domain.TripImage;
 import it.unical.ea_project.dto.TripImageDTO;
+import it.unical.ea_project.security.AuthUser;
 import it.unical.ea_project.service.TripImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -28,15 +31,34 @@ public class TripImageController {
         return ResponseEntity.ok(images);
     }
 
-    @PostMapping("/trip/{tripId}")
-    public ResponseEntity<TripImageDTO> addImage(@PathVariable Long tripId, @RequestBody TripImage image) {
-        TripImage saved = tripImageService.addImageToTrip(tripId, image);
+    @PostMapping("/trip/{tripId}/cover")
+    public ResponseEntity<TripImageDTO> uploadCover(
+            @PathVariable Long tripId,
+            @RequestParam("file") MultipartFile file,
+            @AuthenticationPrincipal AuthUser user) {
+        TripImage saved = tripImageService.uploadCover(tripId, user.id(), file);
         TripImageDTO dto = TripImageDTO.builder()
                 .imageId(saved.getImageId())
                 .imageUrl(saved.getImageUrl())
                 .tripId(tripId)
                 .orderIndex(saved.getOrderIndex()).build();
         return ResponseEntity.ok(dto);
+    }
+
+    @PostMapping("/trip/{tripId}/photos")
+    public ResponseEntity<List<TripImageDTO>> uploadPhotos(
+            @PathVariable Long tripId,
+            @RequestParam("files") List<MultipartFile> files,
+            @AuthenticationPrincipal AuthUser user) {
+        List<TripImageDTO> photos = tripImageService.uploadPhotos(tripId, user.id(), files).stream()
+                .map(image -> TripImageDTO.builder()
+                        .imageId(image.getImageId())
+                        .imageUrl(image.getImageUrl())
+                        .tripId(tripId)
+                        .orderIndex(image.getOrderIndex())
+                        .build())
+                .toList();
+        return ResponseEntity.ok(photos);
     }
 
     @DeleteMapping("/{id}")

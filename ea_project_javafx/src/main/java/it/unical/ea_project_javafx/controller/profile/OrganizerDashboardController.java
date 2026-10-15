@@ -2,8 +2,11 @@ package it.unical.ea_project_javafx.controller.profile;
 
 import com.google.gson.reflect.TypeToken;
 import it.unical.ea_project_javafx.dto.ActivityDTO;
+import it.unical.ea_project_javafx.dto.home.ActivityHomeDTO;
+import it.unical.ea_project_javafx.dto.home.TripHomeDTO;
 import it.unical.ea_project_javafx.dto.BookingDTO;
 import it.unical.ea_project_javafx.dto.TripDTO;
+import it.unical.ea_project_javafx.controller.home.ExperienceCardController;
 import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.util.ApiService;
 import javafx.application.Platform;
@@ -13,17 +16,13 @@ import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.effect.GaussianBlur;
 import javafx.scene.effect.Effect;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.FlowPane;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -34,7 +33,6 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.format.DateTimeFormatter;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +50,10 @@ public class OrganizerDashboardController implements ProfileDashboardController 
     @FXML private Label totalSubscribersLabel;
     @FXML private Label totalRevenueLabel;
 
-    @FXML private ListView<DashboardOffer> activitiesListView;
+    @FXML private FlowPane activityCardsContainer;
+    @FXML private Label activitiesPlaceholderLabel;
+    @FXML private FlowPane tripCardsContainer;
+    @FXML private Label tripsPlaceholderLabel;
 
     @FXML private TableView<SubscriberRow> subscribersTable;
     @FXML private TableColumn<SubscriberRow, String> participantColumn;
@@ -81,10 +82,10 @@ public class OrganizerDashboardController implements ProfileDashboardController 
 
     @FXML
     private void handleOpenCreateOffer(ActionEvent event) {
-        openOfferDialog(event, null, null);
+        openOfferDialog((Node) event.getSource(), null, null);
     }
 
-    private void openOfferDialog(ActionEvent event, TripDTO tripToEdit, ActivityDTO activityToEdit) {
+    private void openOfferDialog(Node source, TripDTO tripToEdit, ActivityDTO activityToEdit) {
         clearDashboardError("offer-form");
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(
@@ -96,7 +97,7 @@ public class OrganizerDashboardController implements ProfileDashboardController 
                 else controller.setActivityToEdit(activityToEdit);
             }
 
-            Stage owner = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Stage owner = (Stage) source.getScene().getWindow();
             Stage modal = new Stage(StageStyle.TRANSPARENT);
             modal.initOwner(owner);
             modal.initModality(Modality.APPLICATION_MODAL);
@@ -122,14 +123,14 @@ public class OrganizerDashboardController implements ProfileDashboardController 
             });
             modal.showAndWait();
         } catch (IOException | RuntimeException exception) {
-            ownerSceneRoot(event).setEffect(null);
+            ownerSceneRoot(source).setEffect(null);
             LOGGER.log(Level.WARNING, "Unable to open the create-offer form", exception);
             showDashboardError("offer-form", "Non è stato possibile aprire il modulo dell'offerta.");
         }
     }
 
-    private javafx.scene.Parent ownerSceneRoot(ActionEvent event) {
-        return ((Node) event.getSource()).getScene().getRoot();
+    private javafx.scene.Parent ownerSceneRoot(Node source) {
+        return source.getScene().getRoot();
     }
 
     public static class SubscriberRow {
@@ -154,9 +155,6 @@ public class OrganizerDashboardController implements ProfileDashboardController 
     @FXML
     public void initialize() {
         setupTableColumns();
-        setupActivityCellFactory();
-        activitiesListView.setItems(FXCollections.observableArrayList());
-        activitiesListView.setPlaceholder(new Label("Non hai ancora pubblicato viaggi o attività."));
         subscribersTable.setItems(FXCollections.observableArrayList());
         subscribersTable.setPlaceholder(new Label("Non ci sono ancora prenotazioni."));
         publishedCountLabel.setText("0");
@@ -269,22 +267,101 @@ public class OrganizerDashboardController implements ProfileDashboardController 
     }
 
     private void updateOffers() {
-        List<DashboardOffer> offers = new java.util.ArrayList<>();
-        trips.stream()
+        List<DashboardOffer> tripOffers = trips.stream()
                 .map(trip -> new DashboardOffer("TRIP", trip.getTripId(), trip.getTitle(), trip.getStatus(),
                         trip.getMaxSeats(), trip.getAvailableSeats(), trip.getTotalPrice(), trip, null,
                         trip.getDestinationCity(), formatTripDates(trip)))
-                .forEach(offers::add);
-        activities.stream()
-                .map(activity -> new DashboardOffer("ACTIVITY", activity.getActivityId(), activity.getTitle(),
-                        activity.getStatus(), activity.getMaxSeats(), activity.getAvailableSeats(),
-                        activity.getPrice() == null ? null : BigDecimal.valueOf(activity.getPrice()), null, activity,
-                        activity.getCity(), formatActivityDates(activity)))
-                .forEach(offers::add);
-        activitiesListView.setItems(FXCollections.observableArrayList(offers));
-        publishedCountLabel.setText(String.valueOf(offers.stream()
+                .toList();
+        renderTripCards();
+        renderActivityCards();
+        long publishedTrips = tripOffers.stream()
                 .filter(offer -> "PUBLISHED".equalsIgnoreCase(offer.status()))
-                .count()));
+                .count();
+        long publishedActivities = activities.stream()
+                .filter(activity -> "PUBLISHED".equalsIgnoreCase(activity.getStatus()))
+                .count();
+        publishedCountLabel.setText(String.valueOf(publishedTrips + publishedActivities));
+    }
+
+    private void renderActivityCards() {
+        activityCardsContainer.getChildren().clear();
+        List<ActivityDTO> safeActivities = activities == null ? List.of() : activities;
+        activitiesPlaceholderLabel.setVisible(safeActivities.isEmpty());
+        activitiesPlaceholderLabel.setManaged(safeActivities.isEmpty());
+        for (ActivityDTO activity : safeActivities) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource(
+                        "/it/unical/ea_project_javafx/fxml/home/experience-card.fxml"));
+                Node card = loader.load();
+                ExperienceCardController controller = loader.getController();
+                String imageUrl = activity.getImages() == null || activity.getImages().isEmpty()
+                        ? "/photo/default/experience.jpg"
+                        : activity.getImages().getFirst().getImageUrl();
+                controller.setData(new ActivityHomeDTO(
+                        activity.getActivityId(),
+                        activity.getTitle(),
+                        activity.getCity(),
+                        activity.getCategory(),
+                        activity.getPrice(),
+                        activity.getAverageRating(),
+                        imageUrl,
+                        activity.getStartDate() == null ? null : activity.getStartDate().toString(),
+                        activity.getEndDate() == null ? null : activity.getEndDate().toString()
+                ));
+                controller.setEditAction(() -> openOfferDialog(rootStackPane, null, activity));
+                DashboardOffer activityOffer = new DashboardOffer(
+                        "ACTIVITY", activity.getActivityId(), activity.getTitle(), activity.getStatus(),
+                        activity.getMaxSeats(), activity.getAvailableSeats(),
+                        activity.getPrice() == null ? null : BigDecimal.valueOf(activity.getPrice()),
+                        null, activity, activity.getCity(), ""
+                );
+                controller.setDeleteAction(() -> handleDeleteOffer(activityOffer));
+                activityCardsContainer.getChildren().add(card);
+            } catch (IOException exception) {
+                LOGGER.log(Level.WARNING, "Unable to render organizer activity card", exception);
+                showDashboardError("activity-cards", "Non è stato possibile visualizzare una delle tue attività.");
+                return;
+            }
+        }
+        if (!safeActivities.isEmpty()) clearDashboardError("activity-cards");
+    }
+
+    private void renderTripCards() {
+        tripCardsContainer.getChildren().clear();
+        List<TripDTO> safeTrips = trips == null ? List.of() : trips;
+        tripsPlaceholderLabel.setVisible(safeTrips.isEmpty());
+        tripsPlaceholderLabel.setManaged(safeTrips.isEmpty());
+        for (TripDTO trip : safeTrips) {
+            try {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource(
+                        "/it/unical/ea_project_javafx/fxml/home/experience-card.fxml"));
+                Node card = loader.load();
+                ExperienceCardController controller = loader.getController();
+                controller.setData(new TripHomeDTO(
+                        trip.getTripId(),
+                        trip.getTitle(),
+                        trip.getDestinationCity(),
+                        trip.getTotalPrice(),
+                        trip.getAverageRating(),
+                        trip.getCoverPhotoUrl(),
+                        trip.getStartDate() == null ? null : trip.getStartDate().toString(),
+                        trip.getEndDate() == null ? null : trip.getEndDate().toString()
+                ));
+                controller.setEditAction(() -> openOfferDialog(rootStackPane, trip, null));
+                DashboardOffer tripOffer = new DashboardOffer(
+                        "TRIP", trip.getTripId(), trip.getTitle(), trip.getStatus(),
+                        trip.getMaxSeats(), trip.getAvailableSeats(), trip.getTotalPrice(),
+                        trip, null, trip.getDestinationCity(), formatTripDates(trip)
+                );
+                controller.setDeleteAction(() -> handleDeleteOffer(tripOffer));
+                tripCardsContainer.getChildren().add(card);
+            } catch (IOException exception) {
+                LOGGER.log(Level.WARNING, "Unable to render organizer trip card", exception);
+                showDashboardError("trip-cards", "Non è stato possibile visualizzare uno dei tuoi viaggi.");
+                return;
+            }
+        }
+        if (!safeTrips.isEmpty()) clearDashboardError("trip-cards");
     }
 
     private String formatTripDates(TripDTO trip) {
@@ -295,18 +372,6 @@ public class OrganizerDashboardController implements ProfileDashboardController 
                 ? start.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                 : start.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + " - "
                 + end.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-    }
-
-    private String formatActivityDates(ActivityDTO activity) {
-        LocalDateTime start = activity.getStartDate();
-        LocalDateTime end = activity.getEndDate();
-        if (start == null) return "";
-        String startText = start.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
-        if (end == null) return startText;
-        String endText = end.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
-        return start.toLocalDate().equals(end.toLocalDate())
-                ? startText + " - " + end.format(DateTimeFormatter.ofPattern("HH:mm"))
-                : startText + " - " + endText;
     }
 
     private void updateSubscribers(List<BookingDTO> bookings) {
@@ -361,80 +426,6 @@ public class OrganizerDashboardController implements ProfileDashboardController 
         dateColumn.setCellValueFactory(cell -> cell.getValue().dateProperty());
     }
 
-    private void setupActivityCellFactory() {
-        activitiesListView.setCellFactory(param -> new ListCell<>() {
-            @Override
-            protected void updateItem(DashboardOffer offer, boolean empty) {
-                super.updateItem(offer, empty);
-
-                if (empty || offer == null) {
-                    setText(null);
-                    setGraphic(null);
-                } else {
-                    VBox card = new VBox(8);
-                    card.getStyleClass().add("activity-card");
-
-                    HBox topBox = new HBox(10);
-                    topBox.setAlignment(Pos.CENTER_LEFT);
-
-                    Label typeLabel = new Label(offer.type().equals("TRIP") ? "VIAGGIO" : "ATTIVITÀ");
-                    typeLabel.getStyleClass().add("activity-card-type");
-                    Label titleLabel = new Label(offer.title());
-                    titleLabel.getStyleClass().add("activity-card-title");
-
-                    Region spacer = new Region();
-                    HBox.setHgrow(spacer, Priority.ALWAYS);
-
-                    Label statusBadge = new Label(offer.status() != null ? offer.status() : "N/D");
-                    statusBadge.getStyleClass().add("badge-published");
-
-                    topBox.getChildren().addAll(typeLabel, spacer, statusBadge);
-
-                    int total = offer.maxSeats() != null ? offer.maxSeats() : 0;
-                    int available = offer.availableSeats() != null ? offer.availableSeats() : total;
-                    int sold = Math.max(0, total - available);
-                    Label seatsLabel = new Label("Posti Venduti: " + sold + " / " + total);
-                    seatsLabel.getStyleClass().add("activity-card-seats");
-
-                    String details = offer.location() == null || offer.location().isBlank()
-                            ? valueOrEmpty(offer.dates())
-                            : offer.dates() == null || offer.dates().isBlank()
-                            ? offer.location()
-                            : offer.location() + "  •  " + offer.dates();
-                    Label detailsLabel = new Label(details);
-                    detailsLabel.getStyleClass().add("activity-card-details");
-                    detailsLabel.setWrapText(true);
-                    titleLabel.setWrapText(true);
-
-                    HBox bottomBox = new HBox(8);
-                    bottomBox.setAlignment(Pos.CENTER_LEFT);
-
-                        double price = offer.price() != null
-                            ? offer.price().doubleValue()
-                            : 0.0;
-                    Label priceLabel = new Label(String.format("€ %.2f", price));
-                    priceLabel.getStyleClass().add("activity-card-price");
-
-                    Region bottomSpacer = new Region();
-                    HBox.setHgrow(bottomSpacer, Priority.ALWAYS);
-
-                    Button editBtn = new Button("Modifica");
-                    editBtn.getStyleClass().add("btn-card-action");
-                    editBtn.setOnAction(e -> openOfferDialog(e, offer.trip(), offer.activity()));
-
-                    Button deleteBtn = new Button("Cancella");
-                    deleteBtn.getStyleClass().add("btn-card-delete");
-                    deleteBtn.setOnAction(e -> handleDeleteOffer(offer));
-
-                    bottomBox.getChildren().addAll(priceLabel, bottomSpacer, editBtn, deleteBtn);
-
-                    card.getChildren().addAll(topBox, titleLabel, detailsLabel, seatsLabel, bottomBox);
-                    setGraphic(card);
-                }
-            }
-        });
-    }
-
     private void adjustTableHeight() {
         subscribersTable.fixedCellSizeProperty().set(40);
         subscribersTable.prefHeightProperty().bind(
@@ -471,7 +462,4 @@ public class OrganizerDashboardController implements ProfileDashboardController 
                 ));
     }
 
-    private String valueOrEmpty(String value) {
-        return value == null ? "" : value;
-    }
 }

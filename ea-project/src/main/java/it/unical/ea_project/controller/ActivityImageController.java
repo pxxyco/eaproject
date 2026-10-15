@@ -2,13 +2,15 @@ package it.unical.ea_project.controller;
 
 import it.unical.ea_project.domain.ActivityImage;
 import it.unical.ea_project.dto.ActivityImageDTO;
+import it.unical.ea_project.security.AuthUser;
 import it.unical.ea_project.service.ActivityImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/activity-images")
@@ -29,9 +31,12 @@ public class ActivityImageController {
         return ResponseEntity.ok(images);
     }
 
-    @PostMapping("/activity/{activityId}")
-    public ResponseEntity<ActivityImageDTO> addImage(@PathVariable Long activityId, @RequestBody ActivityImage image) {
-        ActivityImage saved = activityImageService.addImageToActivity(activityId, image);
+    @PostMapping("/activity/{activityId}/cover")
+    public ResponseEntity<ActivityImageDTO> uploadCover(
+            @PathVariable Long activityId,
+            @RequestParam("file") MultipartFile file,
+            @AuthenticationPrincipal AuthUser user) {
+        ActivityImage saved = activityImageService.uploadCover(activityId, user.id(), file);
         ActivityImageDTO dto = ActivityImageDTO.builder()
                 .imageId(saved.getImageId())
                 .imageUrl(saved.getImageUrl())
@@ -39,6 +44,22 @@ public class ActivityImageController {
                 .orderIndex(saved.getOrderIndex())
                 .build();
         return ResponseEntity.ok(dto);
+    }
+
+    @PostMapping("/activity/{activityId}/photos")
+    public ResponseEntity<List<ActivityImageDTO>> uploadPhotos(
+            @PathVariable Long activityId,
+            @RequestParam("files") List<MultipartFile> files,
+            @AuthenticationPrincipal AuthUser user) {
+        List<ActivityImageDTO> photos = activityImageService.uploadPhotos(activityId, user.id(), files).stream()
+                .map(image -> ActivityImageDTO.builder()
+                        .imageId(image.getImageId())
+                        .imageUrl(image.getImageUrl())
+                        .activityId(activityId)
+                        .orderIndex(image.getOrderIndex())
+                        .build())
+                .toList();
+        return ResponseEntity.ok(photos);
     }
 
     @DeleteMapping("/{id}")

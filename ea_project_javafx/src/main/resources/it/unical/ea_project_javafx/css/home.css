@@ -158,6 +158,34 @@
     -fx-border-color: rgba(231, 229, 228, 0.45);
 }
 
+.card-image-container .btn-card-action,
+.card-image-container .btn-card-delete {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-alignment: center;
+    -fx-min-height: 28px;
+    -fx-pref-height: 28px;
+    -fx-min-width: 70px;
+    -fx-pref-width: 70px;
+    -fx-padding: 5px 12px;
+}
+
+.card-image-container .btn-card-action {
+    -fx-background-color: rgba(28, 25, 23, 0.88);
+    -fx-text-fill: #ffffff;
+}
+
+.card-image-container .btn-card-delete {
+    -fx-background-color: rgba(239, 68, 68, 0.3);
+    -fx-text-fill: #fca5a5;
+}
+
+.card-image-container .btn-card-action:hover,
+.card-image-container .btn-card-delete:hover {
+    -fx-background-color: #e7e5e4;
+    -fx-text-fill: #1c1917;
+}
+
 .card-category {
     -fx-text-fill: #d6d3d1;
     -fx-font-weight: bold;
