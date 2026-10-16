@@ -33,4 +33,6 @@ public class ReviewDTO {
     private LocalDateTime createdAt;
 
     private Boolean deleted;
+
+    private LocalDateTime updatedAt;
 }

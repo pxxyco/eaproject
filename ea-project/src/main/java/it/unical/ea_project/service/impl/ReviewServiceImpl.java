@@ -11,6 +11,7 @@ import it.unical.ea_project.service.ReviewService;
 import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -116,9 +117,26 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Transactional
-    public void delete(Long id) {
-        Review review = reviewRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Review non trovata"));
+    public ReviewDTO update(Long id, ReviewDTO data, Long userId) {
+        Review review = findOwnedReview(id, userId);
+
+        if (data.getRating() != null) review.setRating(data.getRating());
+        if (data.getComment() != null) review.setComment(data.getComment());
+
+        Long tripId = review.getTrip() != null ? review.getTrip().getTripId() : null;
+        Long activityId = review.getActivity() != null ? review.getActivity().getActivityId() : null;
+
+        updateAverageRating(tripId, activityId);
+
+        Response response = responseRepository.findByReview_ReviewIdInAndDeletedFalse(List.of(id))
+                .stream().findFirst().orElse(null);
+
+        return ReviewMapper.toReviewDTO(review, response);
+    }
+
+    @Transactional
+    public void delete(Long id, Long userId) {
+        Review review = findOwnedReview(id, userId);
 
         Long tripId = review.getTrip() != null ? review.getTrip().getTripId() : null;
         Long activityId = review.getActivity() != null ? review.getActivity().getActivityId() : null;
@@ -144,5 +162,15 @@ public class ReviewServiceImpl implements ReviewService {
                     ? BigDecimal.valueOf(avg).setScale(2, RoundingMode.HALF_UP)
                     : null);
         }
+    }
+
+    private Review findOwnedReview(Long id, Long userId) {
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Review non trovata"));
+
+        if (!review.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("La recensione non appartiene all'utente autenticato.");
+        }
+        return review;
     }
 }

@@ -18,6 +18,7 @@ public class ReviewMapper {
                 .comment(review.getComment())
                 .createdAt(review.getCreatedAt())
                 .deleted(review.getDeleted())
+                .updatedAt(review.getUpdatedAt())
                 .build();
     }
 

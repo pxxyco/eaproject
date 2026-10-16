@@ -48,6 +48,9 @@ public class Review {
     @Column(name = "deleted_at")
     private Boolean deleted = false;
 
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
 
     @PrePersist
     protected void onCreate() {
@@ -57,6 +60,7 @@ public class Review {
 
     @PreUpdate
     protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
         validateTripXorActivity();
     }
 
