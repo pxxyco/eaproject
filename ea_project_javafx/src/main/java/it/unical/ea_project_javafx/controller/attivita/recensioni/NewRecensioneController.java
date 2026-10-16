@@ -42,6 +42,10 @@ public class NewRecensioneController {
     private Runnable onClose;
     @Setter
     private Consumer<ReviewDTO> onReviewCreated;
+    @Setter
+    private Consumer<ReviewDTO> onReviewUpdated;
+
+    private ReviewDTO editing;
 
 
     List<Button> stars ;
@@ -60,6 +64,12 @@ public class NewRecensioneController {
         reset();
     }
 
+    public void setEditMode(ReviewDTO review) {
+        this.editing = review;
+        handleStar(review.getRating());
+        txtCommento.setText(review.getComment());
+    }
+
 
     @FXML
     void handleCloseButton(ActionEvent event) {
@@ -73,6 +83,23 @@ public class NewRecensioneController {
 
         if(value < 1)
             return;
+
+        if (editing != null) {
+            editing.setRating(value);
+            editing.setComment(txtCommento.getText());
+
+            ReviewService.update(
+                    editing,
+                    updated -> {
+                        if (onReviewUpdated != null) onReviewUpdated.accept(updated);
+                        if (onClose != null) onClose.run();
+                    },
+                    null,
+                    null
+            );
+            return;
+        }
+
 
         ReviewDTO review = ReviewDTO.builder()
                 .rating(value)
@@ -94,6 +121,7 @@ public class NewRecensioneController {
     }
 
     public void reset(){
+        editing = null;
         handleStar(0);
         txtCommento.clear();
     }

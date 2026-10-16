@@ -6,6 +6,7 @@ import com.google.gson.JsonDeserializer;
 import it.unical.ea_project_javafx.controller.attivita.*;
 import it.unical.ea_project_javafx.controller.attivita.recensioni.NewRecensioneController;
 import it.unical.ea_project_javafx.dto.ActivityDTO;
+import it.unical.ea_project_javafx.dto.ReviewDTO;
 import it.unical.ea_project_javafx.dto.TripDTO;
 import it.unical.ea_project_javafx.model.UserSession;
 import it.unical.ea_project_javafx.util.ApiService;
@@ -303,6 +304,8 @@ public class AttivitaController {
 
             if(controller instanceof RecensioniContainerController rcc){
                 rcc.setOnNewReviewRequested(this::openNewReview);
+                rcc.setOnEditReviewRequested(this::openEditReview);
+                rcc.setOnReviewsChanged(this::refreshRating);
                 recensioniController = rcc;
 
             }
@@ -361,6 +364,12 @@ public class AttivitaController {
             refreshRating();
         });
 
+        newRecCardController.setOnReviewUpdated(updated -> {
+            if (recensioniController != null)
+                recensioniController.updateReview(updated);
+            refreshRating();
+        });
+
         Long tripId = (myType == Type.TRIP) ? trip.getTripId() : null;
         Long activityId = (myType == Type.ACTIVITY) ? activity.getActivityId() : null;
         newRecCardController.setType(tripId, activityId);
@@ -368,6 +377,11 @@ public class AttivitaController {
         newRecCard.setDisable(false);
         newRecCard.setManaged(true);
         newRecCard.setVisible(true);
+    }
+
+    private void openEditReview(ReviewDTO review) {
+        openNewReview();
+        newRecCardController.setEditMode(review);
     }
 
     private void showSection(Node node) {
