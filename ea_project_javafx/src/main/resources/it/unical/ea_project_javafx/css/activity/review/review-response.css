@@ -1,0 +1,32 @@
+.risposta-item {
+    -fx-padding: 0;
+}
+
+.risposta-badge {
+    -fx-text-fill: #e7e5e4;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.risposta-testo {
+    -fx-text-fill: rgba(255, 255, 255, 0.85);
+    -fx-font-size: 12px;
+    -fx-line-spacing: 1.5px;
+}
+
+.risposta-data {
+    -fx-text-fill: rgba(255, 255, 255, 0.5);
+    -fx-font-size: 10px;
+}
+
+.btn-modifica-risposta {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(255, 255, 255, 0.65);
+    -fx-font-size: 11px;
+    -fx-cursor: hand;
+    -fx-padding: 2px 6px;
+}
+
+.btn-modifica-risposta:hover {
+    -fx-text-fill: #e7e5e4;
+}

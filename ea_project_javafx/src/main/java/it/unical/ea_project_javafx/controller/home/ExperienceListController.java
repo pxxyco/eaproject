@@ -5,7 +5,7 @@ import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 import it.unical.ea_project_javafx.dto.home.ActivityHomeDTO;
 import it.unical.ea_project_javafx.dto.home.TripHomeDTO;
-import it.unical.ea_project_javafx.model.UserSession;
+import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.util.ApiService;
 import javafx.application.Platform;
 import javafx.fxml.FXML;

@@ -18,4 +18,5 @@ public class TripImageDTO {
     private String imageUrl;
 
     private Integer orderIndex;
+
 }

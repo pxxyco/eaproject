@@ -1,0 +1,312 @@
+/* ==========================================================================
+   1. NAVIGATION ITEMS
+   ========================================================================== */
+.nav-item {
+    -fx-text-fill: rgba(255, 255, 255, 0.85);
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 4px 8px;
+}
+
+.nav-item:hover {
+    -fx-text-fill: #e7e5e4;
+}
+
+.btn-nav-login {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 6px 16px;
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+    -fx-border-color: rgba(255, 255, 255, 0.25);
+    -fx-background-radius: 20px;
+    -fx-border-radius: 20px;
+}
+
+.btn-nav-login:hover {
+    -fx-background-color: #e7e5e4;
+    -fx-text-fill: #1c1917;
+    -fx-border-color: #e7e5e4;
+}
+
+/* ==========================================================================
+   2. HERO & SEARCH BOX
+   ========================================================================== */
+.hero-title {
+    -fx-font-size: 28px;
+    -fx-font-weight: 800;
+    -fx-text-fill: #ffffff;
+}
+
+.hero-subtitle {
+    -fx-font-size: 15px;
+    -fx-text-fill: rgba(255, 255, 255, 0.85);
+}
+
+.booking-search-box {
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+}
+
+.search-field {
+    -fx-background-color: rgba(0, 0, 0, 0.25);
+    -fx-border-color: rgba(255, 255, 255, 0.15);
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 6px 10px;
+}
+
+.search-field:hover {
+    -fx-background-color: rgba(0, 0, 0, 0.32);
+    -fx-border-color: rgba(231, 229, 228, 0.32);
+}
+
+.date-picker.search-field,
+.combo-box.search-field {
+    -fx-background-color: transparent;
+}
+
+.field-label {
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-text-fill: rgba(255, 255, 255, 0.7);
+}
+
+.btn-search {
+    -fx-background-color: #e7e5e4;
+    -fx-text-fill: #1c1917;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-background-radius: 20px;
+    -fx-border-radius: 20px;
+    -fx-padding: 10px 24px;
+    -fx-cursor: hand;
+}
+
+.btn-search:hover {
+    -fx-background-color: #fafaf9;
+}
+
+/* ==========================================================================
+   3. CATEGORY CHIPS
+   ========================================================================== */
+.category-scroll,
+.category-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.category-chip {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-text-fill: #ffffff;
+    -fx-background-radius: 20px;
+    -fx-border-radius: 20px;
+    -fx-padding: 6px 14px;
+    -fx-cursor: hand;
+    -fx-font-size: 12px;
+}
+
+.category-chip:hover, 
+.chip-active {
+    -fx-background-color: rgba(231, 229, 228, 0.22);
+    -fx-border-color: #d6d3d1;
+}
+
+/* ==========================================================================
+   4. SECTIONS, BANNERS & CARDS
+   ========================================================================== */
+.section-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
+}
+
+.section-subtitle {
+    -fx-font-size: 12px;
+    -fx-text-fill: rgba(255, 255, 255, 0.75);
+}
+
+.public-banner {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-background-radius: 16px;
+    -fx-border-radius: 16px;
+}
+
+.banner-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
+}
+
+.banner-sub {
+    -fx-font-size: 12px;
+    -fx-text-fill: rgba(255, 255, 255, 0.8);
+}
+
+.cards-row {
+    -fx-alignment: center-left;
+}
+
+.experience-card {
+    -fx-background-color: rgba(255, 255, 255, 0.07);
+    -fx-border-color: rgba(255, 255, 255, 0.15);
+    -fx-background-radius: 12px;
+    -fx-border-radius: 12px;
+    -fx-cursor: hand;
+    -fx-min-height: 160px;
+    -fx-pref-width: 300px;
+}
+
+.experience-card:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+    -fx-border-color: rgba(231, 229, 228, 0.45);
+}
+
+.card-image-container .btn-card-action,
+.card-image-container .btn-card-delete {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-alignment: center;
+    -fx-min-height: 28px;
+    -fx-pref-height: 28px;
+    -fx-min-width: 70px;
+    -fx-pref-width: 70px;
+    -fx-padding: 5px 12px;
+}
+
+.card-image-container .btn-card-action {
+    -fx-background-color: rgba(28, 25, 23, 0.88);
+    -fx-text-fill: #ffffff;
+}
+
+.card-image-container .btn-card-delete {
+    -fx-background-color: rgba(239, 68, 68, 0.3);
+    -fx-text-fill: #fca5a5;
+}
+
+.card-image-container .btn-card-action:hover,
+.card-image-container .btn-card-delete:hover {
+    -fx-background-color: #e7e5e4;
+    -fx-text-fill: #1c1917;
+}
+
+.card-category {
+    -fx-text-fill: #d6d3d1;
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+}
+
+.card-rating {
+    -fx-text-fill: #f59e0b;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+
+.card-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.card-location {
+    -fx-text-fill: rgba(255, 255, 255, 0.7);
+    -fx-font-size: 12px;
+}
+
+.card-price {
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+/* ==========================================================================
+   5. USER MENU & CONTEXT MENU (FIX GLITCH TRASPARENZA)
+   ========================================================================== */
+.menu-button {
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+    -fx-border-color: rgba(255, 255, 255, 0.25);
+    -fx-background-radius: 20px;
+    -fx-border-radius: 20px;
+    -fx-padding: 4px 12px;
+    -fx-cursor: hand;
+}
+
+.menu-button:hover,
+.menu-button:showing {
+    -fx-background-color: #e7e5e4;
+    -fx-border-color: #e7e5e4;
+}
+
+.menu-button > .label {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.menu-button:hover > .label,
+.menu-button:showing > .label {
+    -fx-text-fill: #1c1917;
+}
+
+.menu-button > .arrow-button > .arrow {
+    -fx-background-color: #ffffff;
+}
+
+.menu-button:hover > .arrow-button > .arrow,
+.menu-button:showing > .arrow-button > .arrow {
+    -fx-background-color: #1c1917;
+}
+
+/* Popup della tendina opaco per coprire gli elementi sottostanti */
+.context-menu {
+    -fx-background-color: #1c1c1b;
+    -fx-border-color: rgba(231, 229, 228, 0.35);
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 6px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.85), 20, 0, 0, 10);
+}
+
+.context-menu .menu-item {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8px;
+    -fx-padding: 8px 14px;
+    -fx-cursor: hand;
+}
+
+.context-menu .menu-item > .label {
+    -fx-text-fill: #f8fafc;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+.context-menu .menu-item:hover,
+.context-menu .menu-item:focused {
+    -fx-background-color: rgba(231, 229, 228, 0.18);
+}
+
+.context-menu .menu-item:hover > .label,
+.context-menu .menu-item:focused > .label {
+    -fx-text-fill: #ffffff;
+}
+
+/* ==========================================================================
+   6. MISCELLANEOUS LABELS
+   ========================================================================== */
+.label-loading {
+    -fx-opacity: 0.6;
+    -fx-cursor: default;
+    -fx-font-weight: normal;
+}
+
+.load-more-label {
+    -fx-cursor: hand;
+    -fx-font-weight: bold;
+}

@@ -1,6 +1,7 @@
 package it.unical.ea_project_javafx.util;
 
 public enum AppErrorCode {
+
     ERR_NETWORK_UNREACHABLE("ERR-101", "Impossibile raggiungere il server."),
     ERR_API_TIMEOUT("ERR-102", "Il server ha impiegato troppo tempo a rispondere."),
     ERR_SERVICE_MAINTENANCE("ERR-103", "I servizi sono temporaneamente in manutenzione."),

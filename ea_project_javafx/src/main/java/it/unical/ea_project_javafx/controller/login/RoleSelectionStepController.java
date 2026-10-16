@@ -1,6 +1,6 @@
 package it.unical.ea_project_javafx.controller.login;
 
-import it.unical.ea_project_javafx.model.StepNavigator;
+import it.unical.ea_project_javafx.navigation.StepNavigator;
 import javafx.fxml.FXML;
 import javafx.scene.input.MouseEvent;
 import lombok.Setter;

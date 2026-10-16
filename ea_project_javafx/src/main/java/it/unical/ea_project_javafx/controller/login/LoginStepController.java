@@ -5,16 +5,16 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonObject;
 import it.unical.ea_project_javafx.dto.UserDTO;
-import it.unical.ea_project_javafx.model.StepNavigator;
+import it.unical.ea_project_javafx.navigation.StepNavigator;
 import it.unical.ea_project_javafx.util.ApiService;
+import it.unical.ea_project_javafx.security.UserSession;
+import it.unical.ea_project_javafx.util.TokenStorage;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -27,20 +27,24 @@ public class LoginStepController {
     @FXML private CheckBox rememberMeCheckBox;
 
     private StepNavigator navigator;
-    JsonObject body = new JsonObject();
 
     @FXML
     public void initialize() {
+
         loginUsernameField.setOnKeyPressed(event -> { if (event.getCode() == KeyCode.ENTER) handleLoginSubmit(null); });
         loginPasswordField.setOnKeyPressed(event -> { if (event.getCode() == KeyCode.ENTER) handleLoginSubmit(null); });
+
     }
 
     public void setNavigator(StepNavigator navigator) {
+    
         this.navigator = navigator;
         btnLogin.setDefaultButton(true);
+
     }
 
     public void showError(String message) {
+
         Platform.runLater(() -> {
             if (errorLabel != null) {
                 errorLabel.setText(message);
@@ -48,18 +52,22 @@ public class LoginStepController {
                 errorLabel.setManaged(true);
             }
         });
+
     }
 
     public void clearError() {
+
         if (errorLabel != null) {
             errorLabel.setText("");
             errorLabel.setVisible(false);
             errorLabel.setManaged(false);
         }
+
     }
 
     @FXML
     void handleLoginSubmit(ActionEvent event) {
+
         clearError();
         String identifier = loginUsernameField.getText().trim();
         String password = loginPasswordField.getText();
@@ -91,20 +99,16 @@ public class LoginStepController {
                             UserDTO user = gson.fromJson(res.body(), UserDTO.class);
 
                             if (user != null) {
-                                it.unical.ea_project_javafx.model.UserSession.getInstance().setSession(user);
-                                it.unical.ea_project_javafx.model.UserSession.getInstance().setTokens(accessToken, refreshToken);
+                                UserSession.getInstance().setSession(user);
+                                UserSession.getInstance().setTokens(accessToken, refreshToken);
 
                                 if (rememberMeCheckBox != null && rememberMeCheckBox.isSelected()) {
-                                    it.unical.ea_project_javafx.util.TokenStorage.saveRefreshToken(refreshToken);
+                                    TokenStorage.saveRefreshToken(refreshToken);
                                 } else {
-                                    it.unical.ea_project_javafx.util.TokenStorage.clear();
+                                    TokenStorage.clear();
                                 }
 
-                                if (event != null) {
-                                    navigator.goToHome(event);
-                                } else {
-                                    navigator.goToHome(new ActionEvent(btnLogin, null));
-                                }
+                                navigator.goToHome();
                             } else {
                                 showError("Errore il profilo utente è vuoto.");
                             }
@@ -125,17 +129,22 @@ public class LoginStepController {
                 () -> Platform.runLater(() -> showError("Errore di connessione al server.")),
                 navigator::setLoading
         );
+
     }
 
     @FXML
     void goToRoleSelection(ActionEvent event) {
+
         clearError();
         navigator.goToRoleStep();
+
     }
 
     @FXML
     void goToForgotPassword(ActionEvent event) {
+
         clearError();
         navigator.goToForgotPasswordStep();
+
     }
 }

@@ -19,4 +19,5 @@ public class ListActivitiesDTO {
     private Long activityId;
 
     private LocalDateTime addedAt;
+
 }

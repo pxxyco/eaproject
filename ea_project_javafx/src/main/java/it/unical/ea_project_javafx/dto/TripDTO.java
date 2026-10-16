@@ -39,8 +39,7 @@ public class TripDTO {
 
     private Integer availableSeats;
 
-    // Trip.TripStatus: DRAFT, PUBLISHED, CANCELLED, COMPLETED
-    private String status;
+    private String status;  // Trip.TripStatus: DRAFT, PUBLISHED, CANCELLED, COMPLETED
 
     private String icsUid;
 
@@ -55,4 +54,5 @@ public class TripDTO {
     private LocalDateTime deletedAt;
 
     private List<StageDTO> stages;
+
 }
