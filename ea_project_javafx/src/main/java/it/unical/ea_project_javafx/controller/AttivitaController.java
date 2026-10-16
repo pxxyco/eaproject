@@ -113,9 +113,6 @@ public class AttivitaController {
         bookingCard.setManaged(!isOrganizer);
         
         btnInitialize();
-
-        // USE FOR DEBUG AND TEST
-        //loadData(Type.ACTIVITY, "1");
     }
 
     private void setupNavbar() {
@@ -238,13 +235,7 @@ public class AttivitaController {
 
         lblLocalita.setText(activity.getCity());
         lblTitolo.setText(activity.getTitle());
-        if (activity.getAverageRating() != null) {
-            lblRating.setText( "★ " + BigDecimal.valueOf(activity.getAverageRating()));
-        }
-        else {
-            lblRating.setText("★ " + BigDecimal.ZERO);
-        }
-
+        lblRating.setText( "★ " + formatRating(activity.getAverageRating()));
 
         BigDecimal prezzo = activity.getPrice() != null ? BigDecimal.valueOf(activity.getPrice()) : null;
         lblPrezzo.setText(setMoneyCurrency(prezzo));
@@ -271,15 +262,32 @@ public class AttivitaController {
         lblLocalita.setText(trip.getDestinationCity());
         lblTitolo.setText(trip.getTitle());
 
-        if(trip.getAverageRating() != null) {
-            lblRating.setText( "★ " + trip.getAverageRating());
-        }
-        else {
-            lblRating.setText( "★ " + BigDecimal.ZERO);
-        }
-
+        lblRating.setText( "★ " + formatRating(trip.getAverageRating()));
         lblPrezzo.setText(setMoneyCurrency(trip.getTotalPrice()));
         lblTotale.setText(setMoneyCurrency(trip.getTotalPrice()));
+    }
+
+    private void refreshRating() {
+        String endpoint = (myType == Type.TRIP) ? "/api/trips/" + id : "/api/activities/" + id;
+
+        ApiService.get(
+                ApiService.BASE_URL + endpoint,
+                response -> {
+                    if (myType == Type.TRIP) {
+                        trip = GSON.fromJson(response.body(), TripDTO.class);
+                        lblRating.setText("★ " + formatRating(trip.getAverageRating()));
+                    } else {
+                        activity = GSON.fromJson(response.body(), ActivityDTO.class);
+                        lblRating.setText("★ " + formatRating(activity.getAverageRating()));
+                    }
+                },
+                null,
+                null
+        );
+    }
+
+    private String formatRating(Number rating) {
+        return rating != null ? String.format("%.1f", rating.doubleValue()) : "0";
     }
 
     private Node loadSection(String fxmlName) {
@@ -348,7 +356,9 @@ public class AttivitaController {
         });
 
         newRecCardController.setOnReviewCreated(review -> {
-            if (recensioniController != null) recensioniController.addReview(review);
+            if (recensioniController != null)
+                recensioniController.addReview(review);
+            refreshRating();
         });
 
         Long tripId = (myType == Type.TRIP) ? trip.getTripId() : null;

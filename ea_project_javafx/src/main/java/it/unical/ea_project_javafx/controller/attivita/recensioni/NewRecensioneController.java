@@ -71,15 +71,14 @@ public class NewRecensioneController {
     @FXML
     void handleSendButton(ActionEvent event) {
 
-        // DEBUG TEST,  TODO: replace with logged-in user
-        // Long userId = Long.valueOf("1");
+        if(value < 1)
+            return;
 
         ReviewDTO review = ReviewDTO.builder()
                 .rating(value)
                 .comment(txtCommento.getText())
                 .activityId(activityId)
                 .tripId(tripId)
-                //.userId(userId)
                 .build();
 
         ReviewService.create(
