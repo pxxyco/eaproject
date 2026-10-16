@@ -12,6 +12,7 @@
 <StackPane styleClass="splash-pane" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.common.SplashScreenController">
     <stylesheets>
         <URL value="@../../css/common/style.css" />
+        <URL value="@../../css/common/splash.css" />
     </stylesheets>
 
     <VBox fx:id="splashContent" alignment="CENTER" spacing="20.0">

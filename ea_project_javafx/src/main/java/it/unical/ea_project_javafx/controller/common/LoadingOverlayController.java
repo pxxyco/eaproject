@@ -16,21 +16,23 @@ public class LoadingOverlayController {
 
 
     public void setMessage(String message) {
-
-        label.getStyleClass().setAll("loading-text");
+        label.getStyleClass().removeAll("loading-error");
+        if (!label.getStyleClass().contains("loading-text")) {
+            label.getStyleClass().add("loading-text");
+        }
         label.setText(message);
-
     }
 
     public void setError(String message) {
-
         loadingSpinner.setVisible(false);
         loadingSpinner.setManaged(false);
         errorImage.setManaged(true);
         errorImage.setVisible(true);
-        label.getStyleClass().setAll("loading-error");
+        label.getStyleClass().removeAll("loading-text");
+        if (!label.getStyleClass().contains("loading-error")) {
+            label.getStyleClass().add("loading-error");
+        }
         label.setText(message);
-
     }
 
 }

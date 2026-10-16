@@ -412,3 +412,29 @@
     -fx-border-color: rgba(134, 239, 172, 0.55);
     -fx-text-fill: #bbf7d0;
 }
+
+/* ==========================================================================
+   7. LOADING OVERLAY
+   ========================================================================== */
+.loading-overlay {
+    -fx-background-color: rgba(12, 12, 12, 0.82);
+}
+
+.loading-overlay .progress-indicator {
+    -fx-progress-color: #e7e5e4;
+}
+
+.loading-text,
+.loading-label {
+    -fx-text-fill: #e7e5e4;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.loading-error {
+    -fx-text-fill: #fecaca;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+}
