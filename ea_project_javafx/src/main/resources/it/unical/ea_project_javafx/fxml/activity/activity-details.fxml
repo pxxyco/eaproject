@@ -14,7 +14,6 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
 <StackPane fx:id="root" prefHeight="760" prefWidth="1300" styleClass="app-root" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.activity.ActivityDetailsController">
 
@@ -82,30 +81,14 @@
                                             </StackPane>
 
                                             <!-- Menu Sezioni (Descrizione, Itinerario, Foto, Recensioni) -->
-                                            <VBox spacing="10.0" styleClass="contente-rows" VBox.vgrow="ALWAYS">
+                                            <VBox spacing="10.0" styleClass="content-rows" VBox.vgrow="ALWAYS">
                                                 <children>
                                                     <HBox alignment="CENTER_LEFT" prefHeight="50.0" prefWidth="200.0" spacing="40.0">
                                                         <children>
-                                                            <Button fx:id="btnDescrizione" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleDescrizione" prefHeight="30.0" prefWidth="100.0" styleClass="section-button-active" text="Descrizione">
-                                                                <font>
-                                                                    <Font size="14.0" />
-                                                                </font>
-                                                            </Button>
-                                                            <Button fx:id="btnItinerario" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleItinerario" prefHeight="30.0" prefWidth="100.0" styleClass="section-button" text="Itinerario">
-                                                                <font>
-                                                                    <Font size="14.0" />
-                                                                </font>
-                                                            </Button>
-                                                            <Button fx:id="btnFoto" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleFoto" prefHeight="30.0" prefWidth="100.0" styleClass="section-button" text="Foto">
-                                                                <font>
-                                                                    <Font size="14.0" />
-                                                                </font>
-                                                            </Button>
-                                                            <Button fx:id="btnRecensioni" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleRecensioni" prefHeight="30.0" prefWidth="100.0" styleClass="section-button" text="Recensioni">
-                                                                <font>
-                                                                    <Font size="14.0" />
-                                                                </font>
-                                                            </Button>
+                                                            <Button fx:id="btnDescrizione" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleDescrizione" prefHeight="30.0" prefWidth="100.0" styleClass="section-button-active" text="Descrizione" />
+                                                            <Button fx:id="btnItinerario" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleItinerario" prefHeight="30.0" prefWidth="100.0" styleClass="section-button" text="Itinerario" />
+                                                            <Button fx:id="btnFoto" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleFoto" prefHeight="30.0" prefWidth="100.0" styleClass="section-button" text="Foto" />
+                                                            <Button fx:id="btnRecensioni" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleRecensioni" prefHeight="30.0" prefWidth="100.0" styleClass="section-button" text="Recensioni" />
                                                         </children>
                                                     </HBox>
                                                     <Separator opacity="0.3" prefWidth="200.0" />

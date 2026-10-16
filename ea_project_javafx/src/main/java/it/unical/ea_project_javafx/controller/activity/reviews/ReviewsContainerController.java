@@ -94,7 +94,7 @@ public class ReviewsContainerController implements ActivitySectionController, Tr
 
         for(int i = startIndex; i < endIndex; i++){
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource(path + "/attivita/recensioniContainer/review-item.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource(path + "/activity/reviews/review-item.fxml"));
                 Node r = loader.load();
 
                 ReviewItemController controller = loader.getController();

@@ -25,7 +25,7 @@
          </children>
       </HBox>
         <Region HBox.hgrow="ALWAYS" />
-        <Button fx:id="btnAzioni" mnemonicParsing="false" styleClass="btn-elimina" text="x" textFill="RED" />
+        <Button fx:id="btnAzioni" mnemonicParsing="false" styleClass="btn-elimina" text="✕" />
     </HBox>
 
     <Label fx:id="lblTesto" styleClass="recensione-testo" text="testo" wrapText="true">

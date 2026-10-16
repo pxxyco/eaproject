@@ -15,7 +15,7 @@ public class FullscreenPhotoViewer {
     public static void mostra(StackPane root, String url) {
         try {
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(FullscreenPhotoViewer.class.getResource(path + "activity/fotoContainer/full-screen-photo-view.fxml"));
+            loader.setLocation(FullscreenPhotoViewer.class.getResource(path + "activity/photo/full-screen-photo-view.fxml"));
             Node overlayNode = loader.load();
 
             FullScreenPhotoViewController controller = loader.getController();

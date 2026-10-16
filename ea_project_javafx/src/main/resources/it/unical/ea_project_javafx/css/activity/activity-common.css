@@ -1,7 +1,8 @@
 /* Contenitori e schede */
-.itinerario, 
-.descrizione, 
-.foto, 
+.itinerario,
+.descrizione,
+.foto,
+.photo-container,
 .recensione-container {
     -fx-background-color: rgba(0, 0, 0, 0.50);
     -fx-background-radius: 12px;
@@ -10,10 +11,14 @@
     -fx-control-inner-background: transparent;
 }
 
-.itinerario, 
+.itinerario,
 .descrizione {
     -fx-text-fill: #ffffff;
-    -fx-font-size: 12px;
+    -fx-font-size: 13px;
+}
+
+.descrizione {
+    -fx-line-spacing: 2px;
 }
 
 /* Tipografia */
@@ -71,21 +76,4 @@
 .next:hover, 
 .previous:hover {
     -fx-text-fill: #ffffff;
-}
-
-/* Stato Caricamento ed Errori */
-.loading-text {
-    -fx-text-fill: #ffffff;
-    -fx-font-size: 14px;
-}
-
-.loading-error {
-    -fx-text-fill: #ef4444;
-    -fx-font-size: 20px;
-    -fx-font-weight: bold;
-}
-
-.loading-spinner {
-    -fx-pref-width: 60px;
-    -fx-pref-height: 60px;
 }

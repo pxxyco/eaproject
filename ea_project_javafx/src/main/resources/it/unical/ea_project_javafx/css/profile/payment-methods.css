@@ -5,9 +5,3 @@
     -fx-background-radius: 12px;
     -fx-padding: 16px;
 }
-
-.sub-heading {
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #ffffff;
-}

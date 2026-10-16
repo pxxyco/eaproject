@@ -58,11 +58,12 @@ public class ReviewItemController {
         for(int i = 0; i < stars.size(); i++) {
 
             if(i+1 <= value){
-                stars.get(i).getStyleClass().add("stella-piena");
+                if (!stars.get(i).getStyleClass().contains("stella-piena")) {
+                    stars.get(i).getStyleClass().add("stella-piena");
+                }
                 stars.get(i).setText(FULL_STAR);
             } else {
-                stars.get(i).getStyleClass().clear();
-                stars.get(i).getStyleClass().add("stella");
+                stars.get(i).getStyleClass().remove("stella-piena");
                 stars.get(i).setText(EMPTY_STAR);
             }
 

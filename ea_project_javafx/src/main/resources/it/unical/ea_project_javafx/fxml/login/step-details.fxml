@@ -15,7 +15,7 @@
     <Label fx:id="wizardTitle" styleClass="header-title" text="Dettagli Profilo" />
 
     <!-- Label per i messaggi di errore -->
-    <Label fx:id="errorLabel" managed="false" visible="false" style="-fx-text-fill: #ef4444; -fx-font-size: 13px; -fx-font-weight: bold; -fx-wrap-text: true;" />
+    <Label fx:id="errorLabel" managed="false" visible="false" styleClass="message-error" wrapText="true" />
 
     <VBox spacing="10.0">
         <HBox spacing="10.0">
