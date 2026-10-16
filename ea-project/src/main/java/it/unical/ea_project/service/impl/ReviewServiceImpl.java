@@ -1,7 +1,9 @@
 package it.unical.ea_project.service.impl;
 
+import it.unical.ea_project.domain.Activity;
 import it.unical.ea_project.domain.Response;
 import it.unical.ea_project.domain.Review;
+import it.unical.ea_project.domain.Trip;
 import it.unical.ea_project.dto.ReviewDTO;
 import it.unical.ea_project.mapper.ReviewMapper;
 import it.unical.ea_project.repository.*;
@@ -10,6 +12,8 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -53,6 +57,8 @@ public class ReviewServiceImpl implements ReviewService {
         reviewEntity.setComment(review.getComment());
 
         Review saved = reviewRepository.save(reviewEntity);
+
+        updateAverageRating(review.getTripId(), review.getActivityId());
 
         return ReviewMapper.toReviewDTO(saved, null);
     }
@@ -111,9 +117,32 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Transactional
     public void delete(Long id) {
-        if (!reviewRepository.existsById(id)) {
-            throw new RuntimeException("Review non trovata");
-        }
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Review non trovata"));
+
+        Long tripId = review.getTrip() != null ? review.getTrip().getTripId() : null;
+        Long activityId = review.getActivity() != null ? review.getActivity().getActivityId() : null;
+
         reviewRepository.softDeleteById(id);
+
+        updateAverageRating(tripId, activityId);
+    }
+
+    private void updateAverageRating(Long tripId, Long activityId) {
+        if(activityId != null){
+            Activity activity = activityRepository.findById(activityId)
+                    .orElseThrow(() -> new RuntimeException("Activity non trovata"));
+
+            Double avg = reviewRepository.averageRatingByActivity(activityId);
+            activity.setAverageRating(avg != null ? Math.round(avg * 100.0) / 100.0 : null);
+        }
+        if (tripId != null) {
+            Trip trip = tripRepository.findById(tripId)
+                    .orElseThrow(() -> new RuntimeException("Trip non trovato"));
+            Double avg = reviewRepository.averageRatingByTrip(tripId);
+            trip.setAverageRating(avg != null
+                    ? BigDecimal.valueOf(avg).setScale(2, RoundingMode.HALF_UP)
+                    : null);
+        }
     }
 }

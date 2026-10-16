@@ -65,6 +65,7 @@ public class SecurityConfig {
                                 "/api/activities/**", "/api/trips/**",
                                 "/api/activity-images/**", "/api/trip-images/**",
                                 "/api/reviews/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/reviews").hasRole("TRAVELER")
                         .requestMatchers(HttpMethod.POST,
                                 "/api/activities/**", "/api/trips/**",
                                 "/api/activity-images/**", "/api/trip-images/**").hasRole("ORGANIZER")
