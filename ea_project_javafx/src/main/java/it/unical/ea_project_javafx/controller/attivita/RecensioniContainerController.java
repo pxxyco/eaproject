@@ -4,19 +4,24 @@ import it.unical.ea_project_javafx.controller.attivita.recensioni.RecensioneItem
 import it.unical.ea_project_javafx.dto.ActivityDTO;
 import it.unical.ea_project_javafx.dto.ReviewDTO;
 import it.unical.ea_project_javafx.dto.TripDTO;
+import it.unical.ea_project_javafx.model.UserSession;
 import it.unical.ea_project_javafx.service.ReviewService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.layout.VBox;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 public class RecensioniContainerController implements ActivitySectionController, TripSectionController{
 
+    @FXML private Button btnNew;
     @FXML private VBox bodyContainer;
     @FXML private Button previousButton;
     @FXML private Button nextButton;
@@ -31,10 +36,18 @@ public class RecensioniContainerController implements ActivitySectionController,
 
     @Setter
     private Runnable onNewReviewRequested;
+    @Setter private Consumer<ReviewDTO> onEditReviewRequested;
+    @Setter private Consumer<ReviewDTO> onReplyRequested;
+    @Setter private Runnable onReviewsChanged;
 
     @FXML
     public void initialize(){
         page = 0;
+
+        UserSession session = UserSession.getInstance();
+        boolean canReview = session.isLoggedIn() && "TRAVELER".equalsIgnoreCase(session.getRole());
+        btnNew.setVisible(canReview);
+        btnNew.setManaged(canReview);
     }
 
     @Override
@@ -94,12 +107,15 @@ public class RecensioniContainerController implements ActivitySectionController,
         for(int i = startIndex; i < endIndex; i++){
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource(path + "/attivita/recensioniContainer/RecensioneItem.fxml"));
-                Node r = loader.load();
+                Node node = loader.load();
 
                 RecensioneItemController controller = loader.getController();
-                controller.setData(reviews.get(i));
+                controller.setData(reviews.get(i), getPlaceOwnerId());
+                controller.setOnEdit(r -> { if (onEditReviewRequested != null) onEditReviewRequested.accept(r); });
+                controller.setOnDelete(this::deleteReview);
+                controller.setOnReply(r -> { if (onReplyRequested != null) onReplyRequested.accept(r); });
 
-                bodyContainer.getChildren().add(r);
+                bodyContainer.getChildren().add(node);
 
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -130,5 +146,40 @@ public class RecensioniContainerController implements ActivitySectionController,
         reviews.addFirst(review);
         page = 0;
         setReviews();
+    }
+
+    private void deleteReview(ReviewDTO review) {
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
+                "Vuoi eliminare questa recensione?", ButtonType.CANCEL, ButtonType.OK);
+        confirm.setHeaderText("Elimina recensione");
+        if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
+
+        ReviewService.deleteReview(
+                review.getReviewId(),
+                () -> {
+                    reviews.removeIf(r -> r.getReviewId().equals(review.getReviewId()));
+                    if (page > 0 && page * PAGE_SIZE >= reviews.size()) page--;
+                    setReviews();
+                    if (onReviewsChanged != null) onReviewsChanged.run();
+                },
+                null,
+                null
+        );
+    }
+
+    public void updateReview(ReviewDTO updated) {
+        for (int i = 0; i < reviews.size(); i++) {
+            if (reviews.get(i).getReviewId().equals(updated.getReviewId())) {
+                reviews.set(i, updated);
+                break;
+            }
+        }
+        setReviews();
+    }
+
+    private Long getPlaceOwnerId() {
+        if (activity != null) return activity.getCreatedByUserId();
+        if (trip != null) return trip.getCreatedByUserId();
+        return null;
     }
 }

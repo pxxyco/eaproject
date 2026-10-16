@@ -77,3 +77,77 @@
 .stella-piena {
     -fx-text-fill: #f5b301;
 }
+
+.btn-actions,
+.btn-actions:focused,
+.btn-actions:pressed {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-background-radius: 50%;
+    -fx-border-color: transparent;
+    -fx-effect: null;
+    -fx-min-width: 36px;
+    -fx-min-height: 36px;
+    -fx-pref-width: 36px;
+    -fx-pref-height: 36px;
+    -fx-padding: 0;
+    -fx-alignment: center;
+    -fx-cursor: hand;
+}
+.btn-actions:hover,
+.btn-actions:showing {
+    -fx-background-color: rgba(255, 255, 255, 0.15);
+    -fx-background-radius: 50%;
+    -fx-border-color: trasparent;
+}
+
+.btn-actions > .arrow-button {
+    -fx-padding: 0;
+    -fx-min-width: 0;
+    -fx-pref-width: 0;
+    -fx-max-width: 0;
+    -fx-background-color: transparent;
+}
+.btn-actions > .arrow-button > .arrow {
+    -fx-shape: null;
+    -fx-padding: 0;
+    -fx-min-width: 0;
+    -fx-pref-width: 0;
+    -fx-background-color: transparent;
+}
+
+.btn-actions > .label {
+    -fx-text-fill: white;
+    -fx-font-size: 22px;
+    -fx-padding: 0;
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+}
+
+.btn-actions .context-menu {
+    -fx-background-color: #2b2b2b;
+    -fx-background-radius: 8px;
+    -fx-padding: 4px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.35), 10, 0, 0, 3);
+}
+
+
+.btn-actions .menu-item {
+    -fx-background-radius: 6px;
+    -fx-padding: 6px 14px;
+}
+.btn-actions .menu-item .label {
+    -fx-text-fill: white;
+    -fx-font-size: 13px;
+}
+
+.btn-actions .menu-item:focused {
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+}
+
+.btn-actions .menu-item.menu-delete .label {
+    -fx-text-fill: #ff6b6b;
+}
+.btn-actions .menu-item.menu-delete:focused {
+    -fx-background-color: rgba(255, 107, 107, 0.15);
+}
