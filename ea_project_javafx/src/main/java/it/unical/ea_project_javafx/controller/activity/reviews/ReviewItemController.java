@@ -46,7 +46,7 @@ public class ReviewItemController {
     List<Button> stars ;
     final private String FULL_STAR = "★";
     final private String EMPTY_STAR = "☆";
-    final private String RISPOSTA_FXML = "/it/unical/ea_project_javafx/fxml/attivita/recensioniContainer/RispostaItem.fxml";
+    final private String RESPONSE_FXML = "/it/unical/ea_project_javafx/fxml/activity/reviews/review-response-item.fxml";
 
     private ReviewDTO review;
     private boolean isPlaceOwner;
@@ -131,7 +131,7 @@ private void refreshResponse() {
     containerRisposta.getChildren().clear();
     if (hasResponse) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(RISPOSTA_FXML));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource(RESPONSE_FXML));
             Node node = loader.load();
 
             ResponseItemController controller = loader.getController();
