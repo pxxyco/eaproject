@@ -18,4 +18,5 @@ public class ActivityImageDTO {
     private String imageUrl;
 
     private Integer orderIndex;
+
 }

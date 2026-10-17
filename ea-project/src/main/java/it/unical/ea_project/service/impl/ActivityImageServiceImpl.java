@@ -2,14 +2,20 @@ package it.unical.ea_project.service.impl;
 
 import it.unical.ea_project.domain.Activity;
 import it.unical.ea_project.domain.ActivityImage;
+import it.unical.ea_project.domain.User;
 import it.unical.ea_project.repository.ActivityImageRepository;
 import it.unical.ea_project.repository.ActivityRepository;
 import it.unical.ea_project.service.ActivityImageService;
+import it.unical.ea_project.service.PhotoStorageService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +23,7 @@ public class ActivityImageServiceImpl implements ActivityImageService {
 
     private final ActivityImageRepository activityImageRepository;
     private final ActivityRepository activityRepository;
+    private final PhotoStorageService photoStorageService;
 
     @Override
     @Transactional(readOnly = true)
@@ -28,16 +35,54 @@ public class ActivityImageServiceImpl implements ActivityImageService {
 
     @Override
     @Transactional
-    public ActivityImage addImageToActivity(Long activityId, ActivityImage image) {
-        Activity activity = activityRepository.findById(activityId)
-                .orElseThrow(() -> new RuntimeException("Attività non trovata con ID: " + activityId));
-        image.setActivity(activity);
-        return activityImageRepository.save(image);
+    public ActivityImage uploadCover(Long activityId, Long organizerId, MultipartFile file) {
+        return uploadPhotos(activityId, organizerId, List.of(file), true).getFirst();
+    }
+
+    @Override
+    @Transactional
+    public List<ActivityImage> uploadPhotos(Long activityId, Long organizerId, List<MultipartFile> files) {
+        return uploadPhotos(activityId, organizerId, files, false);
+    }
+
+    private List<ActivityImage> uploadPhotos(Long activityId, Long organizerId, List<MultipartFile> files,
+                                             boolean makePrimary) {
+        Activity activity = activityRepository.findByActivityIdAndDeletedAtIsNull(activityId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Attività non trovata."));
+        User creator = activity.getCreatedBy();
+        if (creator == null || !Objects.equals(creator.getId(), organizerId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Non puoi modificare le foto di questa attività.");
+        }
+        validateFiles(files);
+
+        List<ActivityImage> existingImages = activityImageRepository.findByActivityOrderByOrderIndexAsc(activity);
+        for (int index = 0; index < existingImages.size(); index++) {
+            existingImages.get(index).setOrderIndex(index + (makePrimary ? 2 : 1));
+        }
+        int nextOrderIndex = makePrimary ? 1 : existingImages.size() + 1;
+        activityImageRepository.saveAll(existingImages);
+
+        List<ActivityImage> uploadedImages = new java.util.ArrayList<>();
+        for (MultipartFile file : files) {
+            ActivityImage photo = activityImageRepository.saveAndFlush(
+                    new ActivityImage(null, activity, "", nextOrderIndex++)
+            );
+            photo.setImageUrl(photoStorageService.storeActivityPhoto(activityId, photo.getImageId(), file));
+            uploadedImages.add(activityImageRepository.save(photo));
+        }
+        return uploadedImages;
     }
 
     @Override
     @Transactional
     public void deleteImage(Long imageId) {
         activityImageRepository.deleteById(imageId);
+    }
+
+    private void validateFiles(List<MultipartFile> files) {
+        if (files == null || files.isEmpty() || files.stream().anyMatch(file -> file == null || file.isEmpty())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Seleziona almeno una foto valida.");
+        }
+        files.forEach(photoStorageService::validatePhoto);
     }
 }

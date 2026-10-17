@@ -1,0 +1,137 @@
+.glass-overlay {
+    -fx-background-color: rgba(0, 0, 0, 0.65);
+}
+
+.main-modal-card {
+    -fx-background-color: #1c1c1b;
+    -fx-border-color: rgba(255, 255, 255, 0.15);
+    -fx-border-radius: 24px;
+    -fx-background-radius: 24px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.7), 24, 0, 0, 10);
+}
+
+.modal-header {
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-width: 0 0 1 0;
+}
+
+.modal-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
+}
+
+.btn-icon-close {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(255, 255, 255, 0.6);
+    -fx-font-weight: bold;
+    -fx-font-size: 16px;
+    -fx-cursor: hand;
+}
+
+.btn-icon-close:hover {
+    -fx-text-fill: #ffffff;
+}
+
+.transparent-scroll,
+.transparent-scroll > .viewport {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.transparent-scroll .scroll-bar:vertical,
+.transparent-scroll .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+    -fx-opacity: 0.3;
+}
+
+.section-heading {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
+}
+
+.section-subheading {
+    -fx-font-size: 12px;
+    -fx-text-fill: rgba(255, 255, 255, 0.65);
+}
+
+/* Selezione Tipo Offerta */
+.choice-card {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-border-color: rgba(255, 255, 255, 0.12);
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+    -fx-padding: 24px;
+    -fx-cursor: hand;
+}
+
+.choice-card:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.1);
+    -fx-border-color: #e7e5e4;
+}
+
+.choice-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
+}
+
+.choice-desc {
+    -fx-font-size: 13px;
+    -fx-text-fill: rgba(255, 255, 255, 0.65);
+}
+
+.feature-item {
+    -fx-font-size: 12px;
+    -fx-text-fill: #34d399;
+}
+
+.choice-icon-badge {
+    -fx-background-color: rgba(231, 229, 228, 0.12);
+    -fx-background-radius: 12px;
+    -fx-padding: 10px;
+}
+
+.choice-svg-icon {
+    -fx-fill: #e7e5e4;
+}
+
+/* Gestione Tappe */
+.stage-section-container {
+    -fx-background-color: rgba(0, 0, 0, 0.25);
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 14px;
+}
+
+.btn-remove-stage {
+    -fx-background-color: rgba(239, 68, 68, 0.2);
+    -fx-text-fill: #fca5a5;
+    -fx-font-weight: bold;
+    -fx-background-radius: 6px;
+    -fx-cursor: hand;
+}
+
+.btn-remove-stage:hover {
+    -fx-background-color: rgba(239, 68, 68, 0.4);
+}
+
+/* Footer Modale */
+.form-footer {
+    -fx-border-color: rgba(255, 255, 255, 0.1);
+    -fx-border-width: 1px 0 0 0;
+    -fx-padding: 14px 0 0 0;
+}
+
+.btn-link {
+    -fx-background-color: transparent;
+    -fx-text-fill: #d6d3d1;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.btn-link:hover {
+    -fx-text-fill: #ffffff;
+}

@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -30,6 +31,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtService jwtService) throws Exception {
+
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -59,6 +61,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/users/me").authenticated()
                         .requestMatchers("/api/me/**").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/activities/organizer/**").hasRole("ORGANIZER")
+                        .requestMatchers(HttpMethod.GET, "/api/activities/**", "/api/trips/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/activities/**", "/api/trips/**").hasRole("ORGANIZER")
+                        .requestMatchers(HttpMethod.POST, "/api/activity-images/**", "/api/trip-images/**").hasRole("ORGANIZER")
+                        .requestMatchers(HttpMethod.PUT, "/api/activities/**", "/api/trips/**").hasRole("ORGANIZER")
+                        .requestMatchers(HttpMethod.DELETE, "/api/activities/**", "/api/trips/**").hasRole("ORGANIZER")
                         .requestMatchers(HttpMethod.GET, "/api/bookings/organizer/**").hasRole("ORGANIZER")
                         .requestMatchers(HttpMethod.GET, "/api/payments/organizer/**").hasRole("ORGANIZER")
                         .requestMatchers(HttpMethod.GET,

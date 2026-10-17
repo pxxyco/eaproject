@@ -15,8 +15,8 @@ public class FavoriteListDTO {
 
     private Long userId;
 
-    // FavoriteList.Visibility: PRIVATE, SHARED, PUBLIC
-    private String visibility;
+    private String visibility;  // FavoriteList.Visibility: PRIVATE, SHARED, PUBLIC
 
     private boolean deleted;
+
 }

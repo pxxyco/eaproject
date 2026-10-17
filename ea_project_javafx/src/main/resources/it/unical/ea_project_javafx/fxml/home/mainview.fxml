@@ -13,8 +13,8 @@
 <StackPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="it.unical.ea_project_javafx.controller.home.MainViewController">
     <stylesheets>
-        <URL value="@../../css/style.css" />
-        <URL value="@../../css/home.css" />
+        <URL value="@../../css/common/style.css" />
+        <URL value="@../../css/home/home.css" />
     </stylesheets>
 
     <ImageView

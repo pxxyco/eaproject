@@ -10,12 +10,22 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <javafx.version>21.0.2</javafx.version>
-        <gluon.maps.version>2.0.03</gluon.maps.version>
-        <lombok.version>1.18.46</lombok.version>
+        <gluon.maps.version>2.0.0-ea+6</gluon.maps.version>
+        <lombok.version>1.18.42</lombok.version>
     </properties>
 
     <dependencies>
-        <!-- JavaFX Core Modules -->
+        <!-- JavaFX Core Modules (Tutti allineati alla versione 21.0.2) -->
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-base</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-graphics</artifactId>
+            <version>${javafx.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
@@ -32,20 +42,25 @@
             <version>${javafx.version}</version>
         </dependency>
 
-        <!-- Gluon Maps -->
+        <!-- Gluon Maps (con esclusioni di JavaFX legacy) -->
         <dependency>
             <groupId>com.gluonhq</groupId>
             <artifactId>maps</artifactId>
-            <version>2.0.0-ea+6</version>
-            <scope>compile</scope>
+            <version>${gluon.maps.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.openjfx</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!-- Utilities -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.46</version>
-            <scope>compile</scope>
+            <version>${lombok.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>

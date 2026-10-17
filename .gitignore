@@ -233,7 +233,8 @@ hs_err_pid*
 logs/
 
 ### Photos ###
-photo/
+/photo/activity/*
+/photo/trip/*
 
 ### App secrets & environment ###
 .env
@@ -242,5 +243,3 @@ application-local.properties
 application-local.yml
 *.pem
 *.key
-
-photo/

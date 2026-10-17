@@ -1,11 +1,12 @@
 package it.unical.ea_project_javafx.util;
 
-import it.unical.ea_project_javafx.controller.attivita.fotoContainer.FullScreenFotoViewController;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.layout.StackPane;
 
 import java.io.IOException;
+
+import it.unical.ea_project_javafx.controller.activity.photo.FullScreenPhotoViewController;
 
 public class FullscreenPhotoViewer {
 
@@ -14,10 +15,10 @@ public class FullscreenPhotoViewer {
     public static void mostra(StackPane root, String url) {
         try {
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(FullscreenPhotoViewer.class.getResource(path + "attivita/fotoContainer/FullScreenFotoView.fxml"));
+            loader.setLocation(FullscreenPhotoViewer.class.getResource(path + "activity/photo/full-screen-photo-view.fxml"));
             Node overlayNode = loader.load();
 
-            FullScreenFotoViewController controller = loader.getController();
+            FullScreenPhotoViewController controller = loader.getController();
             controller.setFoto(url);
             controller.setOnClose(() -> root.getChildren().remove(overlayNode));
 

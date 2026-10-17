@@ -35,15 +35,14 @@ public class BookingDTO {
 
     private Integer seats;
 
-    // Booking.BookingType: TRIP, ACTIVITY
-    private String bookingType;
+    private String bookingType;     // Booking.BookingType: TRIP, ACTIVITY
 
-    // Booking.BookingStatus: PENDING, COMPLETED, CONFIRMED, CANCELLED
-    private String bookingStatus;
+    private String bookingStatus;   // Booking.BookingStatus: PENDING, COMPLETED, CONFIRMED, CANCELLED
 
     private BigDecimal price;
 
     private LocalDateTime createdAt;
 
     private LocalDateTime deletedAt;
+
 }

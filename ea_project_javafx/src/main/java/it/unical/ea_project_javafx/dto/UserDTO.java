@@ -26,8 +26,7 @@ public class UserDTO {
 
     private String profilePhotoUrl;
 
-    // User.Role: ORGANIZER, TRAVELER
-    private String role;
+    private String role;    // User.Role: ORGANIZER, TRAVELER
 
     private boolean oauthProvider;
 
@@ -36,4 +35,5 @@ public class UserDTO {
     private LocalDateTime createdAt;
 
     private LocalDateTime deletedAt;
+
 }
