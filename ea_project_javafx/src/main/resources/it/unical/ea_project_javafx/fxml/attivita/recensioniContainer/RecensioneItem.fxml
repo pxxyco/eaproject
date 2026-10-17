@@ -9,6 +9,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
+<?import javafx.scene.control.TextArea?>
 <VBox minWidth="400.0" spacing="5.0" styleClass="recensione-item" stylesheets="@../../../css/attivita/recensione/recensioneItem.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.attivita.recensioni.RecensioneItemController">
 
     <padding>
@@ -49,6 +50,15 @@
     <VBox fx:id="containerRisposta" styleClass="risposta-container">
       <VBox.margin>
          <Insets />
-      </VBox.margin></VBox>
+      </VBox.margin>
+    </VBox>
+    <VBox fx:id="containerFormRisposta" spacing="6" styleClass="risposta-container">
+        <TextArea fx:id="txtRisposta" prefRowCount="3" promptText="Scrivi una risposta..." wrapText="true" />
+        <HBox alignment="CENTER_RIGHT" spacing="8">
+            <Button mnemonicParsing="false" onAction="#handleCancelResponse" styleClass="btn-annulla" text="Annulla" />
+            <Button mnemonicParsing="false" onAction="#handleSendResponse" styleClass="btn-rispondi" text="Invia" />
+        </HBox>
+    </VBox>
+
 
 </VBox>

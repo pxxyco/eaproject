@@ -113,7 +113,6 @@ public class RecensioniContainerController implements ActivitySectionController,
                 controller.setData(reviews.get(i), getPlaceOwnerId());
                 controller.setOnEdit(r -> { if (onEditReviewRequested != null) onEditReviewRequested.accept(r); });
                 controller.setOnDelete(this::deleteReview);
-                controller.setOnReply(r -> { if (onReplyRequested != null) onReplyRequested.accept(r); });
 
                 bodyContainer.getChildren().add(node);
 
