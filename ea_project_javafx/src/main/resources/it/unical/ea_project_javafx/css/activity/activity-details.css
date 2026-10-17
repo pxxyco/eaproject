@@ -18,9 +18,6 @@
     -fx-text-fill: rgba(255, 255, 255, 0.85);
     -fx-font-size: 13px;
     -fx-cursor: hand;
-}
-
-.back-link {
     -fx-padding: 0;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 1);
 }
@@ -170,9 +167,8 @@
     -fx-padding: 10px 0;
 }
 
-/* Controlli Form (TextField, Spinner, DatePicker) */
-.text-field, 
-.spinner .text-field {
+/* Controlli del modulo di prenotazione */
+.booking-card .text-field {
     -fx-background-color: rgba(231, 229, 228, 0.08);
     -fx-text-fill: #ffffff;
     -fx-border-color: rgba(255, 255, 255, 0.2);
@@ -180,26 +176,42 @@
     -fx-background-radius: 6px;
 }
 
-.spinner > .increment-arrow-button,
-.spinner > .decrement-arrow-button {
+.booking-card .booking-spinner {
+    -fx-background-color: rgba(231, 229, 228, 0.08);
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+}
+
+.booking-card .booking-spinner > .text-field {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-text-fill: #ffffff;
+    -fx-alignment: center;
+}
+
+
+.booking-card .booking-spinner > .increment-arrow-button,
+.booking-card .booking-spinner > .decrement-arrow-button {
     -fx-background-color: transparent;
     -fx-background-insets: 0;
     -fx-border-color: transparent;
     -fx-cursor: hand;
 }
 
-.spinner > .increment-arrow-button:hover,
-.spinner > .decrement-arrow-button:hover {
+.booking-card .booking-spinner > .increment-arrow-button:hover,
+.booking-card .booking-spinner > .decrement-arrow-button:hover {
     -fx-background-color: rgba(231, 229, 228, 0.18);
 }
 
-.spinner > .increment-arrow-button:pressed,
-.spinner > .decrement-arrow-button:pressed {
+.booking-card .booking-spinner > .increment-arrow-button:pressed,
+.booking-card .booking-spinner > .decrement-arrow-button:pressed {
     -fx-background-color: rgba(231, 229, 228, 0.28);
 }
 
-.spinner > .increment-arrow-button > .increment-arrow,
-.spinner > .decrement-arrow-button > .decrement-arrow {
+.booking-card .booking-spinner > .increment-arrow-button > .increment-arrow,
+.booking-card .booking-spinner > .decrement-arrow-button > .decrement-arrow {
     -fx-background-color: #d6d3d1;
 }
 
