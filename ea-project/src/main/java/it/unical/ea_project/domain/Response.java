@@ -38,4 +38,7 @@ public class Response
     private LocalDateTime createdAt;
     @Column(name = "deleted")
     private boolean deleted;
+
+    @Column(name = "updated_at")
+    private  LocalDateTime updatedAt;
 }

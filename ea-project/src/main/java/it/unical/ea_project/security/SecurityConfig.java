@@ -74,6 +74,7 @@ public class SecurityConfig {
                                 "/api/activities/**", "/api/trips/**",
                                 "/api/activity-images/**", "/api/trip-images/**").hasRole("ORGANIZER")
                         .requestMatchers("/api/bookings/**").hasRole("TRAVELER")
+                        .requestMatchers("/api/responses/**").hasRole("ORGANIZER")
                         .anyRequest().authenticated()
                 );
 
