@@ -41,7 +41,6 @@
                     <!-- Overlay di caricamento -->
                     <StackPane fx:id="loadingOverlay" alignment="CENTER" styleClass="loading-overlay">
                         <children>
-                            <Button fx:id="btnIndietro1" styleClass="back-link" text="←  Torna alle esperienze" StackPane.alignment="TOP_LEFT" />
                             <fx:include fx:id="loadingCard" source="../common/loading-overlay.fxml" />
                         </children>
                     </StackPane>
@@ -56,7 +55,6 @@
                                             <Insets bottom="60" left="60" right="60" top="24" />
                                         </padding>
                                         <children>
-                                            <Button fx:id="btnIndietro" styleClass="back-link" text="←  Torna alle esperienze" />
 
                                             <!-- Section Hero Header -->
                                             <StackPane fx:id="hero" maxHeight="200.0" maxWidth="600.0" minHeight="200.0" prefHeight="200.0" styleClass="hero">
@@ -115,7 +113,7 @@
                                             <Label styleClass="field-label" text="Data" />
                                             <DatePicker fx:id="datePicker" editable="false" maxWidth="Infinity" />
                                             <Label styleClass="field-label" text="Partecipanti" />
-                                            <Spinner fx:id="spinnerPartecipanti" maxWidth="Infinity" />
+                                            <Spinner fx:id="spinnerPartecipanti" maxWidth="Infinity" styleClass="booking-spinner" />
                                             <Separator />
                                             <HBox alignment="CENTER_LEFT">
                                                 <children>
