@@ -3,10 +3,13 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
+<?import javafx.scene.control.TextArea?>
 <VBox minWidth="400.0" spacing="5.0" styleClass="recensione-item" stylesheets="@../../../css/activity/review/review-item.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.activity.reviews.ReviewItemController">
 
     <padding>
@@ -25,7 +28,12 @@
          </children>
       </HBox>
         <Region HBox.hgrow="ALWAYS" />
-        <Button fx:id="btnAzioni" mnemonicParsing="false" styleClass="btn-elimina" text="x" textFill="RED" />
+        <MenuButton fx:id="btnActions" mnemonicParsing="false" styleClass="btn-actions" text="⋮">
+            <items>
+                <MenuItem onAction="#handleEdit" text="Modifica" />
+                <MenuItem onAction="#handleDelete" styleClass="menu-delete" text="Elimina" />
+            </items>
+        </MenuButton>
     </HBox>
 
     <Label fx:id="lblTesto" styleClass="recensione-testo" text="testo" wrapText="true">
@@ -34,7 +42,7 @@
       </padding></Label>
 
     <HBox alignment="CENTER_LEFT" spacing="10">
-        <Button fx:id="btnRispondi" mnemonicParsing="false" styleClass="btn-rispondi" text="Rispondi" />
+        <Button fx:id="btnRispondi" mnemonicParsing="false" onAction="#handleReply" styleClass="btn-rispondi" text="Rispondi" />
         <Region HBox.hgrow="ALWAYS" />
         <Label fx:id="lblData" styleClass="recensione-data" text="data" />
     </HBox>
@@ -42,6 +50,15 @@
     <VBox fx:id="containerRisposta" styleClass="risposta-container">
       <VBox.margin>
          <Insets />
-      </VBox.margin></VBox>
+      </VBox.margin>
+    </VBox>
+    <VBox fx:id="containerFormRisposta" spacing="6" styleClass="risposta-container">
+        <TextArea fx:id="txtRisposta" prefRowCount="3" promptText="Scrivi una risposta..." wrapText="true" />
+        <HBox alignment="CENTER_RIGHT" spacing="8">
+            <Button mnemonicParsing="false" onAction="#handleCancelResponse" styleClass="btn-annulla" text="Annulla" />
+            <Button mnemonicParsing="false" onAction="#handleSendResponse" styleClass="btn-rispondi" text="Invia" />
+        </HBox>
+    </VBox>
+
 
 </VBox>

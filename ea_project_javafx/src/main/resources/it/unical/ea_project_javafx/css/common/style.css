@@ -56,6 +56,106 @@
     -fx-text-fill: #e7e5e4;
 }
 
+.nav-item {
+    -fx-text-fill: rgba(255, 255, 255, 0.85);
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 4px 8px;
+}
+
+.nav-item:hover {
+    -fx-text-fill: #e7e5e4;
+}
+
+.btn-nav-login {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 6px 16px;
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+    -fx-border-color: rgba(255, 255, 255, 0.25);
+    -fx-background-radius: 20px;
+    -fx-border-radius: 20px;
+}
+
+.btn-nav-login:hover {
+    -fx-background-color: #e7e5e4;
+    -fx-text-fill: #1c1917;
+    -fx-border-color: #e7e5e4;
+}
+
+/* User Menu (MenuButton della navbar) */
+.menu-button {
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+    -fx-border-color: rgba(255, 255, 255, 0.25);
+    -fx-background-radius: 20px;
+    -fx-border-radius: 20px;
+    -fx-padding: 4px 12px;
+    -fx-cursor: hand;
+}
+
+.menu-button:hover,
+.menu-button:showing {
+    -fx-background-color: #e7e5e4;
+    -fx-border-color: #e7e5e4;
+}
+
+.menu-button > .label {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.menu-button:hover > .label,
+.menu-button:showing > .label {
+    -fx-text-fill: #1c1917;
+}
+
+.menu-button > .arrow-button > .arrow {
+    -fx-background-color: #ffffff;
+}
+
+.menu-button:hover > .arrow-button > .arrow,
+.menu-button:showing > .arrow-button > .arrow {
+    -fx-background-color: #1c1917;
+}
+
+/* Popup della tendina opaco per coprire gli elementi sottostanti */
+.context-menu {
+    -fx-background-color: #1c1c1b;
+    -fx-border-color: rgba(231, 229, 228, 0.35);
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 6px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.85), 20, 0, 0, 10);
+}
+
+.context-menu .menu-item {
+    -fx-background-color: transparent;
+    -fx-background-radius: 8px;
+    -fx-padding: 8px 14px;
+    -fx-cursor: hand;
+}
+
+.context-menu .menu-item > .label {
+    -fx-text-fill: #f8fafc;
+    -fx-font-size: 13px;
+    -fx-font-weight: 600;
+}
+
+.context-menu .menu-item:hover,
+.context-menu .menu-item:focused {
+    -fx-background-color: rgba(231, 229, 228, 0.18);
+}
+
+.context-menu .menu-item:hover > .label,
+.context-menu .menu-item:focused > .label {
+    -fx-text-fill: #ffffff;
+}
+
 /* ==========================================================================
    3. PULSANTI ED INPUT DI BASE
    ========================================================================== */
@@ -411,6 +511,17 @@
     -fx-background-color: rgba(20, 83, 45, 0.55);
     -fx-border-color: rgba(134, 239, 172, 0.55);
     -fx-text-fill: #bbf7d0;
+}
+
+/* Stato iniziale (prima che il controller imposti status-message/status-*) */
+.dashboard-error {
+    -fx-background-color: rgba(127, 29, 29, 0.55);
+    -fx-background-radius: 8px;
+    -fx-border-color: rgba(252, 165, 165, 0.55);
+    -fx-border-radius: 8px;
+    -fx-padding: 10px 14px;
+    -fx-text-fill: #fecaca;
+    -fx-font-size: 12px;
 }
 
 /* ==========================================================================

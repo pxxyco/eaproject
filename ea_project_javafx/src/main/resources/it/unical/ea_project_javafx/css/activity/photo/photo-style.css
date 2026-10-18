@@ -1,3 +1,8 @@
+/* Overlay foto a schermo intero */
+.fullscreen-overlay {
+    -fx-background-color: rgba(0, 0, 0, 0.7);
+}
+
 .foto-item {
     -fx-cursor: hand;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 4, 0, 0, 2);

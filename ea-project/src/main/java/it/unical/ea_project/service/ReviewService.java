@@ -18,6 +18,8 @@ public interface ReviewService {
 
     @Nullable List<ReviewDTO> findByTrip(Long tripId);
 
-    void delete(Long id);
+    ReviewDTO update(Long id, ReviewDTO review, Long userId);
+
+    void delete(Long id, Long userId);
 
 }

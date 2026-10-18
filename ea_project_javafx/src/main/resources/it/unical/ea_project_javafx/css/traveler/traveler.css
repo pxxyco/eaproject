@@ -1,14 +1,49 @@
+.dash-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #ffffff;
+}
+
+.dash-subtitle {
+    -fx-font-size: 12px;
+    -fx-text-fill: rgba(255, 255, 255, 0.6);
+}
+
 .booking-dashboard-row {
     -fx-alignment: top-left;
 }
 
+/* Correzione della card di creazione lista */
 .booking-count-card {
     -fx-background-color: rgba(255, 255, 255, 0.08);
     -fx-border-color: rgba(255, 255, 255, 0.18);
     -fx-border-radius: 12px;
     -fx-background-radius: 12px;
-    -fx-padding: 14px;
-    -fx-spacing: 3px;
+    -fx-padding: 16px;
+    -fx-spacing: 12px; /* Aumentato per spaziare bene la label e l'HBox con il campo di testo */
+}
+
+/* Stile per la ListView delle liste (visto che nel FXML richiami .custom-table) */
+.custom-table {
+    -fx-background-color: rgba(255, 255, 255, 0.04);
+    -fx-border-color: rgba(255, 255, 255, 0.14);
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.custom-table .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(255, 255, 255, 0.85);
+    -fx-padding: 10px 12px;
+}
+
+.custom-table .list-cell:filled:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+}
+
+.custom-table .list-cell:filled:selected {
+    -fx-background-color: rgba(255, 255, 255, 0.15);
+    -fx-text-fill: #ffffff;
 }
 
 .booking-count-value {
@@ -44,16 +79,6 @@
 .search-icon-button:hover {
     -fx-background-color: rgba(231, 229, 228, 0.22);
     -fx-border-color: #e7e5e4;
-}
-
-.traveler-search-bar .custom-input {
-    -fx-background-color: rgba(255, 255, 255, 0.08);
-    -fx-background-radius: 8px;
-    -fx-border-color: rgba(255, 255, 255, 0.2);
-    -fx-border-radius: 8px;
-    -fx-text-fill: #ffffff;
-    -fx-prompt-text-fill: rgba(255, 255, 255, 0.48);
-    -fx-padding: 9px 12px;
 }
 
 .traveler-search-type {

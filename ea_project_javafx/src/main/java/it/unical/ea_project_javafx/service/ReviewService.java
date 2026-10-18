@@ -68,4 +68,31 @@ public class ReviewService {
                 loading
         );
     }
+
+    public static void update(ReviewDTO review, Consumer<ReviewDTO> onSuccess, Runnable onFailure, Consumer<Boolean> loading) {
+        ReviewDTO body = ReviewDTO.builder()
+                .rating(review.getRating())
+                .comment(review.getComment())
+                .build();
+
+        ApiService.put(
+            BASE_URL + "/" + review.getReviewId(),
+                GSON.toJson(body),
+                response -> {
+                    ReviewDTO updated =  GSON.fromJson(response.body(), ReviewDTO.class);
+                    if(onSuccess != null) onSuccess.accept(updated);
+                },
+                onFailure,
+                loading
+        );
+    }
+
+    public static void deleteReview(Long reviewId, Runnable onSuccess, Runnable onFailure, Consumer<Boolean> loading) {
+        ApiService.delete(
+                BASE_URL + "/" + reviewId,
+                response -> {if(onSuccess != null) onSuccess.run(); },
+                onFailure,
+                loading
+        );
+    }
 }

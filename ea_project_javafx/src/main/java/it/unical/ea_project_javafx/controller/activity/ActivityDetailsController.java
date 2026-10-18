@@ -10,10 +10,12 @@ import it.unical.ea_project_javafx.controller.activity.reviews.ReviewController;
 import it.unical.ea_project_javafx.controller.activity.reviews.ReviewsContainerController;
 import it.unical.ea_project_javafx.controller.common.LoadingOverlayController;
 import it.unical.ea_project_javafx.dto.ActivityDTO;
+import it.unical.ea_project_javafx.dto.ReviewDTO;
 import it.unical.ea_project_javafx.dto.TripDTO;
 import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.util.ApiService;
 import it.unical.ea_project_javafx.util.BackgroundHelper;
+import it.unical.ea_project_javafx.util.FullscreenPhotoViewer;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -58,22 +60,28 @@ public class ActivityDetailsController {
     @FXML private ImageView bgImageView;
 
     @FXML private Label lblCategoria;
+
     @FXML private Label lblLocalita;
+
     @FXML private Label lblPrezzo;
+
     @FXML private Label lblRating;
+
     @FXML private Label lblTitolo;
+
     @FXML private Label lblTotale;
 
     @FXML private VBox bookingCard;
 
     @FXML private LoadingOverlayController loadingCardController;
     @FXML private ReviewController newRecCardController;
-    
+
     @FXML private ScrollPane contentScroll;
-    
+
     private ReviewsContainerController recensioniController;
-    
+
     private List<Button> sectionButtons;
+
     private Node itinerarioNode;
     private Node descrizioneNode;
     private Node fotoNode;
@@ -197,13 +205,9 @@ public class ActivityDetailsController {
         }
 
         lblLocalita.setText(activity.getCity());
+        lblCategoria.setText(activity.getCategory());
         lblTitolo.setText(activity.getTitle());
-        if (activity.getAverageRating() != null) {
-            lblRating.setText( "★ " + BigDecimal.valueOf(activity.getAverageRating()));
-        } else {
-            lblRating.setText("★ " + BigDecimal.ZERO);
-        }
-
+        lblRating.setText( "★ " + formatRating(activity.getAverageRating()));
 
         BigDecimal prezzo = activity.getPrice() != null ? BigDecimal.valueOf(activity.getPrice()) : null;
         lblPrezzo.setText(setMoneyCurrency(prezzo));
@@ -223,15 +227,11 @@ public class ActivityDetailsController {
             datePicker.setValue(LocalDate.now());
         }
 
+        lblCategoria.setText("TRIP");
         lblLocalita.setText(trip.getDestinationCity());
         lblTitolo.setText(trip.getTitle());
 
-        if(trip.getAverageRating() != null) {
-            lblRating.setText( "★ " + trip.getAverageRating());
-        } else {
-            lblRating.setText( "★ " + BigDecimal.ZERO);
-        }
-
+        lblRating.setText( "★ " + formatRating(trip.getAverageRating()));
         lblPrezzo.setText(setMoneyCurrency(trip.getTotalPrice()));
         lblTotale.setText(setMoneyCurrency(trip.getTotalPrice()));
 
@@ -272,6 +272,29 @@ public class ActivityDetailsController {
         return ApiService.BASE_URL + (url.startsWith("/") ? url : "/" + url);
     }
 
+    private void refreshRating() {
+        String endpoint = (myType == Type.TRIP) ? "/api/trips/" + id : "/api/activities/" + id;
+
+        ApiService.get(
+                ApiService.BASE_URL + endpoint,
+                response -> {
+                    if (myType == Type.TRIP) {
+                        trip = GSON.fromJson(response.body(), TripDTO.class);
+                        lblRating.setText("★ " + formatRating(trip.getAverageRating()));
+                    } else {
+                        activity = GSON.fromJson(response.body(), ActivityDTO.class);
+                        lblRating.setText("★ " + formatRating(activity.getAverageRating()));
+                    }
+                },
+                null,
+                null
+        );
+    }
+
+    private String formatRating(Number rating) {
+        return rating != null ? String.format("%.1f", rating.doubleValue()) : "0";
+    }
+
     private Node loadSection(String fxmlName) {
 
         try {
@@ -282,10 +305,13 @@ public class ActivityDetailsController {
 
             if (controller instanceof PhotoContainerController fcc) {
                 fcc.setOnGalleryRequested(this::openGallery);
+                fcc.setOnFotoRequested(url -> FullscreenPhotoViewer.mostra(root, url));
             }
 
             if (controller instanceof ReviewsContainerController rcc) {
                 rcc.setOnNewReviewRequested(this::openNewReview);
+                rcc.setOnEditReviewRequested(this::openEditReview);
+                rcc.setOnReviewsChanged(this::refreshRating);
                 recensioniController = rcc;
             }
 
@@ -307,7 +333,7 @@ public class ActivityDetailsController {
     private void openGallery(List<String> urls) {
 
         try {
-    
+
             FXMLLoader loader = new FXMLLoader(getClass().getResource(path + "/photo/photo-gallery.fxml"));
             Node galleryNode = loader.load();
             PhotoGalleryController controller = loader.getController();
@@ -343,7 +369,15 @@ public class ActivityDetailsController {
         });
 
         newRecCardController.setOnReviewCreated(review -> {
-            if (recensioniController != null) recensioniController.addReview(review);
+            if (recensioniController != null)
+                recensioniController.addReview(review);
+            refreshRating();
+        });
+
+        newRecCardController.setOnReviewUpdated(updated -> {
+            if (recensioniController != null)
+                recensioniController.updateReview(updated);
+            refreshRating();
         });
 
         Long tripId = (myType == Type.TRIP) ? trip.getTripId() : null;
@@ -354,6 +388,11 @@ public class ActivityDetailsController {
         newRecCard.setManaged(true);
         newRecCard.setVisible(true);
 
+    }
+
+    private void openEditReview(ReviewDTO review) {
+        openNewReview();
+        newRecCardController.setEditMode(review);
     }
 
     private void showSection(Node node) {

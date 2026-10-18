@@ -1,12 +1,4 @@
-/* Layout & Struttura Base */
-.app-root {
-    -fx-font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
-}
-
-.bg-overlay {
-    -fx-background-color: rgba(12, 12, 12, 0.82);
-}
-
+/* Layout & Struttura Base (font e .bg-overlay sono in common/style.css) */
 .app-shell,
 .content-wrapper,
 .content-scroll,
@@ -14,33 +6,22 @@
     -fx-background-color: transparent;
 }
 
-/* Navigation Bar */
-.navbar {
-    -fx-background-color: rgba(10, 10, 10, 0.30);
-    -fx-border-color: transparent transparent rgba(255, 255, 255, 0.08) transparent;
-    -fx-border-width: 0 0 1 0;
-}
-
+/* Navigation Bar (la .navbar globale è in common/style.css) */
 .logo {
     -fx-text-fill: #ffffff;
     -fx-font-size: 16px;
     -fx-font-weight: bold;
 }
 
-.nav-link,
 .back-link {
     -fx-background-color: transparent;
     -fx-text-fill: rgba(255, 255, 255, 0.85);
     -fx-font-size: 13px;
     -fx-cursor: hand;
-}
-
-.back-link {
     -fx-padding: 0;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 1);
 }
 
-.nav-link:hover,
 .back-link:hover {
     -fx-text-fill: #ffffff;
 }
@@ -101,7 +82,7 @@
     -fx-effect: dropshadow(gaussian, rgba(231, 229, 228, 0.4), 16, 0.2, 0, 4);
 }
 
-/* Hero Header */
+/* Hero Header (scoped: home.css definisce .hero-title/.hero-subtitle per la home) */
 .hero {
     -fx-background-radius: 14px;
     -fx-background-insets: 0;
@@ -112,14 +93,14 @@
     -fx-background-radius: 14px;
 }
 
-.hero-title {
+.hero .hero-title {
     -fx-text-fill: #ffffff;
     -fx-font-size: 28px;
     -fx-font-weight: bold;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7), 8, 0, 0, 2);
 }
 
-.hero-subtitle {
+.hero .hero-subtitle {
     -fx-text-fill: rgba(255, 255, 255, 0.85);
     -fx-font-size: 13px;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7), 6, 0, 0, 1);
@@ -171,7 +152,7 @@
     -fx-font-weight: bold;
 }
 
-.field-label {
+.booking-card .field-label {
     -fx-text-fill: rgba(255, 255, 255, 0.7);
     -fx-font-size: 12px;
 }
@@ -181,22 +162,13 @@
     -fx-font-size: 11px;
 }
 
-.btn-primary {
-    -fx-background-color: #e7e5e4;
-    -fx-text-fill: #1c1917;
-    -fx-font-weight: bold;
-    -fx-background-radius: 8px;
+/* .btn-primary è in common/style.css: qui solo l'override del padding a tutta larghezza */
+.booking-card .btn-primary {
     -fx-padding: 10px 0;
-    -fx-cursor: hand;
 }
 
-.btn-primary:hover {
-    -fx-background-color: #fafaf9;
-}
-
-/* Controlli Form (TextField, Spinner, DatePicker) */
-.text-field, 
-.spinner .text-field {
+/* Controlli del modulo di prenotazione */
+.booking-card .text-field {
     -fx-background-color: rgba(231, 229, 228, 0.08);
     -fx-text-fill: #ffffff;
     -fx-border-color: rgba(255, 255, 255, 0.2);
@@ -204,26 +176,42 @@
     -fx-background-radius: 6px;
 }
 
-.spinner > .increment-arrow-button,
-.spinner > .decrement-arrow-button {
+.booking-card .booking-spinner {
+    -fx-background-color: rgba(231, 229, 228, 0.08);
+    -fx-border-color: rgba(255, 255, 255, 0.2);
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+}
+
+.booking-card .booking-spinner > .text-field {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-text-fill: #ffffff;
+    -fx-alignment: center;
+}
+
+
+.booking-card .booking-spinner > .increment-arrow-button,
+.booking-card .booking-spinner > .decrement-arrow-button {
     -fx-background-color: transparent;
     -fx-background-insets: 0;
     -fx-border-color: transparent;
     -fx-cursor: hand;
 }
 
-.spinner > .increment-arrow-button:hover,
-.spinner > .decrement-arrow-button:hover {
+.booking-card .booking-spinner > .increment-arrow-button:hover,
+.booking-card .booking-spinner > .decrement-arrow-button:hover {
     -fx-background-color: rgba(231, 229, 228, 0.18);
 }
 
-.spinner > .increment-arrow-button:pressed,
-.spinner > .decrement-arrow-button:pressed {
+.booking-card .booking-spinner > .increment-arrow-button:pressed,
+.booking-card .booking-spinner > .decrement-arrow-button:pressed {
     -fx-background-color: rgba(231, 229, 228, 0.28);
 }
 
-.spinner > .increment-arrow-button > .increment-arrow,
-.spinner > .decrement-arrow-button > .decrement-arrow {
+.booking-card .booking-spinner > .increment-arrow-button > .increment-arrow,
+.booking-card .booking-spinner > .decrement-arrow-button > .decrement-arrow {
     -fx-background-color: #d6d3d1;
 }
 

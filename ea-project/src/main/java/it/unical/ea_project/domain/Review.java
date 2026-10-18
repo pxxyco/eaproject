@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Entity
 @Table(name = "\"REVIEW\"")
+@SQLRestriction("deleted_at = false")
 public class Review {
 
     @Id
@@ -46,6 +48,9 @@ public class Review {
     @Column(name = "deleted_at")
     private Boolean deleted = false;
 
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
 
     @PrePersist
     protected void onCreate() {
@@ -55,6 +60,7 @@ public class Review {
 
     @PreUpdate
     protected void onUpdate() {
+        this.updatedAt = LocalDateTime.now();
         validateTripXorActivity();
     }
 

@@ -81,28 +81,7 @@
 }
 
 /* ==========================================================================
-   3. MESSAGGI DI STATO (ERRORE / SUCCESSO)
-   ========================================================================== */
-.status-message {
-    -fx-font-size: 13px;
-    -fx-font-weight: bold;
-    -fx-padding: 8px 12px;
-    -fx-background-radius: 6px;
-    -fx-border-radius: 6px;
-}
-
-.status-error {
-    -fx-text-fill: #ef4444;
-    -fx-background-color: rgba(239, 68, 68, 0.15);
-}
-
-.status-success {
-    -fx-text-fill: #22c55e;
-    -fx-background-color: rgba(34, 197, 94, 0.15);
-}
-
-/* ==========================================================================
-   4. AZIONI & SALVATAGGIO
+   3. AZIONI & SALVATAGGIO
    ========================================================================== */
 .btn-save-settings {
     -fx-background-color: #e7e5e4;

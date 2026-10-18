@@ -14,7 +14,6 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
 
 <StackPane fx:id="root" prefHeight="760" prefWidth="1300" styleClass="app-root" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.activity.ActivityDetailsController">
 
@@ -42,7 +41,6 @@
                     <!-- Overlay di caricamento -->
                     <StackPane fx:id="loadingOverlay" alignment="CENTER" styleClass="loading-overlay">
                         <children>
-                            <Button fx:id="btnIndietro1" styleClass="back-link" text="←  Torna alle esperienze" StackPane.alignment="TOP_LEFT" />
                             <fx:include fx:id="loadingCard" source="../common/loading-overlay.fxml" />
                         </children>
                     </StackPane>
@@ -57,7 +55,6 @@
                                             <Insets bottom="60" left="60" right="60" top="24" />
                                         </padding>
                                         <children>
-                                            <Button fx:id="btnIndietro" styleClass="back-link" text="←  Torna alle esperienze" />
 
                                             <!-- Section Hero Header -->
                                             <StackPane fx:id="hero" maxHeight="200.0" maxWidth="600.0" minHeight="200.0" prefHeight="200.0" styleClass="hero">
@@ -70,7 +67,7 @@
                                                         <children>
                                                             <HBox spacing="10">
                                                                 <children>
-                                                                    <Label fx:id="lblCategoria" styleClass="badge-category" text="Quad &amp; 4x4" />
+                                                                    <Label fx:id="lblCategoria" styleClass="badge-category"/>
                                                                     <Label fx:id="lblRating" styleClass="badge-rating" text="★ 4.9" />
                                                                 </children>
                                                             </HBox>
@@ -82,30 +79,14 @@
                                             </StackPane>
 
                                             <!-- Menu Sezioni (Descrizione, Itinerario, Foto, Recensioni) -->
-                                            <VBox spacing="10.0" styleClass="contente-rows" VBox.vgrow="ALWAYS">
+                                            <VBox spacing="10.0" styleClass="content-rows" VBox.vgrow="ALWAYS">
                                                 <children>
                                                     <HBox alignment="CENTER_LEFT" prefHeight="50.0" prefWidth="200.0" spacing="40.0">
                                                         <children>
-                                                            <Button fx:id="btnDescrizione" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleDescrizione" prefHeight="30.0" prefWidth="100.0" styleClass="section-button-active" text="Descrizione">
-                                                                <font>
-                                                                    <Font size="14.0" />
-                                                                </font>
-                                                            </Button>
-                                                            <Button fx:id="btnItinerario" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleItinerario" prefHeight="30.0" prefWidth="100.0" styleClass="section-button" text="Itinerario">
-                                                                <font>
-                                                                    <Font size="14.0" />
-                                                                </font>
-                                                            </Button>
-                                                            <Button fx:id="btnFoto" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleFoto" prefHeight="30.0" prefWidth="100.0" styleClass="section-button" text="Foto">
-                                                                <font>
-                                                                    <Font size="14.0" />
-                                                                </font>
-                                                            </Button>
-                                                            <Button fx:id="btnRecensioni" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleRecensioni" prefHeight="30.0" prefWidth="100.0" styleClass="section-button" text="Recensioni">
-                                                                <font>
-                                                                    <Font size="14.0" />
-                                                                </font>
-                                                            </Button>
+                                                            <Button fx:id="btnDescrizione" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleDescrizione" prefHeight="30.0" prefWidth="100.0" styleClass="section-button-active" text="Descrizione" />
+                                                            <Button fx:id="btnItinerario" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleItinerario" prefHeight="30.0" prefWidth="100.0" styleClass="section-button" text="Itinerario" />
+                                                            <Button fx:id="btnFoto" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleFoto" prefHeight="30.0" prefWidth="100.0" styleClass="section-button" text="Foto" />
+                                                            <Button fx:id="btnRecensioni" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleRecensioni" prefHeight="30.0" prefWidth="100.0" styleClass="section-button" text="Recensioni" />
                                                         </children>
                                                     </HBox>
                                                     <Separator opacity="0.3" prefWidth="200.0" />
@@ -132,7 +113,7 @@
                                             <Label styleClass="field-label" text="Data" />
                                             <DatePicker fx:id="datePicker" editable="false" maxWidth="Infinity" />
                                             <Label styleClass="field-label" text="Partecipanti" />
-                                            <Spinner fx:id="spinnerPartecipanti" maxWidth="Infinity" />
+                                            <Spinner fx:id="spinnerPartecipanti" maxWidth="Infinity" styleClass="booking-spinner" />
                                             <Separator />
                                             <HBox alignment="CENTER_LEFT">
                                                 <children>

@@ -1,9 +1,10 @@
 package it.unical.ea_project.controller;
 
 import it.unical.ea_project.dto.ReviewDTO;
+import it.unical.ea_project.security.AuthUser;
 import it.unical.ea_project.service.ReviewService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,15 +20,9 @@ public class ReviewController {
     }
 
     @PostMapping
-    public ResponseEntity<ReviewDTO> createReview(@RequestBody ReviewDTO review){
-        // TODO: add data validation
-
-        // TODO: use authentication for user id
-        // review.setUserId(userId);
-
-        // TEST
-        // review.setUserId("1");
-
+    public ResponseEntity<ReviewDTO> createReview(@RequestBody ReviewDTO review,
+                                                  @AuthenticationPrincipal AuthUser user){
+        review.setUserId(user.id());
         return ResponseEntity.ok(reviewService.create(review));
     }
 
@@ -41,5 +36,17 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.findByActivity(activityId));
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<ReviewDTO> updateReview(@PathVariable Long id,
+                                                  @RequestBody ReviewDTO review,
+                                                  @AuthenticationPrincipal AuthUser user){
+        return ResponseEntity.ok(reviewService.update(id, review, user.id()));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteReview(@PathVariable Long id, @AuthenticationPrincipal AuthUser user){
+        reviewService.delete(id, user.id());
+        return ResponseEntity.noContent().build();
+    }
 
 }

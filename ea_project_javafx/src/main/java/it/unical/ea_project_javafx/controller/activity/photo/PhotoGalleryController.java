@@ -25,7 +25,7 @@ public class PhotoGalleryController {
     private int paging = 0;
     private static final int PAGE_SIZE = 20;
     private List<String> imageUrls;
-    private final String path = "/it/unical/ea_project_javafx/fxml/activity/photo-container";
+    private final String path = "/it/unical/ea_project_javafx/fxml/activity/photo";
 
     @FXML
     void initialize() throws IOException {

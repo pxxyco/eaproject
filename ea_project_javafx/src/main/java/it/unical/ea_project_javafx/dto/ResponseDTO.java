@@ -18,9 +18,13 @@ public class ResponseDTO {
 
     private Long organizerId;
 
+    private Long reviewId;
+
     private String comment;
 
     private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 
     private boolean deleted;
 

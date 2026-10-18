@@ -30,10 +30,14 @@ public class PhotoContainerController implements ActivitySectionController, Trip
     @Setter
     private Consumer<List<String>> onGalleryRequested;
 
+    @Setter
+    private Consumer<String> onFotoRequested;
+
+    private List<String> imageUrls;
+
     @FXML
     private FlowPane imgsContainer;
-    
-    private List<String> imageUrls;
+
 
     @FXML
     public void initialize(){
@@ -66,7 +70,7 @@ public class PhotoContainerController implements ActivitySectionController, Trip
         for (int i = 0; i < max; i++) {
             loadImage(imageUrls.get(i));
         }
-        
+
         if (imageUrls.size() > 5) {
             addPlaceholder();
         }
@@ -97,6 +101,11 @@ public class PhotoContainerController implements ActivitySectionController, Trip
 
             PhotoItemController controller = loader.getController();
             controller.setFoto(url);
+            controller.setOnFotoClickedCallBack( u-> {
+                if(onFotoRequested != null){
+                    onFotoRequested.accept(u);
+                }
+            });
 
             imgsContainer.getChildren().add(foto);
 

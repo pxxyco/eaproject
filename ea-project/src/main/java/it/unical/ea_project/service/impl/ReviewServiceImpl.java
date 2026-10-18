@@ -1,7 +1,9 @@
 package it.unical.ea_project.service.impl;
 
+import it.unical.ea_project.domain.Activity;
 import it.unical.ea_project.domain.Response;
 import it.unical.ea_project.domain.Review;
+import it.unical.ea_project.domain.Trip;
 import it.unical.ea_project.dto.ReviewDTO;
 import it.unical.ea_project.mapper.ReviewMapper;
 import it.unical.ea_project.repository.*;
@@ -9,7 +11,10 @@ import it.unical.ea_project.service.ReviewService;
 import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.access.AccessDeniedException;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -53,6 +58,8 @@ public class ReviewServiceImpl implements ReviewService {
         reviewEntity.setComment(review.getComment());
 
         Review saved = reviewRepository.save(reviewEntity);
+
+        updateAverageRating(review.getTripId(), review.getActivityId());
 
         return ReviewMapper.toReviewDTO(saved, null);
     }
@@ -110,10 +117,60 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Transactional
-    public void delete(Long id) {
-        if (!reviewRepository.existsById(id)) {
-            throw new RuntimeException("Review non trovata");
-        }
+    public ReviewDTO update(Long id, ReviewDTO data, Long userId) {
+        Review review = findOwnedReview(id, userId);
+
+        if (data.getRating() != null) review.setRating(data.getRating());
+        if (data.getComment() != null) review.setComment(data.getComment());
+
+        Long tripId = review.getTrip() != null ? review.getTrip().getTripId() : null;
+        Long activityId = review.getActivity() != null ? review.getActivity().getActivityId() : null;
+
+        updateAverageRating(tripId, activityId);
+
+        Response response = responseRepository.findByReview_ReviewIdInAndDeletedFalse(List.of(id))
+                .stream().findFirst().orElse(null);
+
+        return ReviewMapper.toReviewDTO(review, response);
+    }
+
+    @Transactional
+    public void delete(Long id, Long userId) {
+        Review review = findOwnedReview(id, userId);
+
+        Long tripId = review.getTrip() != null ? review.getTrip().getTripId() : null;
+        Long activityId = review.getActivity() != null ? review.getActivity().getActivityId() : null;
+
         reviewRepository.softDeleteById(id);
+
+        updateAverageRating(tripId, activityId);
+    }
+
+    private void updateAverageRating(Long tripId, Long activityId) {
+        if(activityId != null){
+            Activity activity = activityRepository.findById(activityId)
+                    .orElseThrow(() -> new RuntimeException("Activity non trovata"));
+
+            Double avg = reviewRepository.averageRatingByActivity(activityId);
+            activity.setAverageRating(avg != null ? Math.round(avg * 100.0) / 100.0 : null);
+        }
+        if (tripId != null) {
+            Trip trip = tripRepository.findById(tripId)
+                    .orElseThrow(() -> new RuntimeException("Trip non trovato"));
+            Double avg = reviewRepository.averageRatingByTrip(tripId);
+            trip.setAverageRating(avg != null
+                    ? BigDecimal.valueOf(avg).setScale(2, RoundingMode.HALF_UP)
+                    : null);
+        }
+    }
+
+    private Review findOwnedReview(Long id, Long userId) {
+        Review review = reviewRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Review non trovata"));
+
+        if (!review.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException("La recensione non appartiene all'utente autenticato.");
+        }
+        return review;
     }
 }

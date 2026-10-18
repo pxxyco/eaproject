@@ -17,6 +17,20 @@
     -fx-font-weight: bold;
 }
 
+.btn-elimina {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(255, 255, 255, 0.5);
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+    -fx-padding: 2px 8px;
+}
+
+.btn-elimina:hover {
+    -fx-text-fill: #ef4444;
+    -fx-background-color: rgba(239, 68, 68, 0.1);
+    -fx-background-radius: 50%;
+}
+
 /* Valutazione a Stelle */
 .rating-stelle {
     -fx-padding: 4px 0;

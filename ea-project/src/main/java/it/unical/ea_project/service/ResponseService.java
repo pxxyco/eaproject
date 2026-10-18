@@ -1,11 +1,11 @@
 package it.unical.ea_project.service;
 
-import it.unical.ea_project.domain.Response;
-import java.util.List;
+import it.unical.ea_project.dto.ResponseDTO;
+
+
 
 public interface ResponseService {
-    Response createResponse(Long organizerId, Long reviewId, String comment);
-    List<Response> getAllActiveResponses();
-    Response getResponseById(Long id);
-    void softDeleteResponse(Long id);
+    ResponseDTO create(Long reviewId, String comment, Long organizerId);
+    ResponseDTO update(Long id, String comment, Long organizerId);
+    void delete(Long id, Long organizerId);
 }

@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox maxWidth="Infinity" spacing="10.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.activity.ActivityDescriptionController">
+   <stylesheets>
+      <URL value="@../../css/activity/activity-common.css" />
+   </stylesheets>
    <children>
-      <Label fx:id="lblDescrizione" alignment="TOP_LEFT" minHeight="150.0" minWidth="450.0" prefWidth="900.0" styleClass="descrizione" text="Nessuna descrizione disponibile">
+      <Label fx:id="lblDescrizione" alignment="TOP_LEFT" minHeight="150.0" minWidth="450.0" prefWidth="900.0" styleClass="descrizione" text="Nessuna descrizione disponibile" wrapText="true">
          <padding>
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
          </padding>
       </Label>
-      <Label fx:id="lblNota" alignment="TOP_LEFT" layoutX="10.0" layoutY="10.0" minHeight="150.0" minWidth="450.0" prefWidth="900.0" styleClass="descrizione" text="Nessuna nota aggiuntiva disponibile">
+      <Label fx:id="lblNota" alignment="TOP_LEFT" minHeight="150.0" minWidth="450.0" prefWidth="900.0" styleClass="descrizione" text="Nessuna nota aggiuntiva disponibile" wrapText="true">
          <padding>
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
          </padding>

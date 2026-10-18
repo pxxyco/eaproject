@@ -16,7 +16,7 @@
 
     <Label styleClass="header-title" text="Login" />
 
-    <Label fx:id="errorLabel" managed="false" visible="false" style="-fx-text-fill: #ef4444; -fx-font-size: 13px; -fx-font-weight: bold; -fx-wrap-text: true;" />
+    <Label fx:id="errorLabel" managed="false" visible="false" styleClass="message-error" wrapText="true" />
 
     <VBox spacing="8.0">
         <Label styleClass="input-label" text="Email / Username" />

@@ -9,8 +9,10 @@ public class ResponseMapper {
         return ResponseDTO.builder()
                 .id(response.getId())
                 .organizerId(response.getOrganizer().getId())
+                .reviewId(response.getReview().getReviewId())
                 .comment(response.getComment())
                 .createdAt(response.getCreatedAt())
+                .updatedAt(response.getUpdatedAt())
                 .deleted(response.isDeleted())
                 .build();
     }

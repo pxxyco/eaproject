@@ -15,12 +15,6 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class ReviewController {
-
-    @Setter
-    private Runnable onClose;
-    @Setter
-    private Consumer<ReviewDTO> onReviewCreated;
-
     @FXML private HBox containerStelle;
     @FXML private Button star1;
     @FXML private Button star2;
@@ -33,9 +27,17 @@ public class ReviewController {
     private int value;
     private Long tripId;
     private Long activityId;
-    private final String FULL_STAR = "★";
-    private final String EMPTY_STAR = "☆";
-    List<Button> stars;
+    @Setter
+    private Runnable onClose;
+    @Setter
+    private Consumer<ReviewDTO> onReviewCreated;
+    @Setter
+    private Consumer<ReviewDTO> onReviewUpdated;
+    List<Button> stars ;
+    final private String FULL_STAR = "★";
+    final private String EMPTY_STAR = "☆";
+
+    private ReviewDTO editing;
 
     @FXML
     private void initialize() {
@@ -51,6 +53,12 @@ public class ReviewController {
 
     }
 
+    public void setEditMode(ReviewDTO review) {
+        this.editing = review;
+        handleStar(review.getRating());
+        txtCommento.setText(review.getComment());
+    }
+
 
     @FXML
     void handleCloseButton(ActionEvent event) {
@@ -64,15 +72,31 @@ public class ReviewController {
     @FXML
     void handleSendButton(ActionEvent event) {
 
-        // DEBUG TEST,  TODO: replace with logged-in user
-        // Long userId = Long.valueOf("1");
+        if(value < 1)
+            return;
+
+        if (editing != null) {
+            editing.setRating(value);
+            editing.setComment(txtCommento.getText());
+
+            ReviewService.update(
+                    editing,
+                    updated -> {
+                        if (onReviewUpdated != null) onReviewUpdated.accept(updated);
+                        if (onClose != null) onClose.run();
+                    },
+                    null,
+                    null
+            );
+            return;
+        }
+
 
         ReviewDTO review = ReviewDTO.builder()
                 .rating(value)
                 .comment(txtCommento.getText())
                 .activityId(activityId)
                 .tripId(tripId)
-                //.userId(userId)
                 .build();
 
         ReviewService.create(
@@ -81,17 +105,16 @@ public class ReviewController {
                     if(onReviewCreated != null) onReviewCreated.accept(created);
                     if(onClose != null) onClose.run();
                 },
-                () -> {},
-                null
-        );
-
+                () -> {
+                    // TODO: set error message
+                },
+                null);
     }
 
     public void reset(){
-
+        editing = null;
         handleStar(0);
         txtCommento.clear();
-
     }
 
     @FXML
@@ -125,7 +148,9 @@ public class ReviewController {
 
         for(int i = 0; i < stars.size(); i++) {
             if(i+1 <= value){
-                stars.get(i).getStyleClass().add("stella-piena");
+                if (!stars.get(i).getStyleClass().contains("stella-piena")) {
+                    stars.get(i).getStyleClass().add("stella-piena");
+                }
                 stars.get(i).setText(FULL_STAR);
 
             }
