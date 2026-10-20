@@ -12,21 +12,26 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import com.example.application.network.AuthRepository
+import com.example.application.network.RegisterRequest
 import com.example.application.ui.theme.ScreenBackground
 import com.example.application.ui.theme.Stone200
 import com.example.application.ui.theme.Stone900
+import kotlinx.coroutines.launch
 
 @Composable
 fun AuthWizardScreen(onLoginSuccess: () -> Unit, onBackToHome: () -> Unit) {
     var currentStep by remember { mutableStateOf(AuthStep.LOGIN) }
     var selectedRole by remember { mutableStateOf("TRAVELER") }
+    var isLoading by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    val scope = rememberCoroutineScope()
 
     Box(modifier = Modifier.fillMaxSize().background(ScreenBackground).padding(24.dp), contentAlignment = Alignment.Center) {
         Card(modifier = Modifier.fillMaxWidth().wrapContentHeight(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)) {
             Column(modifier = Modifier.padding(24.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 if (currentStep != AuthStep.LOGIN) {
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Start) {
-                        // Tasto Torna Indietro trasformato in un OutlinedButton
                         OutlinedButton(
                             onClick = {
                                 currentStep = when (currentStep) {
@@ -46,7 +51,16 @@ fun AuthWizardScreen(onLoginSuccess: () -> Unit, onBackToHome: () -> Unit) {
 
                 when (currentStep) {
                     AuthStep.LOGIN -> LoginStepContent(
-                        onLoginSubmit = { _, _ -> onLoginSuccess() },
+                        isLoading = isLoading,
+                        errorMessage = error,
+                        onLoginSubmit = { id, pw ->
+                            scope.launch {
+                                isLoading = true; error = null
+                                error = AuthRepository.login(id, pw)
+                                isLoading = false
+                                if (error == null) onLoginSuccess()
+                            }
+                        },
                         onGoToForgotPassword = { currentStep = AuthStep.FORGOT_PASSWORD },
                         onGoToRegister = { currentStep = AuthStep.ROLE_SELECTION }
                     )
@@ -61,7 +75,18 @@ fun AuthWizardScreen(onLoginSuccess: () -> Unit, onBackToHome: () -> Unit) {
                     )
                     AuthStep.REGISTRATION_DETAILS -> RegistrationStepContent(
                         role = selectedRole,
-                        onRegisterSubmit = { _, _, _, _, _, _ -> onLoginSuccess() }
+                        isLoading = isLoading,
+                        serverError = error,
+                        onRegisterSubmit = { first, last, username, email, password, _ ->
+                            scope.launch {
+                                isLoading = true; error = null
+                                error = AuthRepository.register(
+                                    RegisterRequest(username.trim(), email.trim(), "$first $last".trim(), password, selectedRole)
+                                )
+                                isLoading = false
+                                if (error == null) onLoginSuccess()
+                            }
+                        }
                     )
                 }
             }
@@ -69,9 +94,11 @@ fun AuthWizardScreen(onLoginSuccess: () -> Unit, onBackToHome: () -> Unit) {
     }
 }
 
-// --- 1. STEP LOGIN ---
+//STEP LOGIN
 @Composable
 fun LoginStepContent(
+    isLoading: Boolean,
+    errorMessage: String?,
     onLoginSubmit: (String, String) -> Unit,
     onGoToForgotPassword: () -> Unit,
     onGoToRegister: () -> Unit
@@ -90,7 +117,6 @@ fun LoginStepContent(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Pulsante Password Dimenticata
         OutlinedButton(
             onClick = onGoToForgotPassword,
             modifier = Modifier.fillMaxWidth(),
@@ -109,7 +135,6 @@ fun LoginStepContent(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Pulsante Registrati (per chi non ha un account)
         OutlinedButton(
             onClick = onGoToRegister,
             modifier = Modifier.fillMaxWidth(),
@@ -120,7 +145,7 @@ fun LoginStepContent(
     }
 }
 
-// --- 2. STEP PASSWORD DIMENTICATA ---
+//STEP PASSWORD DIMENTICATA
 @Composable
 fun ForgotPasswordStepContent(onSendReset: (String) -> Unit) {
     var email by remember { mutableStateOf("") }
@@ -140,8 +165,7 @@ fun ForgotPasswordStepContent(onSendReset: (String) -> Unit) {
     }
 }
 
-// --- 3. STEP SELEZIONE RUOLO ---
-// --- 3. STEP SELEZIONE RUOLO ---
+//STEP SELEZIONE RUOLO
 @Composable
 fun RoleSelectionStepContent(onSelectRole: (String) -> Unit) {
     Column(modifier = Modifier.fillMaxWidth()) {
@@ -152,7 +176,6 @@ fun RoleSelectionStepContent(onSelectRole: (String) -> Unit) {
         )
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Pulsante Account Personal (Traveler)
         Button(
             onClick = { onSelectRole("TRAVELER") },
             modifier = Modifier.fillMaxWidth().height(50.dp),
@@ -163,7 +186,6 @@ fun RoleSelectionStepContent(onSelectRole: (String) -> Unit) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Pulsante Account Business (Organizer)
         Button(
             onClick = { onSelectRole("ORGANIZER") },
             modifier = Modifier.fillMaxWidth().height(50.dp),
@@ -176,11 +198,14 @@ fun RoleSelectionStepContent(onSelectRole: (String) -> Unit) {
 
 
 
-// --- 4. STEP DETTAGLI REGISTRAZIONE ---
+//STEP DETTAGLI REGISTRAZIONE
 @Composable
 fun RegistrationStepContent(
+    isLoading: Boolean,
+    serverError: String?,
     role: String,
-    onRegisterSubmit: (String, String, String, String, String, String) -> Unit
+    onRegisterSubmit: (String, String, String, String, String, String) -> Unit,
+
 ) {
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }

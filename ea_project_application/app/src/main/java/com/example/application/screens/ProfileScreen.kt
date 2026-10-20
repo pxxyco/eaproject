@@ -19,13 +19,11 @@ fun ProfileScreen(
 ) {
     Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         if (!isLoggedIn) {
-            // Mostra il flusso completo (Login -> Ruoli -> Registrazione)
             AuthWizardScreen(
                 onLoginSuccess = onLoginSuccess,
                 onBackToHome = {}
             )
         } else {
-            // Schermata Profilo a login avvenuto con tasto Logout
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,

@@ -35,7 +35,6 @@ fun ExperienceCard(
         colors = CardDefaults.cardColors(containerColor = PopupSurface)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            // Sostituito AsyncImage con un Box segnaposto stilizzato
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -44,14 +43,11 @@ fun ExperienceCard(
                     .background(Stone600),
                 contentAlignment = Alignment.Center
             ) {
-                // Testo o icona di fallback per l'immagine
                 Text(
                     text = "Foto",
                     style = MaterialTheme.typography.bodySmall,
                     color = Stone300
                 )
-
-                // Badge Categoria in alto a sinistra
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -71,8 +67,6 @@ fun ExperienceCard(
                     }
                 }
             }
-
-            // Dettagli Testuali della Card
             Column(modifier = Modifier.padding(10.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),

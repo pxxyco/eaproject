@@ -35,7 +35,7 @@ fun LoginScreen(onLoginClick: () -> Unit, onSkipClick: () -> Unit)
             )
             Spacer(modifier = Modifier.height(48.dp))
 
-            // Pulsante 1: Effettua il login
+            //Effettua il login
             Button(onClick = onLoginClick,
                 modifier = Modifier.fillMaxWidth().height(50.dp),
                 colors = ButtonDefaults.buttonColors(
@@ -47,7 +47,7 @@ fun LoginScreen(onLoginClick: () -> Unit, onSkipClick: () -> Unit)
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Pulsante 2: Annulla / Salta alla schermata principale
+            //Annulla / Salta alla schermata principale
             OutlinedButton(onClick = onSkipClick,
                 modifier = Modifier.fillMaxWidth().height(50.dp),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = Stone200))

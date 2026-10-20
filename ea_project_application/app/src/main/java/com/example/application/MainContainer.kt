@@ -1,5 +1,6 @@
 package com.example.application
 
+import android.app.Activity
 import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -13,20 +14,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.core.content.edit
+import com.example.application.network.ApiService
+import com.example.application.network.AppStatus
+import com.example.application.network.AuthRepository
+import com.example.application.network.UserSession
+import com.example.application.screens.AppErrorDialog
 import com.example.application.screens.HomeScreen
 import com.example.application.screens.MyTrip
 import com.example.application.screens.ProfileScreen
 
 @Composable
 fun MainContainer() {
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val sharedPreferences = remember { context.getSharedPreferences("AppPrefs", Context.MODE_PRIVATE) }
+    val isLoggedIn = UserSession.isLoggedIn
 
-    var isLoggedIn by remember {
-        mutableStateOf(sharedPreferences.getBoolean("is_logged_in", false))
+    LaunchedEffect(AppStatus.reloadTick) {
+        if (!ApiService.isBackendReachable()) {
+            AppStatus.showNetworkError()
+        } else {
+            AuthRepository.restoreSession()
+        }
     }
 
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
+    AppErrorDialog(onExit = { (context as? Activity)?.finishAffinity() })
 
     NavigationSuiteScaffold(
         navigationSuiteItems = {
@@ -47,26 +59,14 @@ fun MainContainer() {
     ) {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             when (currentDestination) {
-                AppDestinations.HOME -> {
-                    HomeScreen(modifier = Modifier.padding(innerPadding))
-                }
-                AppDestinations.`MY-TRIP` -> {
-                    MyTrip(modifier = Modifier.padding(innerPadding))
-                }
-                AppDestinations.PROFILE -> {
-                    ProfileScreen(
-                        isLoggedIn = isLoggedIn,
-                        onLoginSuccess = {
-                            sharedPreferences.edit { putBoolean("is_logged_in", true) }
-                            isLoggedIn = true
-                        },
-                        onLogoutClick = {
-                            sharedPreferences.edit { putBoolean("is_logged_in", false) }
-                            isLoggedIn = false
-                        },
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                AppDestinations.HOME -> HomeScreen(modifier = Modifier.padding(innerPadding))
+                AppDestinations.`MY-TRIP` -> MyTrip(modifier = Modifier.padding(innerPadding))
+                AppDestinations.PROFILE -> ProfileScreen(
+                    isLoggedIn = isLoggedIn,
+                    onLoginSuccess = { /* lo stato lo gestisce UserSession */ },
+                    onLogoutClick = { AuthRepository.logout() },
+                    modifier = Modifier.padding(innerPadding)
+                )
             }
         }
     }

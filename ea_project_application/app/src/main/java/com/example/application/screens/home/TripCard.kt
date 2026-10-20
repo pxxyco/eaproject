@@ -26,7 +26,7 @@ fun TripCard(
 ) {
     Card(
         modifier = Modifier
-            .width(280.dp) // Più larga e rettangolare
+            .width(280.dp)
             .height(200.dp)
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
@@ -35,7 +35,6 @@ fun TripCard(
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
-            // Sfondo dell'immagine panoramica/rettangolare
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -43,13 +42,12 @@ fun TripCard(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "🖼️ Foto Multiple (Galleria)",
+                    text = "🖼 Foto Multiple (Galleria)",
                     style = MaterialTheme.typography.bodySmall,
                     color = Stone300
                 )
             }
 
-            // Badge foto in alto a destra
             Surface(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
@@ -65,7 +63,6 @@ fun TripCard(
                 )
             }
 
-            // Contenuto testuale in basso sovrapposto con sfumatura o box scuro
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
