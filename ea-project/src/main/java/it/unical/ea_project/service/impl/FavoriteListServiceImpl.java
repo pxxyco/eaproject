@@ -20,41 +20,50 @@ public class FavoriteListServiceImpl implements FavoriteListService {
 
     @Override
     @Transactional
-    public FavoriteList createFavoriteList(Long userId, FavoriteList.Visibility visibility) {
+    public FavoriteList createFavoriteList(Long userId, String name, FavoriteList.Visibility visibility) {
+
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Utente non trovato con ID: " + userId));
 
         FavoriteList favoriteList = new FavoriteList();
+        if (name == null || name.isBlank() || name.trim().length() > 80) {
+            throw new IllegalArgumentException("Il nome della lista deve contenere da 1 a 80 caratteri.");
+        }
+        
+        favoriteList.setName(name.trim());
         favoriteList.setUser(user);
         favoriteList.setVisibility(visibility != null ? visibility : FavoriteList.Visibility.PRIVATE);
         favoriteList.setDeleted(false);
 
         return favoriteListRepository.save(favoriteList);
+
     }
 
 
     @Override
     @Transactional(readOnly = true)
     public List<FavoriteList> getActiveListsByUser(Long userId) {
-        //Controlla se l'utente esiste fixme
-        //return favoriteListRepository.findByUserUserIdAndDeletedFalse(userId);
-        return List.of();
+        return favoriteListRepository.findByUser_IdAndDeletedFalse(userId);
     }
 
     @Override
     @Transactional(readOnly = true)
     public FavoriteList getListById(Long id) {
+
         return favoriteListRepository.findById(id)
                 .filter(list -> !list.isDeleted())
                 .orElseThrow(() -> new IllegalArgumentException("Lista dei preferiti non trovata o eliminata con ID: " + id));
+
     }
 
     @Override
     @Transactional
     public void softDeleteList(Long id) {
+
         FavoriteList favoriteList = favoriteListRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Lista dei preferiti non trovata con ID: " + id));
         favoriteList.setDeleted(true);
         favoriteListRepository.save(favoriteList);
+
     }
 }

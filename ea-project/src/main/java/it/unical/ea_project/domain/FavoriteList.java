@@ -11,10 +11,24 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-
 @Entity
 @Table(name = "\"FAVORITE_LIST\"")
 public class FavoriteList {
+
+    /**
+     * Visibility
+     */
+    public enum Visibility {
+    
+        PRIVATE,
+        SHARED,
+        PUBLIC
+
+    }
+
+    @Column(name = "name", length = 80, nullable = false)
+    private String name;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "list_id")
@@ -25,15 +39,11 @@ public class FavoriteList {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    public enum Visibility {
-        PRIVATE ,
-        SHARED,
-        PUBLIC
-    }
-
     @Enumerated(EnumType.STRING)
     @Column(name = "visibility")
     private Visibility visibility;
+
     @Column(name = "deleted")
     private boolean deleted;
+
 }
