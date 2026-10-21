@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -18,5 +17,10 @@ public class ListTripsDTO {
 
     private Long tripId;
 
+    private String title;
+
+    private String location;
+
     private LocalDateTime addedAt;
+
 }

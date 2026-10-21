@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.util.List;
 
@@ -110,6 +111,39 @@ public class FavoriteListController {
 
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<FavoriteListDTO> updateList(
+            @PathVariable Long id,
+            @AuthenticationPrincipal AuthUser user,
+            @RequestBody FavoriteListRequest request) {
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        if (request == null 
+            || request.name() == null 
+            || request.name().isBlank()        
+            || request.name().trim().length() > 80 
+            || request.visibility() == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        try {
+
+            FavoriteList updated = favoriteListService.updateFavoriteList(
+                    id, user.id(), request.name(), request.visibility()
+            );
+            return ResponseEntity.ok(toDTO(updated));
+
+        } catch (AccessDeniedException ex) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteList(
             @PathVariable Long id,
@@ -119,15 +153,23 @@ public class FavoriteListController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        FavoriteList list = favoriteListService.getListById(id);
+        final FavoriteList list;
+        try {
+            list = favoriteListService.getListById(id);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.notFound().build();
+        }
 
-        if (!list.getUser().getId().equals(user.id())) {
+        if (list.getUser() == null || !list.getUser().getId().equals(user.id())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        favoriteListService.softDeleteList(id);
-
-        return ResponseEntity.noContent().build();
+        try {
+            favoriteListService.softDeleteList(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.notFound().build();
+        }
 
     }
 

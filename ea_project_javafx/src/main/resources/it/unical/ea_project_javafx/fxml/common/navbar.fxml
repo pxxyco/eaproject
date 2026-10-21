@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.MenuButton?>
@@ -10,8 +11,10 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 
 <BorderPane styleClass="navbar" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.common.NavbarController">
+    <stylesheets><URL value="@../../css/common/notifications.css" /></stylesheets>
     <left>
         <HBox alignment="CENTER_LEFT" spacing="16.0">
             <children>
@@ -45,6 +48,10 @@
             <children>
                 <Label fx:id="loginLabel" onMouseClicked="#handleLogin" styleClass="btn-nav-login" text="Login" />
 
+                <StackPane fx:id="notificationBellContainer" onMouseClicked="#handleNotifications" styleClass="notification-bell-container" visible="false" managed="false" accessibleText="Notifiche" focusTraversable="true">
+                    <Label text="🔔" styleClass="notification-bell-icon" />
+                    <Label fx:id="notificationBadge" text="" styleClass="notification-badge" visible="false" managed="false" />
+                </StackPane>
                 <MenuButton fx:id="userMenuButton" styleClass="btn-nav-login" text="Utente">
                     <items>
                         <MenuItem onAction="#handleProfileInfos" text="Il mio Profilo" />

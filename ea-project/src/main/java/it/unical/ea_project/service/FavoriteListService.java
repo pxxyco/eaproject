@@ -11,6 +11,8 @@ public interface FavoriteListService {
     
     FavoriteList getListById(Long id);
     
+    FavoriteList updateFavoriteList(Long id, Long userId, String name, FavoriteList.Visibility visibility);
+
     void softDeleteList(Long id);
 
 }

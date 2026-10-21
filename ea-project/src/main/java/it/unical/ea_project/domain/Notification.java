@@ -19,7 +19,8 @@ public class Notification {
         CONFIRMATION,
         BOOKING,
         NOTICE,
-        PAYMENT
+        PAYMENT,
+        LIST_INVITATION
     }
 
     @Id
@@ -47,6 +48,17 @@ public class Notification {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    // Riferimento opzionale all'elemento dell'app (es. lista preferita invitata).
+    @Column(name = "related_entity_id")
+    private Long relatedEntityId;
+
+    @Column(name = "related_entity_type", length = 80)
+    private String relatedEntityType;
+
+    // Dati d'azione opzionali, ad esempio il permesso VIEW/EDIT dell'invito.
+    @Column(name = "action_data", length = 255)
+    private String actionData;
 
     @PrePersist
     protected void onCreate() {

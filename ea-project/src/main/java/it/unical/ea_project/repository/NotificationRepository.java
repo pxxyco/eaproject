@@ -12,9 +12,15 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
+
+    Optional<Notification> findByNotificationIdAndUser_Id(Long notificationId, Long userId);
+
+    boolean existsByUser_IdAndTypeAndRelatedEntityId(
+            Long userId, NotificationType type, Long relatedEntityId);
 
     // Recupera le notifiche di un utente ordinate dalla più recente (decrescente per data)
     List<Notification> findByUserOrderByCreatedAtDesc(User user);

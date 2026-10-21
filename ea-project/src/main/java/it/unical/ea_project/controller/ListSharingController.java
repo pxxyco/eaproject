@@ -1,16 +1,33 @@
 package it.unical.ea_project.controller;
 
+import it.unical.ea_project.domain.FavoriteList;
 import it.unical.ea_project.domain.ListSharing;
+import it.unical.ea_project.domain.Notification;
+import it.unical.ea_project.domain.ListTrips;
+import it.unical.ea_project.domain.Stage;
+import it.unical.ea_project.domain.Trip;
+import it.unical.ea_project.domain.User;
 import it.unical.ea_project.repository.FavoriteListRepository;
+import it.unical.ea_project.repository.ListSharingRepository;
+import it.unical.ea_project.repository.ListTripsRepository;
+import it.unical.ea_project.repository.TripRepository;
+import it.unical.ea_project.repository.UserRepository;
 import it.unical.ea_project.security.AuthUser;
 import it.unical.ea_project.service.ListSharingService;
+import it.unical.ea_project.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/list-sharings")
@@ -19,82 +36,170 @@ public class ListSharingController {
 
     private final ListSharingService listSharingService;
     private final FavoriteListRepository lists;
+    private final ListSharingRepository sharings;
+    private final UserRepository users;
+    private final NotificationService notifications;
+    private final ListTripsRepository listTrips;
+    private final TripRepository trips;
 
-    public record ShareListRequest(Long listId, Long userId, ListSharing.SharingPermission permission) {}
+    // Per compatibilità accetta identifier (nuovo client), username (client precedente) oppure email.
+    // userId resta interno per modifiche/revoche di condivisioni già accettate.
+    public record ShareListRequest(Long listId, String identifier, String username, String email,
+                                   Long userId, ListSharing.SharingPermission permission) {}
+
+    public record SharingResponse(Long listId, String listName, Long userId, String username, String email,
+                                  ListSharing.SharingPermission permission, LocalDateTime sharedAt) {
+        static SharingResponse from(ListSharing sharing) {
+            return new SharingResponse(sharing.getFavoriteList().getId(), sharing.getFavoriteList().getName(),
+                    sharing.getUser().getId(), sharing.getUser().getUsername(), sharing.getUser().getEmail(),
+                    sharing.getPermission(), sharing.getSharedAt());
+        }
+    }
+
+    public record SharedStageResponse(String title, String category, String locationName, String city,
+                                      String country, Integer day, Integer orderInDay,
+                                      LocalTime startTime, LocalTime endTime, String description) {}
+
+    public record SharedTripResponse(Long tripId, String title, String destinationCity,
+                                     String destinationCountry, LocalDate startDate, LocalDate endDate,
+                                     String organizerUsername, List<SharedStageResponse> stages) {}
+
+    public record SharedListResponse(Long listId, String listName, String organizerUsername,
+                                     ListSharing.SharingPermission permission, LocalDateTime sharedAt,
+                                     List<SharedTripResponse> trips) {}
 
     @PostMapping
-    public ResponseEntity<?> shareList(@RequestBody ShareListRequest request,
-                                       @AuthenticationPrincipal AuthUser user) {
+    @Transactional
+    public ResponseEntity<?> inviteToList(@RequestBody ShareListRequest request,
+                                          @AuthenticationPrincipal AuthUser currentUser) {
+        String identifier = request == null ? null : firstNonBlank(request.identifier(), request.username(), request.email());
+        if (request == null || request.listId() == null || identifier == null) {
+            return ResponseEntity.badRequest().body("Inserisci lo username o l'email dell'utente da invitare.");
+        }
+        FavoriteList list = lists.findById(request.listId()).filter(l -> !l.isDeleted()).orElse(null);
+        if (list == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Lista non trovata.");
+        if (!list.getUser().getId().equals(currentUser.id())) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 
-        if (!owns(request.listId(), user.id())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        String normalizedIdentifier = identifier.trim();
+        User recipient = users.findByUsernameIgnoreCase(normalizedIdentifier)
+                .or(() -> users.findByEmailIgnoreCase(normalizedIdentifier))
+                .filter(candidate -> candidate.getDeletedAt() == null)
+                .orElse(null);
+        if (recipient == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Nessun utente attivo trovato con questo username o email.");
+        }
+        if (recipient.getId().equals(currentUser.id())) {
+            return ResponseEntity.badRequest().body("Non puoi invitare te stesso.");
+        }
+        if (sharings.existsByFavoriteList_IdAndUser_Id(list.getId(), recipient.getId())) {
+            return ResponseEntity.badRequest().body("Questo utente ha già accesso alla lista.");
+        }
+        if (notifications.hasPendingListInvitation(recipient.getId(), list.getId())) {
+            return ResponseEntity.badRequest().body("Esiste già un invito in attesa per questo utente.");
         }
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(
-                listSharingService.shareList(request.listId(), request.userId(), request.permission())
-        );
+        User inviter = users.findById(currentUser.id()).orElseThrow();
+        Notification notification = new Notification();
+        notification.setUser(recipient);
+        notification.setType(Notification.NotificationType.LIST_INVITATION);
+        notification.setTitle("Invito a una lista condivisa");
+        notification.setMessage("@" + inviter.getUsername() + " ti ha invitato alla lista «" + list.getName() + "».");
+        notification.setRead(false);
+        notification.setRelatedEntityId(list.getId());
+        notification.setRelatedEntityType("FAVORITE_LIST");
+        notification.setActionData((request.permission() == null ? ListSharing.SharingPermission.VIEW : request.permission()).name());
+        notifications.createNotification(notification);
 
+        return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
+                "message", "Invito inviato a @" + recipient.getUsername(),
+                "username", recipient.getUsername(),
+                "email", recipient.getEmail()));
+    }
+
+    private String firstNonBlank(String... values) {
+        for (String value : values) {
+            if (value != null && !value.isBlank()) return value.trim();
+        }
+        return null;
     }
 
     @GetMapping("/list/{listId}")
+    @Transactional(readOnly = true)
     public ResponseEntity<?> getSharingsByList(@PathVariable Long listId,
                                                @AuthenticationPrincipal AuthUser user) {
-
-        if (!owns(listId, user.id())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        return ResponseEntity.ok(listSharingService.getSharingsByListId(listId));
-
+        if (!owns(listId, user.id())) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        return ResponseEntity.ok(listSharingService.getSharingsByListId(listId).stream().map(SharingResponse::from).toList());
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<ListSharing>> getMySharedLists(@AuthenticationPrincipal AuthUser user) {
-        return ResponseEntity.ok(listSharingService.getSharedListsForUser(user.id()));
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<SharingResponse>> getMySharedLists(@AuthenticationPrincipal AuthUser user) {
+        return ResponseEntity.ok(listSharingService.getSharedListsForUser(user.id()).stream().map(SharingResponse::from).toList());
+    }
+
+    /** Elenca solo le liste accettate e condivise con l'utente autenticato, includendo viaggi e tappe. */
+    @GetMapping("/shared-with-me")
+    @Transactional(readOnly = true)
+    public ResponseEntity<List<SharedListResponse>> getSharedListsWithDetails(
+            @AuthenticationPrincipal AuthUser user) {
+        List<SharedListResponse> result = listSharingService.getSharedListsForUser(user.id()).stream()
+                .filter(sharing -> !sharing.getFavoriteList().isDeleted())
+                .map(sharing -> {
+                    FavoriteList favoriteList = sharing.getFavoriteList();
+                    List<SharedTripResponse> sharedTrips = listTrips.findByFavoriteListId(favoriteList.getId())
+                            .stream()
+                            .map(ListTrips::getTripId)
+                            .map(tripId -> trips.findByTripIdAndDeletedAtIsNull(tripId).orElse(null))
+                            .filter(java.util.Objects::nonNull)
+                            .map(trip -> new SharedTripResponse(
+                                    trip.getTripId(), trip.getTitle(), trip.getDestinationCity(),
+                                    trip.getDestinationCountry(), trip.getStartDate(), trip.getEndDate(),
+                                    trip.getCreatedBy() == null ? null : trip.getCreatedBy().getUsername(),
+                                    trip.getStages().stream()
+                                            .sorted(Comparator.comparing(Stage::getDay, Comparator.nullsLast(Integer::compareTo))
+                                                    .thenComparing(Stage::getOrderInDay, Comparator.nullsLast(Integer::compareTo)))
+                                            .map(stage -> new SharedStageResponse(
+                                                    stage.getTitle(),
+                                                    stage.getCategory() == null ? null : stage.getCategory().name(),
+                                                    stage.getLocationName(), stage.getCity(), stage.getCountry(),
+                                                    stage.getDay(), stage.getOrderInDay(), stage.getStartTime(),
+                                                    stage.getEndTime(), stage.getDescription()))
+                                            .toList()))
+                            .toList();
+                    return new SharedListResponse(favoriteList.getId(), favoriteList.getName(),
+                            favoriteList.getUser() == null ? null : favoriteList.getUser().getUsername(),
+                            sharing.getPermission(), sharing.getSharedAt(), sharedTrips);
+                })
+                .toList();
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getSharedListsForUser(@PathVariable Long userId,
-                                                   @AuthenticationPrincipal AuthUser user) {
-
-        if (!user.id().equals(userId)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        return ResponseEntity.ok(listSharingService.getSharedListsForUser(userId));
+    @Transactional(readOnly = true)
+    public ResponseEntity<?> getSharedListsForUser(@PathVariable Long userId, @AuthenticationPrincipal AuthUser user) {
+        if (!user.id().equals(userId)) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        return ResponseEntity.ok(listSharingService.getSharedListsForUser(userId).stream().map(SharingResponse::from).toList());
     }
 
     @PutMapping("/permission")
-    public ResponseEntity<Void> updatePermission(@RequestBody ShareListRequest request, 
-                                                 @AuthenticationPrincipal AuthUser user) {
-
-        if (!owns(request.listId(), user.id())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
+    public ResponseEntity<Void> updatePermission(@RequestBody ShareListRequest request, @AuthenticationPrincipal AuthUser user) {
+        if (request == null || request.listId() == null || request.userId() == null) return ResponseEntity.badRequest().build();
+        if (!owns(request.listId(), user.id())) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         listSharingService.updatePermission(request.listId(), request.userId(), request.permission());
         return ResponseEntity.ok().build();
-
     }
 
     @DeleteMapping("/list/{listId}/user/{userId}")
-    public ResponseEntity<Void> revokeSharing(@PathVariable Long listId, 
-                                              @PathVariable Long userId,
+    public ResponseEntity<Void> revokeSharing(@PathVariable Long listId, @PathVariable Long userId,
                                               @AuthenticationPrincipal AuthUser user) {
-
-        if (!owns(listId, user.id())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
+        if (!owns(listId, user.id())) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         listSharingService.revokeSharing(listId, userId);
         return ResponseEntity.noContent().build();
-
     }
 
     private boolean owns(Long listId, Long userId) {
         return lists.findById(listId).filter(l -> !l.isDeleted())
                 .map(l -> l.getUser().getId().equals(userId)).orElse(false);
     }
-
 }

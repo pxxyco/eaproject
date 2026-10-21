@@ -9,6 +9,8 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.FlowPane?>
@@ -24,72 +26,132 @@
         <URL value="@../../css/home/home.css" />
         <URL value="@../../css/profile/profile.css" />
         <URL value="@../../css/traveler/traveler.css" />
+        <URL value="@../../css/traveler/list-sharing-popup.css" />
     </stylesheets>
-
     <ImageView fx:id="bgImageView" pickOnBounds="true" preserveRatio="false" />
     <Region styleClass="profile-overlay" />
-
     <BorderPane>
-        <top>
-            <StackPane fx:id="navbarContainer" />
-        </top>
+        <top><StackPane fx:id="navbarContainer" /></top>
         <center>
             <ScrollPane fitToWidth="true" styleClass="main-scroll">
                 <content>
                     <VBox alignment="TOP_CENTER" spacing="24.0">
-                        <padding>
-                            <Insets bottom="40.0" left="32.0" right="32.0" top="28.0" />
-                        </padding>
-
-                        <VBox maxWidth="1050.0" spacing="20.0" styleClass="glass-card">
-                            <padding>
-                                <Insets bottom="28.0" left="28.0" right="28.0" top="28.0" />
-                            </padding>
-
-                            <HBox alignment="CENTER_LEFT" spacing="16.0">
-                                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
-                                    <Label styleClass="dash-title" text="Liste Itinerari &amp; Preferiti" />
-                                    <Label styleClass="dash-subtitle" text="Crea e gestisci le tue liste di viaggi private o condivise con i tuoi amici." />
-                                </VBox>
-                            </HBox>
-
+                        <padding><Insets bottom="40.0" left="32.0" right="32.0" top="28.0" /></padding>
+                        <VBox maxWidth="1150.0" spacing="20.0" styleClass="glass-card">
+                            <padding><Insets bottom="28.0" left="28.0" right="28.0" top="28.0" /></padding>
+                            <VBox spacing="4.0">
+                                <Label styleClass="dash-title" text="Liste Itinerari &amp; Preferiti" />
+                                <Label styleClass="dash-subtitle" text="Organizza viaggi e attività nelle tue liste." />
+                            </VBox>
                             <Label fx:id="statusMessageLabel" managed="false" visible="false" wrapText="true" />
-
                             <Separator styleClass="nav-divider" />
-
                             <VBox spacing="10.0" styleClass="booking-count-card">
                                 <Label styleClass="section-header" text="+ Crea Nuova Lista Itinerari" />
                                 <HBox spacing="12.0" alignment="CENTER_LEFT">
-                                    <TextField fx:id="newListNameField" promptText="Nome lista (es. Viaggio estivo Sila)" styleClass="custom-input" HBox.hgrow="ALWAYS" />
+                                    <TextField fx:id="newListNameField" promptText="Nome lista" styleClass="custom-input" HBox.hgrow="ALWAYS" />
                                     <ComboBox fx:id="newListVisibilityCombo" promptText="Visibilità" styleClass="traveler-search-type" prefWidth="160.0" />
                                     <Button text="Crea Lista" onAction="#handleCreateList" styleClass="btn-primary" />
                                 </HBox>
                             </VBox>
-
+                            <VBox spacing="10.0" styleClass="booking-count-card">
+                                <Label styleClass="section-header" text="Modifica nome e visibilità" />
+                                <HBox spacing="12.0" alignment="CENTER_LEFT">
+                                    <TextField fx:id="editListNameField" promptText="Nome della lista selezionata" styleClass="custom-input" HBox.hgrow="ALWAYS" />
+                                    <ComboBox fx:id="editListVisibilityCombo" promptText="Visibilità" styleClass="traveler-search-type" prefWidth="160.0" />
+                                    <Button fx:id="saveListChangesButton" text="Salva modifiche" onAction="#handleSaveListChanges" styleClass="btn-primary" />
+                                </HBox>
+                            </VBox>
                             <HBox spacing="20.0" VBox.vgrow="ALWAYS">
                                 <VBox spacing="10.0" prefWidth="280.0">
                                     <Label styleClass="section-header" text="Le Tue Liste" />
-                                    <ListView fx:id="listsListView" prefHeight="350.0" styleClass="custom-table" />
+                                    <ListView fx:id="listsListView" prefHeight="500.0" styleClass="custom-table" />
                                 </VBox>
-
                                 <VBox spacing="12.0" HBox.hgrow="ALWAYS">
-                                    <HBox alignment="CENTER_LEFT">
+                                    <HBox alignment="CENTER_LEFT" spacing="10.0">
                                         <VBox spacing="2.0">
                                             <Label fx:id="selectedListNameLabel" styleClass="section-title" text="Seleziona una lista" />
                                             <Label fx:id="selectedListVisibilityLabel" styleClass="section-subtitle" text="-" />
                                         </VBox>
                                         <Region HBox.hgrow="ALWAYS" />
                                         <Button fx:id="shareListButton" text="🔗 Condividi / Permessi" onAction="#handleShareList" styleClass="btn-secondary" visible="false" />
+                                        <Button fx:id="deleteListButton" text="🗑 Elimina lista" onAction="#handleDeleteList" styleClass="btn-secondary" disable="true" />
                                     </HBox>
-
-                                    <FlowPane fx:id="favoritesCardsContainer" hgap="16.0" vgap="16.0" />
+                                    <HBox spacing="16.0">
+                                        <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                                            <Label styleClass="section-header" text="Viaggi salvati" />
+                                            <ListView fx:id="savedTripsListView" prefHeight="180.0" />
+                                            <Button fx:id="removeTripButton" text="Rimuovi viaggio selezionato" onAction="#handleRemoveTrip" styleClass="btn-secondary" maxWidth="Infinity" />
+                                            <Label text="Cerca viaggi da aggiungere" />
+                                            <HBox spacing="8.0">
+                                                <TextField fx:id="tripSearchField" promptText="Titolo o destinazione" HBox.hgrow="ALWAYS" />
+                                                <Button text="Cerca" onAction="#handleSearchTrips" styleClass="btn-secondary" />
+                                            </HBox>
+                                            <ListView fx:id="tripSearchResults" prefHeight="150.0" />
+                                            <Button fx:id="addTripButton" text="Aggiungi viaggio selezionato" onAction="#handleAddTrip" styleClass="btn-primary" maxWidth="Infinity" />
+                                        </VBox>
+                                        <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                                            <Label styleClass="section-header" text="Attività salvate" />
+                                            <ListView fx:id="savedActivitiesListView" prefHeight="180.0" />
+                                            <Button fx:id="removeActivityButton" text="Rimuovi attività selezionata" onAction="#handleRemoveActivity" styleClass="btn-secondary" maxWidth="Infinity" />
+                                            <Label text="Cerca attività da aggiungere" />
+                                            <HBox spacing="8.0">
+                                                <TextField fx:id="activitySearchField" promptText="Titolo o città" HBox.hgrow="ALWAYS" />
+                                                <Button text="Cerca" onAction="#handleSearchActivities" styleClass="btn-secondary" />
+                                            </HBox>
+                                            <ListView fx:id="activitySearchResults" prefHeight="150.0" />
+                                            <Button fx:id="addActivityButton" text="Aggiungi attività selezionata" onAction="#handleAddActivity" styleClass="btn-primary" maxWidth="Infinity" />
+                                        </VBox>
+                                    </HBox>
                                 </VBox>
                             </HBox>
-
+                            <Separator styleClass="nav-divider" />
+                            <VBox spacing="12.0" styleClass="booking-count-card">
+                                <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                    <VBox spacing="3.0" HBox.hgrow="ALWAYS">
+                                        <Label styleClass="section-header" text="Liste condivise con te" />
+                                        <Label fx:id="sharedListsStatusLabel" styleClass="section-subtitle" text="Caricamento liste condivise…" wrapText="true" />
+                                    </VBox>
+                                    <Button text="Aggiorna" onAction="#handleRefreshSharedLists" styleClass="btn-secondary" />
+                                </HBox>
+                                <HBox spacing="16.0" alignment="TOP_LEFT">
+                                    <TableView fx:id="sharedListsTable" prefHeight="230.0" prefWidth="530.0" HBox.hgrow="ALWAYS" styleClass="custom-table">
+                                        <columns>
+                                            <TableColumn fx:id="sharedListNameColumn" text="Lista" prefWidth="190.0" />
+                                            <TableColumn fx:id="sharedListOrganizerColumn" text="Organizzatore" prefWidth="125.0" />
+                                            <TableColumn fx:id="sharedListPermissionColumn" text="Permesso" prefWidth="85.0" />
+                                            <TableColumn fx:id="sharedListSharedAtColumn" text="Condivisa il" prefWidth="130.0" />
+                                        </columns>
+                                    </TableView>
+                                    <VBox spacing="8.0" HBox.hgrow="ALWAYS">
+                                        <Label styleClass="section-header" text="Viaggi e tappe della lista selezionata" />
+                                        <ListView fx:id="sharedListDetailsListView" prefHeight="230.0" prefWidth="480.0" />
+                                    </VBox>
+                                </HBox>
+                            </VBox>
                         </VBox>
                     </VBox>
                 </content>
             </ScrollPane>
         </center>
     </BorderPane>
+    <fx:include fx:id="sharingPopup" source="list-sharing-popup.fxml" />
+    <StackPane fx:id="deleteConfirmationPopup" styleClass="sharing-popup-overlay" pickOnBounds="true" visible="false" managed="false">
+        <Region styleClass="sharing-popup-backdrop" />
+        <VBox maxWidth="460.0" spacing="18.0" styleClass="sharing-popup-card delete-confirmation-card">
+            <padding><Insets top="28.0" right="30.0" bottom="26.0" left="30.0" /></padding>
+            <HBox alignment="CENTER_LEFT" spacing="12.0">
+                <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                    <Label text="Elimina lista" styleClass="sharing-popup-title" />
+                    <Label fx:id="deletePopupTitleLabel" text="Vuoi eliminare questa lista?" wrapText="true" styleClass="sharing-popup-subtitle" />
+                </VBox>
+                <Button text="✕" onAction="#cancelDeleteList" styleClass="sharing-popup-close" accessibleText="Chiudi popup" />
+            </HBox>
+            <Separator />
+            <Label text="La lista non sarà più disponibile. Se è condivisa, scomparirà anche dalle liste condivise degli altri utenti. L'operazione non può essere annullata dall'interfaccia." wrapText="true" styleClass="sharing-popup-hint" />
+            <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                <Button text="Annulla" onAction="#cancelDeleteList" styleClass="btn-secondary" />
+                <Button fx:id="confirmDeleteButton" text="Elimina definitivamente" onAction="#confirmDeleteList" styleClass="delete-confirm-button" />
+            </HBox>
+        </VBox>
+    </StackPane>
 </StackPane>

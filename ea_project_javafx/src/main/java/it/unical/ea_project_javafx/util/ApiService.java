@@ -323,6 +323,10 @@ public class ApiService {
                 if (onFailure != null) {
                     onFailure.run();
                 }
+            } else {
+                // Anche le risposte HTTP 4xx/5xx devono notificare il chiamante: altrimenti
+                // la UI può restare bloccata nello stato "Caricamento..." senza feedback.
+                if (onFailure != null) onFailure.run();
             }
         });
 

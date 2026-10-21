@@ -8,6 +8,7 @@ import it.unical.ea_project.service.FavoriteListService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.util.List;
 
@@ -54,6 +55,36 @@ public class FavoriteListServiceImpl implements FavoriteListService {
                 .filter(list -> !list.isDeleted())
                 .orElseThrow(() -> new IllegalArgumentException("Lista dei preferiti non trovata o eliminata con ID: " + id));
 
+    }
+
+    @Override
+    @Transactional
+    public FavoriteList updateFavoriteList(Long id, 
+                                           Long userId,
+                                           String name,
+                                           FavoriteList.Visibility visibility) {
+
+        FavoriteList list = favoriteListRepository.findById(id)
+                .filter(existing -> !existing.isDeleted())
+                .orElseThrow(() -> new IllegalArgumentException("Lista non trovata o eliminata: " + id));
+
+        if (list.getUser() == null || !list.getUser().getId().equals(userId)) {
+            throw new AccessDeniedException(
+                    "Non sei autorizzato a modificare questa lista."
+            );
+        }
+
+        if (name == null || name.isBlank() || name.trim().length() > 80) {
+            throw new IllegalArgumentException("Il nome deve contenere da 1 a 80 caratteri.");
+        }
+
+        if (visibility == null) {
+            throw new IllegalArgumentException("La visibilità è obbligatoria.");
+        }
+
+        list.setName(name.trim());
+        list.setVisibility(visibility);
+        return favoriteListRepository.save(list);
     }
 
     @Override

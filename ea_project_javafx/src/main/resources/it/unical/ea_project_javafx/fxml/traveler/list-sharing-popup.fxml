@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="it.unical.ea_project_javafx.controller.traveler.ListSharingPopupController"
+           styleClass="sharing-popup-overlay" pickOnBounds="true">
+    <children>
+        <Region styleClass="sharing-popup-backdrop" />
+        <VBox maxWidth="620.0" maxHeight="650.0" spacing="16.0" styleClass="sharing-popup-card">
+            <padding><Insets top="26.0" right="28.0" bottom="26.0" left="28.0" /></padding>
+            <HBox alignment="CENTER_LEFT" spacing="12.0">
+                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                    <Label text="Gestisci condivisioni" styleClass="sharing-popup-title" />
+                    <Label fx:id="popupTitleLabel" text="Condivisioni" styleClass="sharing-popup-subtitle" />
+                </VBox>
+                <Region HBox.hgrow="ALWAYS" />
+                <Button text="✕" onAction="#handleClose" styleClass="sharing-popup-close" accessibleText="Chiudi popup" />
+            </HBox>
+            <Separator />
+            <VBox spacing="8.0">
+                <Label text="Utenti che hanno accesso" styleClass="section-header" />
+                <ListView fx:id="sharingListView" prefHeight="220.0" VBox.vgrow="ALWAYS" styleClass="sharing-users-list" />
+                <Label fx:id="sharingStatusLabel" text="" wrapText="true" styleClass="sharing-status-success" />
+                <HBox spacing="10.0" alignment="CENTER_RIGHT">
+                    <ComboBox fx:id="permissionCombo" prefWidth="125.0" promptText="Permesso" />
+                    <Button fx:id="updatePermissionButton" text="Aggiorna permesso" onAction="#handleUpdatePermission" styleClass="btn-secondary" disable="true" />
+                    <Button fx:id="revokeAccessButton" text="Revoca accesso" onAction="#handleRevokeAccess" styleClass="btn-secondary" disable="true" />
+                </HBox>
+            </VBox>
+            <Separator />
+            <VBox spacing="10.0">
+                <Label text="Condividi con un nuovo utente" styleClass="section-header" />
+                <HBox spacing="10.0" alignment="CENTER_LEFT">
+                    <TextField fx:id="userIdField" promptText="ID utente" HBox.hgrow="ALWAYS" />
+                    <ComboBox fx:id="newPermissionCombo" visible="false" managed="false" />
+                    <Button text="Condividi" onAction="#handleShare" styleClass="btn-primary" />
+                </HBox>
+                <Label text="Scegli VIEW per consentire la visualizzazione o EDIT per consentire le modifiche. Il permesso selezionato sopra verrà assegnato al nuovo utente." wrapText="true" styleClass="sharing-popup-hint" />
+            </VBox>
+            <HBox alignment="CENTER_RIGHT">
+                <Button text="Fatto" onAction="#handleClose" styleClass="btn-primary" />
+            </HBox>
+        </VBox>
+    </children>
+</StackPane>

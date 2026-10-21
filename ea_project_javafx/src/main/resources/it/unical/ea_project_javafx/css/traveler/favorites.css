@@ -1,0 +1,151 @@
+
+/* ===== TABELLE: viaggi e attività ===== */
+
+.custom-table,
+.favorites-table {
+    -fx-background-color: rgba(255, 255, 255, 0.04);
+    -fx-control-inner-background: rgba(255, 255, 255, 0.04);
+    -fx-background-insets: 0;
+    -fx-background-radius: 8px;
+    -fx-border-color: rgba(255, 255, 255, 0.16);
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-table-cell-border-color: rgba(255, 255, 255, 0.08);
+    -fx-padding: 0;
+}
+
+/* Intestazione delle colonne */
+.custom-table .column-header-background,
+.favorites-table .column-header-background {
+    -fx-background-color: rgba(255, 255, 255, 0.09);
+    -fx-background-radius: 8px 8px 0 0;
+}
+
+.custom-table .column-header,
+.favorites-table .column-header {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent rgba(255, 255, 255, 0.10) transparent transparent;
+    -fx-size: 38px;
+}
+
+.custom-table .column-header .label,
+.favorites-table .column-header .label {
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 0 10px;
+}
+
+/* Righe */
+.custom-table .table-row-cell,
+.favorites-table .table-row-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent rgba(255, 255, 255, 0.08) transparent;
+    -fx-cell-size: 38px;
+}
+
+.custom-table .table-row-cell:odd,
+.favorites-table .table-row-cell:odd {
+    -fx-background-color: rgba(255, 255, 255, 0.025);
+}
+
+.custom-table .table-row-cell:hover,
+.favorites-table .table-row-cell:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+}
+
+.custom-table .table-row-cell:selected,
+.favorites-table .table-row-cell:selected {
+    -fx-background-color: rgba(255, 255, 255, 0.15);
+}
+
+.custom-table .table-cell,
+.favorites-table .table-cell {
+    -fx-text-fill: #e7e5e4;
+    -fx-padding: 8px 10px;
+    -fx-alignment: CENTER_LEFT;
+    -fx-border-color: transparent;
+}
+
+/* Tabella vuota e placeholder */
+.custom-table .placeholder .label,
+.favorites-table .placeholder .label {
+    -fx-text-fill: rgba(255, 255, 255, 0.55);
+    -fx-font-size: 12px;
+}
+
+/* Scrollbar delle tabelle */
+.custom-table .scroll-bar:vertical,
+.custom-table .scroll-bar:horizontal,
+.favorites-table .scroll-bar:vertical,
+.favorites-table .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+}
+
+.custom-table .scroll-bar .thumb,
+.favorites-table .scroll-bar .thumb {
+    -fx-background-color: rgba(255, 255, 255, 0.25);
+    -fx-background-radius: 8px;
+}
+
+.custom-table .scroll-bar .thumb:hover,
+.favorites-table .scroll-bar .thumb:hover {
+    -fx-background-color: rgba(255, 255, 255, 0.40);
+}
+
+
+/* ===== BARRE DI RICERCA ===== */
+
+/* Campo di ricerca */
+.custom-input,
+.favorites-search,
+.search-field {
+    -fx-background-color: rgba(255, 255, 255, 0.07);
+    -fx-background-radius: 8px;
+    -fx-border-color: rgba(255, 255, 255, 0.18);
+    -fx-border-radius: 8px;
+    -fx-border-width: 1px;
+    -fx-text-fill: #ffffff;
+    -fx-prompt-text-fill: rgba(255, 255, 255, 0.48);
+    -fx-highlight-fill: rgba(255, 255, 255, 0.20);
+    -fx-highlight-text-fill: #ffffff;
+    -fx-padding: 9px 12px;
+    -fx-font-size: 13px;
+}
+
+.custom-input:focused,
+.favorites-search:focused,
+.search-field:focused {
+    -fx-background-color: rgba(255, 255, 255, 0.10);
+    -fx-border-color: #d6d3d1;
+    -fx-border-width: 1px;
+}
+
+/* Contenitore della barra, se presente nel FXML */
+.search-bar,
+.favorites-search-bar {
+    -fx-background-color: rgba(255, 255, 255, 0.05);
+    -fx-background-radius: 8px;
+    -fx-border-color: rgba(255, 255, 255, 0.14);
+    -fx-border-radius: 8px;
+    -fx-padding: 6px;
+    -fx-spacing: 8px;
+}
+
+/* Pulsante accanto alla ricerca */
+.search-bar .button,
+.favorites-search-bar .button {
+    -fx-background-color: #e7e5e4;
+    -fx-text-fill: #1c1917;
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-font-weight: bold;
+    -fx-padding: 8px 14px;
+    -fx-cursor: hand;
+}
+
+.search-bar .button:hover,
+.favorites-search-bar .button:hover {
+    -fx-background-color: #fafaf9;
+}

@@ -9,11 +9,18 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(exclude = "favoriteList")
-
 @Entity
 @IdClass(ListActivities.ListActivityId.class)
 @Table(name = "\"LIST_ACTIVITIES\"")
 public class ListActivities {
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ListActivityId implements Serializable {
+        private Long favoriteList;
+        private Long activityId;
+    }
 
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
@@ -27,11 +34,4 @@ public class ListActivities {
     @Column(name = "added_at")
     private LocalDateTime addedAt;
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class ListActivityId implements Serializable {
-        private Long favoriteList;
-        private Long activityId;
-    }
 }
