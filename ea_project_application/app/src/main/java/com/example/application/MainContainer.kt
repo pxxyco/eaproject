@@ -62,8 +62,8 @@ fun MainContainer() {
                 AppDestinations.HOME -> HomeScreen(modifier = Modifier.padding(innerPadding))
                 AppDestinations.`MY-TRIP` -> MyTrip(modifier = Modifier.padding(innerPadding))
                 AppDestinations.PROFILE -> ProfileScreen(
-                    isLoggedIn = isLoggedIn,
-                    onLoginSuccess = { /* lo stato lo gestisce UserSession */ },
+                    user = UserSession.user,
+                    onLoginSuccess = { },
                     onLogoutClick = { AuthRepository.logout() },
                     modifier = Modifier.padding(innerPadding)
                 )
