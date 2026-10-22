@@ -1,5 +1,9 @@
 package com.example.application.screens.home
 
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
+
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -15,6 +19,8 @@ fun SearchTopBar(
     onSearchSubmit: () -> Unit
 ) {
     OutlinedTextField(
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+        keyboardActions = KeyboardActions(onSearch = { onSearchSubmit() }),
         value = searchQuery,
         onValueChange = onQueryChange,
         placeholder = { Text("Cerca destinazioni, attività o hotel...", color = Color.Gray) },
@@ -25,6 +31,8 @@ fun SearchTopBar(
             unfocusedBorderColor = MaterialTheme.colorScheme.outline,
             focusedTextColor = Color.White,
             unfocusedTextColor = Color.White
+
         )
+
     )
 }

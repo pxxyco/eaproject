@@ -35,19 +35,26 @@ fun ExperienceCard(
         colors = CardDefaults.cardColors(containerColor = PopupSurface)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(110.dp)
-                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 16.dp,
+                            topEnd = 16.dp
+                        )
+                    )
                     .background(Stone600),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "Foto",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Stone300
+                RemotePhoto(
+                    imageUrl = imageUrl,
+                    modifier = Modifier.fillMaxSize(),
+                    contentDescription = title
                 )
+
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -62,11 +69,15 @@ fun ExperienceCard(
                             text = category,
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.White,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            modifier = Modifier.padding(
+                                horizontal = 6.dp,
+                                vertical = 2.dp
+                            )
                         )
                     }
                 }
             }
+
             Column(modifier = Modifier.padding(10.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),

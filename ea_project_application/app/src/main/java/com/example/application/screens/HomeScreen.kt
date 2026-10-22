@@ -1,5 +1,7 @@
 package com.example.application.screens
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -13,165 +15,271 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.application.dto.home.ActivityHomeDTO
+import com.example.application.dto.home.TripHomeDTO
+import com.example.application.repository.HomeRepository
 import com.example.application.screens.home.ExperienceCard
 import com.example.application.screens.home.SearchTopBar
 import com.example.application.screens.home.TripCard
 import com.example.application.ui.theme.ScreenBackground
+import kotlinx.coroutines.launch
+import java.math.BigDecimal
+import java.math.RoundingMode
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.util.Locale
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import com.example.application.network.AppStatus
+
+private data class ActivityCategory(
+    val title: String,
+    val backendCategory: String
+)
+
+private val activityCategories = listOf(
+    ActivityCategory("Escursioni e Trekking", "EXCURSION"),
+    ActivityCategory("Visite Culturali e Musei", "VISIT"),
+    ActivityCategory("Hotel e Soggiorni", "HOTEL"),
+    ActivityCategory("Ristorazione e Degustazioni", "MEAL"),
+    ActivityCategory("Trasporti e Mobilità", "TRANSPORT")
+)
+
+private fun formatDateRange(start: String?, end: String?): String {
+    if (start.isNullOrBlank() || end.isNullOrBlank()) return ""
+    return try {
+        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+        val startDate = LocalDate.parse(start.take(10))
+        val endDate = LocalDate.parse(end.take(10))
+        if (startDate == endDate) {
+            startDate.format(formatter)
+        } else {
+            "${startDate.format(formatter)} - ${endDate.format(formatter)}"
+        }
+    } catch (_: Exception) {
+        ""
+    }
+}
+
+private fun formatPrice(price: Double?): String =
+    price?.let { "€%.2f".format(Locale.ITALY, it) } ?: "N/D"
+
+private fun formatTripPrice(price: BigDecimal?): String =
+    price?.setScale(2, RoundingMode.HALF_UP)?.let { "€$it" } ?: "N/D"
 
 @Composable
 fun HomeScreen(modifier: Modifier = Modifier) {
+    val appError by AppStatus::error
     var searchQuery by remember { mutableStateOf("") }
-    val verticalScrollState = rememberScrollState()
+    var activities by remember { mutableStateOf<List<ActivityHomeDTO>>(emptyList()) }
+    var trips by remember { mutableStateOf<List<TripHomeDTO>>(emptyList()) }
+    var activitiesByCategory by remember { mutableStateOf<Map<String, List<ActivityHomeDTO>>>(emptyMap()) }
+    var loading by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+    var hasSearched by remember { mutableStateOf(false) }
 
-    Column(
+    val scope = rememberCoroutineScope()
+    val scrollState = rememberScrollState()
+
+    fun loadHome() {
+        scope.launch {
+            loading = true
+            error = null
+            hasSearched = false
+            try {
+                activities = HomeRepository.getTopActivities()
+                trips = HomeRepository.getFeaturedTrips()
+                activitiesByCategory = activityCategories.associate { category ->
+                    category.backendCategory to HomeRepository.getActivitiesByCategory(category.backendCategory)
+                }
+            } catch (e: Exception) {
+                val msg = e.message.orEmpty()
+                error = if (msg.contains("failed to connect", ignoreCase = true) || msg.contains("refused", ignoreCase = true)) {
+                    "Impossibile raggiungere il server."
+                } else {
+                    msg.ifBlank { "Impossibile caricare la Home." }
+                }
+            } finally {
+                loading = false
+            }
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
+    fun search() {
+        scope.launch {
+            loading = true
+            error = null
+            hasSearched = true
+            try {
+                val query = searchQuery.trim()
+                activities = HomeRepository.searchActivities(query)
+                trips = HomeRepository.searchTrips(query)
+            } catch (e: Exception) {
+                val msg = e.message.orEmpty()
+                error = if (msg.contains("failed to connect", ignoreCase = true) || msg.contains("refused", ignoreCase = true)) {
+                    "Impossibile raggiungere il server."
+                } else {
+                    msg.ifBlank { "Errore durante la ricerca." }
+                }
+            } finally {
+                loading = false
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        loadHome()
+    }
+
+    Box(
         modifier = modifier
             .fillMaxSize()
             .background(ScreenBackground)
-            .verticalScroll(verticalScrollState)
-            .padding(16.dp)
     ) {
-        SearchTopBar(
-            searchQuery = searchQuery,
-            onQueryChange = { searchQuery = it },
-            onSearchSubmit = { /* Azione ricerca */ }
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .padding(16.dp)
+        ) {
+            SearchTopBar(
+                searchQuery = searchQuery,
+                onQueryChange = { searchQuery = it },
+                onSearchSubmit = { search() }
+            )
 
-        Spacer(modifier = Modifier.height(24.dp))
+            Spacer(Modifier.height(16.dp))
 
-        SectionTitle(title = "Le Migliori Attività")
-        Spacer(modifier = Modifier.height(12.dp))
-
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(6) { index ->
-                ExperienceCard(
-                    title = "Attività Top del Mese #$index",
-                    location = "Cosenza / Roma",
-                    category = "Attività",
-                    price = "45€",
-                    rating = "4.9",
-                    imageUrl = "",
-                    dateInfo = "Disponibile",
-                    onClick = {}
-                )
+            if (loading) {
+                LinearProgressIndicator(Modifier.fillMaxWidth())
+                Spacer(Modifier.height(12.dp))
             }
-        }
 
-        Spacer(modifier = Modifier.height(28.dp))
-
-        SectionTitle(title = "I Migliori Viaggi in Primo Piano")
-        Spacer(modifier = Modifier.height(12.dp))
-
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            items(4) { index ->
-                TripCard(
-                    title = "Pacchetto Viaggio Esclusivo $index",
-                    location = "Tour della Calabria & Sicilia",
-                    price = "320€",
-                    rating = "4.9",
-                    dateRange = "12 Giu - 19 Giu",
-                    onClick = {}
+            if (error != null) {
+                Text(
+                    text = error!!,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
                 )
+                Spacer(Modifier.height(8.dp))
             }
-        }
 
-        Spacer(modifier = Modifier.height(28.dp))
+            if (appError == null) {
+                if (hasSearched) {
+                    SectionTitle("Risultati attività")
+                    Spacer(Modifier.height(12.dp))
 
-        //LISTE PER CIASCUNA CATEGORIA DI ATTIVITÀ
+                    if (!loading && activities.isEmpty() && error == null) {
+                        Text("Nessuna attività trovata.", color = Color.White)
+                    }
 
-        SectionTitle(title = "Escursioni e Trekking")
-        Spacer(modifier = Modifier.height(12.dp))
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(5) { index ->
-                ExperienceCard(
-                    title = "Sentiero della Sila #$index",
-                    location = "Parco Nazionale",
-                    category = "Escursione",
-                    price = "25€",
-                    rating = "4.8",
-                    imageUrl = "",
-                    dateInfo = "Weekend",
-                    onClick = {}
-                )
+                    ActivityRow(activities)
+
+                    Spacer(Modifier.height(28.dp))
+
+                    SectionTitle("Risultati viaggi")
+                    Spacer(Modifier.height(12.dp))
+
+                    if (!loading && trips.isEmpty() && error == null) {
+                        Text("Nessun viaggio trovato.", color = Color.White)
+                    }
+
+                    TripRow(trips)
+                } else {
+                    SectionTitle("Le Migliori Attività")
+                    Spacer(Modifier.height(12.dp))
+
+                    if (!loading && activities.isEmpty() && error == null) {
+                        Text("Nessuna attività disponibile.", color = Color.White)
+                    }
+
+                    ActivityRow(activities)
+
+                    Spacer(Modifier.height(28.dp))
+
+                    SectionTitle("I Migliori Viaggi in Primo Piano")
+                    Spacer(Modifier.height(12.dp))
+
+                    if (!loading && trips.isEmpty() && error == null) {
+                        Text("Nessun viaggio disponibile.", color = Color.White)
+                    }
+
+                    TripRow(trips)
+
+                    activityCategories.forEach { category ->
+                        Spacer(Modifier.height(28.dp))
+
+                        SectionTitle(category.title)
+                        Spacer(Modifier.height(12.dp))
+
+                        val categoryActivities = activitiesByCategory[category.backendCategory].orEmpty()
+
+                        if (!loading && categoryActivities.isEmpty() && error == null) {
+                            Text(
+                                "Nessuna attività disponibile in questa categoria.",
+                                color = Color.White
+                            )
+                        }
+
+                        ActivityRow(categoryActivities)
+                    }
+                }
             }
+
+            Spacer(Modifier.height(32.dp))
         }
+    }
+}
 
-        Spacer(modifier = Modifier.height(28.dp))
-
-        SectionTitle(title = "Visite Culturali e Musei")
-        Spacer(modifier = Modifier.height(12.dp))
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(5) { index ->
-                ExperienceCard(
-                    title = "Visita Guidata Storica #$index",
-                    location = "Centro Storico",
-                    category = "Visita",
-                    price = "20€",
-                    rating = "4.7",
-                    imageUrl = "",
-                    dateInfo = "Domani",
-                    onClick = {}
-                )
-            }
+@Composable
+private fun ActivityRow(itemsList: List<ActivityHomeDTO>) {
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        items(
+            items = itemsList,
+            key = { it.activityId ?: it.hashCode().toLong() }
+        ) { item ->
+            ExperienceCard(
+                title = item.title ?: "Senza titolo",
+                location = item.city.orEmpty(),
+                category = item.category ?: "Attività",
+                price = formatPrice(item.price),
+                rating = item.averageRating?.let {
+                    "%.1f".format(Locale.ITALY, it)
+                } ?: "-",
+                imageUrl = item.imageUrl.orEmpty(),
+                dateInfo = formatDateRange(item.startDate, item.endDate),
+                onClick = {
+                    // TODO: navigazione ai dettagli dell'attività
+                }
+            )
         }
+    }
+}
 
-        Spacer(modifier = Modifier.height(28.dp))
-
-        SectionTitle(title = "Hotel e Soggiorni")
-        Spacer(modifier = Modifier.height(12.dp))
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(5) { index ->
-                ExperienceCard(
-                    title = "Resort & Spa Partner #$index",
-                    location = "Tropea",
-                    category = "Hotel",
-                    price = "90€",
-                    rating = "4.9",
-                    imageUrl = "",
-                    dateInfo = null,
-                    onClick = {}
-                )
-            }
+@Composable
+private fun TripRow(itemsList: List<TripHomeDTO>) {
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        items(
+            items = itemsList,
+            key = { it.tripId ?: it.hashCode().toLong() }
+        ) { item ->
+            TripCard(
+                title = item.title ?: "Senza titolo",
+                location = item.location.orEmpty(),
+                price = formatTripPrice(item.totalPrice),
+                rating = item.averageRating?.toPlainString() ?: "-",
+                dateRange = formatDateRange(item.startDate, item.endDate),
+                imageUrl = item.coverPhotoUrl.orEmpty(),
+                onClick = {
+                    // TODO: navigazione ai dettagli del viaggio
+                }
+            )
         }
-
-        Spacer(modifier = Modifier.height(28.dp))
-
-        SectionTitle(title = "Ristorazione e Degustazioni")
-        Spacer(modifier = Modifier.height(12.dp))
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(5) { index ->
-                ExperienceCard(
-                    title = "Cena Tipica Tradizionale #$index",
-                    location = "Ristorante Locale",
-                    category = "Ristorazione",
-                    price = "35€",
-                    rating = "4.9",
-                    imageUrl = "",
-                    dateInfo = "Stasera",
-                    onClick = {}
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(28.dp))
-
-        SectionTitle(title = "Trasporti e Mobilità")
-        Spacer(modifier = Modifier.height(12.dp))
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            items(4) { index ->
-                ExperienceCard(
-                    title = "Transfer Privato #$index",
-                    location = "Aeroporto - Hotel",
-                    category = "Trasporto",
-                    price = "45€",
-                    rating = "4.6",
-                    imageUrl = "",
-                    dateInfo = "Su misura",
-                    onClick = {}
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
     }
 }
 
