@@ -168,7 +168,7 @@ public class NavbarController {
 
     private void openNotificationTray() {
         if (notificationBellContainer == null || notificationBellContainer.getScene() == null) return;
-        ApiService.call(NOTIFICATIONS_URL, null, ApiService.Method.GET, response -> {
+        ApiService.call(NOTIFICATIONS_URL + "/unread", null, ApiService.Method.GET, response -> {
             try {
                 JsonArray array = JsonParser.parseString(response.body()).getAsJsonArray();
                 showNotificationTray(array);
@@ -189,7 +189,7 @@ public class NavbarController {
         Region spacer = new Region(); HBox.setHgrow(spacer, Priority.ALWAYS);
         Button markAll = new Button("Mark all read"); markAll.getStyleClass().add("notification-mark-all");
         markAll.setOnAction(e -> ApiService.call(NOTIFICATIONS_URL + "/read-all", "{}", ApiService.Method.POST,
-                response -> { notificationPopup.hide(); notificationPopup = null; pollNotifications(); openNotificationTray(); },
+                response -> { if (notificationPopup != null) notificationPopup.hide(); notificationPopup = null; pollNotifications(); openNotificationTray(); },
                 () -> showToast("Notifications", "Unable to update notifications."), null));
         header.getChildren().addAll(title, spacer, markAll);
         root.getChildren().addAll(header, new Separator());
@@ -201,8 +201,13 @@ public class NavbarController {
             if (element.isJsonObject()) cards.getChildren().add(createNotificationCard(element.getAsJsonObject()));
         }
         if (cards.getChildren().isEmpty()) {
-            Label empty = new Label("No notifications"); empty.getStyleClass().add("notification-empty");
-            empty.setMaxWidth(Double.MAX_VALUE); empty.setAlignment(Pos.CENTER); empty.setPadding(new Insets(24, 8, 24, 8));
+            Label empty = new Label("No notifications");
+            empty.getStyleClass().add("notification-empty");
+            empty.setMaxWidth(Double.MAX_VALUE);
+            empty.setAlignment(Pos.CENTER);
+            empty.setPadding(new Insets(24, 8, 24, 8));
+            cards.setAlignment(Pos.CENTER);
+            cards.setPrefHeight(300);
             cards.getChildren().add(empty);
         }
         ScrollPane scroll = new ScrollPane(cards); scroll.setFitToWidth(true); scroll.setPrefViewportHeight(330);
@@ -238,7 +243,11 @@ public class NavbarController {
         } else if (id > 0 && !(notification.has("read") && notification.get("read").getAsBoolean())) {
             Button markRead = new Button("Mark as read"); markRead.getStyleClass().add("notification-mark-all");
             markRead.setOnAction(e -> ApiService.call(NOTIFICATIONS_URL + "/" + id + "/read", "{}", ApiService.Method.POST,
-                    response -> { if (notificationPopup != null) notificationPopup.hide(); pollNotifications(); openNotificationTray(); },
+                    response -> {
+                        if (notificationPopup != null) { notificationPopup.hide(); notificationPopup = null; }
+                        pollNotifications();
+                        openNotificationTray();
+                    },
                     () -> showToast("Notifications", "Unable to mark as read."), null));
             HBox row = new HBox(markRead); row.setAlignment(Pos.CENTER_RIGHT); card.getChildren().add(row);
         }
@@ -346,12 +355,37 @@ public class NavbarController {
 
     private void positionPopup(Popup popup, Node anchor, double width) {
         if (anchor == null || anchor.getScene() == null || anchor.getScene().getWindow() == null) return;
+        Window owner = anchor.getScene().getWindow();
+        Runnable reposition = () -> {
+            if (!popup.isShowing() || anchor.getScene() == null) return;
+            Bounds bounds = anchor.localToScreen(anchor.getBoundsInLocal());
+            if (bounds == null) return;
+            popup.setX(Math.max(8, bounds.getMaxX() - width));
+            popup.setY(bounds.getMaxY() + 8);
+        };
         Bounds bounds = anchor.localToScreen(anchor.getBoundsInLocal());
         if (bounds == null) return;
-        Window owner = anchor.getScene().getWindow();
-        double x = Math.max(8, bounds.getMaxX() - width);
-        double y = bounds.getMaxY() + 8;
-        popup.show(owner, x, y);
+        popup.show(owner, Math.max(8, bounds.getMaxX() - width), bounds.getMaxY() + 8);
+
+        // A Popup JavaFX is una finestra separata: seguiamo spostamento e ridimensionamento
+        // della finestra principale, così la tendina resta ancorata alla navbar.
+        javafx.beans.value.ChangeListener<Number> windowListener = (obs, oldValue, newValue) -> reposition.run();
+        owner.xProperty().addListener(windowListener);
+        owner.yProperty().addListener(windowListener);
+        owner.widthProperty().addListener(windowListener);
+        owner.heightProperty().addListener(windowListener);
+        javafx.beans.value.ChangeListener<Bounds> boundsListener = (obs, oldValue, newValue) -> reposition.run();
+        javafx.beans.value.ChangeListener<javafx.scene.transform.Transform> transformListener = (obs, oldValue, newValue) -> reposition.run();
+        anchor.boundsInLocalProperty().addListener(boundsListener);
+        anchor.localToSceneTransformProperty().addListener(transformListener);
+        popup.setOnHidden(event -> {
+            owner.xProperty().removeListener(windowListener);
+            owner.yProperty().removeListener(windowListener);
+            owner.widthProperty().removeListener(windowListener);
+            owner.heightProperty().removeListener(windowListener);
+            anchor.boundsInLocalProperty().removeListener(boundsListener);
+            anchor.localToSceneTransformProperty().removeListener(transformListener);
+        });
         if (popup.getScene() != null) {
             String css = getClass().getResource("/it/unical/ea_project_javafx/css/common/notifications.css").toExternalForm();
             if (!popup.getScene().getStylesheets().contains(css)) popup.getScene().getStylesheets().add(css);

@@ -19,4 +19,6 @@ public interface BookingService {
 
     void cancella(Long bookingId, Long userId);
 
+    String exportBookingToIcs(Long bookingId, Long userId);
+
 }

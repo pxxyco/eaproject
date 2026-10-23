@@ -176,3 +176,15 @@
 .danger-action-button:hover {
     -fx-background-color: rgba(239, 68, 68, 0.5);
 }
+
+/* Prenotazioni cancellate: visivamente secondarie e sempre in fondo alla lista. */
+.cancelled-booking-row {
+    -fx-opacity: 0.68;
+}
+.cancelled-booking-row .text {
+    -fx-fill: #7b8492;
+    -fx-font-style: italic;
+}
+.cancelled-booking-row .button {
+    -fx-opacity: 0.8;
+}

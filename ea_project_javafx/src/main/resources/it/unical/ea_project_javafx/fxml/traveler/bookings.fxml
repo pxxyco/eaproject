@@ -23,6 +23,7 @@
         <URL value="@../../css/home/home.css" />
         <URL value="@../../css/profile/profile.css" />
         <URL value="@../../css/traveler/traveler.css" />
+        <URL value="@../../css/traveler/bookings-export-popup.css" />
     </stylesheets>
 
     <ImageView fx:id="bgImageView" pickOnBounds="true" preserveRatio="false" />
