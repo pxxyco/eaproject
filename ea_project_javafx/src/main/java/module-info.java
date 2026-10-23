@@ -8,6 +8,7 @@ module it.unical.ea_project_javafx {
     requires javafx.base;
     requires java.prefs;
     requires java.net.http;
+    requires java.desktop;
     
     requires com.google.gson;
     requires com.gluonhq.maps;

@@ -31,6 +31,9 @@ public class BookingDTO {
 
     private String itemDate;
 
+    /** Data/ora di fine dell’esperienza; usata per classificare correttamente lo storico. */
+    private String itemEndDate;
+
     private String itemLocation;
 
     private Integer seats;

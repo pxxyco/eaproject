@@ -6,6 +6,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
@@ -40,57 +41,82 @@
                                 <Insets bottom="28.0" left="28.0" right="28.0" top="28.0" />
                             </padding>
 
-                            <HBox alignment="CENTER_LEFT" spacing="16.0">
-                                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
-                                    <Label fx:id="fullNameLabel" styleClass="profile-title" text="Nome Utente" />
+                            <HBox alignment="CENTER_LEFT" spacing="18.0">
+                                <StackPane fx:id="avatarContainer" minWidth="104.0" minHeight="104.0"
+                                           prefWidth="104.0" prefHeight="104.0" styleClass="profile-avatar">
+                                    <Label fx:id="avatarInitialsLabel" styleClass="avatar-initials" text="U" />
+                                    <ImageView fx:id="profilePhotoImageView" fitWidth="104.0" fitHeight="104.0"
+                                               preserveRatio="true" smooth="true" />
+                                </StackPane>
+                                <VBox spacing="6.0" HBox.hgrow="ALWAYS">
+                                    <Label fx:id="fullNameLabel" styleClass="profile-title" text="Nome Utente" wrapText="true" />
                                     <Label fx:id="roleBadgeLabel" styleClass="role-badge" text="TRAVELER" />
+                                    <Label styleClass="profile-subtitle" text="Gestisci i tuoi dati personali e la foto del profilo." wrapText="true" />
                                 </VBox>
-                                <Button text="Impostazioni" onAction="#handleGoToSettings" styleClass="btn-secondary" />
+                                <VBox alignment="CENTER_RIGHT" spacing="7.0">
+                                    <Button text="Scegli foto" onAction="#handleChooseProfilePhoto" styleClass="btn-secondary" />
+                                    <Button fx:id="savePhotoButton" text="Carica foto" onAction="#handleUploadProfilePhoto"
+                                            styleClass="btn-primary" managed="false" visible="false" />
+                                    <Button fx:id="cancelPhotoButton" text="Annulla scelta" onAction="#handleCancelPhotoSelection"
+                                            styleClass="btn-secondary" managed="false" visible="false" />
+                                    <Button fx:id="removePhotoButton" text="Rimuovi foto" onAction="#handleRemoveProfilePhoto"
+                                            styleClass="btn-secondary" managed="false" visible="false" />
+                                </VBox>
                             </HBox>
 
+                            <Label fx:id="statusLabel" managed="false" visible="false" wrapText="true" />
                             <Separator styleClass="nav-divider" />
 
-                            <VBox spacing="16.0">
-                                <Label styleClass="section-header" text="Informazioni Personali &amp; Account" />
-
-                                <VBox spacing="12.0">
-                                    <HBox spacing="12.0">
-                                        <VBox spacing="4.0" HBox.hgrow="ALWAYS">
-                                            <Label styleClass="form-label" text="Username" />
-                                            <Label fx:id="usernameValueLabel" styleClass="custom-input-read" text="-" />
-                                        </VBox>
-                                        <VBox spacing="4.0" HBox.hgrow="ALWAYS">
-                                            <Label styleClass="form-label" text="Indirizzo Email" />
-                                            <Label fx:id="emailValueLabel" styleClass="custom-input-read" text="-" />
-                                        </VBox>
-                                    </HBox>
-
-                                    <HBox spacing="12.0">
-                                        <VBox spacing="4.0" HBox.hgrow="ALWAYS">
-                                            <Label styleClass="form-label" text="Ruolo Account" />
-                                            <Label fx:id="roleValueLabel" styleClass="custom-input-read" text="-" />
-                                        </VBox>
-                                        <VBox spacing="4.0" HBox.hgrow="ALWAYS">
-                                            <Label styleClass="form-label" text="Stato Account" />
-                                            <Label styleClass="custom-input-read" text="Attivo" />
-                                        </VBox>
-                                    </HBox>
+                            <VBox spacing="14.0">
+                                <Label styleClass="section-header" text="Modifica dati personali" />
+                                <Label styleClass="section-subtitle" text="Username ed email devono essere univoci. Il nome completo è quello mostrato sul profilo." wrapText="true" />
+                                <VBox spacing="4.0">
+                                    <Label styleClass="form-label" text="Nome completo *" />
+                                    <TextField fx:id="fullNameField" promptText="Nome e cognome" styleClass="custom-input" />
                                 </VBox>
+                                <HBox spacing="12.0">
+                                    <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                        <Label styleClass="form-label" text="Username *" />
+                                        <TextField fx:id="usernameField" promptText="Il tuo username" styleClass="custom-input" />
+                                    </VBox>
+                                    <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                        <Label styleClass="form-label" text="Indirizzo email *" />
+                                        <TextField fx:id="emailField" promptText="nome@esempio.it" styleClass="custom-input" />
+                                    </VBox>
+                                </HBox>
+                                <HBox alignment="CENTER_RIGHT" spacing="12.0">
+                                    <Button text="Salva modifiche" onAction="#handleSaveProfile" styleClass="btn-primary" />
+                                </HBox>
                             </VBox>
 
                             <Separator styleClass="nav-divider" />
 
                             <VBox spacing="12.0">
-                                <Label styleClass="section-header" text="Sicurezza Account" />
-                                <HBox alignment="CENTER_LEFT" spacing="12.0">
-                                    <VBox spacing="2.0" HBox.hgrow="ALWAYS">
-                                        <Label styleClass="form-label" text="Password" />
-                                        <Label styleClass="section-subtitle" text="• • • • • • • • • •" />
+                                <Label styleClass="section-header" text="Informazioni account" />
+                                <HBox spacing="12.0">
+                                    <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                        <Label styleClass="form-label" text="Ruolo account" />
+                                        <Label fx:id="roleValueLabel" styleClass="custom-input-read" text="-" />
                                     </VBox>
-                                    <Button text="Cambia Password" onAction="#handleGoToSettings" styleClass="btn-primary" />
+                                    <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                        <Label styleClass="form-label" text="Stato account" />
+                                        <Label styleClass="custom-input-read" text="Attivo" />
+                                    </VBox>
                                 </HBox>
                             </VBox>
 
+                            <Separator styleClass="nav-divider" />
+
+                            <VBox spacing="12.0">
+                                <Label styleClass="section-header" text="Sicurezza account" />
+                                <HBox alignment="CENTER_LEFT" spacing="12.0">
+                                    <VBox spacing="2.0" HBox.hgrow="ALWAYS">
+                                        <Label styleClass="form-label" text="Password" />
+                                        <Label styleClass="section-subtitle" text="Per modificare la password dovrai confermare quella attuale." wrapText="true" />
+                                    </VBox>
+                                    <Button text="Cambia password" onAction="#handleGoToSettings" styleClass="btn-primary" />
+                                </HBox>
+                            </VBox>
                         </VBox>
                     </VBox>
                 </content>

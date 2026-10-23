@@ -6,6 +6,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonObject;
 import it.unical.ea_project_javafx.dto.UserDTO;
 import it.unical.ea_project_javafx.security.UserSession;
 import javafx.application.Platform;
@@ -138,6 +139,104 @@ public class ApiService {
 
     @Setter
     private static Consumer<Integer> onRateLimitedGlobal;
+
+    /** HTTP helper that preserves the server's validation/conflict message for forms. */
+    public static void callDetailed(String url, String body, Method method,
+                                    Consumer<HttpResponse<String>> onSuccess,
+                                    Consumer<String> onFailure,
+                                    Consumer<Boolean> loadingSetter) {
+        callDetailed(url, body, method, onSuccess, onFailure, loadingSetter, true);
+    }
+
+    private static void callDetailed(String url, String body, Method method,
+                                     Consumer<HttpResponse<String>> onSuccess,
+                                     Consumer<String> onFailure,
+                                     Consumer<Boolean> loadingSetter,
+                                     boolean allowRefresh) {
+        setLoadingOnFxThread(loadingSetter, true);
+        String sentToken = UserSession.getInstance().getAccessToken();
+        boolean hadToken = sentToken != null && !sentToken.isBlank();
+
+        Task<HttpResponse<String>> task = new Task<>() {
+            @Override
+            protected HttpResponse<String> call() throws Exception {
+                return CLIENT.send(buildRequest(url, body, method), HttpResponse.BodyHandlers.ofString());
+            }
+        };
+
+        task.setOnSucceeded(event -> {
+            HttpResponse<String> response = task.getValue();
+            if (response.statusCode() == 401 && hadToken && allowRefresh) {
+                CompletableFuture<Boolean> future;
+                synchronized (ApiService.class) {
+                    if (isRefreshing.compareAndSet(false, true)) {
+                        refreshFuture = new CompletableFuture<>();
+                        future = refreshFuture;
+                        executeRefreshTokenCall();
+                    } else {
+                        future = refreshFuture;
+                    }
+                }
+                future.thenAcceptAsync(success -> {
+                    if (Boolean.TRUE.equals(success)) {
+                        callDetailed(url, body, method, onSuccess, onFailure, loadingSetter, false);
+                    } else {
+                        setLoadingOnFxThread(loadingSetter, false);
+                        forceLogout();
+                    }
+                }, Platform::runLater);
+                return;
+            }
+
+            setLoadingOnFxThread(loadingSetter, false);
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                if (onSuccess != null) onSuccess.accept(response);
+            } else if (onFailure != null) {
+                onFailure.accept(extractErrorMessage(response.body(), response.statusCode()));
+            }
+        });
+
+        task.setOnFailed(event -> {
+            setLoadingOnFxThread(loadingSetter, false);
+            if (onFailure != null) {
+                Platform.runLater(() -> onFailure.accept("Impossibile completare la richiesta: verifica che il server sia raggiungibile."));
+            }
+        });
+        EXECUTOR.execute(task);
+    }
+
+    public static String extractErrorMessage(String responseBody, int statusCode) {
+        String fallback = switch (statusCode) {
+            case 400 -> "I dati inseriti non sono validi.";
+            case 401 -> "Sessione scaduta o credenziali non corrette.";
+            case 403 -> "Non hai i permessi per eseguire questa operazione.";
+            case 404 -> "Risorsa non trovata.";
+            case 409 -> "I dati inseriti sono già utilizzati da un altro account.";
+            case 413 -> "Il file caricato è troppo grande.";
+            case 429 -> "Hai effettuato troppe richieste. Riprova tra poco.";
+            default -> statusCode >= 500 ? "Errore interno del server. Riprova più tardi." : "Richiesta non completata.";
+        };
+        if (responseBody == null || responseBody.isBlank()) return fallback;
+        try {
+            JsonObject json = GSON.fromJson(responseBody, JsonObject.class);
+            if (json != null) {
+                for (String key : new String[]{"message", "detail", "reason", "error"}) {
+                    if (json.has(key) && !json.get(key).isJsonNull()) {
+                        String value = json.get(key).getAsString();
+                        if (!value.isBlank() && !value.equalsIgnoreCase("Bad Request")
+                                && !value.equalsIgnoreCase("Conflict") && !value.equalsIgnoreCase("Unauthorized")) {
+                            return value;
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignored) {
+            // The body may be plain text or a framework error document.
+        }
+        String plain = responseBody.trim();
+        if (!plain.startsWith("{") && plain.length() <= 250 && !plain.contains("<html")) return plain;
+        return fallback;
+    }
 
     public static void get(String url, Consumer<HttpResponse<String>> onSuccess, Runnable onFailure, Consumer<Boolean> loadingSetter) {
         call(url, null, Method.GET, onSuccess, onFailure, loadingSetter);

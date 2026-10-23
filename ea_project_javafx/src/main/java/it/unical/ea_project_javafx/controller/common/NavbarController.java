@@ -26,6 +26,9 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.shape.Circle;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -49,6 +52,10 @@ public class NavbarController {
 
     @FXML private Label loginLabel;
     @FXML private MenuButton userMenuButton;
+    @FXML private ImageView userAvatarImageView;
+    @FXML private Label userAvatarInitialsLabel;
+    @FXML private Label userMenuLabel;
+    @FXML private javafx.scene.layout.StackPane userAvatarContainer;
     @FXML private javafx.scene.layout.StackPane notificationBellContainer;
     @FXML private Label notificationBadge;
 
@@ -65,6 +72,7 @@ public class NavbarController {
     private Popup toastPopup;
     private final Set<Long> seenNotificationIds = new HashSet<>();
     private boolean initialNotificationPoll = true;
+    private long avatarLoadRequestId = 0;
 
     @FXML
     public void initialize() {
@@ -76,6 +84,7 @@ public class NavbarController {
         bindVisibilityToManaged(travelerFavoritesNavItem);
         bindVisibilityToManaged(organizerEventsNavItem);
         bindVisibilityToManaged(organizerAttendeesNavItem);
+        configureUserAvatar();
         updateNavbarState();
         if (notificationBellContainer != null) {
             notificationBellContainer.sceneProperty().addListener((obs, oldScene, newScene) -> {
@@ -97,7 +106,24 @@ public class NavbarController {
         if (loginLabel != null) loginLabel.setVisible(!isLoggedIn);
         if (userMenuButton != null) {
             userMenuButton.setVisible(isLoggedIn);
-            if (isLoggedIn) userMenuButton.setText(UserSession.getInstance().getUsername());
+            if (isLoggedIn) {
+                String username = UserSession.getInstance().getUsername();
+                if (userMenuLabel != null) userMenuLabel.setText(username == null || username.isBlank() ? "Utente" : username);
+                userMenuButton.setAccessibleText("Menu utente " + (username == null ? "" : username));
+                updateUserAvatar();
+            } else {
+                if (userMenuLabel != null) userMenuLabel.setText("Utente");
+                if (userAvatarImageView != null) {
+                    userAvatarImageView.setImage(null);
+                    userAvatarImageView.setVisible(false);
+                    userAvatarImageView.setManaged(false);
+                }
+                if (userAvatarInitialsLabel != null) {
+                    userAvatarInitialsLabel.setText("U");
+                    userAvatarInitialsLabel.setVisible(true);
+                    userAvatarInitialsLabel.setManaged(true);
+                }
+            }
         }
         if (notificationBellContainer != null) notificationBellContainer.setVisible(isLoggedIn);
         if (dashboardNavItem != null) dashboardNavItem.setVisible(isLoggedIn);
@@ -108,6 +134,78 @@ public class NavbarController {
         if (paymentsMenuItem != null) paymentsMenuItem.setText(isOrganizer ? "Incassi & Payout" : "Metodi di Pagamento");
 
         if (isLoggedIn) startNotificationPolling(); else stopNotificationPolling();
+    }
+
+    private void configureUserAvatar() {
+        if (userAvatarImageView != null) {
+            userAvatarImageView.setFitWidth(28);
+            userAvatarImageView.setFitHeight(28);
+            userAvatarImageView.setPreserveRatio(false);
+            userAvatarImageView.setSmooth(true);
+            userAvatarImageView.setClip(new Circle(14, 14, 14));
+            userAvatarImageView.setVisible(false);
+            userAvatarImageView.setManaged(false);
+        }
+    }
+
+    /** Keeps the navbar avatar in sync with UserSession after an upload, replacement or removal. */
+    private void updateUserAvatar() {
+        long requestId = ++avatarLoadRequestId;
+        UserSession session = UserSession.getInstance();
+        String displayName = session.getFullName();
+        if (displayName == null || displayName.isBlank()) displayName = session.getUsername();
+        if (userAvatarInitialsLabel != null) {
+            userAvatarInitialsLabel.setText(makeInitials(displayName));
+            userAvatarInitialsLabel.setVisible(true);
+            userAvatarInitialsLabel.setManaged(true);
+        }
+        if (userAvatarImageView != null) {
+            userAvatarImageView.setImage(null);
+            userAvatarImageView.setVisible(false);
+            userAvatarImageView.setManaged(false);
+        }
+
+        String photoUrl = session.getProfilePhotoUrl();
+        if (photoUrl == null || photoUrl.isBlank() || userAvatarImageView == null) return;
+
+        String resolvedUrl = ApiService.resolveUrl(photoUrl) + "?v=" + System.currentTimeMillis();
+        Image image = new Image(resolvedUrl, 28, 28, true, true, true);
+        image.errorProperty().addListener((obs, oldValue, hasError) -> {
+            if (hasError) Platform.runLater(() -> {
+                if (requestId == avatarLoadRequestId) showAvatarImage(null);
+            });
+        });
+        image.progressProperty().addListener((obs, oldValue, progress) -> {
+            if (progress.doubleValue() >= 1.0 && !image.isError()) {
+                Platform.runLater(() -> {
+                    if (requestId == avatarLoadRequestId) showAvatarImage(image);
+                });
+            }
+        });
+        if (image.getProgress() >= 1.0 && !image.isError() && requestId == avatarLoadRequestId) {
+            showAvatarImage(image);
+        }
+    }
+
+    private void showAvatarImage(Image image) {
+        boolean loaded = image != null && !image.isError();
+        if (userAvatarImageView != null) {
+            userAvatarImageView.setImage(loaded ? image : null);
+            userAvatarImageView.setVisible(loaded);
+            userAvatarImageView.setManaged(loaded);
+        }
+        if (userAvatarInitialsLabel != null) {
+            userAvatarInitialsLabel.setVisible(!loaded);
+            userAvatarInitialsLabel.setManaged(!loaded);
+        }
+    }
+
+    private String makeInitials(String name) {
+        if (name == null || name.isBlank()) return "U";
+        String[] parts = name.trim().split("\\s+");
+        String first = parts[0].substring(0, 1).toUpperCase(java.util.Locale.ROOT);
+        if (parts.length == 1) return first;
+        return first + parts[parts.length - 1].substring(0, 1).toUpperCase(java.util.Locale.ROOT);
     }
 
     private void startNotificationPolling() {

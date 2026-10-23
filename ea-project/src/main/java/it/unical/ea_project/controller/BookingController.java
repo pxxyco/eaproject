@@ -12,6 +12,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/bookings")
@@ -73,13 +74,23 @@ public class BookingController {
     }
 
     @DeleteMapping("/{bookingId}")
-    public ResponseEntity<Void> cancel(@PathVariable Long bookingId,
-                                       @AuthenticationPrincipal AuthUser user) {
-
-        bookingService.cancella(bookingId, user.id());
-        return ResponseEntity.noContent()
-            .build();
-
+    public ResponseEntity<Map<String, String>> cancel(@PathVariable Long bookingId,
+                                                       @AuthenticationPrincipal AuthUser user) {
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Devi accedere per cancellare una prenotazione."));
+        }
+        try {
+            bookingService.cancella(bookingId, user.id());
+            return ResponseEntity.noContent().build();
+        } catch (org.springframework.security.access.AccessDeniedException exception) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "Puoi cancellare soltanto le tue prenotazioni."));
+        } catch (IllegalArgumentException exception) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", exception.getMessage() == null
+                            ? "Prenotazione non valida." : exception.getMessage()));
+        }
     }
 
 }

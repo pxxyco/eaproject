@@ -549,3 +549,35 @@
     -fx-wrap-text: true;
     -fx-text-alignment: center;
 }
+
+/* Avatar utente nella navbar: usa la foto profilo salvata o le iniziali come fallback. */
+.nav-user-graphic {
+    -fx-alignment: center-left;
+}
+.nav-avatar-container {
+    -fx-background-color: rgba(255, 255, 255, 0.16);
+    -fx-background-radius: 100;
+    -fx-alignment: center;
+}
+.nav-avatar-initials {
+    -fx-min-width: 28px;
+    -fx-min-height: 28px;
+    -fx-pref-width: 28px;
+    -fx-pref-height: 28px;
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-background-color: rgba(99, 102, 241, 0.8);
+    -fx-background-radius: 100;
+}
+.nav-user-name {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+.menu-button:hover .nav-user-name,
+.menu-button:showing .nav-user-name {
+    -fx-text-fill: #1c1917;
+}

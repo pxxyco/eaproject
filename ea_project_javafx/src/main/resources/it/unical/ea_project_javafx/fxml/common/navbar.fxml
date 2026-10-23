@@ -52,7 +52,16 @@
                     <Label text="🔔" styleClass="notification-bell-icon" />
                     <Label fx:id="notificationBadge" text="" styleClass="notification-badge" visible="false" managed="false" />
                 </StackPane>
-                <MenuButton fx:id="userMenuButton" styleClass="btn-nav-login" text="Utente">
+                <MenuButton fx:id="userMenuButton" styleClass="btn-nav-login" text="" accessibleText="Menu utente">
+                    <graphic>
+                        <HBox alignment="CENTER_LEFT" spacing="8.0" styleClass="nav-user-graphic">
+                            <StackPane fx:id="userAvatarContainer" prefWidth="28.0" prefHeight="28.0" minWidth="28.0" minHeight="28.0" maxWidth="28.0" maxHeight="28.0" styleClass="nav-avatar-container">
+                                <Label fx:id="userAvatarInitialsLabel" text="U" styleClass="nav-avatar-initials" />
+                                <ImageView fx:id="userAvatarImageView" fitWidth="28.0" fitHeight="28.0" preserveRatio="false" smooth="true" visible="false" managed="false" />
+                            </StackPane>
+                            <Label fx:id="userMenuLabel" text="Utente" styleClass="nav-user-name" />
+                        </HBox>
+                    </graphic>
                     <items>
                         <MenuItem onAction="#handleProfileInfos" text="Il mio Profilo" />
                         <MenuItem onAction="#handleSettings" text="Impostazioni &amp; Sicurezza" />

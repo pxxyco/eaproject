@@ -188,3 +188,41 @@
 .cancelled-booking-row .button {
     -fx-opacity: 0.8;
 }
+
+/* Stati della prenotazione: etichette leggibili anche nella vista storico. */
+.booking-status-pill {
+    -fx-padding: 4px 9px;
+    -fx-background-radius: 999px;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+}
+.booking-status-confirmed {
+    -fx-background-color: rgba(34, 197, 94, 0.18);
+    -fx-text-fill: #86efac;
+}
+.booking-status-pending {
+    -fx-background-color: rgba(245, 158, 11, 0.18);
+    -fx-text-fill: #fcd34d;
+}
+.booking-status-completed {
+    -fx-background-color: rgba(96, 165, 250, 0.18);
+    -fx-text-fill: #93c5fd;
+}
+.booking-status-cancelled {
+    -fx-background-color: rgba(148, 163, 184, 0.16);
+    -fx-text-fill: #94a3b8;
+}
+.booking-status-neutral {
+    -fx-background-color: rgba(255, 255, 255, 0.10);
+    -fx-text-fill: rgba(255, 255, 255, 0.8);
+}
+
+/* Le esperienze già concluse rimangono consultabili, ma meno in evidenza. */
+.historical-booking-row {
+    -fx-opacity: 0.88;
+}
+.historical-booking-row .text {
+    -fx-fill: rgba(203, 213, 225, 0.86);
+}

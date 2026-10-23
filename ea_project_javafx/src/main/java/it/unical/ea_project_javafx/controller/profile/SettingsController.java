@@ -2,6 +2,7 @@ package it.unical.ea_project_javafx.controller.profile;
 
 import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.util.ApiService;
+import it.unical.ea_project_javafx.util.PasswordPolicy;
 import it.unical.ea_project_javafx.util.BackgroundHelper;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -41,24 +42,27 @@ public class SettingsController {
 
     @FXML
     public void initialize() {
+
         BackgroundHelper.setupBackground(bgImageView);
         loadNavbar();
         setupRoleSpecificSections();
+
     }
 
     private void loadNavbar() {
+
         try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml")
-            );
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml"));
             Parent navbar = loader.load();
             navbarContainer.getChildren().setAll(navbar);
         } catch (IOException e) {
             e.printStackTrace();
         }
+
     }
 
     private void setupRoleSpecificSections() {
+
         boolean isOrganizer = "ORGANIZER".equalsIgnoreCase(userSession.getRole());
 
         if (organizerSettingsSection != null) {
@@ -70,10 +74,12 @@ public class SettingsController {
             travelerSettingsSection.setVisible(!isOrganizer);
             travelerSettingsSection.setManaged(!isOrganizer);
         }
+
     }
 
     @FXML
     private void handleChangePassword(ActionEvent event) {
+
         clearMessage();
 
         String currentPassword = currentPasswordField.getText();
@@ -85,8 +91,8 @@ public class SettingsController {
             return;
         }
 
-        if (newPassword.length() < 6) {
-            showError("La nuova password deve contenere almeno 6 caratteri.");
+        if (!PasswordPolicy.isValid(newPassword)) {
+            showError("La password deve contenere almeno 8 caratteri, una lettera, un numero e un carattere speciale.");
             return;
         }
 
@@ -99,7 +105,7 @@ public class SettingsController {
         payload.put("currentPassword", currentPassword);
         payload.put("newPassword", newPassword);
 
-        ApiService.call(
+        ApiService.callDetailed(
                 ApiService.BASE_URL + "/api/users/change-password",
                 ApiService.toJson(payload),
                 ApiService.Method.POST,
@@ -109,13 +115,15 @@ public class SettingsController {
                     newPasswordField.clear();
                     confirmPasswordField.clear();
                 }),
-                () -> Platform.runLater(() -> showError("Impossibile modificare la password. Verifica la password attuale.")),
+                message -> Platform.runLater(() -> showError(message)),
                 null
         );
+
     }
 
     @FXML
     private void handleSaveOrganizerInfo(ActionEvent event) {
+
         clearMessage();
         String brand = organizerBrandNameField.getText();
         String bio = organizerBioArea.getText();
@@ -132,6 +140,7 @@ public class SettingsController {
                 () -> Platform.runLater(() -> showError("Errore durante il salvataggio dei dati organizzatore.")),
                 null
         );
+
     }
 
     private boolean blank(String value) {

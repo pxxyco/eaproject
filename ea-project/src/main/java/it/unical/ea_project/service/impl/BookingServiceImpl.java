@@ -81,25 +81,37 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public void cancella(Long bookingId, Long userId) {
 
-        Booking b = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Non trovato"));
-        if (b.getUser() == null || !b.getUser().getId().equals(userId)) {
+        Booking b = bookingRepository.findByBookingIdForUpdate(bookingId)
+                .orElseThrow(() -> new IllegalArgumentException("Prenotazione non trovata."));
+        if (b.getUser() == null || !java.util.Objects.equals(b.getUser().getId(), userId)) {
             throw new org.springframework.security.access.AccessDeniedException("Prenotazione non appartenente all'utente");
+        }
+
+        if (b.getDeletedAt() != null) {
+            throw new IllegalArgumentException("Prenotazione non disponibile.");
         }
 
         if (b.getBookingStatus() == Booking.BookingStatus.CANCELLED) {
             return;
         }
 
-        b.setBookingStatus(Booking.BookingStatus.CANCELLED);
-        if (b.getTrip() != null) {
-            b.getTrip()
-            .setAvailableSeats(b.getTrip().getAvailableSeats() + b.getSeats());
+        if (b.getBookingStatus() == Booking.BookingStatus.COMPLETED) {
+            throw new IllegalArgumentException("Non puoi cancellare una prenotazione già completata.");
         }
 
-        if (b.getActivity() != null) {
-            b.getActivity()
-            .setAvailableSeats(b.getActivity().getAvailableSeats() + b.getSeats());
+        LocalDateTime eventStart = getEventStartDateTime(b);
+        if (eventStart != null && !eventStart.isAfter(LocalDateTime.now())) {
+            throw new IllegalArgumentException("Non puoi cancellare una prenotazione per un'esperienza già iniziata.");
+        }
+
+        b.setBookingStatus(Booking.BookingStatus.CANCELLED);
+        int seatsToRestore = b.getSeats() == null ? 0 : Math.max(0, b.getSeats());
+        if (seatsToRestore > 0 && b.getTrip() != null) {
+            Integer available = b.getTrip().getAvailableSeats();
+            b.getTrip().setAvailableSeats((available == null ? 0 : available) + seatsToRestore);
+        } else if (seatsToRestore > 0 && b.getActivity() != null) {
+            Integer available = b.getActivity().getAvailableSeats();
+            b.getActivity().setAvailableSeats((available == null ? 0 : available) + seatsToRestore);
         }
         
         bookingRepository.save(b);
@@ -249,6 +261,17 @@ public class BookingServiceImpl implements BookingService {
 
     }
 
+    /** Start instant used to avoid cancelling events that have already started. Trips have day precision. */
+    private LocalDateTime getEventStartDateTime(Booking booking) {
+        if (booking.getTrip() != null && booking.getTrip().getStartDate() != null) {
+            return booking.getTrip().getStartDate().atStartOfDay();
+        }
+        if (booking.getActivity() != null) {
+            return booking.getActivity().getStartDate();
+        }
+        return null;
+    }
+
     private void validateSeats(Integer seats) {
 
         if (seats == null || seats < 1) {
@@ -269,15 +292,27 @@ public class BookingServiceImpl implements BookingService {
 
         String title = null;
         String date = null;
+        String endDate = null;
         String location = null;
         if (booking.getTrip() != null) {
             title = booking.getTrip().getTitle();
             date = booking.getTrip().getStartDate() != null ? booking.getTrip().getStartDate().toString() : null;
+            endDate = booking.getTrip().getEndDate() != null
+                    ? booking.getTrip().getEndDate().toString()
+                    : date;
             location = booking.getTrip().getDestinationCity();
         } else if (booking.getActivity() != null) {
-            title = booking.getActivity().getTitle();
-            date = booking.getActivity().getStartDate() != null ? booking.getActivity().getStartDate().toString() : null;
-            location = booking.getActivity().getCity();
+            Activity activity = booking.getActivity();
+            title = activity.getTitle();
+            date = activity.getStartDate() != null ? activity.getStartDate().toString() : null;
+            LocalDateTime activityEnd = activity.getEndDate();
+            if (activityEnd == null && activity.getStartDate() != null) {
+                int duration = activity.getDurationMinutes() == null || activity.getDurationMinutes() < 1
+                        ? 60 : activity.getDurationMinutes();
+                activityEnd = activity.getStartDate().plusMinutes(duration);
+            }
+            endDate = activityEnd != null ? activityEnd.toString() : date;
+            location = activity.getCity();
         }
 
         return BookingDTO.builder()
@@ -289,6 +324,7 @@ public class BookingServiceImpl implements BookingService {
                 .participantEmail(booking.getUser() != null ? booking.getUser().getEmail() : null)
                 .itemTitle(title)
                 .itemDate(date)
+                .itemEndDate(endDate)
                 .itemLocation(location)
                 .seats(booking.getSeats())
                 .bookingType(booking.getBookingType() != null ? booking.getBookingType().name() : null)
