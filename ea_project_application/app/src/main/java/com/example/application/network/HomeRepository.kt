@@ -1,15 +1,17 @@
+package com.example.application.network
 
-package com.example.application.repository
-
-import android.os.Build
-import androidx.annotation.RequiresApi
-import com.example.application.dto.home.ActivityHomeDTO
+import com.example.application.dto.ActivitySuggestionDTO
+import com.example.application.dto.SearchSuggestion
 import com.example.application.dto.home.TripHomeDTO
-import com.example.application.network.ApiResult
-import com.example.application.network.ApiService
+import com.example.application.dto.TripSuggestionDTO
+import com.example.application.dto.home.ActivityHomeDTO
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import java.lang.reflect.Type
 import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
+import kotlin.collections.get
 
 object HomeRepository {
 
@@ -20,6 +22,23 @@ object HomeRepository {
 
     private val tripListType =
         object : TypeToken<List<TripHomeDTO>>() {}.type
+
+    private val activitySuggestionListType =
+        object : TypeToken<List<ActivitySuggestionDTO>>() {}.type
+
+    private val tripSuggestionListType =
+        object : TypeToken<List<TripSuggestionDTO>>() {}.type
+
+    private val categoryLabels = mapOf(
+        "EXCURSION" to "Escursione",
+        "VISIT" to "Visita",
+        "TRANSPORT" to "Trasporto",
+        "HOTEL" to "Hotel",
+        "MEAL" to "Ristorazione",
+        "OTHER" to "Altro"
+    )
+
+    //Home
 
     suspend fun getTopActivities(): List<ActivityHomeDTO> {
         return getList(
@@ -35,10 +54,28 @@ object HomeRepository {
         )
     }
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    suspend fun searchActivities(
-        query: String
+    suspend fun getActivitiesByCategory(
+        category: String
     ): List<ActivityHomeDTO> {
+        require(
+            category in setOf(
+                "EXCURSION",
+                "VISIT",
+                "TRANSPORT",
+                "HOTEL",
+                "MEAL",
+                "OTHER"
+            )
+        ) {
+            "Categoria attività non valida: $category"
+        }
+
+        return getList("/api/activities/category/$category", activityListType)
+    }
+
+    //Ricerca
+
+    suspend fun searchActivities(query: String): List<ActivityHomeDTO> {
         val path = buildString {
             append("/api/activities/search?page=0&size=$PAGE_SIZE")
             if (query.isNotBlank()) {
@@ -50,10 +87,7 @@ object HomeRepository {
         return getList(path, activityListType)
     }
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    suspend fun searchTrips(
-        query: String
-    ): List<TripHomeDTO> {
+    suspend fun searchTrips(query: String): List<TripHomeDTO> {
         val path = buildString {
             append("/api/trips/search?page=0&size=$PAGE_SIZE")
             if (query.isNotBlank()) {
@@ -65,34 +99,67 @@ object HomeRepository {
         return getList(path, tripListType)
     }
 
+    //Suggerimenti TextBox
+    suspend fun getSuggestions(query: String, limit: Int = 4): List<SearchSuggestion> =
+        coroutineScope {
+            val q = encode(query.trim())
 
-    suspend fun getActivitiesByCategory(
-        category: String
-    ): List<ActivityHomeDTO> {
-        require(category in setOf(
-            "EXCURSION",
-            "VISIT",
-            "TRANSPORT",
-            "HOTEL",
-            "MEAL",
-            "OTHER"
-        )) {
-            "Categoria attività non valida: $category"
+            val activities = async {
+                safeList<ActivitySuggestionDTO> {
+                    getList(
+                        "/api/activities/suggest?query=$q&limit=$limit",
+                        activitySuggestionListType
+                    )
+                }
+            }
+            val trips = async {
+                safeList<TripSuggestionDTO> {
+                    getList(
+                        "/api/trips/suggest?query=$q&limit=$limit",
+                        tripSuggestionListType
+                    )
+                }
+            }
+
+            val activityItems = activities.await().mapNotNull { a ->
+                val title = a.title?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
+                val parts = listOfNotNull(
+                    "Attività",
+                    categoryLabels[a.category],
+                    a.city?.takeIf { it.isNotBlank() }
+                )
+                SearchSuggestion(title, parts.joinToString(" · "))
+            }
+
+            val tripItems = trips.await().mapNotNull { t ->
+                val title = t.title?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
+                val parts = listOfNotNull(
+                    "Viaggio",
+                    t.location?.takeIf { it.isNotBlank() }
+                )
+                SearchSuggestion(title, parts.joinToString(" · "))
+            }
+
+            (activityItems + tripItems).distinctBy { it.title to it.subtitle }
         }
 
-        val path = "/api/activities/category/$category"
+    //Altro
 
-        return getList(path, activityListType)
-    }
-
-
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     private fun encode(value: String): String =
-        URLEncoder.encode(value, StandardCharsets.UTF_8)
+        URLEncoder.encode(value, "UTF-8")
+
+    private suspend fun <T> safeList(block: suspend () -> List<T>): List<T> =
+        try {
+            block()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            emptyList()
+        }
 
     private suspend fun <T> getList(
         path: String,
-        type: java.lang.reflect.Type
+        type: Type
     ): List<T> {
         return when (val result = ApiService.getRaw(path)) {
             is ApiResult.Success -> {

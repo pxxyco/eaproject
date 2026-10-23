@@ -24,13 +24,11 @@ fun ExperienceCard(
     rating: String,
     imageUrl: String,
     dateInfo: String?,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier.width(180.dp)
 ) {
     Card(
-        modifier = Modifier
-            .width(180.dp)
-            .wrapContentHeight()
-            .clickable { onClick() },
+        modifier = modifier.clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = PopupSurface)
     ) {

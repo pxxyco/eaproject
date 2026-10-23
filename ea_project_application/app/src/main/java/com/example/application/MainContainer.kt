@@ -77,6 +77,6 @@ enum class AppDestinations(
     val icon: Int,
 ) {
     HOME("Esplora", R.drawable.ic_home),
-    `MY-TRIP`("Viaggi", R.drawable.ic_favorite),
+    `MY-TRIP`("Viaggi", R.drawable.ic_favorite), //TODO Sostituire con Preferiti e non Trip (Trip è gestito dalla home inseme ad Activity)
     PROFILE("Account", R.drawable.ic_account_box),
 }
