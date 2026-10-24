@@ -1,0 +1,106 @@
+.itinerary-editor .label {
+    -fx-text-fill: #e7e5e4;
+}
+
+.itinerary-editor .split-pane,
+.itinerary-editor .table-view,
+.itinerary-editor .table-row-cell {
+    -fx-background-color: #1c1917;
+}
+
+.itinerary-editor .table-cell {
+    -fx-text-fill: #e7e5e4;
+    -fx-padding: 12 8;
+}
+
+.itinerary-editor .table-row-cell:selected {
+    -fx-background-color: #44403c;
+}
+
+.itinerary-form {
+    -fx-background-color: #292524;
+}
+
+.itinerary-form .text-field,
+.itinerary-form .text-area {
+    -fx-control-inner-background: #1c1917;
+    -fx-text-fill: #fafaf9;
+    -fx-prompt-text-fill: #a8a29e;
+}
+
+.itinerary-editor .split-pane {
+    -fx-padding: 0;
+}
+
+.itinerary-editor .split-pane-divider {
+    -fx-background-color: #44403c;
+    -fx-padding: 0 2;
+}
+
+.itinerary-editor .column-header-background,
+.itinerary-editor .column-header,
+.itinerary-editor .filler {
+    -fx-background-color: #292524;
+}
+
+.itinerary-editor .column-header {
+    -fx-border-color: transparent #44403c #44403c transparent;
+    -fx-padding: 9 0;
+}
+
+.itinerary-editor .column-header .label {
+    -fx-text-fill: #d6d3d1;
+}
+
+.itinerary-editor .table-row-cell:empty .table-cell {
+    -fx-border-color: transparent;
+}
+
+.itinerary-editor .combo-box,
+.itinerary-editor .spinner {
+    -fx-background-color: #292524;
+    -fx-border-color: #57534e;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+}
+
+.itinerary-editor .combo-box .list-cell {
+    -fx-background-color: #292524;
+    -fx-text-fill: #fafaf9;
+}
+
+.itinerary-editor .combo-box-popup .list-view {
+    -fx-background-color: #292524;
+}
+
+.itinerary-editor .combo-box-popup .list-cell:hover {
+    -fx-background-color: #44403c;
+}
+
+.itinerary-form .text-field,
+.itinerary-form .text-area {
+    -fx-background-color: #1c1917;
+    -fx-border-color: #57534e;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 9 10;
+}
+
+.itinerary-form .text-area .content {
+    -fx-background-color: #1c1917;
+    -fx-background-radius: 8;
+}
+
+.itinerary-editor .spinner .increment-arrow-button,
+.itinerary-editor .spinner .decrement-arrow-button {
+    -fx-background-color: #44403c;
+}
+
+.itinerary-editor .spinner .increment-arrow,
+.itinerary-editor .spinner .decrement-arrow {
+    -fx-background-color: #e7e5e4;
+}
+
+.itinerary-editor .table-view .placeholder .label {
+    -fx-text-fill: #a8a29e;
+}

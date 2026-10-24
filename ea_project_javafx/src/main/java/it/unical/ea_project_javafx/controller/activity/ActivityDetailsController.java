@@ -14,6 +14,7 @@ import it.unical.ea_project_javafx.dto.ReviewDTO;
 import it.unical.ea_project_javafx.dto.TripDTO;
 import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.util.ApiService;
+import it.unical.ea_project_javafx.util.SceneNavigator;
 import it.unical.ea_project_javafx.util.BackgroundHelper;
 import it.unical.ea_project_javafx.util.FullscreenPhotoViewer;
 import it.unical.ea_project_javafx.util.PopupFactory;
@@ -44,44 +45,71 @@ import java.util.List;
 
 public class ActivityDetailsController {
 
-    @FXML private StackPane root;
-    @FXML private StackPane bodyContainer;
-    @FXML private StackPane loadingOverlay;
-    @FXML private StackPane newRecCard;
-    @FXML private StackPane hero;
-    @FXML private StackPane navbarContainer;
+    @FXML
+    private StackPane root;
+    @FXML
+    private StackPane bodyContainer;
+    @FXML
+    private StackPane loadingOverlay;
+    @FXML
+    private StackPane newRecCard;
+    @FXML
+    private StackPane hero;
+    @FXML
+    private StackPane navbarContainer;
 
-    @FXML private Button btnDescrizione;
-    @FXML private Button btnFoto;
-    @FXML private Button btnItinerario;
-    @FXML private Button btnRecensioni;
-    @FXML private Button btnPrenota;
+    @FXML
+    private Button btnDescrizione;
+    @FXML
+    private Button btnFoto;
+    @FXML
+    private Button btnItinerario;
+    @FXML
+    private Button btnRecensioni;
+    @FXML
+    private Button btnPrenota;
+    @FXML
+    private Button btnContactOrganizer;
 
-    @FXML private Spinner<Integer> spinnerPartecipanti;
+    @FXML
+    private Spinner<Integer> spinnerPartecipanti;
 
-    @FXML private DatePicker datePicker;
+    @FXML
+    private DatePicker datePicker;
 
-    @FXML private ImageView heroImage;
-    @FXML private ImageView bgImageView;
+    @FXML
+    private ImageView heroImage;
+    @FXML
+    private ImageView bgImageView;
 
-    @FXML private Label lblCategoria;
+    @FXML
+    private Label lblCategoria;
 
-    @FXML private Label lblLocalita;
+    @FXML
+    private Label lblLocalita;
 
-    @FXML private Label lblPrezzo;
+    @FXML
+    private Label lblPrezzo;
 
-    @FXML private Label lblRating;
+    @FXML
+    private Label lblRating;
 
-    @FXML private Label lblTitolo;
+    @FXML
+    private Label lblTitolo;
 
-    @FXML private Label lblTotale;
+    @FXML
+    private Label lblTotale;
 
-    @FXML private VBox bookingCard;
+    @FXML
+    private VBox bookingCard;
 
-    @FXML private LoadingOverlayController loadingCardController;
-    @FXML private ReviewController newRecCardController;
+    @FXML
+    private LoadingOverlayController loadingCardController;
+    @FXML
+    private ReviewController newRecCardController;
 
-    @FXML private ScrollPane contentScroll;
+    @FXML
+    private ScrollPane contentScroll;
 
     private ReviewsContainerController recensioniController;
     private PopupFactory.Handle activeInAppModal;
@@ -98,12 +126,12 @@ public class ActivityDetailsController {
     private Type myType;
 
     private final static Gson GSON = new GsonBuilder()
-            .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, type, ctx) ->
-                    LocalDateTime.parse(json.getAsString()))
-            .registerTypeAdapter(LocalDate.class, (JsonDeserializer<LocalDate>) (json, type, ctx) ->
-                    LocalDate.parse(json.getAsString()))
-            .registerTypeAdapter(LocalTime.class, (JsonDeserializer<LocalTime>) (json, type, ctx) ->
-                    LocalTime.parse(json.getAsString()))
+            .registerTypeAdapter(LocalDateTime.class,
+                    (JsonDeserializer<LocalDateTime>) (json, type, ctx) -> LocalDateTime.parse(json.getAsString()))
+            .registerTypeAdapter(LocalDate.class,
+                    (JsonDeserializer<LocalDate>) (json, type, ctx) -> LocalDate.parse(json.getAsString()))
+            .registerTypeAdapter(LocalTime.class,
+                    (JsonDeserializer<LocalTime>) (json, type, ctx) -> LocalTime.parse(json.getAsString()))
             .create();
 
     public enum Type {
@@ -118,23 +146,28 @@ public class ActivityDetailsController {
         BackgroundHelper.setupBackground(bgImageView);
 
         setupNavbar();
-        
+
         loadingOverlay.setVisible(true);
         boolean isOrganizer = "ORGANIZER".equalsIgnoreCase(UserSession.getInstance().getRole());
+        if (btnContactOrganizer != null) {
+            btnContactOrganizer.setVisible(!isOrganizer);
+            btnContactOrganizer.setManaged(!isOrganizer);
+        }
         // bookingCard.setVisible(!isOrganizer);
         // bookingCard.setManaged(!isOrganizer);
-        
+
         btnInitialize();
 
         // USE FOR DEBUG AND TEST
-        //loadData(Type.ACTIVITY, "1");
+        // loadData(Type.ACTIVITY, "1");
     }
 
     private void setupNavbar() {
 
         try {
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml"));
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml"));
             Node navbar = loader.load();
             navbarContainer.getChildren().setAll(navbar);
 
@@ -146,15 +179,15 @@ public class ActivityDetailsController {
     }
 
     public void loadData(Type type, String id) {
-        
+
         myType = type;
         this.id = id;
-        
+
         switch (type) {
             case ACTIVITY -> {
                 ApiService.get(
                         ApiService.BASE_URL + "/api/activities/" + id,
-                        response ->  {
+                        response -> {
                             activity = GSON.fromJson(response.body(), ActivityDTO.class);
 
                             setActivityData();
@@ -170,13 +203,12 @@ public class ActivityDetailsController {
                         loading -> {
                             loadingOverlay.setVisible(true);
                             loadingCardController.setMessage("Caricamento...");
-                        }
-                );
+                        });
             }
             case TRIP -> {
                 ApiService.get(
                         ApiService.BASE_URL + "/api/trips/" + id,
-                        response ->  {
+                        response -> {
                             trip = GSON.fromJson(response.body(), TripDTO.class);
 
                             setTripData();
@@ -192,10 +224,24 @@ public class ActivityDetailsController {
                         loading -> {
                             loadingOverlay.setVisible(true);
                             loadingCardController.setMessage("Caricamento...");
-                        }
-                );
+                        });
             }
         }
+    }
+
+    @FXML
+    private void handleContactOrganizer() {
+        if (!UserSession.getInstance().isLoggedIn()) {
+            SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/login/login.fxml", null);
+            return;
+        }
+        Long organizer = trip != null ? trip.getCreatedByUserId()
+                : activity != null ? activity.getCreatedByUserId() : null;
+        if (organizer != null)
+            SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/chat/chat.fxml", controller -> {
+                if (controller instanceof it.unical.ea_project_javafx.controller.chat.ChatController chat)
+                    chat.openOrganizer(organizer);
+            });
     }
 
     private void setActivityData() {
@@ -213,7 +259,7 @@ public class ActivityDetailsController {
         lblLocalita.setText(activity.getCity());
         lblCategoria.setText(activity.getCategory());
         lblTitolo.setText(activity.getTitle());
-        lblRating.setText( "★ " + formatRating(activity.getAverageRating()));
+        lblRating.setText("★ " + formatRating(activity.getAverageRating()));
 
         BigDecimal prezzo = activity.getPrice() != null ? BigDecimal.valueOf(activity.getPrice()) : null;
         lblPrezzo.setText(setMoneyCurrency(prezzo));
@@ -237,7 +283,7 @@ public class ActivityDetailsController {
         lblLocalita.setText(trip.getDestinationCity());
         lblTitolo.setText(trip.getTitle());
 
-        lblRating.setText( "★ " + formatRating(trip.getAverageRating()));
+        lblRating.setText("★ " + formatRating(trip.getAverageRating()));
         lblPrezzo.setText(setMoneyCurrency(trip.getTotalPrice()));
         lblTotale.setText(setMoneyCurrency(trip.getTotalPrice()));
 
@@ -293,8 +339,7 @@ public class ActivityDetailsController {
                     }
                 },
                 null,
-                null
-        );
+                null);
     }
 
     private String formatRating(Number rating) {
@@ -351,7 +396,7 @@ public class ActivityDetailsController {
             double height = stage.getScene() != null ? stage.getScene().getHeight() : 720;
 
             Scene previousScene = root.getScene();
-            controller.setOnBackLink( () -> {
+            controller.setOnBackLink(() -> {
                 stage.setScene(previousScene);
             });
 
@@ -367,7 +412,7 @@ public class ActivityDetailsController {
 
     private void openNewReview() {
 
-        newRecCardController.setOnClose( () -> {
+        newRecCardController.setOnClose(() -> {
             newRecCard.setManaged(false);
             newRecCard.setVisible(false);
             newRecCard.setDisable(true);
@@ -405,7 +450,6 @@ public class ActivityDetailsController {
         bodyContainer.getChildren().setAll(node);
     }
 
-
     @FXML
     private void handleDescrizione(ActionEvent event) {
         setActiveButton(btnDescrizione);
@@ -434,11 +478,11 @@ public class ActivityDetailsController {
         showSection(recensioniNode);
     }
 
-    private void btnInitialize(){
+    private void btnInitialize() {
         sectionButtons = List.of(btnDescrizione, btnItinerario, btnFoto, btnRecensioni);
 
-        SpinnerValueFactory.IntegerSpinnerValueFactory valueFactory =
-                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 5, 1);
+        SpinnerValueFactory.IntegerSpinnerValueFactory valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(
+                1, 5, 1);
         spinnerPartecipanti.setValueFactory(valueFactory);
 
         spinnerPartecipanti.valueProperty().addListener((obs, oldValue, newValue) -> {
@@ -448,13 +492,15 @@ public class ActivityDetailsController {
 
     @FXML
     private void handlePrenota() {
-        if ("ORGANIZER".equalsIgnoreCase(UserSession.getInstance().getRole())) return;
+        if ("ORGANIZER".equalsIgnoreCase(UserSession.getInstance().getRole()))
+            return;
         if (!UserSession.getInstance().isLoggedIn()) {
             showAlert(Alert.AlertType.WARNING, "Accesso richiesto", "Devi effettuare il login per prenotare.");
             return;
         }
         if ((myType == Type.ACTIVITY && activity == null) || (myType == Type.TRIP && trip == null)) {
-            showAlert(Alert.AlertType.ERROR, "Esperienza non disponibile", "Non è stato possibile caricare i dati necessari alla prenotazione.");
+            showAlert(Alert.AlertType.ERROR, "Esperienza non disponibile",
+                    "Non è stato possibile caricare i dati necessari alla prenotazione.");
             return;
         }
 
@@ -484,7 +530,8 @@ public class ActivityDetailsController {
 
         Label experience = new Label(lblTitolo.getText() == null ? "Esperienza" : lblTitolo.getText());
         experience.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
-        Label date = new Label("Data: " + (datePicker.getValue() == null ? "secondo il programma dell'esperienza" : datePicker.getValue().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
+        Label date = new Label("Data: " + (datePicker.getValue() == null ? "secondo il programma dell'esperienza"
+                : datePicker.getValue().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
         date.getStyleClass().add("app-modal-subtitle");
         HBox seatsRow = new HBox(8, new Label("Partecipanti"), new Region(), new Label(String.valueOf(seats)));
         seatsRow.setAlignment(Pos.CENTER_LEFT);
@@ -493,7 +540,8 @@ public class ActivityDetailsController {
         totalRow.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(totalRow.getChildren().get(1), javafx.scene.layout.Priority.ALWAYS);
         totalRow.getChildren().get(2).setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #e7e5e4;");
-        Label note = new Label("Controlla i dati prima di confermare. La prenotazione verrà registrata sul tuo account.");
+        Label note = new Label(
+                "Controlla i dati prima di confermare. La prenotazione verrà registrata sul tuo account.");
         note.setWrapText(true);
         note.getStyleClass().add("app-modal-subtitle");
         HBox actions = new HBox(10);
@@ -519,16 +567,18 @@ public class ActivityDetailsController {
         ApiService.post(ApiService.BASE_URL + endpoint + "?seats=" + seats, null,
                 response -> javafx.application.Platform.runLater(() -> {
                     closeInAppModal();
-                    showAlert(Alert.AlertType.INFORMATION, "Prenotazione completata", "La prenotazione è stata registrata correttamente.");
+                    showAlert(Alert.AlertType.INFORMATION, "Prenotazione completata",
+                            "La prenotazione è stata registrata correttamente.");
                 }),
                 () -> javafx.application.Platform.runLater(() -> showBookingFailure(
-                        "Non è stato possibile registrare la prenotazione. Verifica la disponibilità e riprova.")), null);
+                        "Non è stato possibile registrare la prenotazione. Verifica la disponibilità e riprova.")),
+                null);
     }
-
 
     private void showBookingFailure(String message) {
         closeInAppModal();
-        if (root == null) return;
+        if (root == null)
+            return;
         VBox panel = new VBox(14);
         panel.setMaxWidth(480);
         Label title = new Label("Prenotazione non completata");
@@ -559,7 +609,8 @@ public class ActivityDetailsController {
     }
 
     private void showAlert(Alert.AlertType type, String titleText, String message) {
-        if (root == null) return;
+        if (root == null)
+            return;
         closeInAppModal();
         VBox panel = new VBox(14);
         panel.setMaxWidth(480);

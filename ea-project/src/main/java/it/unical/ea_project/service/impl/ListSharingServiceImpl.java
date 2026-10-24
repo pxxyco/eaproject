@@ -30,7 +30,7 @@ public class ListSharingServiceImpl implements ListSharingService {
             throw new IllegalArgumentException("ID della lista e dell'utente obbligatori.");
         }
 
-        FavoriteList favoriteList = favoriteListRepository.findById(listId)
+        FavoriteList favoriteList = favoriteListRepository.lockActive(listId)
                 .filter(list -> !list.isDeleted())
                 .orElseThrow(() -> new IllegalArgumentException("Lista non trovata o eliminata con ID: " + listId));
 
@@ -47,7 +47,8 @@ public class ListSharingServiceImpl implements ListSharingService {
         }
 
         if (listSharingRepository.existsByFavoriteList_IdAndUser_Id(listId, userId)) {
-            throw new IllegalStateException("La lista è già condivisa con questo utente. Modifica il permesso esistente.");
+            throw new IllegalStateException(
+                    "La lista è già condivisa con questo utente. Modifica il permesso esistente.");
         }
 
         ListSharing sharing = new ListSharing();
@@ -79,16 +80,18 @@ public class ListSharingServiceImpl implements ListSharingService {
         }
 
         return listSharingRepository.findByUser_Id(userId)
-            .stream()
-            .filter(sharing -> !sharing.getFavoriteList().isDeleted()
-                    && sharing.getFavoriteList().getVisibility() == FavoriteList.Visibility.SHARED)
-            .toList();
+                .stream()
+                .filter(sharing -> !sharing.getFavoriteList().isDeleted()
+                        && sharing.getFavoriteList().getVisibility() == FavoriteList.Visibility.SHARED)
+                .toList();
 
     }
 
     @Override
     @Transactional
     public void updatePermission(Long listId, Long userId, ListSharing.SharingPermission newPermission) {
+        favoriteListRepository.lockActive(listId)
+                .orElseThrow(() -> new IllegalArgumentException("Lista non disponibile."));
 
         if (newPermission == null) {
             throw new IllegalArgumentException("Il permesso è obbligatorio.");
@@ -96,7 +99,8 @@ public class ListSharingServiceImpl implements ListSharingService {
 
         ListSharing.ListSharingId id = new ListSharing.ListSharingId(listId, userId);
         ListSharing sharing = listSharingRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Nessuna condivisione esistente per questa coppia lista-utente."));
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Nessuna condivisione esistente per questa coppia lista-utente."));
         sharing.setPermission(newPermission);
         listSharingRepository.save(sharing);
 
@@ -105,6 +109,8 @@ public class ListSharingServiceImpl implements ListSharingService {
     @Override
     @Transactional
     public void revokeSharing(Long listId, Long userId) {
+        favoriteListRepository.lockActive(listId)
+                .orElseThrow(() -> new IllegalArgumentException("Lista non disponibile."));
 
         ListSharing.ListSharingId id = new ListSharing.ListSharingId(listId, userId);
         ListSharing sharing = listSharingRepository.findById(id)

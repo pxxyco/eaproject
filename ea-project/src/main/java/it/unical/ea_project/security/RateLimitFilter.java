@@ -1,103 +1,139 @@
 package it.unical.ea_project.security;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import jakarta.servlet.http.*;
+import org.apache.logging.log4j.*;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
-
 import java.io.IOException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.time.Duration;
 
+/**
+ * Local bounded token buckets. Uses the socket peer, never untrusted forwarding
+ * headers.
+ */
 public class RateLimitFilter extends OncePerRequestFilter {
-
     private static final Logger AUDIT = LogManager.getLogger("AUDIT");
+    private final Cache<String, Bucket> buckets = Caffeine.newBuilder().maximumSize(50_000)
+            .expireAfterAccess(Duration.ofMinutes(10)).build();
 
-    private static final long WINDOW_MS = 60_000;
-    private static final int GENERAL_LIMIT = 120;
-    private static final int PHOTO_LIMIT = 600;
-    private static final int NOTIFICATION_LIMIT = 60;
-    private static final int AUTH_LIMIT = 10;
+    private static final class Bucket {
+        double tokens;
+        long updated = System.nanoTime();
+        boolean reported;
 
-    private static final class Counter {
-        long windowStart;
-        int count;
-    }
-
-    private final Map<String, Counter> counters = new ConcurrentHashMap<>();
-    private volatile long lastCleanup = System.currentTimeMillis();
-
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        return request.getRequestURI().equals("/api/health");
-    }
-
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-                                    FilterChain chain) throws ServletException, IOException {
-        String path = request.getRequestURI();
-        String method = request.getMethod();
-        String ip = request.getRemoteAddr();
-
-        String bucket;
-        int limit;
-        if (isAuthEndpoint(method, path)) {
-            bucket = "auth";
-            limit = AUTH_LIMIT;
-        } else if (path.startsWith("/photo/")) {
-            bucket = "photo";
-            limit = PHOTO_LIMIT;
-        } else if (path.startsWith("/api/notifications")) {
-            // Le notifiche hanno un bucket separato: un burst sull'inbox non deve
-            // consumare il limite generale e bloccare prenotazioni, profilo o ricerca.
-            bucket = "notifications";
-            limit = NOTIFICATION_LIMIT;
-        } else {
-            bucket = "general";
-            limit = GENERAL_LIMIT;
+        Bucket(int capacity) {
+            tokens = capacity;
         }
 
-        int count = hit(ip + ":" + bucket);
-        if (count > limit) {
-            if (count == limit + 1) {
-                AUDIT.warn("RATE_LIMIT ip={} bucket={} limit={} method={} path={}",
-                        ip, bucket, limit, method, path);
+        synchronized int take(int capacity, int seconds) {
+            long now = System.nanoTime();
+            tokens = Math.min(capacity, tokens + Math.max(0, now - updated) / 1_000_000_000d * capacity / seconds);
+            updated = now;
+            if (tokens >= 1) {
+                tokens--;
+                reported = false;
+                return 0;
             }
-            response.setStatus(429);
-            response.setHeader("Retry-After", "60");
-            response.setContentType("application/json");
-            response.setCharacterEncoding("UTF-8");
-            response.getWriter().write("{\"code\":\"ERR-104\",\"message\":\"Troppe richieste in poco tempo. Attendi 60 secondi e riprova.\"}");
+            return Math.max(1, (int) Math.ceil((1 - tokens) * seconds / capacity));
+        }
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest r) {
+        return r.getRequestURI().equals("/api/health");
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest r, HttpServletResponse response, FilterChain chain)
+            throws ServletException, IOException {
+        String path = r.getRequestURI();
+        String method = r.getMethod();
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        AuthUser user = authentication != null && authentication.getPrincipal() instanceof AuthUser a ? a : null;
+        String bucket = "general";
+        int capacity = 180;
+        int seconds = 60;
+        if (path.equals("/api/users/login") || path.equals("/api/users") || path.equals("/api/users/exists")) {
+            bucket = "auth";
+            capacity = 10;
+        } else if (path.equals("/api/users/refresh")) {
+            bucket = "refresh";
+            capacity = 30;
+        } else if (path.startsWith("/photo/")) {
+            bucket = "photos";
+            capacity = 600;
+        } else if (path.startsWith("/api/notifications")) {
+            bucket = "notifications";
+            capacity = 60;
+        } else if (path.equals("/api/chat/events")) {
+            bucket = "chat-connect";
+            capacity = 10;
+        } else if (path.startsWith("/api/chat/") && path.endsWith("/messages") && method.equals("POST")) {
+            bucket = "chat-send";
+            capacity = 40;
+        } else if (!method.equals("GET") && !method.equals("HEAD") && !method.equals("OPTIONS")) {
+            bucket = "write";
+            capacity = path.contains("photo") || path.contains("images") ? 20 : 60;
+        }
+        String ip = r.getRemoteAddr();
+        String identity = user == null ? "ip:" + ip : "user:" + user.id();
+        final int burst = capacity;
+        Bucket counter = buckets.get(bucket + ":" + identity, key -> new Bucket(burst));
+        int retry = counter.take(capacity, seconds);
+        if (retry == 0) {
+            chain.doFilter(r, response);
             return;
         }
-        chain.doFilter(request, response);
-    }
-
-    private boolean isAuthEndpoint(String method, String path) {
-        return ("POST".equals(method) && (path.equals("/api/users/login") || path.equals("/api/users")))
-                || ("GET".equals(method) && path.equals("/api/users/exists"));
-    }
-
-    private int hit(String key) {
-        long now = System.currentTimeMillis();
-        cleanupIfNeeded(now);
-        Counter c = counters.computeIfAbsent(key, k -> new Counter());
-        synchronized (c) {
-            if (now - c.windowStart >= WINDOW_MS) {
-                c.windowStart = now;
-                c.count = 0;
+        synchronized (counter) {
+            if (!counter.reported) {
+                counter.reported = true;
+                AUDIT.warn("RATE_LIMIT bucket={} userId={} ip={}", bucket, user == null ? "anonymous" : user.id(), ip);
             }
-            return ++c.count;
+        }
+        reject(response, retry);
+    }
+
+    private static void reject(HttpServletResponse response, int wait) throws IOException {
+        response.setStatus(429);
+        response.setHeader("Retry-After", Integer.toString(wait));
+        response.setHeader("Cache-Control", "no-store");
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write(
+                "{\"code\":\"ERR-104\",\"message\":\"Troppe richieste. Attendi " + wait + " secondi e riprova.\"}");
+    }
+
+    /**
+     * Rejects abusive peers before JWT signature verification and database lookup.
+     */
+    public static final class PeerGuard extends OncePerRequestFilter {
+        private final Cache<String, Bucket> peers = Caffeine.newBuilder().maximumSize(25_000)
+                .expireAfterAccess(Duration.ofMinutes(10)).build();
+
+        @Override
+        protected boolean shouldNotFilter(HttpServletRequest request) {
+            return request.getRequestURI().equals("/api/health");
+        }
+
+        @Override
+        protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+                FilterChain chain) throws ServletException, IOException {
+            Bucket counter = peers.get(request.getRemoteAddr(), key -> new Bucket(1200));
+            int wait = counter.take(1200, 60);
+            if (wait == 0) {
+                chain.doFilter(request, response);
+                return;
+            }
+            synchronized (counter) {
+                if (!counter.reported) {
+                    counter.reported = true;
+                    AUDIT.warn("RATE_LIMIT bucket=peer ip={}", request.getRemoteAddr());
+                }
+            }
+            reject(response, wait);
         }
     }
-
-    private void cleanupIfNeeded(long now) {
-        if (now - lastCleanup < WINDOW_MS) return;
-        lastCleanup = now;
-        counters.entrySet().removeIf(e -> now - e.getValue().windowStart >= WINDOW_MS);
-    }
 }
-

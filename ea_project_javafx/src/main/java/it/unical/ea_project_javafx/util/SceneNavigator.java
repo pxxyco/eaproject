@@ -29,6 +29,17 @@ public class SceneNavigator {
 
     public void init(Stage stage) {
         this.mainStage = stage;
+        stage.addEventHandler(javafx.stage.WindowEvent.WINDOW_HIDDEN, event -> {
+            if (stage.getScene() == null)
+                return;
+            Object controller = stage.getScene().getProperties().remove("pageController");
+            if (controller instanceof AutoCloseable closeable) {
+                try {
+                    closeable.close();
+                } catch (Exception ignored) {
+                }
+            }
+        });
     }
 
     public void loadScene(String fxmlPath, Consumer<Object> controllerInitializer) {
@@ -36,7 +47,7 @@ public class SceneNavigator {
         if (mainStage == null) {
             throw new IllegalStateException("SceneNavigator non inizializzato.");
         }
-        
+
         try {
 
             URL fxmlUrl = getClass().getResource(fxmlPath);
@@ -61,6 +72,15 @@ public class SceneNavigator {
 
             scene.setUserData(fxmlPath);
 
+            if (mainStage.getScene() != null) {
+                Object previous = mainStage.getScene().getProperties().get("pageController");
+                if (previous instanceof AutoCloseable closeable)
+                    try {
+                        closeable.close();
+                    } catch (Exception ignored) {
+                    }
+            }
+            scene.getProperties().put("pageController", loader.getController());
             mainStage.setScene(scene);
             mainStage.show();
 

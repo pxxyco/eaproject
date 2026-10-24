@@ -20,23 +20,36 @@ import java.util.Map;
 
 public class SettingsController {
 
-    @FXML private ImageView bgImageView;
-    @FXML private StackPane navbarContainer;
-    @FXML private Label statusMessageLabel;
+    @FXML
+    private ImageView bgImageView;
+    @FXML
+    private StackPane navbarContainer;
+    @FXML
+    private Label statusMessageLabel;
 
-    @FXML private PasswordField currentPasswordField;
-    @FXML private PasswordField newPasswordField;
-    @FXML private PasswordField confirmPasswordField;
+    @FXML
+    private PasswordField currentPasswordField;
+    @FXML
+    private PasswordField newPasswordField;
+    @FXML
+    private PasswordField confirmPasswordField;
 
-    @FXML private CheckBox emailBookingNotificationCheck;
-    @FXML private CheckBox emailMarketingCheck;
+    @FXML
+    private CheckBox emailBookingNotificationCheck;
+    @FXML
+    private CheckBox emailMarketingCheck;
 
-    @FXML private VBox organizerSettingsSection;
-    @FXML private TextField organizerBrandNameField;
-    @FXML private TextArea organizerBioArea;
+    @FXML
+    private VBox organizerSettingsSection;
+    @FXML
+    private TextField organizerBrandNameField;
+    @FXML
+    private TextArea organizerBioArea;
 
-    @FXML private VBox travelerSettingsSection;
-    @FXML private CheckBox publicProfileCheck;
+    @FXML
+    private VBox travelerSettingsSection;
+    @FXML
+    private CheckBox publicProfileCheck;
 
     private final UserSession userSession = UserSession.getInstance();
 
@@ -52,7 +65,8 @@ public class SettingsController {
     private void loadNavbar() {
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml"));
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml"));
             Parent navbar = loader.load();
             navbarContainer.getChildren().setAll(navbar);
         } catch (IOException e) {
@@ -110,14 +124,17 @@ public class SettingsController {
                 ApiService.toJson(payload),
                 ApiService.Method.POST,
                 response -> Platform.runLater(() -> {
-                    showSuccess("Password aggiornata con successo!");
+                    userSession.clear();
+                    it.unical.ea_project_javafx.util.TokenStorage.clear();
+                    it.unical.ea_project_javafx.util.NotificationPollingService.getInstance().clearSessionState();
+                    showSuccess("Password aggiornata. Le sessioni sono state chiuse: accedi di nuovo dal menu.");
+                    loadNavbar();
                     currentPasswordField.clear();
                     newPasswordField.clear();
                     confirmPasswordField.clear();
                 }),
                 message -> Platform.runLater(() -> showError(message)),
-                null
-        );
+                null);
 
     }
 
@@ -138,8 +155,7 @@ public class SettingsController {
                 ApiService.Method.PUT,
                 response -> Platform.runLater(() -> showSuccess("Dati organizzatore salvati con successo!")),
                 () -> Platform.runLater(() -> showError("Errore durante il salvataggio dei dati organizzatore.")),
-                null
-        );
+                null);
 
     }
 

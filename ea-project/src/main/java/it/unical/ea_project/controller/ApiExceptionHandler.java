@@ -17,12 +17,19 @@ import java.util.Map;
 public class ApiExceptionHandler {
 
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<Map<String, Object>> handleResponseStatus(ResponseStatusException exception) {
+    public ResponseEntity<Map<String, Object>> handleResponseStatus(ResponseStatusException exception, HttpServletRequest request) {
         HttpStatus status = HttpStatus.resolve(exception.getStatusCode().value());
         Map<String, Object> body = new LinkedHashMap<>();
         body.put("status", exception.getStatusCode().value());
         body.put("message", exception.getReason() == null ? "Richiesta non valida." : exception.getReason());
-        return ResponseEntity.status(status == null ? HttpStatus.INTERNAL_SERVER_ERROR : status).body(body);
+        var response = ResponseEntity.status(status == null ? HttpStatus.INTERNAL_SERVER_ERROR : status);
+        if (exception.getStatusCode().value() == 429) response.header("Retry-After", request.getRequestURI().startsWith("/api/chat") ? "30" : "900");
+        return response.body(body);
+    }
+
+    @ExceptionHandler(org.springframework.dao.OptimisticLockingFailureException.class)
+    public ResponseEntity<Map<String,Object>> concurrentEdit(Exception exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("status",409,"message","Un altro utente ha aggiornato questi dati. Ricarica prima di salvare."));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)

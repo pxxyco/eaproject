@@ -35,9 +35,13 @@ import java.util.function.Consumer;
 
 public class ApiService {
 
-    public enum Method { GET, POST, PUT, DELETE }
+    public enum Method {
+        GET, POST, PUT, DELETE
+    }
 
-    public static final String BASE_URL = "http://localhost:8080";
+    public static final String BASE_URL = System
+            .getProperty("itinera.api.url", System.getenv().getOrDefault("ITINERA_API_URL", "http://localhost:8080"))
+            .replaceAll("/+$", "");
 
     private static final HttpClient CLIENT = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(5))
@@ -53,12 +57,12 @@ public class ApiService {
     private static CompletableFuture<Boolean> refreshFuture;
 
     private static final Gson GSON = new GsonBuilder()
-            .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, type, context) ->
-                    deserializeLocalDateTime(json))
-            .registerTypeAdapter(LocalDate.class, (JsonDeserializer<LocalDate>) (json, type, context) ->
-                    deserializeLocalDate(json))
-            .registerTypeAdapter(LocalTime.class, (JsonDeserializer<LocalTime>) (json, type, context) ->
-                    deserializeLocalTime(json))
+            .registerTypeAdapter(LocalDateTime.class,
+                    (JsonDeserializer<LocalDateTime>) (json, type, context) -> deserializeLocalDateTime(json))
+            .registerTypeAdapter(LocalDate.class,
+                    (JsonDeserializer<LocalDate>) (json, type, context) -> deserializeLocalDate(json))
+            .registerTypeAdapter(LocalTime.class,
+                    (JsonDeserializer<LocalTime>) (json, type, context) -> deserializeLocalTime(json))
             .create();
 
     public static <T> T fromJson(String json, java.lang.reflect.Type type) {
@@ -110,8 +114,7 @@ public class ApiService {
                 parts.get(3).getAsInt(),
                 parts.get(4).getAsInt(),
                 second,
-                nano
-        );
+                nano);
     }
 
     private static LocalTime deserializeLocalTime(JsonElement json) {
@@ -128,39 +131,45 @@ public class ApiService {
                 parts.get(0).getAsInt(),
                 parts.get(1).getAsInt(),
                 second,
-                nano
-        );
+                nano);
     }
-
 
     @Setter
     private static Runnable onNetworkFailureGlobal;
 
-    /** HTTP helper that preserves the server's validation/conflict message for forms. */
+    /**
+     * HTTP helper that preserves the server's validation/conflict message for
+     * forms.
+     */
     public static void callDetailed(String url, String body, Method method,
-                                    Consumer<HttpResponse<String>> onSuccess,
-                                    Consumer<String> onFailure,
-                                    Consumer<Boolean> loadingSetter) {
+            Consumer<HttpResponse<String>> onSuccess,
+            Consumer<String> onFailure,
+            Consumer<Boolean> loadingSetter) {
         callDetailed(url, body, method, onSuccess, onFailure, loadingSetter, true);
     }
 
     private static void callDetailed(String url, String body, Method method,
-                                     Consumer<HttpResponse<String>> onSuccess,
-                                     Consumer<String> onFailure,
-                                     Consumer<Boolean> loadingSetter,
-                                     boolean allowRefresh) {
+            Consumer<HttpResponse<String>> onSuccess,
+            Consumer<String> onFailure,
+            Consumer<Boolean> loadingSetter,
+            boolean allowRefresh) {
         setLoadingOnFxThread(loadingSetter, true);
+        long requestGeneration = UserSession.getInstance().getGeneration();
         String sentToken = UserSession.getInstance().getAccessToken();
         boolean hadToken = sentToken != null && !sentToken.isBlank();
 
         Task<HttpResponse<String>> task = new Task<>() {
             @Override
             protected HttpResponse<String> call() throws Exception {
-                return CLIENT.send(buildRequest(url, body, method), HttpResponse.BodyHandlers.ofString());
+                return CLIENT.send(buildRequest(url, body, method, sentToken), HttpResponse.BodyHandlers.ofString());
             }
         };
 
         task.setOnSucceeded(event -> {
+            if (requestGeneration != UserSession.getInstance().getGeneration()) {
+                setLoadingOnFxThread(loadingSetter, false);
+                return;
+            }
             HttpResponse<String> response = task.getValue();
             if (response.statusCode() == 401 && hadToken && allowRefresh) {
                 CompletableFuture<Boolean> future;
@@ -174,6 +183,10 @@ public class ApiService {
                     }
                 }
                 future.thenAcceptAsync(success -> {
+                    if (requestGeneration != UserSession.getInstance().getGeneration()) {
+                        setLoadingOnFxThread(loadingSetter, false);
+                        return;
+                    }
                     if (Boolean.TRUE.equals(success)) {
                         callDetailed(url, body, method, onSuccess, onFailure, loadingSetter, false);
                     } else {
@@ -186,16 +199,22 @@ public class ApiService {
 
             setLoadingOnFxThread(loadingSetter, false);
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                if (onSuccess != null) onSuccess.accept(response);
+                if (onSuccess != null)
+                    onSuccess.accept(response);
             } else if (onFailure != null) {
                 onFailure.accept(extractErrorMessage(response.body(), response.statusCode()));
             }
         });
 
         task.setOnFailed(event -> {
+            if (requestGeneration != UserSession.getInstance().getGeneration()) {
+                setLoadingOnFxThread(loadingSetter, false);
+                return;
+            }
             setLoadingOnFxThread(loadingSetter, false);
             if (onFailure != null) {
-                Platform.runLater(() -> onFailure.accept("Impossibile completare la richiesta: verifica che il server sia raggiungibile."));
+                Platform.runLater(() -> onFailure
+                        .accept("Impossibile completare la richiesta: verifica che il server sia raggiungibile."));
             }
         });
         EXECUTOR.execute(task);
@@ -210,9 +229,11 @@ public class ApiService {
             case 409 -> "I dati inseriti sono già utilizzati da un altro account.";
             case 413 -> "Il file caricato è troppo grande.";
             case 429 -> "Hai effettuato troppe richieste. Riprova tra poco.";
-            default -> statusCode >= 500 ? "Errore interno del server. Riprova più tardi." : "Richiesta non completata.";
+            default ->
+                statusCode >= 500 ? "Errore interno del server. Riprova più tardi." : "Richiesta non completata.";
         };
-        if (responseBody == null || responseBody.isBlank()) return fallback;
+        if (responseBody == null || responseBody.isBlank())
+            return fallback;
         try {
             JsonObject json = GSON.fromJson(responseBody, JsonObject.class);
             if (json != null) {
@@ -222,7 +243,7 @@ public class ApiService {
                         return "ERR-104 — " + json.get("message").getAsString();
                     }
                 }
-                for (String key : new String[]{"message", "detail", "reason", "error"}) {
+                for (String key : new String[] { "message", "detail", "reason", "error" }) {
                     if (json.has(key) && !json.get(key).isJsonNull()) {
                         String value = json.get(key).getAsString();
                         if (!value.isBlank() && !value.equalsIgnoreCase("Bad Request")
@@ -236,75 +257,87 @@ public class ApiService {
             // The body may be plain text or a framework error document.
         }
         String plain = responseBody.trim();
-        if (!plain.startsWith("{") && plain.length() <= 250 && !plain.contains("<html")) return plain;
+        if (!plain.startsWith("{") && plain.length() <= 250 && !plain.contains("<html"))
+            return plain;
         return fallback;
     }
 
-    public static void get(String url, Consumer<HttpResponse<String>> onSuccess, Runnable onFailure, Consumer<Boolean> loadingSetter) {
+    public static void get(String url, Consumer<HttpResponse<String>> onSuccess, Runnable onFailure,
+            Consumer<Boolean> loadingSetter) {
         call(url, null, Method.GET, onSuccess, onFailure, loadingSetter);
     }
 
-    public static void post(String url, String body, Consumer<HttpResponse<String>> onSuccess, Runnable onFailure, Consumer<Boolean> loadingSetter) {
+    public static void post(String url, String body, Consumer<HttpResponse<String>> onSuccess, Runnable onFailure,
+            Consumer<Boolean> loadingSetter) {
         call(url, body, Method.POST, onSuccess, onFailure, loadingSetter);
     }
 
-    public static void put(String url, String body, Consumer<HttpResponse<String>> onSuccess, Runnable onFailure, Consumer<Boolean> loadingSetter) {
+    public static void put(String url, String body, Consumer<HttpResponse<String>> onSuccess, Runnable onFailure,
+            Consumer<Boolean> loadingSetter) {
         call(url, body, Method.PUT, onSuccess, onFailure, loadingSetter);
     }
 
-    public static void delete(String url, Consumer<HttpResponse<String>> onSuccess, Runnable onFailure, Consumer<Boolean> loadingSetter) {
+    public static void delete(String url, Consumer<HttpResponse<String>> onSuccess, Runnable onFailure,
+            Consumer<Boolean> loadingSetter) {
         call(url, null, Method.DELETE, onSuccess, onFailure, loadingSetter);
     }
 
-    public static void call(String url, String body, Method method, Consumer<HttpResponse<String>> onSuccess, Runnable onFailure, Consumer<Boolean> loadingSetter) {
+    public static void call(String url, String body, Method method, Consumer<HttpResponse<String>> onSuccess,
+            Runnable onFailure, Consumer<Boolean> loadingSetter) {
         call(url, body, method, onSuccess, onFailure, loadingSetter, true);
     }
 
     public static void uploadFile(String url, Path file, Consumer<HttpResponse<String>> onSuccess,
-                                  Runnable onFailure, Consumer<Boolean> loadingSetter) {
+            Runnable onFailure, Consumer<Boolean> loadingSetter) {
         uploadFiles(url, java.util.List.of(file), "file", onSuccess, onFailure, null, loadingSetter);
     }
 
     public static void uploadFileDetailed(String url, Path file, Consumer<HttpResponse<String>> onSuccess,
-                                          Runnable onFailure, Consumer<String> onServerFailure,
-                                          Consumer<Boolean> loadingSetter) {
+            Runnable onFailure, Consumer<String> onServerFailure,
+            Consumer<Boolean> loadingSetter) {
         uploadFiles(url, java.util.List.of(file), "file", onSuccess, onFailure, onServerFailure, loadingSetter);
     }
 
     public static void uploadFiles(String url, java.util.List<Path> files, Consumer<HttpResponse<String>> onSuccess,
-                                   Runnable onFailure, Consumer<Boolean> loadingSetter) {
+            Runnable onFailure, Consumer<Boolean> loadingSetter) {
         uploadFiles(url, files, "files", onSuccess, onFailure, null, loadingSetter);
     }
 
     public static void uploadFilesDetailed(String url, java.util.List<Path> files,
-                                           Consumer<HttpResponse<String>> onSuccess, Runnable onFailure,
-                                           Consumer<String> onServerFailure, Consumer<Boolean> loadingSetter) {
+            Consumer<HttpResponse<String>> onSuccess, Runnable onFailure,
+            Consumer<String> onServerFailure, Consumer<Boolean> loadingSetter) {
         uploadFiles(url, files, "files", onSuccess, onFailure, onServerFailure, loadingSetter);
     }
 
     private static void uploadFiles(String url, java.util.List<Path> files, String formField,
-                                    Consumer<HttpResponse<String>> onSuccess, Runnable onFailure,
-                                    Consumer<String> onServerFailure, Consumer<Boolean> loadingSetter) {
+            Consumer<HttpResponse<String>> onSuccess, Runnable onFailure,
+            Consumer<String> onServerFailure, Consumer<Boolean> loadingSetter) {
         uploadFiles(url, files, formField, onSuccess, onFailure, onServerFailure, loadingSetter, true);
     }
 
     private static void uploadFiles(String url, java.util.List<Path> files, String formField,
-                                    Consumer<HttpResponse<String>> onSuccess, Runnable onFailure,
-                                    Consumer<String> onServerFailure, Consumer<Boolean> loadingSetter,
-                                    boolean allowRefresh) {
+            Consumer<HttpResponse<String>> onSuccess, Runnable onFailure,
+            Consumer<String> onServerFailure, Consumer<Boolean> loadingSetter,
+            boolean allowRefresh) {
         setLoadingOnFxThread(loadingSetter, true);
 
+        long requestGeneration = UserSession.getInstance().getGeneration();
         String sentToken = UserSession.getInstance().getAccessToken();
         boolean hadToken = sentToken != null && !sentToken.isBlank();
 
         Task<HttpResponse<String>> task = new Task<>() {
             @Override
             protected HttpResponse<String> call() throws Exception {
-                return CLIENT.send(buildMultipartRequest(url, files, formField), HttpResponse.BodyHandlers.ofString());
+                return CLIENT.send(buildMultipartRequest(url, files, formField, sentToken),
+                        HttpResponse.BodyHandlers.ofString());
             }
         };
 
         task.setOnSucceeded(event -> {
+            if (requestGeneration != UserSession.getInstance().getGeneration()) {
+                setLoadingOnFxThread(loadingSetter, false);
+                return;
+            }
             HttpResponse<String> response = task.getValue();
             if (response.statusCode() == 401 && hadToken && allowRefresh) {
                 CompletableFuture<Boolean> future;
@@ -316,6 +349,10 @@ public class ApiService {
                     future = refreshFuture;
                 }
                 future.thenAcceptAsync(success -> {
+                    if (requestGeneration != UserSession.getInstance().getGeneration()) {
+                        setLoadingOnFxThread(loadingSetter, false);
+                        return;
+                    }
                     if (Boolean.TRUE.equals(success)) {
                         uploadFiles(url, files, formField, onSuccess, onFailure, onServerFailure, loadingSetter, false);
                     } else {
@@ -328,10 +365,12 @@ public class ApiService {
 
             setLoadingOnFxThread(loadingSetter, false);
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
-                if (onSuccess != null) onSuccess.accept(response);
+                if (onSuccess != null)
+                    onSuccess.accept(response);
             } else if (onServerFailure != null) {
                 String details = response.body() == null ? "" : response.body().trim();
-                if (details.length() > 300) details = details.substring(0, 300) + "...";
+                if (details.length() > 300)
+                    details = details.substring(0, 300) + "...";
                 String message = "Errore HTTP " + response.statusCode()
                         + (details.isBlank() ? "" : ": " + details);
                 Platform.runLater(() -> onServerFailure.accept(message));
@@ -341,16 +380,21 @@ public class ApiService {
         });
 
         task.setOnFailed(event -> {
+            if (requestGeneration != UserSession.getInstance().getGeneration()) {
+                setLoadingOnFxThread(loadingSetter, false);
+                return;
+            }
             setLoadingOnFxThread(loadingSetter, false);
             if (onServerFailure != null) {
                 Throwable exception = task.getException();
                 String details = exception == null
                         ? "causa non disponibile"
                         : exception.getClass().getSimpleName()
-                        + (exception.getMessage() == null || exception.getMessage().isBlank()
-                        ? ""
-                        : ": " + exception.getMessage());
-                if (details.length() > 300) details = details.substring(0, 300) + "...";
+                                + (exception.getMessage() == null || exception.getMessage().isBlank()
+                                        ? ""
+                                        : ": " + exception.getMessage());
+                if (details.length() > 300)
+                    details = details.substring(0, 300) + "...";
                 String message = "Errore durante la richiesta di upload: " + details;
                 Platform.runLater(() -> onServerFailure.accept(message));
             } else {
@@ -361,9 +405,11 @@ public class ApiService {
         EXECUTOR.execute(task);
     }
 
-    private static void call(String url, String body, Method method, Consumer<HttpResponse<String>> onSuccess, Runnable onFailure, Consumer<Boolean> loadingSetter, boolean allowRefresh) {
+    private static void call(String url, String body, Method method, Consumer<HttpResponse<String>> onSuccess,
+            Runnable onFailure, Consumer<Boolean> loadingSetter, boolean allowRefresh) {
         setLoadingOnFxThread(loadingSetter, true);
 
+        long requestGeneration = UserSession.getInstance().getGeneration();
         String sentToken = UserSession.getInstance().getAccessToken();
         boolean hadToken = sentToken != null && !sentToken.isBlank();
 
@@ -371,13 +417,16 @@ public class ApiService {
             @Override
             protected HttpResponse<String> call() throws Exception {
                 return CLIENT.send(
-                        buildRequest(url, body, method),
-                        HttpResponse.BodyHandlers.ofString()
-                );
+                        buildRequest(url, body, method, sentToken),
+                        HttpResponse.BodyHandlers.ofString());
             }
         };
 
         task.setOnSucceeded(e -> {
+            if (requestGeneration != UserSession.getInstance().getGeneration()) {
+                setLoadingOnFxThread(loadingSetter, false);
+                return;
+            }
             HttpResponse<String> response = task.getValue();
 
             if (response.statusCode() == 401 && hadToken && allowRefresh) {
@@ -394,6 +443,10 @@ public class ApiService {
                 }
 
                 future.thenAcceptAsync(success -> {
+                    if (requestGeneration != UserSession.getInstance().getGeneration()) {
+                        setLoadingOnFxThread(loadingSetter, false);
+                        return;
+                    }
                     if (Boolean.TRUE.equals(success)) {
                         call(url, body, method, onSuccess, onFailure, loadingSetter, false);
                     } else {
@@ -415,15 +468,21 @@ public class ApiService {
                 // ERR-104 è un errore locale della richiesta, non un motivo per cambiare
                 // scena o riavviare la UI. Il chiamante gestisce il limite e può rispettare
                 // Retry-After senza interrompere l'intera applicazione.
-                if (onFailure != null) onFailure.run();
+                if (onFailure != null)
+                    onFailure.run();
             } else {
                 // Anche le risposte HTTP 4xx/5xx devono notificare il chiamante: altrimenti
                 // la UI può restare bloccata nello stato "Caricamento..." senza feedback.
-                if (onFailure != null) onFailure.run();
+                if (onFailure != null)
+                    onFailure.run();
             }
         });
 
         task.setOnFailed(e -> {
+            if (requestGeneration != UserSession.getInstance().getGeneration()) {
+                setLoadingOnFxThread(loadingSetter, false);
+                return;
+            }
             setLoadingOnFxThread(loadingSetter, false);
             handleFailure(onFailure);
         });
@@ -432,6 +491,7 @@ public class ApiService {
     }
 
     private static void executeRefreshTokenCall() {
+        long generation = UserSession.getInstance().getGeneration();
         String refresh = UserSession.getInstance().getRefreshToken();
 
         if (refresh == null || refresh.isBlank()) {
@@ -451,8 +511,7 @@ public class ApiService {
 
                 return CLIENT.send(
                         request,
-                        HttpResponse.BodyHandlers.ofString()
-                );
+                        HttpResponse.BodyHandlers.ofString());
             }
         };
 
@@ -464,6 +523,10 @@ public class ApiService {
 
             if (response.statusCode() == 200 && authorization.startsWith("Bearer ")) {
                 String newAccessToken = authorization.substring(7);
+                if (generation != UserSession.getInstance().getGeneration()) {
+                    completeRefresh(false);
+                    return;
+                }
                 UserSession.getInstance().setTokens(newAccessToken, refresh);
                 completeRefresh(true);
             } else {
@@ -487,24 +550,22 @@ public class ApiService {
     private static void forceLogout() {
         UserSession.getInstance().clear();
         TokenStorage.clear();
+        NotificationPollingService.getInstance().clearSessionState();
         SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/common/splash-screen.fxml", null);
     }
 
-    private static HttpRequest buildRequest(String url, String body, Method method) {
+    private static HttpRequest buildRequest(String url, String body, Method method, String token) {
         HttpRequest.Builder builder = HttpRequest.newBuilder()
                 .uri(URI.create(url))
                 .timeout(Duration.ofSeconds(30));
-
-        String token = UserSession.getInstance().getAccessToken();
 
         if (token != null && !token.isBlank()) {
             builder.header("Authorization", "Bearer " + token);
         }
 
-        HttpRequest.BodyPublisher publisher =
-                (body == null || body.isEmpty())
-                        ? HttpRequest.BodyPublishers.noBody()
-                        : HttpRequest.BodyPublishers.ofString(body);
+        HttpRequest.BodyPublisher publisher = (body == null || body.isEmpty())
+                ? HttpRequest.BodyPublishers.noBody()
+                : HttpRequest.BodyPublishers.ofString(body);
 
         switch (method) {
             case POST -> builder.header("Content-Type", "application/json").POST(publisher);
@@ -522,7 +583,8 @@ public class ApiService {
         return builder.build();
     }
 
-    private static HttpRequest buildMultipartRequest(String url, java.util.List<Path> files, String formField) throws IOException {
+    private static HttpRequest buildMultipartRequest(String url, java.util.List<Path> files, String formField,
+            String token) throws IOException {
         String boundary = "----CopilotUpload" + UUID.randomUUID();
         ByteArrayOutputStream body = new ByteArrayOutputStream();
         for (Path file : files) {
@@ -539,7 +601,6 @@ public class ApiService {
                 .uri(URI.create(url))
                 .timeout(Duration.ofSeconds(30))
                 .header("Content-Type", "multipart/form-data; boundary=" + boundary);
-        String token = UserSession.getInstance().getAccessToken();
         if (token != null && !token.isBlank()) {
             builder.header("Authorization", "Bearer " + token);
         }
@@ -576,7 +637,8 @@ public class ApiService {
     }
 
     private static void setLoadingOnFxThread(Consumer<Boolean> loadingSetter, boolean value) {
-        if (loadingSetter == null) return;
+        if (loadingSetter == null)
+            return;
 
         if (Platform.isFxApplicationThread()) {
             loadingSetter.accept(value);
@@ -585,7 +647,9 @@ public class ApiService {
         }
     }
 
-    public static void restoreSessionFromStoredRefreshToken(Runnable onSuccess, Runnable onInvalidToken, Runnable onNetworkError) {
+    public static void restoreSessionFromStoredRefreshToken(Runnable onSuccess, Runnable onInvalidToken,
+            Runnable onNetworkError) {
+        long generation = UserSession.getInstance().getGeneration();
         String refreshToken = TokenStorage.getRefreshToken();
 
         if (refreshToken == null || refreshToken.isBlank()) {
@@ -605,8 +669,7 @@ public class ApiService {
 
                 return CLIENT.send(
                         request,
-                        HttpResponse.BodyHandlers.ofString()
-                );
+                        HttpResponse.BodyHandlers.ofString());
             }
         };
 
@@ -627,12 +690,13 @@ public class ApiService {
                 return;
             }
 
+            if (generation != UserSession.getInstance().getGeneration())
+                return;
             String accessToken = authorization.substring(7);
 
             UserSession.getInstance().setTokens(
                     accessToken,
-                    refreshToken
-            );
+                    refreshToken);
 
             get(
                     BASE_URL + "/api/users/me",
@@ -641,10 +705,9 @@ public class ApiService {
                             try {
                                 UserDTO user = GSON.fromJson(
                                         meResponse.body(),
-                                        UserDTO.class
-                                );
+                                        UserDTO.class);
 
-                                if (user != null) {
+                                if (user != null && generation == UserSession.getInstance().getGeneration()) {
                                     UserSession.getInstance().setSession(user);
                                     Platform.runLater(onSuccess);
                                 } else {
@@ -661,8 +724,7 @@ public class ApiService {
                         }
                     },
                     () -> Platform.runLater(onNetworkError),
-                    null
-            );
+                    null);
         });
 
         task.setOnFailed(event -> Platform.runLater(onNetworkError));

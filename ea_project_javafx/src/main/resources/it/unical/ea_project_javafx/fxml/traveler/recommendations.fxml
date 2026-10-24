@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.net.URL?><?import javafx.scene.control.*?><?import javafx.scene.layout.*?><?import javafx.geometry.Insets?>
+<StackPane xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="it.unical.ea_project_javafx.controller.traveler.RecommendationsController"
+    styleClass="chat-root">
+    <stylesheets>
+        <URL value="@../../css/common/style.css" />
+        <URL value="@../../css/chat/chat.css" />
+        <URL value="@../../css/home/experience-card.css" />
+    </stylesheets>
+    <BorderPane>
+        <top>
+            <StackPane fx:id="navbarContainer" />
+        </top>
+        <center>
+            <ScrollPane fitToWidth="true" styleClass="main-scroll">
+                <VBox spacing="22">
+                    <padding>
+                        <Insets top="28" right="34" bottom="36" left="34" />
+                    </padding>
+                    <HBox alignment="CENTER_LEFT" spacing="20">
+                        <Label text="Scelte per te" styleClass="chat-title" />
+                        <Button fx:id="refreshButton" text="Aggiorna consigli"
+                            onAction="#handleRefresh" styleClass="btn-secondary" />
+                    </HBox>
+                    <Label fx:id="subtitle" wrapText="true" styleClass="chat-meta" />
+                    <Label fx:id="statusLabel" wrapText="true" styleClass="chat-status" />
+                    <Label text="Viaggi da scoprire" styleClass="chat-title" />
+                    <TilePane fx:id="tripCards" hgap="20" vgap="22" prefTileWidth="315" />
+                    <Label text="Attività che potrebbero piacerti" styleClass="chat-title" />
+                    <TilePane fx:id="activityCards" hgap="20" vgap="22" prefTileWidth="315" />
+                </VBox>
+            </ScrollPane>
+        </center>
+    </BorderPane>
+</StackPane>

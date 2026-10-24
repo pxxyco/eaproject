@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.net.URL?><?import javafx.scene.control.*?><?import javafx.scene.layout.*?><?import javafx.geometry.Insets?>
+<StackPane xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="it.unical.ea_project_javafx.controller.traveler.CollaborativeItineraryController"
+    styleClass="chat-root">
+    <stylesheets>
+        <URL value="@../../css/common/style.css" />
+        <URL value="@../../css/chat/chat.css" />
+        <URL value="@../../css/traveler/collaborative-itinerary.css" />
+    </stylesheets>
+    <BorderPane>
+        <top>
+            <StackPane fx:id="navbarContainer" />
+        </top>
+        <center>
+            <VBox spacing="18" styleClass="itinerary-editor">
+                <padding>
+                    <Insets top="22" right="32" bottom="30" left="32" />
+                </padding>
+                <Label text="Itinerari collaborativi" styleClass="chat-title" />
+                <HBox spacing="14" alignment="CENTER_LEFT">
+                    <ComboBox fx:id="listPicker" promptText="Scegli una lista" prefWidth="360" />
+                    <Button fx:id="refreshButton" text="Aggiorna" onAction="#handleRefresh"
+                        styleClass="btn-secondary" />
+                </HBox>
+                <Label fx:id="permissionLabel" wrapText="true" styleClass="chat-meta" />
+                <Label fx:id="statusLabel" wrapText="true" styleClass="chat-status" />
+                <SplitPane VBox.vgrow="ALWAYS" dividerPositions="0.58">
+                    <items>
+                        <TableView fx:id="stops">
+                            <placeholder>
+                                <Label text="Nessuna tappa. Aggiungi la prima dal modulo."
+                                    wrapText="true" />
+                            </placeholder>
+                            <columns>
+                                <TableColumn fx:id="dayColumn" text="Giorno" prefWidth="65" />
+                                <TableColumn fx:id="positionColumn" text="Ordine" prefWidth="65" />
+                                <TableColumn fx:id="titleColumn" text="Tappa" prefWidth="220" />
+                                <TableColumn fx:id="cityColumn" text="Città" prefWidth="150" />
+                            </columns>
+                        </TableView>
+                        <ScrollPane fitToWidth="true" styleClass="main-scroll">
+                            <VBox spacing="12" styleClass="itinerary-form">
+                                <padding>
+                                    <Insets top="16" right="20" bottom="20" left="20" />
+                                </padding>
+                                <Label text="Organizza una tappa" styleClass="chat-title" />
+                                <TextField fx:id="titleField" promptText="Titolo della tappa" />
+                                <TextField fx:id="cityField" promptText="Città o luogo" />
+                                <HBox spacing="12">
+                                    <VBox spacing="6">
+                                        <Label text="Giorno" />
+                                        <Spinner fx:id="daySpinner" prefWidth="110" />
+                                    </VBox>
+                                    <VBox spacing="6">
+                                        <Label text="Ordine nel giorno" />
+                                        <Spinner fx:id="positionSpinner" prefWidth="140" />
+                                    </VBox>
+                                </HBox>
+                                <HBox spacing="12">
+                                    <TextField fx:id="startField" promptText="Inizio (HH:mm)"
+                                        prefWidth="145" />
+                                    <TextField fx:id="endField" promptText="Fine (HH:mm)"
+                                        prefWidth="145" />
+                                </HBox>
+                                <TextArea fx:id="notesField"
+                                    promptText="Note per te e per i collaboratori" wrapText="true"
+                                    prefRowCount="5" />
+                                <HBox spacing="10">
+                                    <Button fx:id="saveButton" text="Salva tappa"
+                                        onAction="#handleSave" styleClass="btn-primary" />
+                                    <Button fx:id="newButton" text="Nuova" onAction="#handleNew"
+                                        styleClass="btn-secondary" />
+                                    <Button fx:id="deleteButton" text="Elimina"
+                                        onAction="#handleDelete" styleClass="btn-secondary" />
+                                </HBox>
+                            </VBox>
+                        </ScrollPane>
+                    </items>
+                </SplitPane>
+            </VBox>
+        </center>
+    </BorderPane>
+</StackPane>

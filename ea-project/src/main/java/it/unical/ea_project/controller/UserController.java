@@ -4,10 +4,13 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import it.unical.ea_project.domain.User;
 import it.unical.ea_project.dto.UserDTO;
+import it.unical.ea_project.repository.UserRepository;
 import it.unical.ea_project.security.AuthUser;
 import it.unical.ea_project.service.JwtService;
 import it.unical.ea_project.service.UserService;
 import lombok.RequiredArgsConstructor;
+
+import org.apache.logging.log4j.LogManager;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +27,7 @@ public class UserController {
 
     private final UserService userService;
     private final JwtService jwtService;
+    private final UserRepository users;
 
     @com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
     public record RegistrationRequest(String username, String email, String fullName, String password, String role) {}
@@ -90,6 +94,14 @@ public class UserController {
         } catch (JwtException | IllegalArgumentException | NullPointerException | ClassCastException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+    }
+
+    /** Revokes access and refresh tokens on every device for this account. */
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@AuthenticationPrincipal AuthUser auth) {
+        users.revokeSessions(auth.id());
+        LogManager.getLogger("AUDIT").info("LOGOUT userId={}", auth.id());
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/me")

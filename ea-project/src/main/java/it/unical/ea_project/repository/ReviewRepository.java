@@ -1,6 +1,5 @@
 package it.unical.ea_project.repository;
 
-
 import it.unical.ea_project.domain.Review;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -11,7 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Repository
-public interface ReviewRepository extends JpaRepository<Review,Long> {
+public interface ReviewRepository extends JpaRepository<Review, Long> {
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "trip", "activity" })
+    @Query("select r from Review r where r.user.id=:user and r.deleted=false order by r.createdAt desc")
+    List<Review> preferenceReviews(@org.springframework.data.repository.query.Param("user") Long user,
+            org.springframework.data.domain.Pageable page);
 
     List<Review> findAllByUserId(Long userId);
 

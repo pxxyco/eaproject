@@ -51,21 +51,37 @@ public class NavbarController {
     private static final String SETTINGS_FXML = "/it/unical/ea_project_javafx/fxml/profile/settings.fxml";
     private static final String NOTIFICATIONS_URL = ApiService.BASE_URL + "/api/notifications";
 
-    @FXML private Label loginLabel;
-    @FXML private MenuButton userMenuButton;
-    @FXML private ImageView userAvatarImageView;
-    @FXML private Label userAvatarInitialsLabel;
-    @FXML private Label userMenuLabel;
-    @FXML private javafx.scene.layout.StackPane userAvatarContainer;
-    @FXML private javafx.scene.layout.StackPane notificationBellContainer;
-    @FXML private Label notificationBadge;
+    @FXML
+    private Label loginLabel;
+    @FXML
+    private MenuButton userMenuButton;
+    @FXML
+    private ImageView userAvatarImageView;
+    @FXML
+    private Label userAvatarInitialsLabel;
+    @FXML
+    private Label userMenuLabel;
+    @FXML
+    private javafx.scene.layout.StackPane userAvatarContainer;
+    @FXML
+    private javafx.scene.layout.StackPane notificationBellContainer;
+    @FXML
+    private Label notificationBadge;
 
-    @FXML private Label dashboardNavItem;
-    @FXML private Label travelerHistoryNavItem;
-    @FXML private Label travelerFavoritesNavItem;
-    @FXML private Label organizerEventsNavItem;
-    @FXML private Label organizerAttendeesNavItem;
-    @FXML private MenuItem paymentsMenuItem;
+    @FXML
+    private Label dashboardNavItem;
+    @FXML
+    private Label travelerHistoryNavItem;
+    @FXML
+    private Label travelerFavoritesNavItem;
+    @FXML
+    private javafx.scene.control.MenuItem chatMenuItem, recommendationsMenuItem, itineraryMenuItem;
+    @FXML
+    private Label organizerEventsNavItem;
+    @FXML
+    private Label organizerAttendeesNavItem;
+    @FXML
+    private MenuItem paymentsMenuItem;
 
     private NotificationPollingService.Subscription notificationSubscription;
     private Timeline toastTimeout;
@@ -88,14 +104,17 @@ public class NavbarController {
         updateNavbarState();
         if (notificationBellContainer != null) {
             notificationBellContainer.sceneProperty().addListener((obs, oldScene, newScene) -> {
-                if (newScene == null) stopNotificationPolling();
-                else if (UserSession.getInstance().isLoggedIn()) startNotificationPolling();
+                if (newScene == null)
+                    stopNotificationPolling();
+                else if (UserSession.getInstance().isLoggedIn())
+                    startNotificationPolling();
             });
         }
     }
 
     private void bindVisibilityToManaged(Node node) {
-        if (node != null) node.managedProperty().bind(node.visibleProperty());
+        if (node != null)
+            node.managedProperty().bind(node.visibleProperty());
     }
 
     public void updateNavbarState() {
@@ -103,16 +122,25 @@ public class NavbarController {
         boolean isOrganizer = isLoggedIn && "ORGANIZER".equalsIgnoreCase(UserSession.getInstance().getRole());
         boolean isTraveler = isLoggedIn && !isOrganizer;
 
-        if (loginLabel != null) loginLabel.setVisible(!isLoggedIn);
+        if (chatMenuItem != null)
+            chatMenuItem.setVisible(isLoggedIn);
+        if (recommendationsMenuItem != null)
+            recommendationsMenuItem.setVisible(isTraveler);
+        if (itineraryMenuItem != null)
+            itineraryMenuItem.setVisible(isTraveler);
+        if (loginLabel != null)
+            loginLabel.setVisible(!isLoggedIn);
         if (userMenuButton != null) {
             userMenuButton.setVisible(isLoggedIn);
             if (isLoggedIn) {
                 String username = UserSession.getInstance().getUsername();
-                if (userMenuLabel != null) userMenuLabel.setText(username == null || username.isBlank() ? "Utente" : username);
+                if (userMenuLabel != null)
+                    userMenuLabel.setText(username == null || username.isBlank() ? "Utente" : username);
                 userMenuButton.setAccessibleText("Menu utente " + (username == null ? "" : username));
                 updateUserAvatar();
             } else {
-                if (userMenuLabel != null) userMenuLabel.setText("Utente");
+                if (userMenuLabel != null)
+                    userMenuLabel.setText("Utente");
                 if (userAvatarImageView != null) {
                     userAvatarImageView.setImage(null);
                     userAvatarImageView.setVisible(false);
@@ -125,15 +153,25 @@ public class NavbarController {
                 }
             }
         }
-        if (notificationBellContainer != null) notificationBellContainer.setVisible(isLoggedIn);
-        if (dashboardNavItem != null) dashboardNavItem.setVisible(isLoggedIn);
-        if (travelerHistoryNavItem != null) travelerHistoryNavItem.setVisible(isTraveler);
-        if (travelerFavoritesNavItem != null) travelerFavoritesNavItem.setVisible(isTraveler);
-        if (organizerEventsNavItem != null) organizerEventsNavItem.setVisible(isOrganizer);
-        if (organizerAttendeesNavItem != null) organizerAttendeesNavItem.setVisible(isOrganizer);
-        if (paymentsMenuItem != null) paymentsMenuItem.setText(isOrganizer ? "Incassi & Payout" : "Metodi di Pagamento");
+        if (notificationBellContainer != null)
+            notificationBellContainer.setVisible(isLoggedIn);
+        if (dashboardNavItem != null)
+            dashboardNavItem.setVisible(isLoggedIn);
+        if (travelerHistoryNavItem != null)
+            travelerHistoryNavItem.setVisible(isTraveler);
+        if (travelerFavoritesNavItem != null)
+            travelerFavoritesNavItem.setVisible(isTraveler);
+        if (organizerEventsNavItem != null)
+            organizerEventsNavItem.setVisible(isOrganizer);
+        if (organizerAttendeesNavItem != null)
+            organizerAttendeesNavItem.setVisible(isOrganizer);
+        if (paymentsMenuItem != null)
+            paymentsMenuItem.setText(isOrganizer ? "Incassi & Payout" : "Metodi di Pagamento");
 
-        if (isLoggedIn) startNotificationPolling(); else stopNotificationPolling();
+        if (isLoggedIn)
+            startNotificationPolling();
+        else
+            stopNotificationPolling();
     }
 
     private void configureUserAvatar() {
@@ -148,12 +186,16 @@ public class NavbarController {
         }
     }
 
-    /** Keeps the navbar avatar in sync with UserSession after an upload, replacement or removal. */
+    /**
+     * Keeps the navbar avatar in sync with UserSession after an upload, replacement
+     * or removal.
+     */
     private void updateUserAvatar() {
         long requestId = ++avatarLoadRequestId;
         UserSession session = UserSession.getInstance();
         String displayName = session.getFullName();
-        if (displayName == null || displayName.isBlank()) displayName = session.getUsername();
+        if (displayName == null || displayName.isBlank())
+            displayName = session.getUsername();
         if (userAvatarInitialsLabel != null) {
             userAvatarInitialsLabel.setText(makeInitials(displayName));
             userAvatarInitialsLabel.setVisible(true);
@@ -166,19 +208,23 @@ public class NavbarController {
         }
 
         String photoUrl = session.getProfilePhotoUrl();
-        if (photoUrl == null || photoUrl.isBlank() || userAvatarImageView == null) return;
+        if (photoUrl == null || photoUrl.isBlank() || userAvatarImageView == null)
+            return;
 
         String resolvedUrl = ApiService.resolveUrl(photoUrl) + "?v=" + System.currentTimeMillis();
         Image image = new Image(resolvedUrl, 28, 28, true, true, true);
         image.errorProperty().addListener((obs, oldValue, hasError) -> {
-            if (hasError) Platform.runLater(() -> {
-                if (requestId == avatarLoadRequestId) showAvatarImage(null);
-            });
+            if (hasError)
+                Platform.runLater(() -> {
+                    if (requestId == avatarLoadRequestId)
+                        showAvatarImage(null);
+                });
         });
         image.progressProperty().addListener((obs, oldValue, progress) -> {
             if (progress.doubleValue() >= 1.0 && !image.isError()) {
                 Platform.runLater(() -> {
-                    if (requestId == avatarLoadRequestId) showAvatarImage(image);
+                    if (requestId == avatarLoadRequestId)
+                        showAvatarImage(image);
                 });
             }
         });
@@ -217,19 +263,23 @@ public class NavbarController {
     }
 
     private String makeInitials(String name) {
-        if (name == null || name.isBlank()) return "U";
+        if (name == null || name.isBlank())
+            return "U";
         String[] parts = name.trim().split("\\s+");
         String first = parts[0].substring(0, 1).toUpperCase(java.util.Locale.ROOT);
-        if (parts.length == 1) return first;
+        if (parts.length == 1)
+            return first;
         return first + parts[parts.length - 1].substring(0, 1).toUpperCase(java.util.Locale.ROOT);
     }
 
     private void startNotificationPolling() {
         if (notificationSubscription != null || !UserSession.getInstance().isLoggedIn()
-                || notificationBellContainer == null || notificationBellContainer.getScene() == null) return;
+                || notificationBellContainer == null || notificationBellContainer.getScene() == null)
+            return;
         notificationSubscription = NotificationPollingService.getInstance().subscribe(snapshot -> {
             updateNotificationBadge(snapshot.unreadCount());
-            if (snapshot.newNotification() != null) showToast(snapshot.newNotification());
+            if (snapshot.newNotification() != null)
+                showToast(snapshot.newNotification());
         });
     }
 
@@ -238,15 +288,25 @@ public class NavbarController {
             notificationSubscription.close();
             notificationSubscription = null;
         }
-        if (notificationPopup != null) { notificationPopup.hide(); notificationPopup = null; }
-        if (toastPopup != null) { toastPopup.hide(); toastPopup = null; }
-        if (toastTimeout != null) { toastTimeout.stop(); toastTimeout = null; }
+        if (notificationPopup != null) {
+            notificationPopup.hide();
+            notificationPopup = null;
+        }
+        if (toastPopup != null) {
+            toastPopup.hide();
+            toastPopup = null;
+        }
+        if (toastTimeout != null) {
+            toastTimeout.stop();
+            toastTimeout = null;
+        }
         notificationTrayLoading = false;
         updateNotificationBadge(0);
     }
 
     private void updateNotificationBadge(int count) {
-        if (notificationBadge == null) return;
+        if (notificationBadge == null)
+            return;
         notificationBadge.setText(count > 99 ? "99+" : Integer.toString(count));
         notificationBadge.setVisible(count > 0);
         notificationBadge.setManaged(count > 0);
@@ -255,14 +315,17 @@ public class NavbarController {
     @FXML
     private void handleNotifications(MouseEvent event) {
         if (notificationPopup != null && notificationPopup.isShowing()) {
-            notificationPopup.hide(); notificationPopup = null; return;
+            notificationPopup.hide();
+            notificationPopup = null;
+            return;
         }
         openNotificationTray();
     }
 
     private void openNotificationTray() {
         if (notificationBellContainer == null || notificationBellContainer.getScene() == null
-                || notificationTrayLoading) return;
+                || notificationTrayLoading)
+            return;
         notificationTrayLoading = true;
         NotificationPollingService.getInstance().fetchUnreadForTray(
                 notifications -> {
@@ -281,19 +344,29 @@ public class NavbarController {
 
     private void showNotificationTray(JsonArray notifications) {
         notificationTrayLoading = false;
-        if (notificationPopup != null) notificationPopup.hide();
+        if (notificationPopup != null)
+            notificationPopup.hide();
         VBox root = new VBox(10);
         root.getStyleClass().add("notification-tray");
         root.setPadding(new Insets(16));
         root.setPrefWidth(360);
         root.setMaxHeight(430);
 
-        HBox header = new HBox(10); header.setAlignment(Pos.CENTER_LEFT);
-        Label title = new Label("Notifiche"); title.getStyleClass().add("notification-tray-title");
-        Region spacer = new Region(); HBox.setHgrow(spacer, Priority.ALWAYS);
-        Button markAll = new Button("Segna tutte come lette"); markAll.getStyleClass().add("notification-mark-all");
+        HBox header = new HBox(10);
+        header.setAlignment(Pos.CENTER_LEFT);
+        Label title = new Label("Notifiche");
+        title.getStyleClass().add("notification-tray-title");
+        Region spacer = new Region();
+        HBox.setHgrow(spacer, Priority.ALWAYS);
+        Button markAll = new Button("Segna tutte come lette");
+        markAll.getStyleClass().add("notification-mark-all");
         markAll.setOnAction(e -> ApiService.call(NOTIFICATIONS_URL + "/read-all", "{}", ApiService.Method.POST,
-                response -> { if (notificationPopup != null) notificationPopup.hide(); notificationPopup = null; openNotificationTray(); },
+                response -> {
+                    if (notificationPopup != null)
+                        notificationPopup.hide();
+                    notificationPopup = null;
+                    openNotificationTray();
+                },
                 () -> showToast("Notifiche", "Non è stato possibile aggiornare le notifiche."), null));
         header.getChildren().addAll(title, spacer, markAll);
         root.getChildren().addAll(header, new Separator());
@@ -302,7 +375,8 @@ public class NavbarController {
         int shown = Math.min(notifications.size(), 15);
         for (int i = 0; i < shown; i++) {
             JsonElement element = notifications.get(i);
-            if (element.isJsonObject()) cards.getChildren().add(createNotificationCard(element.getAsJsonObject()));
+            if (element.isJsonObject())
+                cards.getChildren().add(createNotificationCard(element.getAsJsonObject()));
         }
         if (cards.getChildren().isEmpty()) {
             Label empty = new Label("Nessuna notifica");
@@ -314,45 +388,70 @@ public class NavbarController {
             cards.setPrefHeight(300);
             cards.getChildren().add(empty);
         }
-        ScrollPane scroll = new ScrollPane(cards); scroll.setFitToWidth(true); scroll.setPrefViewportHeight(330);
-        scroll.setMaxHeight(350); scroll.getStyleClass().add("notification-scroll");
+        ScrollPane scroll = new ScrollPane(cards);
+        scroll.setFitToWidth(true);
+        scroll.setPrefViewportHeight(330);
+        scroll.setMaxHeight(350);
+        scroll.getStyleClass().add("notification-scroll");
         root.getChildren().add(scroll);
 
-        notificationPopup = new Popup(); notificationPopup.setAutoHide(true); notificationPopup.setHideOnEscape(true);
+        notificationPopup = new Popup();
+        notificationPopup.setAutoHide(true);
+        notificationPopup.setHideOnEscape(true);
         notificationPopup.getContent().add(root);
         positionPopup(notificationPopup, popupAnchor(), 360);
     }
 
     private VBox createNotificationCard(JsonObject notification) {
-        VBox card = new VBox(6); card.getStyleClass().add("notification-card");
-        if (notification.has("read") && !notification.get("read").isJsonNull() && notification.get("read").getAsBoolean())
+        VBox card = new VBox(6);
+        card.getStyleClass().add("notification-card");
+        if (notification.has("read") && !notification.get("read").isJsonNull()
+                && notification.get("read").getAsBoolean())
             card.getStyleClass().add("notification-card-read");
         String titleText = jsonString(notification, "title", "Notifica");
         String messageText = jsonString(notification, "message", "");
         String type = jsonString(notification, "type", "NOTICE");
         long id = notification.has("notificationId") ? notification.get("notificationId").getAsLong() : -1;
-        Label title = new Label(titleText); title.getStyleClass().add("notification-card-title"); title.setWrapText(true);
-        Label message = new Label(messageText); message.getStyleClass().add("notification-card-message"); message.setWrapText(true);
+        Label title = new Label(titleText);
+        title.getStyleClass().add("notification-card-title");
+        title.setWrapText(true);
+        Label message = new Label(messageText);
+        message.getStyleClass().add("notification-card-message");
+        message.setWrapText(true);
         card.getChildren().addAll(title, message);
         if ("LIST_INVITATION".equals(type) && id > 0) {
-            HBox actions = new HBox(8); actions.setAlignment(Pos.CENTER_RIGHT);
-            Button preview = new Button("Visualizza dettagli"); preview.getStyleClass().add("notification-mark-all");
-            Button accept = new Button("Accetta"); accept.getStyleClass().add("notification-accept");
-            Button reject = new Button("Rifiuta"); reject.getStyleClass().add("notification-decline");
+            HBox actions = new HBox(8);
+            actions.setAlignment(Pos.CENTER_RIGHT);
+            Button preview = new Button("Visualizza dettagli");
+            preview.getStyleClass().add("notification-mark-all");
+            Button accept = new Button("Accetta");
+            accept.getStyleClass().add("notification-accept");
+            Button reject = new Button("Rifiuta");
+            reject.getStyleClass().add("notification-decline");
             preview.setOnAction(e -> previewInvitation(id));
             accept.setOnAction(e -> respondToInvitation(id, true));
             reject.setOnAction(e -> respondToInvitation(id, false));
-            HBox previewRow = new HBox(preview); previewRow.setAlignment(Pos.CENTER_LEFT);
-            actions.getChildren().addAll(accept, reject); card.getChildren().addAll(previewRow, actions);
+            HBox previewRow = new HBox(preview);
+            previewRow.setAlignment(Pos.CENTER_LEFT);
+            actions.getChildren().addAll(accept, reject);
+            card.getChildren().addAll(previewRow, actions);
         } else if (id > 0 && !(notification.has("read") && notification.get("read").getAsBoolean())) {
-            Button markRead = new Button("Segna come letta"); markRead.getStyleClass().add("notification-mark-all");
-            markRead.setOnAction(e -> ApiService.call(NOTIFICATIONS_URL + "/" + id + "/read", "{}", ApiService.Method.POST,
-                    response -> {
-                        if (notificationPopup != null) { notificationPopup.hide(); notificationPopup = null; }
-                        openNotificationTray();
-                    },
-                    () -> showToast("Notifiche", "Non è stato possibile segnare la notifica come letta."), null));
-            HBox row = new HBox(markRead); row.setAlignment(Pos.CENTER_RIGHT); card.getChildren().add(row);
+            Button markRead = new Button("Segna come letta");
+            markRead.getStyleClass().add("notification-mark-all");
+            markRead.setOnAction(
+                    e -> ApiService.call(NOTIFICATIONS_URL + "/" + id + "/read", "{}", ApiService.Method.POST,
+                            response -> {
+                                if (notificationPopup != null) {
+                                    notificationPopup.hide();
+                                    notificationPopup = null;
+                                }
+                                openNotificationTray();
+                            },
+                            () -> showToast("Notifiche", "Non è stato possibile segnare la notifica come letta."),
+                            null));
+            HBox row = new HBox(markRead);
+            row.setAlignment(Pos.CENTER_RIGHT);
+            card.getChildren().add(row);
         }
         return card;
     }
@@ -364,45 +463,62 @@ public class NavbarController {
                         JsonObject list = JsonParser.parseString(response.body()).getAsJsonObject();
                         StringBuilder details = new StringBuilder();
                         details.append("Lista: ").append(jsonString(list, "listName", "Lista condivisa")).append('\n');
-                        details.append("Organizzatore della lista: @").append(jsonString(list, "organizerUsername", "non disponibile")).append('\n');
-                        details.append("Permesso previsto: ").append(jsonString(list, "permission", "VIEW")).append("\n\n");
-                        JsonArray trips = list.has("trips") && list.get("trips").isJsonArray() ? list.getAsJsonArray("trips") : new JsonArray();
-                        if (trips.size() == 0) details.append("La lista non contiene ancora viaggi.\n");
+                        details.append("Organizzatore della lista: @")
+                                .append(jsonString(list, "organizerUsername", "non disponibile")).append('\n');
+                        details.append("Permesso previsto: ").append(jsonString(list, "permission", "VIEW"))
+                                .append("\n\n");
+                        JsonArray trips = list.has("trips") && list.get("trips").isJsonArray()
+                                ? list.getAsJsonArray("trips")
+                                : new JsonArray();
+                        if (trips.size() == 0)
+                            details.append("La lista non contiene ancora viaggi.\n");
                         for (JsonElement tripElement : trips) {
-                            if (!tripElement.isJsonObject()) continue;
+                            if (!tripElement.isJsonObject())
+                                continue;
                             JsonObject trip = tripElement.getAsJsonObject();
                             details.append("✈ ").append(jsonString(trip, "title", "Viaggio senza titolo"));
                             String city = jsonString(trip, "destinationCity", "");
                             String country = jsonString(trip, "destinationCountry", "");
                             String destination = city + (city.isBlank() || country.isBlank() ? "" : ", ") + country;
-                            if (!destination.isBlank()) details.append(" — ").append(destination);
+                            if (!destination.isBlank())
+                                details.append(" — ").append(destination);
                             details.append('\n').append("  Organizzatore del viaggio: @")
                                     .append(jsonString(trip, "organizerUsername", "non disponibile")).append('\n');
                             String start = jsonString(trip, "startDate", "");
                             String end = jsonString(trip, "endDate", "");
-                            if (!start.isBlank() || !end.isBlank()) details.append("  Date: ").append(start.isBlank() ? "?" : start)
-                                    .append(" → ").append(end.isBlank() ? "?" : end).append('\n');
-                            JsonArray stages = trip.has("stages") && trip.get("stages").isJsonArray() ? trip.getAsJsonArray("stages") : new JsonArray();
-                            if (stages.size() == 0) details.append("  Nessuna tappa inserita.\n");
+                            if (!start.isBlank() || !end.isBlank())
+                                details.append("  Date: ").append(start.isBlank() ? "?" : start)
+                                        .append(" → ").append(end.isBlank() ? "?" : end).append('\n');
+                            JsonArray stages = trip.has("stages") && trip.get("stages").isJsonArray()
+                                    ? trip.getAsJsonArray("stages")
+                                    : new JsonArray();
+                            if (stages.size() == 0)
+                                details.append("  Nessuna tappa inserita.\n");
                             for (JsonElement stageElement : stages) {
-                                if (!stageElement.isJsonObject()) continue;
+                                if (!stageElement.isJsonObject())
+                                    continue;
                                 JsonObject stage = stageElement.getAsJsonObject();
                                 details.append("    Giorno ").append(jsonString(stage, "day", "?"))
                                         .append(" · tappa ").append(jsonString(stage, "orderInDay", "?"))
                                         .append(": ").append(jsonString(stage, "title", "Tappa"));
                                 String location = jsonString(stage, "locationName", "");
-                                if (location.isBlank()) location = jsonString(stage, "city", "");
+                                if (location.isBlank())
+                                    location = jsonString(stage, "city", "");
                                 String stageCountry = jsonString(stage, "country", "");
-                                if (!location.isBlank()) details.append(" — ").append(location);
-                                if (!stageCountry.isBlank() && !stageCountry.equals(location)) details.append(", ").append(stageCountry);
+                                if (!location.isBlank())
+                                    details.append(" — ").append(location);
+                                if (!stageCountry.isBlank() && !stageCountry.equals(location))
+                                    details.append(", ").append(stageCountry);
                                 String timeStart = jsonString(stage, "startTime", "");
                                 String timeEnd = jsonString(stage, "endTime", "");
-                                if (!timeStart.isBlank() || !timeEnd.isBlank()) details.append(" ( ")
-                                        .append(timeStart.isBlank() ? "--:--" : timeStart).append("–")
-                                        .append(timeEnd.isBlank() ? "--:--" : timeEnd).append(" )");
+                                if (!timeStart.isBlank() || !timeEnd.isBlank())
+                                    details.append(" ( ")
+                                            .append(timeStart.isBlank() ? "--:--" : timeStart).append("–")
+                                            .append(timeEnd.isBlank() ? "--:--" : timeEnd).append(" )");
                                 details.append('\n');
                                 String description = jsonString(stage, "description", "");
-                                if (!description.isBlank()) details.append("      ").append(description).append('\n');
+                                if (!description.isBlank())
+                                    details.append("      ").append(description).append('\n');
                             }
                             details.append('\n');
                         }
@@ -441,31 +557,53 @@ public class NavbarController {
         String action = accept ? "accept" : "reject";
         ApiService.call(NOTIFICATIONS_URL + "/" + id + "/" + action, "{}", ApiService.Method.POST,
                 response -> {
-                    if (notificationPopup != null) { notificationPopup.hide(); notificationPopup = null; }
+                    if (notificationPopup != null) {
+                        notificationPopup.hide();
+                        notificationPopup = null;
+                    }
                     showToast("Invito alla lista", accept ? "Invito accettato." : "Invito rifiutato.");
                     openNotificationTray();
                 },
-                () -> showToast("Invito alla lista", accept ? "Non è stato possibile accettare l’invito." : "Non è stato possibile rifiutare l’invito."), null);
+                () -> showToast("Invito alla lista", accept ? "Non è stato possibile accettare l’invito."
+                        : "Non è stato possibile rifiutare l’invito."),
+                null);
     }
 
     private void showToast(JsonObject notification) {
-        showToast(jsonString(notification, "title", "Nuova notifica"), jsonString(notification, "message", "Hai ricevuto una nuova notifica."));
+        showToast(jsonString(notification, "title", "Nuova notifica"),
+                jsonString(notification, "message", "Hai ricevuto una nuova notifica."));
     }
 
     private void showToast(String titleText, String messageText) {
-        if (notificationBellContainer == null || notificationBellContainer.getScene() == null) return;
-        if (toastPopup != null) toastPopup.hide();
-        if (toastTimeout != null) toastTimeout.stop();
-        VBox toast = new VBox(5); toast.getStyleClass().add("notification-toast"); toast.setPadding(new Insets(14)); toast.setPrefWidth(330);
-        Label title = new Label(titleText); title.getStyleClass().add("notification-toast-title"); title.setWrapText(true);
-        Label message = new Label(messageText); message.getStyleClass().add("notification-toast-message"); message.setWrapText(true);
+        if (notificationBellContainer == null || notificationBellContainer.getScene() == null)
+            return;
+        if (toastPopup != null)
+            toastPopup.hide();
+        if (toastTimeout != null)
+            toastTimeout.stop();
+        VBox toast = new VBox(5);
+        toast.getStyleClass().add("notification-toast");
+        toast.setPadding(new Insets(14));
+        toast.setPrefWidth(330);
+        Label title = new Label(titleText);
+        title.getStyleClass().add("notification-toast-title");
+        title.setWrapText(true);
+        Label message = new Label(messageText);
+        message.getStyleClass().add("notification-toast-message");
+        message.setWrapText(true);
         toast.getChildren().addAll(title, message);
-        toastPopup = new Popup(); toastPopup.setAutoHide(false); toastPopup.getContent().add(toast);
+        toastPopup = new Popup();
+        toastPopup.setAutoHide(false);
+        toastPopup.getContent().add(toast);
         positionPopup(toastPopup, popupAnchor(), 330);
         toastTimeout = new Timeline(new KeyFrame(Duration.seconds(5), e -> {
-            if (toastPopup != null) { toastPopup.hide(); toastPopup = null; }
+            if (toastPopup != null) {
+                toastPopup.hide();
+                toastPopup = null;
+            }
         }));
-        toastTimeout.setCycleCount(1); toastTimeout.play();
+        toastTimeout.setCycleCount(1);
+        toastTimeout.play();
     }
 
     private Node popupAnchor() {
@@ -473,20 +611,25 @@ public class NavbarController {
     }
 
     private void positionPopup(Popup popup, Node anchor, double width) {
-        if (anchor == null || anchor.getScene() == null || anchor.getScene().getWindow() == null) return;
+        if (anchor == null || anchor.getScene() == null || anchor.getScene().getWindow() == null)
+            return;
         Window owner = anchor.getScene().getWindow();
         Runnable reposition = () -> {
-            if (!popup.isShowing() || anchor.getScene() == null) return;
+            if (!popup.isShowing() || anchor.getScene() == null)
+                return;
             Bounds bounds = anchor.localToScreen(anchor.getBoundsInLocal());
-            if (bounds == null) return;
+            if (bounds == null)
+                return;
             popup.setX(Math.max(8, bounds.getMaxX() - width));
             popup.setY(bounds.getMaxY() + 8);
         };
         Bounds bounds = anchor.localToScreen(anchor.getBoundsInLocal());
-        if (bounds == null) return;
+        if (bounds == null)
+            return;
         popup.show(owner, Math.max(8, bounds.getMaxX() - width), bounds.getMaxY() + 8);
 
-        // A Popup JavaFX is una finestra separata: seguiamo spostamento e ridimensionamento
+        // A Popup JavaFX is una finestra separata: seguiamo spostamento e
+        // ridimensionamento
         // della finestra principale, così la tendina resta ancorata alla navbar.
         javafx.beans.value.ChangeListener<Number> windowListener = (obs, oldValue, newValue) -> reposition.run();
         owner.xProperty().addListener(windowListener);
@@ -494,7 +637,8 @@ public class NavbarController {
         owner.widthProperty().addListener(windowListener);
         owner.heightProperty().addListener(windowListener);
         javafx.beans.value.ChangeListener<Bounds> boundsListener = (obs, oldValue, newValue) -> reposition.run();
-        javafx.beans.value.ChangeListener<javafx.scene.transform.Transform> transformListener = (obs, oldValue, newValue) -> reposition.run();
+        javafx.beans.value.ChangeListener<javafx.scene.transform.Transform> transformListener = (obs, oldValue,
+                newValue) -> reposition.run();
         anchor.boundsInLocalProperty().addListener(boundsListener);
         anchor.localToSceneTransformProperty().addListener(transformListener);
         popup.setOnHidden(event -> {
@@ -506,8 +650,10 @@ public class NavbarController {
             anchor.localToSceneTransformProperty().removeListener(transformListener);
         });
         if (popup.getScene() != null) {
-            String css = getClass().getResource("/it/unical/ea_project_javafx/css/common/notifications.css").toExternalForm();
-            if (!popup.getScene().getStylesheets().contains(css)) popup.getScene().getStylesheets().add(css);
+            String css = getClass().getResource("/it/unical/ea_project_javafx/css/common/notifications.css")
+                    .toExternalForm();
+            if (!popup.getScene().getStylesheets().contains(css))
+                popup.getScene().getStylesheets().add(css);
         }
     }
 
@@ -515,20 +661,89 @@ public class NavbarController {
         return obj.has(key) && !obj.get(key).isJsonNull() ? obj.get(key).getAsString() : fallback;
     }
 
-    @FXML void handleHome(MouseEvent event) { SceneNavigator.getInstance().loadScene(MAIN_VIEW_FXML, null); }
-    @FXML void handleLogin(MouseEvent event) { SceneNavigator.getInstance().loadScene(LOGIN_FXML, null); }
-    @FXML private void handleDashboard(MouseEvent event) { SceneNavigator.getInstance().loadScene(DASHBOARD_VIEW_FXML, null); }
-    @FXML private void handleBookingHistory(MouseEvent event) { SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/traveler/booking-history.fxml", null); }
-    @FXML private void handleFavorites(MouseEvent event) { SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/traveler/favorites.fxml", null); }
-    @FXML private void handleOrganizerEvents(MouseEvent event) { SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/organizer/events.fxml", null); }
-    @FXML private void handleOrganizerAttendees(MouseEvent event) { SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/organizer/attendees.fxml", null); }
-    @FXML void handleProfileInfos(ActionEvent event) { SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/profile/profile.fxml", null); }
-    @FXML private void handleSettings(ActionEvent event) { SceneNavigator.getInstance().loadScene(SETTINGS_FXML, null); }
-    @FXML private void handlePaymentMethods(ActionEvent event) { SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/profile/payment-methods.fxml", null); }
-    @FXML private void handleSupport(ActionEvent event) { SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/common/support.fxml", null); }
+    @FXML
+    void handleHome(MouseEvent event) {
+        SceneNavigator.getInstance().loadScene(MAIN_VIEW_FXML, null);
+    }
+
+    @FXML
+    void handleLogin(MouseEvent event) {
+        SceneNavigator.getInstance().loadScene(LOGIN_FXML, null);
+    }
+
+    @FXML
+    private void handleDashboard(MouseEvent event) {
+        SceneNavigator.getInstance().loadScene(DASHBOARD_VIEW_FXML, null);
+    }
+
+    @FXML
+    private void handleBookingHistory(MouseEvent event) {
+        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/traveler/booking-history.fxml", null);
+    }
+
+    @FXML
+    private void handleFavorites(MouseEvent event) {
+        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/traveler/favorites.fxml", null);
+    }
+
+    @FXML
+    private void handleOrganizerEvents(MouseEvent event) {
+        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/organizer/events.fxml", null);
+    }
+
+    @FXML
+    private void handleOrganizerAttendees(MouseEvent event) {
+        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/organizer/attendees.fxml", null);
+    }
+
+    @FXML
+    void handleProfileInfos(ActionEvent event) {
+        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/profile/profile.fxml", null);
+    }
+
+    @FXML
+    private void handleSettings(ActionEvent event) {
+        SceneNavigator.getInstance().loadScene(SETTINGS_FXML, null);
+    }
+
+    @FXML
+    private void handlePaymentMethods(ActionEvent event) {
+        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/profile/payment-methods.fxml", null);
+    }
+
+    @FXML
+    private void handleSupport(ActionEvent event) {
+        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/common/support.fxml", null);
+    }
+
+    @FXML
+    private void handleChat(ActionEvent event) {
+        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/chat/chat.fxml", null);
+    }
+
+    @FXML
+    private void handleRecommendations(ActionEvent event) {
+        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/traveler/recommendations.fxml", null);
+    }
+
+    @FXML
+    private void handleCollaborativeItinerary(ActionEvent event) {
+        SceneNavigator.getInstance()
+                .loadScene("/it/unical/ea_project_javafx/fxml/traveler/collaborative-itinerary.fxml", null);
+    }
 
     @FXML
     void handleLogout(ActionEvent event) {
+        long generation = UserSession.getInstance().getGeneration();
+        Runnable finish = () -> {
+            if (generation == UserSession.getInstance().getGeneration())
+                finishLogout();
+        };
+        ApiService.callDetailed(ApiService.BASE_URL + "/api/users/logout", null, ApiService.Method.POST,
+                r -> finish.run(), message -> finish.run(), null);
+    }
+
+    private void finishLogout() {
         stopNotificationPolling();
         UserSession.getInstance().clear();
         NotificationPollingService.getInstance().clearSessionState();

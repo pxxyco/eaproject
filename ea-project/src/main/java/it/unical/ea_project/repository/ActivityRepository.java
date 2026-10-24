@@ -16,11 +16,13 @@ import java.util.Optional;
 @Repository
 public interface ActivityRepository
         extends JpaRepository<Activity, Long> {
+    @Query("select a from Activity a where a.deletedAt is null and a.status=it.unical.ea_project.domain.Activity.Status.PUBLISHED and a.startDate>:now and a.availableSeats>0 and not exists (select b.bookingId from Booking b where b.user.id=:user and b.activity=a and b.bookingStatus<>it.unical.ea_project.domain.Booking.BookingStatus.CANCELLED) order by a.startDate,a.activityId")
+    List<Activity> recommendationCandidates(@Param("now") java.time.LocalDateTime now, @Param("user") Long user,
+            org.springframework.data.domain.Pageable page);
 
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     @Query("SELECT e FROM Activity e WHERE e.activityId = :id AND e.deletedAt IS NULL")
     Optional<Activity> findActiveForUpdate(@Param("id") Long id);
-
 
     List<Activity> findByCreatedBy(User createdBy);
 
@@ -29,83 +31,77 @@ public interface ActivityRepository
     List<Activity> findByDeletedAtIsNull();
 
     Optional<Activity> findByActivityIdAndDeletedAtIsNull(
-            Long activityId
-    );
+            Long activityId);
 
     List<Activity> findByDeletedAtIsNullOrderByAverageRatingDesc(
-            Pageable pageable
-    );
+            Pageable pageable);
 
     List<Activity> findByDeletedAtIsNullAndCategory(
-            Activity.Category category
-    );
+            Activity.Category category);
 
     @Query("""
-        SELECT new it.unical.ea_project.dto.home.ActivitySuggestionDTO(
-            a.activityId,
-            a.title,
-            a.city
-        )
-        FROM Activity a
-        WHERE a.deletedAt IS NULL
-    AND a.status = it.unical.ea_project.domain.Activity.Status.PUBLISHED
-        AND (
-            LOWER(a.title) LIKE LOWER(CONCAT(:query, '%'))
-            OR LOWER(a.city) LIKE LOWER(CONCAT(:query, '%'))
-        )
-        """)
+                SELECT new it.unical.ea_project.dto.home.ActivitySuggestionDTO(
+                    a.activityId,
+                    a.title,
+                    a.city
+                )
+                FROM Activity a
+                WHERE a.deletedAt IS NULL
+            AND a.status = it.unical.ea_project.domain.Activity.Status.PUBLISHED
+                AND (
+                    LOWER(a.title) LIKE LOWER(CONCAT(:query, '%'))
+                    OR LOWER(a.city) LIKE LOWER(CONCAT(:query, '%'))
+                )
+                """)
     List<ActivitySuggestionDTO> findSuggestions(
             @Param("query") String query,
-            Pageable pageable
-    );
+            Pageable pageable);
 
     @Query("""
-    SELECT a
-    FROM Activity a
-    WHERE a.deletedAt IS NULL
-    AND a.status = it.unical.ea_project.domain.Activity.Status.PUBLISHED
-    AND (
-        cast(:category as String) IS NULL
-        OR a.category = :category
-    )
-    AND (
-        :query = ''
-        OR LOWER(a.title) LIKE CONCAT('%', LOWER(:query), '%')
-        OR LOWER(a.city) LIKE CONCAT('%', LOWER(:query), '%')
-    )
-    AND (
-        cast(:dayStart as LocalDateTime) IS NULL
-        OR (a.startDate < :nextDayStart AND a.endDate >= :dayStart)
-    )
-    ORDER BY a.averageRating DESC
-    """)
+            SELECT a
+            FROM Activity a
+            WHERE a.deletedAt IS NULL
+            AND a.status = it.unical.ea_project.domain.Activity.Status.PUBLISHED
+            AND (
+                cast(:category as String) IS NULL
+                OR a.category = :category
+            )
+            AND (
+                :query = ''
+                OR LOWER(a.title) LIKE CONCAT('%', LOWER(:query), '%')
+                OR LOWER(a.city) LIKE CONCAT('%', LOWER(:query), '%')
+            )
+            AND (
+                cast(:dayStart as LocalDateTime) IS NULL
+                OR (a.startDate < :nextDayStart AND a.endDate >= :dayStart)
+            )
+            ORDER BY a.averageRating DESC
+            """)
     List<Activity> search(
             @Param("query") String query,
             @Param("category") Activity.Category category,
             @Param("dayStart") LocalDateTime dayStart,
             @Param("nextDayStart") LocalDateTime nextDayStart,
-            Pageable pageable
-    );
+            Pageable pageable);
 
     @Query("""
-    SELECT a
-    FROM Activity a
-    WHERE a.deletedAt IS NULL
-    AND a.status = it.unical.ea_project.domain.Activity.Status.PUBLISHED
-    AND (
-        cast(:category as String) IS NULL
-        OR a.category = :category
-    )
-    AND (
-        :query = ''
-        OR LOWER(a.title) LIKE CONCAT('%', LOWER(:query), '%')
-        OR LOWER(a.city) LIKE CONCAT('%', LOWER(:query), '%')
-    )
-    ORDER BY a.averageRating DESC
-    """)
+            SELECT a
+            FROM Activity a
+            WHERE a.deletedAt IS NULL
+            AND a.status = it.unical.ea_project.domain.Activity.Status.PUBLISHED
+            AND (
+                cast(:category as String) IS NULL
+                OR a.category = :category
+            )
+            AND (
+                :query = ''
+                OR LOWER(a.title) LIKE CONCAT('%', LOWER(:query), '%')
+                OR LOWER(a.city) LIKE CONCAT('%', LOWER(:query), '%')
+            )
+            ORDER BY a.averageRating DESC
+            """)
     List<Activity> searchWithoutDate(
             @Param("query") String query,
             @Param("category") Activity.Category category,
-            Pageable pageable
-    );
+            Pageable pageable);
 }

@@ -32,7 +32,7 @@ public class FavoriteListServiceImpl implements FavoriteListService {
         if (name == null || name.isBlank() || name.trim().length() > 80) {
             throw new IllegalArgumentException("Il nome della lista deve contenere da 1 a 80 caratteri.");
         }
-        
+
         favoriteList.setName(name.trim());
         favoriteList.setUser(user);
         favoriteList.setVisibility(visibility != null ? visibility : FavoriteList.Visibility.PRIVATE);
@@ -41,7 +41,6 @@ public class FavoriteListServiceImpl implements FavoriteListService {
         return favoriteListRepository.save(favoriteList);
 
     }
-
 
     @Override
     @Transactional(readOnly = true)
@@ -55,25 +54,25 @@ public class FavoriteListServiceImpl implements FavoriteListService {
 
         return favoriteListRepository.findById(id)
                 .filter(list -> !list.isDeleted())
-                .orElseThrow(() -> new IllegalArgumentException("Lista dei preferiti non trovata o eliminata con ID: " + id));
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "Lista dei preferiti non trovata o eliminata con ID: " + id));
 
     }
 
     @Override
     @Transactional
-    public FavoriteList updateFavoriteList(Long id, 
-                                           Long userId,
-                                           String name,
-                                           FavoriteList.Visibility visibility) {
+    public FavoriteList updateFavoriteList(Long id,
+            Long userId,
+            String name,
+            FavoriteList.Visibility visibility) {
 
-        FavoriteList list = favoriteListRepository.findById(id)
+        FavoriteList list = favoriteListRepository.lockActive(id)
                 .filter(existing -> !existing.isDeleted())
                 .orElseThrow(() -> new IllegalArgumentException("Lista non trovata o eliminata: " + id));
 
         if (list.getUser() == null || !list.getUser().getId().equals(userId)) {
             throw new AccessDeniedException(
-                    "Non sei autorizzato a modificare questa lista."
-            );
+                    "Non sei autorizzato a modificare questa lista.");
         }
 
         if (name == null || name.isBlank() || name.trim().length() > 80) {
@@ -99,7 +98,7 @@ public class FavoriteListServiceImpl implements FavoriteListService {
     @Transactional
     public void softDeleteList(Long id) {
 
-        FavoriteList favoriteList = favoriteListRepository.findById(id)
+        FavoriteList favoriteList = favoriteListRepository.lockActive(id)
                 .orElseThrow(() -> new IllegalArgumentException("Lista dei preferiti non trovata con ID: " + id));
         favoriteList.setDeleted(true);
         favoriteListRepository.save(favoriteList);

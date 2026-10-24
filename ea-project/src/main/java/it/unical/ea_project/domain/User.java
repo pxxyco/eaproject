@@ -21,6 +21,13 @@ public class User {
     @Column(name = "user_id")
     private Long id;
 
+    @Column(name = "auth_version", nullable = false, columnDefinition = "bigint default 0")
+    private long authVersion;
+
+    @Version
+    @Column(name="row_version",nullable=false,columnDefinition="bigint default 0")
+    private long rowVersion;
+
     @Column(name = "username", nullable = false, unique = true)
     private String username;
 

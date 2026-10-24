@@ -51,6 +51,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<User> login(String identifier, String password) {
         String normalizedIdentifier = identifier == null ? "" : identifier.trim();
+        loginAttemptService.assertAllowed(normalizedIdentifier);
         Optional<User> userOpt = userRepository.findByEmailIgnoreCase(normalizedIdentifier);
         if (userOpt.isEmpty()) {
             userOpt = userRepository.findByUsernameIgnoreCase(normalizedIdentifier);
@@ -71,13 +72,16 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public User registerUser(User user) {
         PasswordPolicy.validate(user.getHashedPassword())
-                .ifPresent(message -> { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message); });
+                .ifPresent(message -> {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
+                });
 
         String username = user.getUsername() == null ? "" : user.getUsername().trim();
         String email = user.getEmail() == null ? "" : user.getEmail().trim();
 
         if (!USERNAME_PATTERN.matcher(username).matches()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lo username deve contenere 3–30 caratteri validi.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Lo username deve contenere 3–30 caratteri validi.");
         }
         if (email.length() > 254 || !EMAIL_PATTERN.matcher(email).matches()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Inserisci un indirizzo email valido.");
@@ -119,10 +123,14 @@ public class UserServiceImpl implements UserService {
 
         userRepository.findByUsernameIgnoreCase(normalizedUsername)
                 .filter(existing -> !existing.getId().equals(userId))
-                .ifPresent(existing -> { throw new ResponseStatusException(HttpStatus.CONFLICT, "Username già in uso."); });
+                .ifPresent(existing -> {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Username già in uso.");
+                });
         userRepository.findByEmailIgnoreCase(normalizedEmail)
                 .filter(existing -> !existing.getId().equals(userId))
-                .ifPresent(existing -> { throw new ResponseStatusException(HttpStatus.CONFLICT, "Email già registrata."); });
+                .ifPresent(existing -> {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Email già registrata.");
+                });
 
         user.setUsername(normalizedUsername);
         user.setEmail(normalizedEmail);
@@ -144,7 +152,8 @@ public class UserServiceImpl implements UserService {
         User user = findActiveUser(userId);
         user.setProfilePhotoUrl(null);
         User saved = userRepository.save(user);
-        // Update the entity before filesystem cleanup; on cleanup failure the transaction keeps the previous URL.
+        // Update the entity before filesystem cleanup; on cleanup failure the
+        // transaction keeps the previous URL.
         photoStorageService.deleteProfilePhoto(userId);
         return saved;
     }
@@ -164,10 +173,14 @@ public class UserServiceImpl implements UserService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La password attuale non è corretta.");
         }
         PasswordPolicy.validate(newPassword)
-                .ifPresent(message -> { throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message); });
+                .ifPresent(message -> {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
+                });
         if (passwordEncoder.matches(newPassword, user.getHashedPassword())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La nuova password deve essere diversa da quella attuale.");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "La nuova password deve essere diversa da quella attuale.");
         }
+        user.setAuthVersion(user.getAuthVersion() + 1);
         user.setHashedPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
     }
@@ -175,6 +188,7 @@ public class UserServiceImpl implements UserService {
     private User findActiveUser(Long userId) {
         return userRepository.findById(userId)
                 .filter(user -> user.getDeletedAt() == null)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utente non trovato o non attivo."));
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utente non trovato o non attivo."));
     }
 }
