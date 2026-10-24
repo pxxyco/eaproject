@@ -17,6 +17,9 @@ import java.util.List;
 @Service
 public class BookingServiceImpl implements BookingService {
 
+    @jakarta.persistence.PersistenceContext
+    private jakarta.persistence.EntityManager entityManager;
+
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final TripRepository tripRepository;
@@ -35,8 +38,9 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public BookingDTO creaPrenotazioneTrip(Long userId, Long tripId, Integer seats) {
         validateSeats(seats);
-        Trip trip = tripRepository.findByTripIdAndDeletedAtIsNull(tripId)
+        Trip trip = tripRepository.findForUpdate(tripId)
                 .orElseThrow(() -> new IllegalArgumentException("Viaggio non trovato"));
+        if (trip.getStatus() != Trip.TripStatus.PUBLISHED) throw new IllegalArgumentException("Il viaggio non è prenotabile");
         reserveSeats(trip.getAvailableSeats(), seats);
         trip.setAvailableSeats(trip.getAvailableSeats() - seats);
 
@@ -53,8 +57,9 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public BookingDTO creaPrenotazioneActivity(Long userId, Long activityId, Integer seats) {
         validateSeats(seats);
-        Activity activity = activityRepository.findByActivityIdAndDeletedAtIsNull(activityId)
+        Activity activity = activityRepository.findForUpdate(activityId)
                 .orElseThrow(() -> new IllegalArgumentException("Attività non trovata"));
+        if (activity.getStatus() != Activity.Status.PUBLISHED) throw new IllegalArgumentException("L'attività non è prenotabile");
         reserveSeats(activity.getAvailableSeats(), seats);
         activity.setAvailableSeats(activity.getAvailableSeats() - seats);
 
@@ -70,15 +75,24 @@ public class BookingServiceImpl implements BookingService {
 
     @Transactional
     public void cancella(Long bookingId, Long userId) {
-        Booking b = bookingRepository.findById(bookingId)
+        Booking b = bookingRepository.findForUpdate(bookingId)
                 .orElseThrow(() -> new RuntimeException("Non trovato"));
         if (b.getUser() == null || !b.getUser().getId().equals(userId)) {
             throw new org.springframework.security.access.AccessDeniedException("Prenotazione non appartenente all'utente");
         }
         if (b.getBookingStatus() == Booking.BookingStatus.CANCELLED) return;
         b.setBookingStatus(Booking.BookingStatus.CANCELLED);
-        if (b.getTrip() != null) b.getTrip().setAvailableSeats(b.getTrip().getAvailableSeats() + b.getSeats());
-        if (b.getActivity() != null) b.getActivity().setAvailableSeats(b.getActivity().getAvailableSeats() + b.getSeats());
+        entityManager.flush();
+        if (b.getTrip() != null) {
+            Trip trip = b.getTrip();
+            entityManager.refresh(trip, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+            trip.setAvailableSeats(trip.getAvailableSeats() + b.getSeats());
+        }
+        if (b.getActivity() != null) {
+            Activity activity = b.getActivity();
+            entityManager.refresh(activity, jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+            activity.setAvailableSeats(activity.getAvailableSeats() + b.getSeats());
+        }
         bookingRepository.save(b);
     }
 

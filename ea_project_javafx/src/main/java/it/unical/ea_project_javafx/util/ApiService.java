@@ -323,6 +323,9 @@ public class ApiService {
                 if (onFailure != null) {
                     onFailure.run();
                 }
+            } else if (onFailure != null) {
+                // HTTP 400/403/404/500 are server errors, not a missing connection.
+                onFailure.run();
             }
         });
 

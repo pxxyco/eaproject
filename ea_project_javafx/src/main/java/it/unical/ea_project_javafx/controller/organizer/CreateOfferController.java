@@ -59,6 +59,7 @@ public class CreateOfferController {
     @FXML private Button saveTripButton;
     @FXML private Button saveActivityButton;
     @FXML private Button activityBackButton;
+    @FXML private Button tripBackButton;
 
     @FXML private TextField actTitleField;
     @FXML private ComboBox<String> actCategoryCombo;
@@ -152,8 +153,9 @@ public class CreateOfferController {
 
     @FXML
     private void handleChooseTripCover() {
-        tripCoverFile = chooseCover();
-        if (tripCoverFile != null) {
+        File selected = chooseCover();
+        if (selected != null) {
+            tripCoverFile = selected;
             tripCoverFileLabel.setText(tripCoverFile.getName());
             showLocalPreview(tripCoverPreview, tripCoverFile);
         }
@@ -161,8 +163,9 @@ public class CreateOfferController {
 
     @FXML
     private void handleChooseActivityCover() {
-        activityCoverFile = chooseCover();
-        if (activityCoverFile != null) {
+        File selected = chooseCover();
+        if (selected != null) {
+            activityCoverFile = selected;
             actCoverFileLabel.setText(activityCoverFile.getName());
             showLocalPreview(actCoverPreview, activityCoverFile);
         }
@@ -302,12 +305,28 @@ public class CreateOfferController {
         description.setPrefRowCount(2);
         description.getStyleClass().add("custom-textarea");
         row.getChildren().addAll(fields, description);
-        row.setUserData(new StageFields(title, place, city, day, category, description));
+        row.setUserData(new StageFields(title, place, city, day, category, description, null));
         stagesContainer.getChildren().add(row);
     }
 
     public void setTripToEdit(TripDTO trip) {
         tripToEdit = trip;
+        tripBackButton.setVisible(false);
+        tripBackButton.setManaged(false);
+        stagesContainer.getChildren().clear();
+        if (trip.getStages() != null) for (var stage : trip.getStages()) {
+            handleAddStageRow();
+            var row = stagesContainer.getChildren().getLast();
+            StageFields fields = (StageFields) row.getUserData();
+            fields.title().setText(valueOrEmpty(stage.getTitle()));
+            fields.place().setText(valueOrEmpty(stage.getLocationName()));
+            fields.city().setText(valueOrEmpty(stage.getCity()));
+            fields.day().setText(String.valueOf(stage.getDay()));
+            fields.category().setValue(stage.getCategory());
+            fields.description().setText(valueOrEmpty(stage.getDescription()));
+            row.setUserData(new StageFields(fields.title(), fields.place(), fields.city(), fields.day(),
+                    fields.category(), fields.description(), stage));
+        }
         stepChoose.setVisible(false);
         stepChoose.setManaged(false);
         stepTrip.setVisible(true);
@@ -378,11 +397,11 @@ public class CreateOfferController {
         try {
             LocalDate start = tripStartDatePicker.getValue();
             LocalDate end = tripEndDatePicker.getValue();
-            BigDecimal price = new BigDecimal(tripPriceField.getText().trim());
+            BigDecimal price = new BigDecimal(tripPriceField.getText().trim().replace(',', '.'));
             int maxSeats = Integer.parseInt(tripMaxSeatsField.getText().trim());
             if (blank(tripTitleField.getText()) || blank(tripCountryField.getText())
                     || blank(tripCityField.getText()) || start == null || end == null
-                    || start.isAfter(end) || price.signum() <= 0 || maxSeats < 1) {
+                    || start.isAfter(end) || price.signum() < 0 || maxSeats < 1) {
                 showValidationError("Compila i campi obbligatori con valori validi e controlla l'intervallo delle date.");
                 return;
             }
@@ -395,9 +414,9 @@ public class CreateOfferController {
             payload.put("endDate", end.toString());
             payload.put("totalPrice", price);
             payload.put("maxSeats", maxSeats);
-            payload.put("availableSeats", tripToEdit != null && tripToEdit.getAvailableSeats() != null
-                    ? tripToEdit.getAvailableSeats()
-                    : maxSeats);
+            payload.put("availableSeats", availableSeatsAfterResize(maxSeats,
+                    tripToEdit == null ? null : tripToEdit.getMaxSeats(),
+                    tripToEdit == null ? null : tripToEdit.getAvailableSeats()));
             payload.put("status", tripToEdit != null && tripToEdit.getStatus() != null
                     ? tripToEdit.getStatus()
                     : "PUBLISHED");
@@ -435,7 +454,7 @@ public class CreateOfferController {
             if (blank(actTitleField.getText()) || actCategoryCombo.getValue() == null
                     || blank(actPlaceField.getText()) || blank(actCityField.getText())
                     || start == null || end == null || start.isAfter(end)
-                    || !Double.isFinite(price) || price <= 0 || duration < 1 || maxSeats < 1) {
+                    || !Double.isFinite(price) || price < 0 || duration < 1 || maxSeats < 1) {
                 showValidationError("Compila i campi obbligatori con valori validi e controlla l'intervallo delle date.");
                 return;
             }
@@ -445,21 +464,27 @@ public class CreateOfferController {
             payload.put("category", activityCategoryValue(actCategoryCombo.getValue()));
             payload.put("placeName", actPlaceField.getText().trim());
             payload.put("city", actCityField.getText().trim());
-            payload.put("startDate", start.atStartOfDay().toString());
-            payload.put("endDate", end.atStartOfDay().toString());
+            payload.put("startDate", start.atTime(activityToEdit != null && activityToEdit.getStartDate() != null
+                    ? activityToEdit.getStartDate().toLocalTime() : java.time.LocalTime.MIDNIGHT).toString());
+            payload.put("endDate", end.atTime(activityToEdit != null && activityToEdit.getEndDate() != null
+                    ? activityToEdit.getEndDate().toLocalTime() : java.time.LocalTime.MIDNIGHT).toString());
+            if (activityToEdit != null) {
+                payload.put("latitude", activityToEdit.getLatitude());
+                payload.put("longitude", activityToEdit.getLongitude());
+            }
             payload.put("durationMinutes", duration);
             payload.put("price", price);
             payload.put("maxSeats", maxSeats);
             payload.put("description", emptyToNull(actDescriptionArea.getText()));
             payload.put("notes", emptyToNull(actNotesArea.getText()));
 
-            if (saveActivityButton != null) saveActivityButton.setDisable(true);
-            payload.put("availableSeats", activityToEdit != null && activityToEdit.getAvailableSeats() != null
-                    ? activityToEdit.getAvailableSeats()
-                    : maxSeats);
+            payload.put("availableSeats", availableSeatsAfterResize(maxSeats,
+                    activityToEdit == null ? null : activityToEdit.getMaxSeats(),
+                    activityToEdit == null ? null : activityToEdit.getAvailableSeats()));
             payload.put("status", activityToEdit != null && activityToEdit.getStatus() != null
                     ? activityToEdit.getStatus()
                     : "PUBLISHED");
+            if (saveActivityButton != null) saveActivityButton.setDisable(true);
             ApiService.call(
                     ApiService.BASE_URL + (activityToEdit == null
                             ? "/api/activities"
@@ -473,8 +498,10 @@ public class CreateOfferController {
                     },
                     null
             );
-        } catch (NumberFormatException exception) {
-            showValidationError("Inserisci prezzo, durata e posti con valori validi.");
+        } catch (IllegalArgumentException exception) {
+            showValidationError(exception instanceof NumberFormatException
+                    ? "Inserisci prezzo, durata e posti con valori validi."
+                    : exception.getMessage());
         }
     }
 
@@ -547,7 +574,7 @@ public class CreateOfferController {
             return;
         }
         ApiService.uploadFileDetailed(imageBaseUrl + "/cover", tripCoverFile.toPath(),
-                ignored -> uploadSecondaryPhotos.run(), onFailure,
+                ignored -> { tripCoverFile = null; uploadSecondaryPhotos.run(); }, onFailure,
                 details -> showPhotoUploadError(true, "copertina", details), null);
     }
 
@@ -588,7 +615,7 @@ public class CreateOfferController {
             return;
         }
         ApiService.uploadFileDetailed(imageBaseUrl + "/cover", activityCoverFile.toPath(),
-                ignored -> uploadSecondaryPhotos.run(), onFailure,
+                ignored -> { activityCoverFile = null; uploadSecondaryPhotos.run(); }, onFailure,
                 details -> showPhotoUploadError(false, "copertina", details), null);
     }
 
@@ -614,7 +641,20 @@ public class CreateOfferController {
             if (day < 1) {
                 throw new IllegalArgumentException("Il giorno della tappa deve essere positivo.");
             }
+            long days = java.time.temporal.ChronoUnit.DAYS.between(tripStartDatePicker.getValue(), tripEndDatePicker.getValue()) + 1;
+            if (day > days) throw new IllegalArgumentException("Il giorno della tappa supera la durata del viaggio.");
             Map<String, Object> stage = new LinkedHashMap<>();
+            if (fields.original() != null) {
+                var original = fields.original();
+                stage.put("stageId", original.getStageId());
+                stage.put("country", original.getCountry());
+                stage.put("latitude", original.getLatitude());
+                stage.put("longitude", original.getLongitude());
+                stage.put("startTime", original.getStartTime() == null ? null : original.getStartTime().toString());
+                stage.put("endTime", original.getEndTime() == null ? null : original.getEndTime().toString());
+                stage.put("photoUrl", original.getPhotoUrl());
+                stage.put("notes", original.getNotes());
+            }
             stage.put("title", fields.title().getText().trim());
             stage.put("locationName", emptyToNull(fields.place().getText()));
             stage.put("city", emptyToNull(fields.city().getText()));
@@ -648,6 +688,12 @@ public class CreateOfferController {
             case "MEAL" -> "Pasto";
             default -> "Altro";
         };
+    }
+
+    private static int availableSeatsAfterResize(int capacity, Integer previousCapacity, Integer available) {
+        int booked = previousCapacity == null || available == null ? 0 : Math.max(0, previousCapacity - available);
+        if (capacity < booked) throw new IllegalArgumentException("I posti totali non possono essere inferiori ai posti già prenotati (" + booked + ").");
+        return capacity - booked;
     }
 
     private boolean blank(String value) {
@@ -697,7 +743,8 @@ public class CreateOfferController {
             TextField city,
             TextField day,
             ComboBox<String> category,
-            TextArea description
+            TextArea description,
+            it.unical.ea_project_javafx.dto.StageDTO original
     ) {
     }
 }

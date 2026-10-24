@@ -1,7 +1,6 @@
 package it.unical.ea_project.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,7 +12,6 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 
 @Entity
 @Table(name = "\"TRIP\"")
@@ -87,6 +85,17 @@ public class Trip {
     // Relazione bidirezionale con le tappe (Stage)
     @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Stage> stages = new ArrayList<>();
+
+    // Distinguish an omitted itinerary (preserve it) from an explicitly empty itinerary.
+    @Transient
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    @lombok.Setter(lombok.AccessLevel.NONE)
+    private boolean stagesProvided;
+
+    public void setStages(List<Stage> stages) {
+        this.stages = stages;
+        this.stagesProvided = true;
+    }
 
     @PrePersist
     protected void onCreate() {

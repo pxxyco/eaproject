@@ -22,9 +22,13 @@ public class StageController {
     }
 
     @PostMapping
-    public ResponseEntity<StageDTO> addStage(@PathVariable Long tripId, @RequestBody StageDTO stageDTO) {
+    public ResponseEntity<StageDTO> addStage(@PathVariable Long tripId, @RequestBody StageDTO stageDTO,
+            @org.springframework.security.core.annotation.AuthenticationPrincipal it.unical.ea_project.security.AuthUser user) {
         return tripService.getTripById(tripId)
                 .map(trip -> {
+                    if (trip.getCreatedBy() == null || !trip.getCreatedBy().getId().equals(user.id())) {
+                        throw new org.springframework.security.access.AccessDeniedException("Il viaggio appartiene a un altro organizzatore.");
+                    }
                     Stage stage = toEntity(stageDTO);
                     Stage saved = stageService.addStageToTrip(trip, stage);
                     return ResponseEntity.ok(StageDTO.toDto(saved));

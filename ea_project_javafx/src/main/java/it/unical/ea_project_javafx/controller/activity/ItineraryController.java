@@ -51,6 +51,7 @@ public class ItineraryController implements ActivitySectionController, TripSecti
         location.getStyleClass().add("itinerario-box");
 
         location.setOnMouseClicked(mouseEvent -> {
+            if (activity.getLatitude() == null || activity.getLongitude() == null) return;
             mapView.setZoom(mapView.getZoom() + 0.0001);
             mapView.setCenter(activity.getLatitude(), activity.getLongitude());
             mapView.setZoom(15);
@@ -74,6 +75,7 @@ public class ItineraryController implements ActivitySectionController, TripSecti
                 location.getStyleClass().add("itinerario-box");
 
                 location.setOnMouseClicked(mouseEvent -> {
+                    if (stage.getLatitude() == null || stage.getLongitude() == null) return;
                     mapView.setZoom(mapView.getZoom() + 0.0001);
                     mapView.setCenter(stage.getLatitude(), stage.getLongitude());
                     mapView.setZoom(15);
@@ -115,13 +117,15 @@ public class ItineraryController implements ActivitySectionController, TripSecti
 
         mapView = new MapView();
 
-        if(!trip.getStages().isEmpty()){
-            MapPoint centro = new MapPoint(trip.getStages().get(0).getLatitude(), trip.getStages().get(0).getLongitude());
+        var mappedStages = trip.getStages().stream()
+                .filter(stage -> stage.getLatitude() != null && stage.getLongitude() != null).toList();
+        if(!mappedStages.isEmpty()){
+            MapPoint centro = new MapPoint(mappedStages.getFirst().getLatitude(), mappedStages.getFirst().getLongitude());
             mapView.setCenter(centro);
             mapView.setZoom(14);
 
             Integer number = 1;
-            for(StageDTO stage: trip.getStages()){
+            for(StageDTO stage: mappedStages){
                 MapPoint point = new MapPoint(stage.getLatitude(),stage.getLongitude());
                 MarkerLayer markerLayer = new MarkerLayer(point,String.valueOf(number));
                 number++;

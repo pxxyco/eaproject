@@ -16,6 +16,10 @@ import java.util.Optional;
 @Repository
 public interface TripRepository extends JpaRepository<Trip, Long> {
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT item FROM Trip item WHERE item.tripId = :id AND item.deletedAt IS NULL")
+    Optional<Trip> findForUpdate(@Param("id") Long id);
+
     List<Trip> findByCreatedByAndDeletedAtIsNull(User createdBy);
     List<Trip> findByStatusAndDeletedAtIsNull(TripStatus status);
     List<Trip> findByDestinationCountryContainingIgnoreCaseAndDeletedAtIsNull(String country);

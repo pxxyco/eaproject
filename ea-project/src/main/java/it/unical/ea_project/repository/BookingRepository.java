@@ -13,6 +13,10 @@ import java.util.List;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT b FROM Booking b WHERE b.bookingId = :id AND b.deletedAt IS NULL")
+    java.util.Optional<Booking> findForUpdate(@Param("id") Long id);
+
     List<Booking> findByUserId(Long userId);
 
     List<Booking> findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(Long userId);
@@ -27,8 +31,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
         LEFT JOIN b.trip t
         LEFT JOIN b.activity a
         WHERE b.deletedAt IS NULL
-        AND ((t.createdBy.id = :organizerId AND t.deletedAt IS NULL)
-          OR (a.createdBy.id = :organizerId AND a.deletedAt IS NULL))
+        AND ((t.createdBy.id = :organizerId)
+          OR (a.createdBy.id = :organizerId))
         ORDER BY b.createdAt DESC
         """)
     List<Booking> findActiveBookingsForOrganizer(@Param("organizerId") Long organizerId);

@@ -35,9 +35,10 @@ public class TripController {
     }
 
     @GetMapping("/organizer/{creatorId}")
-    public ResponseEntity<List<TripDTO>> getTripsByOrganizer(@PathVariable Long creatorId) {
+    public ResponseEntity<List<TripDTO>> getTripsByOrganizer(@PathVariable Long creatorId, @AuthenticationPrincipal AuthUser user) {
+        if (!creatorId.equals(user.id())) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         return userRepository.findById(creatorId)
-                .map(user -> ResponseEntity.ok(tripService.getTripDtosByUser(user)))
+                .map(creator -> ResponseEntity.ok(tripService.getTripDtosByUser(creator)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 

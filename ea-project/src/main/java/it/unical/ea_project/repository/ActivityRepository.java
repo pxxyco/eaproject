@@ -17,6 +17,10 @@ import java.util.Optional;
 public interface ActivityRepository
         extends JpaRepository<Activity, Long> {
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT item FROM Activity item WHERE item.activityId = :id AND item.deletedAt IS NULL")
+    Optional<Activity> findForUpdate(@Param("id") Long id);
+
     List<Activity> findByCreatedBy(User createdBy);
 
     List<Activity> findByCreatedByIdAndDeletedAtIsNullOrderByCreatedAtDesc(Long creatorId);

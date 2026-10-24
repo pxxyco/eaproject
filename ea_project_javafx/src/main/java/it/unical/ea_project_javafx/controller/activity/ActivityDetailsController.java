@@ -1,8 +1,5 @@
 package it.unical.ea_project_javafx.controller.activity;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializer;
 
 import it.unical.ea_project_javafx.controller.activity.photo.PhotoContainerController;
 import it.unical.ea_project_javafx.controller.activity.photo.PhotoGalleryController;
@@ -91,15 +88,6 @@ public class ActivityDetailsController {
     private String id;
     private Type myType;
 
-    private final static Gson GSON = new GsonBuilder()
-            .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, type, ctx) ->
-                    LocalDateTime.parse(json.getAsString()))
-            .registerTypeAdapter(LocalDate.class, (JsonDeserializer<LocalDate>) (json, type, ctx) ->
-                    LocalDate.parse(json.getAsString()))
-            .registerTypeAdapter(LocalTime.class, (JsonDeserializer<LocalTime>) (json, type, ctx) ->
-                    LocalTime.parse(json.getAsString()))
-            .create();
-
     public enum Type {
         ACTIVITY, TRIP
     }
@@ -149,7 +137,7 @@ public class ActivityDetailsController {
                 ApiService.get(
                         ApiService.BASE_URL + "/api/activities/" + id,
                         response ->  {
-                            activity = GSON.fromJson(response.body(), ActivityDTO.class);
+                            activity = ApiService.fromJson(response.body(), ActivityDTO.class);
 
                             setActivityData();
                             handleDescrizione(null);
@@ -171,7 +159,7 @@ public class ActivityDetailsController {
                 ApiService.get(
                         ApiService.BASE_URL + "/api/trips/" + id,
                         response ->  {
-                            trip = GSON.fromJson(response.body(), TripDTO.class);
+                            trip = ApiService.fromJson(response.body(), TripDTO.class);
 
                             setTripData();
                             handleDescrizione(null);
@@ -279,10 +267,10 @@ public class ActivityDetailsController {
                 ApiService.BASE_URL + endpoint,
                 response -> {
                     if (myType == Type.TRIP) {
-                        trip = GSON.fromJson(response.body(), TripDTO.class);
+                        trip = ApiService.fromJson(response.body(), TripDTO.class);
                         lblRating.setText("★ " + formatRating(trip.getAverageRating()));
                     } else {
-                        activity = GSON.fromJson(response.body(), ActivityDTO.class);
+                        activity = ApiService.fromJson(response.body(), ActivityDTO.class);
                         lblRating.setText("★ " + formatRating(activity.getAverageRating()));
                     }
                 },

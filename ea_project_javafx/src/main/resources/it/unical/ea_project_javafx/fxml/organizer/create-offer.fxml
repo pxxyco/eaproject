@@ -160,7 +160,7 @@
                 </ScrollPane>
 
                 <HBox alignment="CENTER_LEFT" spacing="12.0" styleClass="form-footer">
-                    <Button text="← Torna alla selezione" onAction="#handleBackToChoose" styleClass="btn-link" />
+                    <Button fx:id="tripBackButton" text="← Torna alla selezione" onAction="#handleBackToChoose" styleClass="btn-link" />
                     <Region HBox.hgrow="ALWAYS" />
                     <Button fx:id="saveTripButton" text="Pubblica Viaggio" onAction="#handleSaveTrip" styleClass="btn-primary" />
                 </HBox>

@@ -41,7 +41,8 @@
                                     </children>
                                 </VBox>
                                 <Region HBox.hgrow="ALWAYS" />
-                                <Button text="+ Nuova Attività" onAction="#handleOpenCreateOffer" styleClass="btn-card-action" />
+                                <Button text="Aggiorna" onAction="#handleRefresh" styleClass="btn-card-action" />
+                                <Button text="+ Nuova Offerta" onAction="#handleOpenCreateOffer" styleClass="btn-card-action" />
                             </children>
                         </HBox>
 
@@ -52,7 +53,7 @@
                             <children>
                                 <VBox minWidth="200.0" styleClass="kpi-card" HBox.hgrow="ALWAYS">
                                     <children>
-                                        <Label styleClass="kpi-title" text="Attività Pubblicate" />
+                                        <Label styleClass="kpi-title" text="Offerte Pubblicate" />
                                         <Label fx:id="publishedCountLabel" styleClass="kpi-value" text="0" />
                                     </children>
                                 </VBox>

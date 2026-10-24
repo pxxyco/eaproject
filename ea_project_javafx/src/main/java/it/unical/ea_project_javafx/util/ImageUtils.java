@@ -13,7 +13,7 @@ public class ImageUtils {
             rawUrl = DEFAULT_IMAGE_PATH;
         }
 
-        if (rawUrl.startsWith("http://") || rawUrl.startsWith("https://")) {
+        if (rawUrl.startsWith("http://") || rawUrl.startsWith("https://") || rawUrl.startsWith("file:")) {
             return rawUrl;
         }
 

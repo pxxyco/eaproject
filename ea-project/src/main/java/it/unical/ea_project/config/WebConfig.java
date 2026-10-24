@@ -18,10 +18,16 @@ public class WebConfig implements WebMvcConfigurer {
 
     private static final Logger log = LoggerFactory.getLogger(WebConfig.class);
 
+    private final Path storageRoot;
+
+    public WebConfig(@org.springframework.beans.factory.annotation.Value("${app.storage.path:photo}") String storagePath) {
+        storageRoot = Paths.get(storagePath).toAbsolutePath().normalize();
+    }
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // Path relativo alla root di esecuzione dell'applicazione
-        Path baseDir = Paths.get("photo").toAbsolutePath();
+        Path baseDir = storageRoot;
 
         // Creazione cartelle
         createDir(baseDir.resolve("activity"));

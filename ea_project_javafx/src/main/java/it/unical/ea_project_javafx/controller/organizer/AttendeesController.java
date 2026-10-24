@@ -49,6 +49,8 @@ public class AttendeesController {
         loadNavbar();
         setupTableColumns();
         loadAttendees();
+        loadPaidRevenue();
+        eventFilterCombo.setOnAction(event -> filterTable());
 
         searchField.textProperty().addListener((obs, oldV, newV) -> filterTable());
     }
@@ -80,6 +82,10 @@ public class AttendeesController {
                     List<BookingDTO> bookings = ApiService.fromJson(response.body(), type);
                     Platform.runLater(() -> {
                         masterList.setAll(bookings == null ? List.of() : bookings);
+                        eventFilterCombo.getItems().setAll("Tutti gli eventi");
+                        masterList.stream().map(BookingDTO::getItemTitle).filter(java.util.Objects::nonNull)
+                                .distinct().sorted().forEach(title -> eventFilterCombo.getItems().add(title));
+                        eventFilterCombo.getSelectionModel().selectFirst();
                         updateKPIs();
                         filterTable();
                     });
@@ -96,21 +102,29 @@ public class AttendeesController {
                 .sum();
         totalAttendeesLabel.setText(String.valueOf(totalSeats));
 
-        BigDecimal totalRev = masterList.stream()
-                .filter(b -> !"CANCELLED".equalsIgnoreCase(b.getBookingStatus()) && b.getPrice() != null)
-                .map(BookingDTO::getPrice)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        confirmedRevenueLabel.setText("€ " + totalRev.toPlainString());
+    }
+
+    private void loadPaidRevenue() {
+        confirmedRevenueLabel.setText("—");
+        ApiService.get(ApiService.BASE_URL + "/api/payments/organizer/revenue",
+                response -> {
+                    BigDecimal revenue = ApiService.fromJson(response.body(), BigDecimal.class);
+                    confirmedRevenueLabel.setText(java.text.NumberFormat.getCurrencyInstance(java.util.Locale.ITALY)
+                            .format(revenue == null ? BigDecimal.ZERO : revenue));
+                }, () -> showError("Impossibile caricare gli incassi da pagamenti."), null);
     }
 
     private void filterTable() {
         String query = searchField.getText() == null ? "" : searchField.getText().toLowerCase().trim();
 
         List<BookingDTO> filtered = masterList.stream().filter(b -> {
-            return query.isEmpty()
+            String selectedEvent = eventFilterCombo.getValue();
+            boolean matchesEvent = selectedEvent == null || "Tutti gli eventi".equals(selectedEvent)
+                    || selectedEvent.equals(b.getItemTitle());
+            return matchesEvent && (query.isEmpty()
                     || (b.getParticipantName() != null && b.getParticipantName().toLowerCase().contains(query))
                     || (b.getParticipantEmail() != null && b.getParticipantEmail().toLowerCase().contains(query))
-                    || (b.getItemTitle() != null && b.getItemTitle().toLowerCase().contains(query));
+                    || (b.getItemTitle() != null && b.getItemTitle().toLowerCase().contains(query)));
         }).toList();
 
         attendeesTableView.setItems(FXCollections.observableArrayList(filtered));

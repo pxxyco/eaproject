@@ -82,6 +82,11 @@ public class OrganizerDashboardController implements ProfileDashboardController 
     ) {}
 
     @FXML
+    private void handleRefresh() {
+        if (userSession != null) setUser(userSession);
+    }
+
+    @FXML
     private void handleOpenCreateOffer(ActionEvent event) {
         openOfferDialog((Node) event.getSource(), null, null);
     }
@@ -120,6 +125,7 @@ public class OrganizerDashboardController implements ProfileDashboardController 
                     loadTrips(userSession);
                     loadActivities(userSession);
                     loadSubscribers(userSession);
+                    loadPaidRevenue(userSession);
                 }
             });
             modal.showAndWait();

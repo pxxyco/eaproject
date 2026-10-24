@@ -75,8 +75,14 @@ public class ActivityImageServiceImpl implements ActivityImageService {
 
     @Override
     @Transactional
-    public void deleteImage(Long imageId) {
-        activityImageRepository.deleteById(imageId);
+    public void deleteImage(Long imageId, Long organizerId) {
+        ActivityImage image = activityImageRepository.findById(imageId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Foto non trovata."));
+        Activity offer = image.getActivity();
+        if (offer.getCreatedBy() == null || !Objects.equals(offer.getCreatedBy().getId(), organizerId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Non puoi eliminare le foto di un'altra offerta.");
+        }
+        activityImageRepository.delete(image);
     }
 
     private void validateFiles(List<MultipartFile> files) {

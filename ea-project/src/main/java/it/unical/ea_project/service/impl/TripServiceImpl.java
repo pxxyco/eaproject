@@ -5,6 +5,7 @@ import it.unical.ea_project.domain.Trip.TripStatus;
 import it.unical.ea_project.domain.TripImage;
 import it.unical.ea_project.domain.User;
 import it.unical.ea_project.dto.TripDTO;
+import it.unical.ea_project.dto.StageDTO;
 import it.unical.ea_project.dto.home.TripHomeDTO;
 import it.unical.ea_project.dto.home.TripSuggestionDTO;
 import it.unical.ea_project.repository.TripImageRepository;
@@ -12,6 +13,8 @@ import it.unical.ea_project.repository.TripRepository;
 import it.unical.ea_project.repository.UserRepository;
 import it.unical.ea_project.service.TripService;
 import it.unical.ea_project.util.PageUtils;
+import it.unical.ea_project.util.OfferCapacity;
+import it.unical.ea_project.util.OfferValidation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -82,6 +85,8 @@ public class TripServiceImpl implements TripService {
     @Override
     @Transactional
     public Trip createTrip(Trip trip, Long creatorId) {
+        OfferValidation.validate(trip);
+        trip.setAvailableSeats(trip.getMaxSeats());
         User creator = userRepository.findById(creatorId)
                 .orElseThrow(() -> new RuntimeException("Utente non trovato con ID: " + creatorId));
         trip.setCreatedBy(creator);
@@ -100,9 +105,11 @@ public class TripServiceImpl implements TripService {
     @Override
     @Transactional
     public Trip updateTrip(Long id, Trip details) {
-        Trip existing = getTripById(id)
+        OfferValidation.validate(details);
+        Trip existing = tripRepository.findForUpdate(id)
                 .orElseThrow(() -> new RuntimeException("Viaggio non trovato con ID: " + id));
 
+        if (details.isStagesProvided()) replaceStages(existing, details.getStages());
         existing.setTitle(details.getTitle());
         existing.setDescription(details.getDescription());
         existing.setDestinationCountry(details.getDestinationCountry());
@@ -110,10 +117,50 @@ public class TripServiceImpl implements TripService {
         existing.setStartDate(details.getStartDate());
         existing.setEndDate(details.getEndDate());
         existing.setTotalPrice(details.getTotalPrice());
+        int available = OfferCapacity.resize(existing.getMaxSeats(), existing.getAvailableSeats(), details.getMaxSeats());
         existing.setMaxSeats(details.getMaxSeats());
-        existing.setAvailableSeats(details.getAvailableSeats());
+        existing.setAvailableSeats(available);
         existing.setStatus(details.getStatus());
         return tripRepository.save(existing);
+    }
+
+    private void replaceStages(Trip trip, List<it.unical.ea_project.domain.Stage> requested) {
+        if (requested == null) return;
+        Map<Long, it.unical.ea_project.domain.Stage> current = trip.getStages().stream()
+                .collect(Collectors.toMap(it.unical.ea_project.domain.Stage::getStageId, stage -> stage));
+        java.util.Set<Long> seen = new java.util.HashSet<>();
+        List<it.unical.ea_project.domain.Stage> replacement = new java.util.ArrayList<>();
+        for (var source : requested) {
+            if (source.getTitle() == null || source.getTitle().isBlank() || source.getCategory() == null
+                    || source.getDay() == null || source.getDay() < 1
+                    || source.getOrderInDay() == null || source.getOrderInDay() < 1) {
+                throw new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.BAD_REQUEST, "Dati della tappa non validi.");
+            }
+            var target = source.getStageId() == null ? new it.unical.ea_project.domain.Stage() : current.get(source.getStageId());
+            if (target == null || (source.getStageId() != null && !seen.add(source.getStageId()))) {
+                throw new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.BAD_REQUEST, "La tappa non appartiene al viaggio o è duplicata.");
+            }
+            target.setTitle(source.getTitle());
+            target.setDescription(source.getDescription());
+            target.setCategory(source.getCategory());
+            target.setLocationName(source.getLocationName());
+            target.setCity(source.getCity());
+            target.setCountry(source.getCountry());
+            target.setLatitude(source.getLatitude());
+            target.setLongitude(source.getLongitude());
+            target.setDay(source.getDay());
+            target.setOrderInDay(source.getOrderInDay());
+            target.setStartTime(source.getStartTime());
+            target.setEndTime(source.getEndTime());
+            target.setPhotoUrl(source.getPhotoUrl());
+            target.setNotes(source.getNotes());
+            target.setTrip(trip);
+            replacement.add(target);
+        }
+        trip.getStages().clear();
+        trip.getStages().addAll(replacement);
     }
 
     @Override
@@ -132,7 +179,7 @@ public class TripServiceImpl implements TripService {
     @Override
     @Transactional
     public void deleteTrip(Long id) {
-        getTripById(id).ifPresent(this::deleteTripLogically);
+        tripRepository.findForUpdate(id).ifPresent(this::deleteTripLogically);
     }
     @Override
     public List<TripDTO> getTripDtosByUser(User user) {
@@ -263,7 +310,10 @@ public class TripServiceImpl implements TripService {
                 .createdAt(trip.getCreatedAt())
                 .updatedAt(trip.getUpdatedAt())
                 .deletedAt(trip.getDeletedAt())
-                .stages(Collections.emptyList())
+                .stages(trip.getStages() == null ? List.of() : trip.getStages().stream()
+                        .sorted(Comparator.comparing(it.unical.ea_project.domain.Stage::getDay, Comparator.nullsLast(Comparator.naturalOrder()))
+                                .thenComparing(it.unical.ea_project.domain.Stage::getOrderInDay, Comparator.nullsLast(Comparator.naturalOrder())))
+                        .map(StageDTO::toDto).toList())
                 .build();
     }
 

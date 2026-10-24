@@ -102,6 +102,8 @@ object ApiService {
             } catch (e: IOException) {
                 reportNetworkFailure()
                 ApiResult.NetworkError(e)
+            } catch (e: com.google.gson.JsonParseException) {
+                ApiResult.HttpError(502, "Risposta JSON non valida")
             }
         }
 
@@ -152,7 +154,10 @@ object ApiService {
         response.isSuccessful -> {
             val text = response.body?.string().orEmpty()
             @Suppress("UNCHECKED_CAST")
-            val data = if (type == Unit::class.java || text.isBlank()) Unit as T else gson.fromJson(text, type)
+            val data = if (type == Unit::class.java) Unit as T else {
+                if (text.isBlank() || text.trim() == "null") throw com.google.gson.JsonParseException("Risposta vuota")
+                gson.fromJson(text, type)
+            }
             ApiResult.Success(data, response)
         }
         response.code == 429 -> rateLimited(response)
