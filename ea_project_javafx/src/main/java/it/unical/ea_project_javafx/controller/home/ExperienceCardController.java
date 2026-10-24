@@ -139,7 +139,7 @@ public class ExperienceCardController {
         String location = dto.getLocation() != null ? dto.getLocation() : "";
         String category = "Viaggio";
         String price = String.format("€%.0f", dto.getTotalPrice() != null ? dto.getTotalPrice().doubleValue() : 0.0);
-        String rating = dto.getAverageRating() != null ? String.format("%.1f", dto.getAverageRating().doubleValue()) : "-";
+        String rating = dto.getAverageRating() != null ? String.format("%.1f", dto.getAverageRating().doubleValue()) : "0,0";
         String imageUrl = dto.getCoverPhotoUrl();
         String dateInfo = formatDateRange(dto.getStartDate(), dto.getEndDate());
 
@@ -158,7 +158,7 @@ public class ExperienceCardController {
         String location = dto.getCity() != null ? dto.getCity() : "";
         String category = dto.getCategory() != null ? dto.getCategory() : "Attività";
         String price = String.format("€%.0f", dto.getPrice() != null ? dto.getPrice() : 0.0);
-        String rating = String.format("%.1f", dto.getAverageRating() != null ? dto.getAverageRating() : 5.0);
+        String rating = String.format("%.1f", dto.getAverageRating() != null ? dto.getAverageRating() : 0.0);
         String imageUrl = dto.getImageUrl();
         String dateInfo = formatDateRange(dto.getStartDate(), dto.getEndDate());
 
