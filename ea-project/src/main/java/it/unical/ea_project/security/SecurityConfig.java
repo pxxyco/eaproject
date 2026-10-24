@@ -61,7 +61,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/users/me/profile-photo", "/api/users/change-password").authenticated()
                         .requestMatchers(HttpMethod.DELETE, "/api/users/me/profile-photo").authenticated()
                         .requestMatchers("/api/me/**").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/activities/organizer/**").hasRole("ORGANIZER")
+                        .requestMatchers(HttpMethod.GET, "/api/activities/organizer/**", "/api/trips/organizer/**").hasRole("ORGANIZER")
                         .requestMatchers(HttpMethod.GET, "/api/activities/**", "/api/trips/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/activities/**", "/api/trips/**").hasRole("ORGANIZER")
                         .requestMatchers(HttpMethod.POST, "/api/activity-images/**", "/api/trip-images/**").hasRole("ORGANIZER")

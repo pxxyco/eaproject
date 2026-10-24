@@ -5,13 +5,12 @@ import it.unical.ea_project_javafx.dto.ReviewDTO;
 import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.service.ResponseService;
 import it.unical.ea_project_javafx.util.DateTimeUtils;
+import it.unical.ea_project_javafx.util.PopupFactory;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.TextArea;
@@ -46,7 +45,7 @@ public class ReviewItemController {
     List<Button> stars ;
     final private String FULL_STAR = "★";
     final private String EMPTY_STAR = "☆";
-    final private String RISPOSTA_FXML = "/it/unical/ea_project_javafx/fxml/attivita/recensioniContainer/RispostaItem.fxml";
+    final private String RISPOSTA_FXML = "/it/unical/ea_project_javafx/fxml/activity/reviews/review-response-item.fxml";
 
     private ReviewDTO review;
     private boolean isPlaceOwner;
@@ -177,16 +176,16 @@ private void editResponse(ResponseDTO response) {
 }
 
 private void deleteResponse(ResponseDTO response) {
-    Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
-            "Vuoi eliminare questa risposta?", ButtonType.CANCEL, ButtonType.OK);
-    confirm.setHeaderText("Elimina risposta");
-    if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
-
-    ResponseService.delete(
-            response.getId(),
-            () -> { review.setResponse(null); refreshResponse(); },
-            null
-    );
+    var root = PopupFactory.resolveRoot(containerRisposta);
+    if (root == null) return;
+    PopupFactory.showConfirmation(root, "Elimina risposta",
+            "Vuoi eliminare questa risposta? L'operazione non può essere annullata.",
+            PopupFactory.Size.COMPACT,
+            () -> ResponseService.delete(
+                    response.getId(),
+                    () -> { review.setResponse(null); refreshResponse(); },
+                    null
+            ));
 }
 
 @FXML

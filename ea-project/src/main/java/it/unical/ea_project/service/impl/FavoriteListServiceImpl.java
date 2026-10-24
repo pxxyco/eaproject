@@ -18,6 +18,8 @@ public class FavoriteListServiceImpl implements FavoriteListService {
 
     private final FavoriteListRepository favoriteListRepository;
     private final UserRepository userRepository;
+    private final it.unical.ea_project.repository.ListSharingRepository sharingRepository;
+    private final it.unical.ea_project.repository.NotificationRepository notificationRepository;
 
     @Override
     @Transactional
@@ -83,6 +85,12 @@ public class FavoriteListServiceImpl implements FavoriteListService {
         }
 
         list.setName(name.trim());
+        if (visibility != FavoriteList.Visibility.SHARED) {
+            sharingRepository.deleteAll(sharingRepository.findByFavoriteListId(id));
+            notificationRepository.invalidateListInvitations(id,
+                    it.unical.ea_project.domain.Notification.NotificationType.LIST_INVITATION,
+                    it.unical.ea_project.domain.Notification.NotificationType.NOTICE);
+        }
         list.setVisibility(visibility);
         return favoriteListRepository.save(list);
     }

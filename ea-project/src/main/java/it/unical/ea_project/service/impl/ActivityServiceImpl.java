@@ -48,16 +48,21 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     @Transactional
     public Activity createActivity(Activity activity, Long creatorId) {
+        it.unical.ea_project.util.ExperienceValidation.activity(activity);
         User creator = userRepository.findById(creatorId)
                 .orElseThrow(() -> new RuntimeException("Utente organizzatore non trovato con ID: " + creatorId));
+        if (creator.getRole() != User.Role.ORGANIZER || creator.getDeletedAt() != null)
+            throw new org.springframework.security.access.AccessDeniedException("Account organizzatore richiesto.");
         activity.setCreatedBy(creator);
+        activity.setAvailableSeats(activity.getMaxSeats());
         return activityRepository.save(activity);
     }
 
     @Override
     @Transactional
     public Activity updateActivity(Long id, Activity details) {
-        Activity existing = getActivityById(id)
+        it.unical.ea_project.util.ExperienceValidation.activity(details);
+        Activity existing = activityRepository.findActiveForUpdate(id)
                 .orElseThrow(() -> new RuntimeException("Attività non trovata con ID: " + id));
 
         existing.setTitle(details.getTitle());
@@ -71,9 +76,11 @@ public class ActivityServiceImpl implements ActivityService {
         existing.setEndDate(details.getEndDate());
         existing.setDurationMinutes(details.getDurationMinutes());
         existing.setPrice(details.getPrice());
+        int available = it.unical.ea_project.util.ExperienceValidation.available(
+                existing.getMaxSeats(), existing.getAvailableSeats(), details.getMaxSeats());
         existing.setMaxSeats(details.getMaxSeats());
-        existing.setAvailableSeats(details.getAvailableSeats());
-        existing.setStatus(details.getStatus());
+        existing.setAvailableSeats(available);
+        if (details.getStatus() != null) existing.setStatus(details.getStatus());
         existing.setNotes(details.getNotes());
 
         return activityRepository.save(existing);
@@ -82,7 +89,8 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     @Transactional
     public void deleteActivity(Long id) {
-        getActivityById(id).ifPresent(activity -> {
+        activityRepository.findActiveForUpdate(id).ifPresent(activity -> {
+            activity.setStatus(Activity.Status.CANCELLED);
             activity.setDeletedAt(LocalDateTime.now());
             activityRepository.save(activity);
         });
@@ -97,7 +105,7 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     @Transactional(readOnly = true)
     public List<Activity> getTopActivities(int page, int size) {
-        return activityRepository.findByDeletedAtIsNullOrderByAverageRatingDesc(PageUtils.of(page, size));
+        return activityRepository.searchWithoutDate("", null, PageUtils.of(page, size));
     }
 
     @Override

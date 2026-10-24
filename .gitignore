@@ -243,3 +243,6 @@ application-local.properties
 application-local.yml
 *.pem
 *.key
+
+# Configurazione locale Docker
+/.env

@@ -7,6 +7,8 @@ import com.google.gson.JsonParser;
 import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.util.ApiService;
 import it.unical.ea_project_javafx.util.SceneNavigator;
+import it.unical.ea_project_javafx.util.NotificationPollingService;
+import it.unical.ea_project_javafx.util.PopupFactory;
 import it.unical.ea_project_javafx.util.TokenStorage;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -16,10 +18,11 @@ import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.Alert;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
@@ -32,15 +35,13 @@ import javafx.scene.shape.Circle;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
 import javafx.stage.Window;
 import javafx.util.Duration;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
 
 public class NavbarController {
 
@@ -60,19 +61,18 @@ public class NavbarController {
     @FXML private Label notificationBadge;
 
     @FXML private Label dashboardNavItem;
-    @FXML private Label travelerBookingsNavItem;
+    @FXML private Label travelerHistoryNavItem;
     @FXML private Label travelerFavoritesNavItem;
     @FXML private Label organizerEventsNavItem;
     @FXML private Label organizerAttendeesNavItem;
     @FXML private MenuItem paymentsMenuItem;
 
-    private Timeline notificationPolling;
+    private NotificationPollingService.Subscription notificationSubscription;
     private Timeline toastTimeout;
     private Popup notificationPopup;
     private Popup toastPopup;
-    private final Set<Long> seenNotificationIds = new HashSet<>();
-    private boolean initialNotificationPoll = true;
     private long avatarLoadRequestId = 0;
+    private boolean notificationTrayLoading;
 
     @FXML
     public void initialize() {
@@ -80,7 +80,7 @@ public class NavbarController {
         bindVisibilityToManaged(userMenuButton);
         bindVisibilityToManaged(notificationBellContainer);
         bindVisibilityToManaged(dashboardNavItem);
-        bindVisibilityToManaged(travelerBookingsNavItem);
+        bindVisibilityToManaged(travelerHistoryNavItem);
         bindVisibilityToManaged(travelerFavoritesNavItem);
         bindVisibilityToManaged(organizerEventsNavItem);
         bindVisibilityToManaged(organizerAttendeesNavItem);
@@ -127,7 +127,7 @@ public class NavbarController {
         }
         if (notificationBellContainer != null) notificationBellContainer.setVisible(isLoggedIn);
         if (dashboardNavItem != null) dashboardNavItem.setVisible(isLoggedIn);
-        if (travelerBookingsNavItem != null) travelerBookingsNavItem.setVisible(isTraveler);
+        if (travelerHistoryNavItem != null) travelerHistoryNavItem.setVisible(isTraveler);
         if (travelerFavoritesNavItem != null) travelerFavoritesNavItem.setVisible(isTraveler);
         if (organizerEventsNavItem != null) organizerEventsNavItem.setVisible(isOrganizer);
         if (organizerAttendeesNavItem != null) organizerAttendeesNavItem.setVisible(isOrganizer);
@@ -190,6 +190,22 @@ public class NavbarController {
     private void showAvatarImage(Image image) {
         boolean loaded = image != null && !image.isError();
         if (userAvatarImageView != null) {
+            if (loaded) {
+                double width = image.getWidth();
+                double height = image.getHeight();
+                if (width > 0 && height > 0) {
+                    double side = Math.min(width, height);
+                    userAvatarImageView.setViewport(new Rectangle2D(
+                            (width - side) / 2.0, (height - side) / 2.0, side, side));
+                } else {
+                    userAvatarImageView.setViewport(null);
+                }
+                userAvatarImageView.setFitWidth(28);
+                userAvatarImageView.setFitHeight(28);
+                userAvatarImageView.setPreserveRatio(false);
+            } else {
+                userAvatarImageView.setViewport(null);
+            }
             userAvatarImageView.setImage(loaded ? image : null);
             userAvatarImageView.setVisible(loaded);
             userAvatarImageView.setManaged(loaded);
@@ -209,44 +225,24 @@ public class NavbarController {
     }
 
     private void startNotificationPolling() {
-        if (notificationPolling != null || !UserSession.getInstance().isLoggedIn()) return;
-        pollNotifications();
-        notificationPolling = new Timeline(new KeyFrame(Duration.seconds(20), event -> pollNotifications()));
-        notificationPolling.setCycleCount(Timeline.INDEFINITE);
-        notificationPolling.play();
+        if (notificationSubscription != null || !UserSession.getInstance().isLoggedIn()
+                || notificationBellContainer == null || notificationBellContainer.getScene() == null) return;
+        notificationSubscription = NotificationPollingService.getInstance().subscribe(snapshot -> {
+            updateNotificationBadge(snapshot.unreadCount());
+            if (snapshot.newNotification() != null) showToast(snapshot.newNotification());
+        });
     }
 
     private void stopNotificationPolling() {
-        if (notificationPolling != null) { notificationPolling.stop(); notificationPolling = null; }
+        if (notificationSubscription != null) {
+            notificationSubscription.close();
+            notificationSubscription = null;
+        }
         if (notificationPopup != null) { notificationPopup.hide(); notificationPopup = null; }
         if (toastPopup != null) { toastPopup.hide(); toastPopup = null; }
         if (toastTimeout != null) { toastTimeout.stop(); toastTimeout = null; }
-    }
-
-    private void pollNotifications() {
-        if (!UserSession.getInstance().isLoggedIn()) return;
-        ApiService.call(NOTIFICATIONS_URL + "/unread", null, ApiService.Method.GET, response -> {
-            try {
-                JsonArray unread = JsonParser.parseString(response.body()).getAsJsonArray();
-                updateNotificationBadge(unread.size());
-                ArrayList<JsonObject> newlyReceived = new ArrayList<>();
-                for (JsonElement element : unread) {
-                    if (!element.isJsonObject()) continue;
-                    JsonObject notification = element.getAsJsonObject();
-                    if (!notification.has("notificationId") || notification.get("notificationId").isJsonNull()) continue;
-                    long id = notification.get("notificationId").getAsLong();
-                    if (initialNotificationPoll) seenNotificationIds.add(id);
-                    else if (seenNotificationIds.add(id)) newlyReceived.add(notification);
-                }
-                if (initialNotificationPoll) initialNotificationPoll = false;
-                else if (!newlyReceived.isEmpty()) showToast(newlyReceived.get(0));
-                if (seenNotificationIds.size() > 600) {
-                    seenNotificationIds.clear();
-                    for (JsonElement element : unread) if (element.isJsonObject() && element.getAsJsonObject().has("notificationId"))
-                        seenNotificationIds.add(element.getAsJsonObject().get("notificationId").getAsLong());
-                }
-            } catch (Exception ignored) { /* Un errore temporaneo non deve interrompere la navbar. */ }
-        }, () -> { /* La navbar resta utilizzabile anche se il server è temporaneamente irraggiungibile. */ }, null);
+        notificationTrayLoading = false;
+        updateNotificationBadge(0);
     }
 
     private void updateNotificationBadge(int count) {
@@ -265,16 +261,26 @@ public class NavbarController {
     }
 
     private void openNotificationTray() {
-        if (notificationBellContainer == null || notificationBellContainer.getScene() == null) return;
-        ApiService.call(NOTIFICATIONS_URL + "/unread", null, ApiService.Method.GET, response -> {
-            try {
-                JsonArray array = JsonParser.parseString(response.body()).getAsJsonArray();
-                showNotificationTray(array);
-            } catch (Exception ex) { showToast("Notifications", "Unable to read notifications."); }
-        }, () -> showToast("Notifications", "Unable to load notifications."), null);
+        if (notificationBellContainer == null || notificationBellContainer.getScene() == null
+                || notificationTrayLoading) return;
+        notificationTrayLoading = true;
+        NotificationPollingService.getInstance().fetchUnreadForTray(
+                notifications -> {
+                    notificationTrayLoading = false;
+                    if (notificationBellContainer != null && notificationBellContainer.getScene() != null) {
+                        showNotificationTray(notifications);
+                    }
+                },
+                message -> {
+                    notificationTrayLoading = false;
+                    if (notificationBellContainer != null && notificationBellContainer.getScene() != null) {
+                        showToast("Notifiche", message);
+                    }
+                });
     }
 
     private void showNotificationTray(JsonArray notifications) {
+        notificationTrayLoading = false;
         if (notificationPopup != null) notificationPopup.hide();
         VBox root = new VBox(10);
         root.getStyleClass().add("notification-tray");
@@ -283,12 +289,12 @@ public class NavbarController {
         root.setMaxHeight(430);
 
         HBox header = new HBox(10); header.setAlignment(Pos.CENTER_LEFT);
-        Label title = new Label("Notifications"); title.getStyleClass().add("notification-tray-title");
+        Label title = new Label("Notifiche"); title.getStyleClass().add("notification-tray-title");
         Region spacer = new Region(); HBox.setHgrow(spacer, Priority.ALWAYS);
-        Button markAll = new Button("Mark all read"); markAll.getStyleClass().add("notification-mark-all");
+        Button markAll = new Button("Segna tutte come lette"); markAll.getStyleClass().add("notification-mark-all");
         markAll.setOnAction(e -> ApiService.call(NOTIFICATIONS_URL + "/read-all", "{}", ApiService.Method.POST,
-                response -> { if (notificationPopup != null) notificationPopup.hide(); notificationPopup = null; pollNotifications(); openNotificationTray(); },
-                () -> showToast("Notifications", "Unable to update notifications."), null));
+                response -> { if (notificationPopup != null) notificationPopup.hide(); notificationPopup = null; openNotificationTray(); },
+                () -> showToast("Notifiche", "Non è stato possibile aggiornare le notifiche."), null));
         header.getChildren().addAll(title, spacer, markAll);
         root.getChildren().addAll(header, new Separator());
 
@@ -299,7 +305,7 @@ public class NavbarController {
             if (element.isJsonObject()) cards.getChildren().add(createNotificationCard(element.getAsJsonObject()));
         }
         if (cards.getChildren().isEmpty()) {
-            Label empty = new Label("No notifications");
+            Label empty = new Label("Nessuna notifica");
             empty.getStyleClass().add("notification-empty");
             empty.setMaxWidth(Double.MAX_VALUE);
             empty.setAlignment(Pos.CENTER);
@@ -321,7 +327,7 @@ public class NavbarController {
         VBox card = new VBox(6); card.getStyleClass().add("notification-card");
         if (notification.has("read") && !notification.get("read").isJsonNull() && notification.get("read").getAsBoolean())
             card.getStyleClass().add("notification-card-read");
-        String titleText = jsonString(notification, "title", "Notification");
+        String titleText = jsonString(notification, "title", "Notifica");
         String messageText = jsonString(notification, "message", "");
         String type = jsonString(notification, "type", "NOTICE");
         long id = notification.has("notificationId") ? notification.get("notificationId").getAsLong() : -1;
@@ -331,22 +337,21 @@ public class NavbarController {
         if ("LIST_INVITATION".equals(type) && id > 0) {
             HBox actions = new HBox(8); actions.setAlignment(Pos.CENTER_RIGHT);
             Button preview = new Button("Visualizza dettagli"); preview.getStyleClass().add("notification-mark-all");
-            Button accept = new Button("Accept"); accept.getStyleClass().add("notification-accept");
-            Button reject = new Button("Decline"); reject.getStyleClass().add("notification-decline");
+            Button accept = new Button("Accetta"); accept.getStyleClass().add("notification-accept");
+            Button reject = new Button("Rifiuta"); reject.getStyleClass().add("notification-decline");
             preview.setOnAction(e -> previewInvitation(id));
             accept.setOnAction(e -> respondToInvitation(id, true));
             reject.setOnAction(e -> respondToInvitation(id, false));
             HBox previewRow = new HBox(preview); previewRow.setAlignment(Pos.CENTER_LEFT);
             actions.getChildren().addAll(accept, reject); card.getChildren().addAll(previewRow, actions);
         } else if (id > 0 && !(notification.has("read") && notification.get("read").getAsBoolean())) {
-            Button markRead = new Button("Mark as read"); markRead.getStyleClass().add("notification-mark-all");
+            Button markRead = new Button("Segna come letta"); markRead.getStyleClass().add("notification-mark-all");
             markRead.setOnAction(e -> ApiService.call(NOTIFICATIONS_URL + "/" + id + "/read", "{}", ApiService.Method.POST,
                     response -> {
                         if (notificationPopup != null) { notificationPopup.hide(); notificationPopup = null; }
-                        pollNotifications();
                         openNotificationTray();
                     },
-                    () -> showToast("Notifications", "Unable to mark as read."), null));
+                    () -> showToast("Notifiche", "Non è stato possibile segnare la notifica come letta."), null));
             HBox row = new HBox(markRead); row.setAlignment(Pos.CENTER_RIGHT); card.getChildren().add(row);
         }
         return card;
@@ -401,18 +406,35 @@ public class NavbarController {
                             }
                             details.append('\n');
                         }
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setTitle("Dettagli invito");
-                        alert.setHeaderText("Anteprima della lista condivisa");
-                        alert.setContentText(details.toString());
-                        alert.getDialogPane().setPrefWidth(600);
-                        alert.getDialogPane().setPrefHeight(520);
-                        alert.showAndWait();
+                        VBox panel = new VBox(14);
+                        panel.setMaxWidth(760);
+                        panel.setMaxHeight(700);
+                        Label heading = new Label("Anteprima della lista condivisa");
+                        heading.getStyleClass().add("app-modal-title");
+                        Label subtitle = new Label(jsonString(list, "listName", "Lista condivisa"));
+                        subtitle.getStyleClass().add("app-modal-subtitle");
+                        TextArea previewText = new TextArea(details.toString());
+                        previewText.setEditable(false);
+                        previewText.setWrapText(true);
+                        previewText.setFocusTraversable(false);
+                        previewText.setPrefRowCount(18);
+                        previewText.setMaxHeight(Double.MAX_VALUE);
+                        VBox.setVgrow(previewText, Priority.ALWAYS);
+                        Button close = new Button("Chiudi");
+                        close.getStyleClass().add("btn-secondary");
+                        HBox actions = new HBox(close);
+                        actions.setAlignment(Pos.CENTER_RIGHT);
+                        panel.getChildren().addAll(heading, subtitle, previewText, actions);
+                        StackPane popupRoot = PopupFactory.resolveRoot(notificationBellContainer);
+                        if (popupRoot != null) {
+                            PopupFactory.Handle handle = PopupFactory.show(popupRoot, panel, PopupFactory.Size.LARGE);
+                            close.setOnAction(event -> handle.close());
+                        }
                     } catch (Exception ex) {
-                        showToast("List invitation", "Unable to read the list details.");
+                        showToast("Invito alla lista", "Non è stato possibile leggere i dettagli della lista.");
                     }
                 },
-                () -> showToast("List invitation", "Unable to load the list preview."), null);
+                () -> showToast("Invito alla lista", "Non è stato possibile caricare l’anteprima della lista."), null);
     }
 
     private void respondToInvitation(long id, boolean accept) {
@@ -420,15 +442,14 @@ public class NavbarController {
         ApiService.call(NOTIFICATIONS_URL + "/" + id + "/" + action, "{}", ApiService.Method.POST,
                 response -> {
                     if (notificationPopup != null) { notificationPopup.hide(); notificationPopup = null; }
-                    pollNotifications();
-                    showToast("List invitation", accept ? "Invitation accepted." : "Invitation declined.");
+                    showToast("Invito alla lista", accept ? "Invito accettato." : "Invito rifiutato.");
                     openNotificationTray();
                 },
-                () -> showToast("List invitation", accept ? "Unable to accept the invitation." : "Unable to decline the invitation."), null);
+                () -> showToast("Invito alla lista", accept ? "Non è stato possibile accettare l’invito." : "Non è stato possibile rifiutare l’invito."), null);
     }
 
     private void showToast(JsonObject notification) {
-        showToast(jsonString(notification, "title", "New notification"), jsonString(notification, "message", "You have a new notification."));
+        showToast(jsonString(notification, "title", "Nuova notifica"), jsonString(notification, "message", "Hai ricevuto una nuova notifica."));
     }
 
     private void showToast(String titleText, String messageText) {
@@ -497,7 +518,7 @@ public class NavbarController {
     @FXML void handleHome(MouseEvent event) { SceneNavigator.getInstance().loadScene(MAIN_VIEW_FXML, null); }
     @FXML void handleLogin(MouseEvent event) { SceneNavigator.getInstance().loadScene(LOGIN_FXML, null); }
     @FXML private void handleDashboard(MouseEvent event) { SceneNavigator.getInstance().loadScene(DASHBOARD_VIEW_FXML, null); }
-    @FXML private void handleBookings(MouseEvent event) { SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/traveler/bookings.fxml", null); }
+    @FXML private void handleBookingHistory(MouseEvent event) { SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/traveler/booking-history.fxml", null); }
     @FXML private void handleFavorites(MouseEvent event) { SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/traveler/favorites.fxml", null); }
     @FXML private void handleOrganizerEvents(MouseEvent event) { SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/organizer/events.fxml", null); }
     @FXML private void handleOrganizerAttendees(MouseEvent event) { SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/organizer/attendees.fxml", null); }
@@ -510,6 +531,7 @@ public class NavbarController {
     void handleLogout(ActionEvent event) {
         stopNotificationPolling();
         UserSession.getInstance().clear();
+        NotificationPollingService.getInstance().clearSessionState();
         TokenStorage.clear();
         SceneNavigator.getInstance().loadScene(MAIN_VIEW_FXML, null);
     }

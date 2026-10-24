@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import it.unical.ea_project_javafx.util.ApiService;
 import it.unical.ea_project_javafx.util.BackgroundHelper;
+import it.unical.ea_project_javafx.util.PopupFactory;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -14,8 +15,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -33,7 +34,6 @@ public class FavoritesController {
     
     @FXML private ComboBox<String> newListVisibilityCombo;
     
-    @FXML private FlowPane favoritesCardsContainer;
     
     @FXML private Label statusMessageLabel;
     @FXML private Label selectedListNameLabel;
@@ -62,9 +62,6 @@ public class FavoritesController {
 
     @FXML private Button shareListButton;
     @FXML private javafx.scene.layout.StackPane sharingPopup;
-    @FXML private StackPane deleteConfirmationPopup;
-    @FXML private Label deletePopupTitleLabel;
-    @FXML private Button confirmDeleteButton;
     @FXML private ListSharingPopupController sharingPopupController;
     @FXML private Button addTripButton;
     @FXML private Button removeTripButton;
@@ -73,6 +70,9 @@ public class FavoritesController {
 
     private static final Pattern ID_PATTERN = Pattern.compile("#(\\d+)\\s*$");
     private Long selectedListId;
+    private VBox sharingPopupPanel;
+    private PopupFactory.Handle activeSharingPopup;
+    private PopupFactory.Handle activeDeletePopup;
 
     @FXML
     public void initialize() {
@@ -106,6 +106,7 @@ public class FavoritesController {
                 saveListChangesButton.setDisable(true);
                 if (deleteListButton != null) deleteListButton.setDisable(true);
                 shareListButton.setVisible(false);
+                shareListButton.setManaged(false);
                 savedTripsListView.getItems().clear();
                 savedActivitiesListView.getItems().clear();
                 setContentControlsEnabled(false);
@@ -119,7 +120,9 @@ public class FavoritesController {
             editListVisibilityCombo.setValue(visibility);
             saveListChangesButton.setDisable(false);
             if (deleteListButton != null) deleteListButton.setDisable(false);
-            shareListButton.setVisible("SHARED".equals(visibility));
+            boolean canShare = "SHARED".equals(visibility);
+            shareListButton.setVisible(canShare);
+            shareListButton.setManaged(canShare);
             setContentControlsEnabled(true);
             loadSavedContents();
 
@@ -129,8 +132,12 @@ public class FavoritesController {
         if (deleteListButton != null) deleteListButton.setDisable(true);
         sharingPopup.setVisible(false);
         sharingPopup.setManaged(false);
-        deleteConfirmationPopup.setVisible(false);
-        deleteConfirmationPopup.setManaged(false);
+        sharingPopupPanel = sharingPopup.getChildrenUnmodifiable().stream()
+                .filter(VBox.class::isInstance)
+                .map(VBox.class::cast)
+                .filter(node -> node.getStyleClass().contains("sharing-popup-card"))
+                .findFirst()
+                .orElse(null);
         sharingPopupController.setCloseAction(this::closeSharingPopup);
         loadLists();
         loadSharedLists();
@@ -183,6 +190,7 @@ public class FavoritesController {
                             selectedListNameLabel.setText("Nessuna lista");
                             selectedListVisibilityLabel.setText("");
                             shareListButton.setVisible(false);
+                            shareListButton.setManaged(false);
                             savedTripsListView.getItems().clear();
                             savedActivitiesListView.getItems().clear();
                             setContentControlsEnabled(false);
@@ -387,16 +395,30 @@ public class FavoritesController {
             showError("Seleziona prima una lista da eliminare.");
             return;
         }
-        deletePopupTitleLabel.setText("Vuoi eliminare la lista \"" + selectedListNameLabel.getText() + "\"?");
-        deleteConfirmationPopup.setManaged(true);
-        deleteConfirmationPopup.setVisible(true);
-        deleteConfirmationPopup.toFront();
+        StackPane root = PopupFactory.resolveRoot(deleteListButton);
+        if (root == null) {
+            showError("Impossibile aprire la conferma. Riprova dalla schermata Preferiti.");
+            return;
+        }
+        closeDeletePopup();
+        activeDeletePopup = PopupFactory.showConfirmation(root,
+                "Elimina lista",
+                "Vuoi eliminare la lista «" + selectedListNameLabel.getText() +
+                        "»? La lista e il suo contenuto non saranno più disponibili e l'operazione non può essere annullata.",
+                PopupFactory.Size.COMPACT,
+                this::confirmDeleteList);
     }
 
     @FXML
     private void cancelDeleteList() {
-        deleteConfirmationPopup.setVisible(false);
-        deleteConfirmationPopup.setManaged(false);
+        closeDeletePopup();
+    }
+
+    private void closeDeletePopup() {
+        if (activeDeletePopup != null) {
+            activeDeletePopup.close();
+            activeDeletePopup = null;
+        }
     }
 
     @FXML
@@ -408,20 +430,18 @@ public class FavoritesController {
         }
         final Long idToDelete = selectedListId;
         final String listName = selectedListNameLabel.getText();
-        confirmDeleteButton.setDisable(true);
+        closeDeletePopup();
         deleteListButton.setDisable(true);
         saveListChangesButton.setDisable(true);
         ApiService.delete(ApiService.BASE_URL + "/api/favorite-lists/" + idToDelete,
                 response -> Platform.runLater(() -> {
                     cancelDeleteList();
-                    confirmDeleteButton.setDisable(false);
                     selectedListId = null;
                     showSuccess("La lista \"" + listName + "\" è stata eliminata.");
                     loadLists();
                     loadSharedLists();
                 }),
                 () -> Platform.runLater(() -> {
-                    confirmDeleteButton.setDisable(false);
                     deleteListButton.setDisable(selectedListId == null);
                     saveListChangesButton.setDisable(selectedListId == null);
                     showError("Impossibile eliminare la lista. Verifica di esserne il proprietario e riprova.");
@@ -644,14 +664,38 @@ public class FavoritesController {
             showError("Seleziona prima una lista condivisa.");
             return;
         }
+        if (sharingPopupPanel == null) {
+            showError("La finestra delle condivisioni non è disponibile. Riapri la schermata Preferiti.");
+            return;
+        }
+        StackPane root = PopupFactory.resolveRoot(shareListButton);
+        if (root == null) {
+            showError("Impossibile aprire le condivisioni. Riprova dalla schermata Preferiti.");
+            return;
+        }
+        closeSharingPopup();
+        sharingPopup.setManaged(false);
+        sharingPopup.setVisible(false);
+        if (sharingPopupPanel.getParent() instanceof StackPane oldParent) {
+            oldParent.getChildren().remove(sharingPopupPanel);
+        }
+        var sharingCssResource = getClass().getResource("/it/unical/ea_project_javafx/css/traveler/list-sharing-popup.css");
+        if (sharingCssResource == null) {
+            showError("Non è stato possibile caricare lo stile della finestra di condivisione.");
+            return;
+        }
+        String sharingCss = sharingCssResource.toExternalForm();
+        if (!sharingPopupPanel.getStylesheets().contains(sharingCss)) sharingPopupPanel.getStylesheets().add(sharingCss);
+        activeSharingPopup = PopupFactory.show(root, sharingPopupPanel, PopupFactory.Size.LARGE);
         sharingPopupController.open(selectedListId, selectedListNameLabel.getText());
-        sharingPopup.setManaged(true);
-        sharingPopup.setVisible(true);
-        sharingPopup.toFront();
     }
 
     @FXML
     private void closeSharingPopup() {
+        if (activeSharingPopup != null) {
+            activeSharingPopup.close();
+            activeSharingPopup = null;
+        }
         sharingPopup.setVisible(false);
         sharingPopup.setManaged(false);
     }

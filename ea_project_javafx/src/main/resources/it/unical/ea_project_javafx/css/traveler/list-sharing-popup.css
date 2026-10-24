@@ -1,235 +1,47 @@
-/* Popup condivisioni - palette coordinata con la UI traveler: blu profondo,
-   azzurro e superfici glass. Le regole sono circoscritte al popup. */
-
-.sharing-popup-overlay {
-    -fx-background-color: transparent;
-}
-
-.sharing-popup-backdrop {
-    -fx-background-color: rgba(10, 25, 48, 0.76);
-}
-
+/* Popup di condivisione: stessa palette grafite/avorio del tema globale. */
+.sharing-popup-overlay { -fx-background-color: transparent; -fx-alignment: center; }
+.sharing-popup-backdrop { -fx-background-color: rgba(8,8,8,0.52); }
 .sharing-popup-card {
-    -fx-background-color: linear-gradient(to bottom right, #ffffff 0%, #f3f8ff 100%);
-    -fx-background-radius: 22px;
-    -fx-border-radius: 22px;
-    -fx-border-color: #c8ddf5;
-    -fx-border-width: 1.2px;
-    -fx-effect: dropshadow(gaussian, rgba(5, 25, 55, 0.38), 26, 0.18, 0, 9);
+    -fx-background-color: linear-gradient(to bottom right, rgba(37,37,36,0.98), rgba(24,24,23,0.99));
+    -fx-background-radius: 20px; -fx-border-radius: 20px; -fx-border-color: rgba(231,229,228,0.22);
+    -fx-border-width: 1px; -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.45), 24, 0.18, 0, 8);
 }
-
-.sharing-popup-title {
-    -fx-font-family: "System";
-    -fx-font-size: 22px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #12345a;
-}
-
-.sharing-popup-subtitle {
-    -fx-font-size: 13px;
-    -fx-text-fill: #55718f;
-}
-
-.sharing-popup-hint {
-    -fx-font-size: 12px;
-    -fx-text-fill: #526b86;
-    -fx-line-spacing: 2px;
-}
-
+.sharing-popup-title, .sharing-popup-card .section-header { -fx-text-fill: #fafaf9; -fx-font-size: 15px; -fx-font-weight: bold; }
+.sharing-popup-subtitle, .sharing-popup-hint { -fx-text-fill: rgba(231,229,228,0.70); -fx-font-size: 11px; -fx-wrap-text: true; }
 .sharing-popup-close {
-    -fx-background-color: #e8f1fb;
-    -fx-text-fill: #244b73;
-    -fx-font-size: 15px;
-    -fx-font-weight: bold;
-    -fx-background-radius: 18px;
-    -fx-border-radius: 18px;
-    -fx-border-color: #c5d9ef;
-    -fx-cursor: hand;
-    -fx-min-width: 36px;
-    -fx-min-height: 36px;
-    -fx-padding: 5px 10px;
+    -fx-background-color: rgba(231,229,228,0.08); -fx-text-fill: #f5f5f4;
+    -fx-border-color: rgba(231,229,228,0.20); -fx-border-radius: 18px; -fx-background-radius: 18px;
+    -fx-cursor: hand; -fx-min-width: 36px; -fx-min-height: 36px; -fx-pref-width: 36px; -fx-pref-height: 36px;
+    -fx-font-size: 16px; -fx-padding: 5px 10px;
 }
-
-.sharing-popup-close:hover {
-    -fx-background-color: #d5e8fb;
+.sharing-popup-close:hover { -fx-background-color: rgba(231,229,228,0.18); }
+.sharing-popup-card .label { -fx-text-fill: #f5f5f4; }
+.sharing-popup-card .separator .line { -fx-border-color: rgba(231,229,228,0.16); -fx-border-width: 1px 0 0 0; }
+.sharing-popup-card .text-field, .sharing-popup-card .combo-box, .sharing-popup-card .combo-box-base {
+    -fx-background-color: rgba(18,18,17,0.72); -fx-background-radius: 9px; -fx-border-color: rgba(231,229,228,0.22);
+    -fx-border-radius: 9px; -fx-border-width: 1px; -fx-text-fill: #f5f5f4;
+    -fx-prompt-text-fill: rgba(231,229,228,0.45); -fx-font-size: 12px; -fx-min-height: 36px;
 }
-
-/* Titoli di sezione: blu coordinato con la palette principale. */
-.sharing-popup-card .section-header {
-    -fx-text-fill: #174a7e;
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
+.sharing-popup-card .text-field:focused, .sharing-popup-card .combo-box:focused,
+.sharing-popup-card .combo-box-base:focused { -fx-border-color: rgba(231,229,228,0.56); -fx-focus-color: transparent; -fx-faint-focus-color: transparent; }
+.sharing-popup-card .combo-box .list-cell { -fx-text-fill: #f5f5f4; -fx-background-color: transparent; }
+.sharing-popup-card .sharing-users-list, .sharing-popup-card .list-view {
+    -fx-background-color: rgba(18,18,17,0.40); -fx-control-inner-background: rgba(18,18,17,0.40);
+    -fx-control-inner-background-alt: rgba(231,229,228,0.03); -fx-background-radius: 10px;
+    -fx-border-color: rgba(231,229,228,0.18); -fx-border-radius: 10px; -fx-border-width: 1px;
+    -fx-padding: 4px; -fx-fixed-cell-size: 38px;
 }
-
-.sharing-popup-card .label {
-    -fx-text-fill: #263f59;
-}
-
-.sharing-popup-card .sharing-popup-title {
-    -fx-text-fill: #12345a;
-}
-
-.sharing-popup-card .sharing-popup-subtitle,
-.sharing-popup-card .sharing-popup-hint {
-    -fx-text-fill: #526b86;
-}
-
-.sharing-popup-card .separator .line {
-    -fx-border-color: #d9e6f4;
-    -fx-border-width: 1 0 0 0;
-}
-
-/* Campi input e menu: contrasto alto, bordo blu e focus azzurro. */
-.sharing-popup-card .text-field,
-.sharing-popup-card .combo-box,
-.sharing-popup-card .combo-box-base {
-    -fx-background-color: #ffffff;
-    -fx-background-radius: 9px;
-    -fx-border-color: #c4d6e9;
-    -fx-border-radius: 9px;
-    -fx-border-width: 1px;
-    -fx-text-fill: #203a54;
-    -fx-prompt-text-fill: #7d91a7;
-    -fx-font-size: 13px;
-    -fx-min-height: 36px;
-}
-
-.sharing-popup-card .text-field:focused,
-.sharing-popup-card .combo-box:focused,
-.sharing-popup-card .combo-box-base:focused {
-    -fx-border-color: #3284c7;
-    -fx-effect: dropshadow(gaussian, rgba(50, 132, 199, 0.18), 7, 0.1, 0, 0);
-}
-
-.sharing-popup-card .combo-box .list-cell {
-    -fx-text-fill: #203a54;
-    -fx-background-color: transparent;
-}
-
-.sharing-popup-card .combo-box-popup .list-view {
-    -fx-background-color: #ffffff;
-    -fx-border-color: #c4d6e9;
-}
-
-.sharing-popup-card .combo-box-popup .list-cell {
-    -fx-background-color: #ffffff;
-    -fx-text-fill: #203a54;
-    -fx-padding: 8px 10px;
-}
-
-.sharing-popup-card .combo-box-popup .list-cell:hover,
-.sharing-popup-card .combo-box-popup .list-cell:filled:selected {
-    -fx-background-color: #e3f1ff;
-    -fx-text-fill: #123e68;
-}
-
-/* Pulsanti del popup, indipendenti dagli stili globali per evitare conflitti. */
-.sharing-popup-card .btn-primary {
-    -fx-background-color: linear-gradient(to right, #1769aa, #2489c9);
-    -fx-text-fill: #ffffff;
-    -fx-font-size: 12.5px;
-    -fx-font-weight: bold;
-    -fx-background-radius: 9px;
-    -fx-border-radius: 9px;
-    -fx-padding: 10px 16px;
-    -fx-cursor: hand;
-}
-
-.sharing-popup-card .btn-primary:hover {
-    -fx-background-color: linear-gradient(to right, #12588f, #1976b5);
-    -fx-effect: dropshadow(gaussian, rgba(23, 105, 170, 0.25), 8, 0.1, 0, 2);
-}
-
-.sharing-popup-card .btn-secondary {
-    -fx-background-color: #e7f1fb;
-    -fx-text-fill: #1b5688;
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
-    -fx-background-radius: 9px;
-    -fx-border-radius: 9px;
-    -fx-border-color: #c5d9ed;
-    -fx-padding: 9px 13px;
-    -fx-cursor: hand;
-}
-
-.sharing-popup-card .btn-secondary:hover {
-    -fx-background-color: #d5e9fb;
-    -fx-border-color: #9dc6e9;
-}
-
-.sharing-popup-card .button:disabled {
-    -fx-opacity: 0.48;
-    -fx-cursor: default;
-}
-
-/* Elenco utenti: righe chiare, selezione ben visibile e testo leggibile. */
-.sharing-popup-card .sharing-users-list,
-.sharing-popup-card .list-view {
-    -fx-background-color: #ffffff;
-    -fx-background-radius: 10px;
-    -fx-border-color: #d1e0ef;
-    -fx-border-radius: 10px;
-    -fx-border-width: 1px;
-    -fx-padding: 4px;
-    -fx-control-inner-background: #ffffff;
-    -fx-control-inner-background-alt: #f4f8fd;
-    -fx-fixed-cell-size: 38px;
-}
-
-.sharing-popup-card .list-view .list-cell {
-    -fx-background-color: transparent;
-    -fx-text-fill: #263f59;
-    -fx-font-size: 12.5px;
-    -fx-padding: 8px 10px;
-    -fx-background-radius: 6px;
-}
-
-.sharing-popup-card .list-view .list-cell:filled:hover {
-    -fx-background-color: #edf6ff;
-}
-
-.sharing-popup-card .list-view .list-cell:filled:selected {
-    -fx-background-color: #d7ebfc;
-    -fx-text-fill: #123e68;
-    -fx-font-weight: bold;
-}
-
-.sharing-popup-card .list-view .placeholder .label {
-    -fx-text-fill: #71869b;
-}
-
-.sharing-status-success {
-    -fx-text-fill: #18704a;
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
-}
-
-.sharing-status-error {
-    -fx-text-fill: #b42332;
-    -fx-font-size: 12px;
-    -fx-font-weight: bold;
-}
-
-
-/* Popup di conferma eliminazione lista, integrato nella schermata Preferiti. */
-.delete-confirmation-card {
-    -fx-max-width: 460px;
-}
-
-.delete-confirm-button {
-    -fx-background-color: linear-gradient(to bottom, #d94343, #b91c1c);
-    -fx-text-fill: white;
-    -fx-font-weight: bold;
-    -fx-background-radius: 9px;
-    -fx-border-radius: 9px;
-    -fx-padding: 10px 16px;
-    -fx-cursor: hand;
-}
-
-.delete-confirm-button:hover {
-    -fx-background-color: linear-gradient(to bottom, #c92f2f, #991b1b);
-}
-
-.delete-confirm-button:disabled {
-    -fx-opacity: 0.6;
-}
+.sharing-popup-card .list-view .list-cell { -fx-background-color: transparent; -fx-text-fill: #f5f5f4; -fx-font-size: 12px; -fx-padding: 8px 10px; }
+.sharing-popup-card .list-view .list-cell:filled:hover { -fx-background-color: rgba(231,229,228,0.08); }
+.sharing-popup-card .list-view .list-cell:filled:selected { -fx-background-color: rgba(231,229,228,0.16); -fx-text-fill: #ffffff; -fx-font-weight: bold; }
+.sharing-popup-card .list-view .placeholder .label { -fx-text-fill: rgba(231,229,228,0.56); }
+.sharing-popup-card .btn-primary { -fx-background-color: #e7e5e4; -fx-text-fill: #1c1917; -fx-font-weight: bold; -fx-background-radius: 9px; -fx-padding: 9px 14px; }
+.sharing-popup-card .btn-primary:hover { -fx-background-color: #fafaf9; }
+.sharing-popup-card .btn-secondary { -fx-background-color: rgba(231,229,228,0.09); -fx-text-fill: #f5f5f4; -fx-border-color: rgba(231,229,228,0.20); -fx-border-radius: 9px; -fx-background-radius: 9px; -fx-padding: 8px 12px; }
+.sharing-popup-card .btn-secondary:hover { -fx-background-color: rgba(231,229,228,0.17); }
+.sharing-popup-card .button:disabled { -fx-opacity: 0.48; }
+.sharing-status-success { -fx-text-fill: #e7e5e4; -fx-font-size: 12px; -fx-font-weight: bold; }
+.sharing-status-error { -fx-text-fill: #fecaca; -fx-font-size: 12px; -fx-font-weight: bold; }
+.delete-confirm-button { -fx-background-color: rgba(120,45,45,0.40); -fx-text-fill: #fecaca; -fx-border-color: rgba(248,113,113,0.30); -fx-border-radius: 9px; -fx-background-radius: 9px; -fx-padding: 10px 16px; -fx-cursor: hand; }
+.delete-confirm-button:hover { -fx-background-color: rgba(120,45,45,0.58); }
+.delete-confirm-button:disabled { -fx-opacity: 0.6; }

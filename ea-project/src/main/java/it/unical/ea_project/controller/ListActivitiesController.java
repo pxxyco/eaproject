@@ -82,12 +82,14 @@ public class ListActivitiesController {
     private boolean canView(Long listId, Long userId) {
         FavoriteList list = activeList(listId);
         return list != null && (list.getUser().getId().equals(userId)
-                || sharings.existsByFavoriteList_IdAndUser_Id(listId, userId));
+                || list.getVisibility() == FavoriteList.Visibility.SHARED
+                && sharings.existsByFavoriteList_IdAndUser_Id(listId, userId));
     }
     private boolean canEdit(Long listId, Long userId) {
         FavoriteList list = activeList(listId);
         if (list == null) return false;
         if (list.getUser().getId().equals(userId)) return true;
+        if (list.getVisibility() != FavoriteList.Visibility.SHARED) return false;
         return sharings.findByFavoriteListId(listId).stream().anyMatch(s ->
                 s.getUser().getId().equals(userId) && s.getPermission() == ListSharing.SharingPermission.EDIT);
     }

@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 
-<BorderPane styleClass="navbar" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.common.NavbarController">
+<BorderPane styleClass="navbar" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.common.NavbarController">
     <stylesheets><URL value="@../../css/common/notifications.css" /></stylesheets>
     <left>
         <HBox alignment="CENTER_LEFT" spacing="16.0">
@@ -31,7 +31,7 @@
                         <Label fx:id="dashboardNavItem" onMouseClicked="#handleDashboard" styleClass="nav-item" text="Dashboard" />
 
                         <!-- Voci Traveler -->
-                        <Label fx:id="travelerBookingsNavItem" onMouseClicked="#handleBookings" styleClass="nav-item" text="Prenotazioni" />
+                        <Label fx:id="travelerHistoryNavItem" onMouseClicked="#handleBookingHistory" styleClass="nav-item" text="Storico" />
                         <Label fx:id="travelerFavoritesNavItem" onMouseClicked="#handleFavorites" styleClass="nav-item" text="Preferiti" />
 
                         <!-- Voci Organizer -->
@@ -48,7 +48,7 @@
             <children>
                 <Label fx:id="loginLabel" onMouseClicked="#handleLogin" styleClass="btn-nav-login" text="Login" />
 
-                <StackPane fx:id="notificationBellContainer" onMouseClicked="#handleNotifications" styleClass="notification-bell-container" visible="false" managed="false" accessibleText="Notifiche" focusTraversable="true">
+                <StackPane fx:id="notificationBellContainer" onMouseClicked="#handleNotifications" styleClass="notification-bell-container" prefWidth="42.0" prefHeight="42.0" minWidth="42.0" minHeight="42.0" maxWidth="42.0" maxHeight="42.0" visible="false" managed="false" accessibleText="Notifiche" focusTraversable="true">
                     <Label text="🔔" styleClass="notification-bell-icon" />
                     <Label fx:id="notificationBadge" text="" styleClass="notification-badge" visible="false" managed="false" />
                 </StackPane>

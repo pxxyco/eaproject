@@ -76,11 +76,11 @@ public class UserServiceImpl implements UserService {
         String username = user.getUsername() == null ? "" : user.getUsername().trim();
         String email = user.getEmail() == null ? "" : user.getEmail().trim();
 
-        if (username.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Username obbligatorio.");
+        if (!USERNAME_PATTERN.matcher(username).matches()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lo username deve contenere 3–30 caratteri validi.");
         }
-        if (email.isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email obbligatoria.");
+        if (email.length() > 254 || !EMAIL_PATTERN.matcher(email).matches()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Inserisci un indirizzo email valido.");
         }
 
         user.setUsername(username);

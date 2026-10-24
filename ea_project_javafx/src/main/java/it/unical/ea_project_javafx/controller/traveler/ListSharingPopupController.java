@@ -13,11 +13,18 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ListCell;
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 /** Gestisce il popup in-scene per aggiungere, modificare e revocare condivisioni. */
 public class ListSharingPopupController {
@@ -26,25 +33,66 @@ public class ListSharingPopupController {
     @FXML private Label popupTitleLabel;
     @FXML private Label sharingStatusLabel;
     @FXML private ListView<String> sharingListView;
-    @FXML private TextField userIdField;
+    @FXML private TextField userIdentifierField;
+    @FXML private ListView<UserSearchRow> userSearchResultsListView;
     @FXML private ComboBox<String> permissionCombo;
+    @FXML private ComboBox<String> newPermissionCombo;
     @FXML private Button updatePermissionButton;
     @FXML private Button revokeAccessButton;
 
     private Long listId;
     private final Map<Long, JsonObject> sharingByUserId = new LinkedHashMap<>();
+    private final Map<String, Long> sharingIdByDisplay = new LinkedHashMap<>();
+    private UserSearchRow selectedRecipient;
+    private boolean selectingSuggestion;
+    private long searchRequestVersion;
+    private PauseTransition searchDebounce;
     private Runnable closeAction = () -> {};
 
     @FXML
     private void initialize() {
         permissionCombo.setItems(FXCollections.observableArrayList("VIEW", "EDIT"));
         permissionCombo.getSelectionModel().select("VIEW");
+        if (newPermissionCombo != null) {
+            newPermissionCombo.setItems(FXCollections.observableArrayList("VIEW", "EDIT"));
+            newPermissionCombo.getSelectionModel().select("VIEW");
+        }
+        if (userSearchResultsListView != null) {
+            userSearchResultsListView.setItems(FXCollections.observableArrayList());
+            userSearchResultsListView.setPlaceholder(new Label("Digita almeno 2 caratteri per cercare per username o email."));
+            userSearchResultsListView.setCellFactory(list -> new ListCell<>() {
+                @Override protected void updateItem(UserSearchRow row, boolean empty) {
+                    super.updateItem(row, empty);
+                    setText(empty || row == null ? null : row.displayText());
+                }
+            });
+            userSearchResultsListView.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, value) -> {
+                if (value == null) return;
+                selectedRecipient = value;
+                selectingSuggestion = true;
+                userIdentifierField.setText(value.username());
+                selectingSuggestion = false;
+                if (searchDebounce != null) searchDebounce.stop();
+                setStatus("Destinatario selezionato: @" + value.username() + ".", false);
+            });
+        }
+        searchDebounce = new PauseTransition(Duration.millis(320));
+        searchDebounce.setOnFinished(event -> searchUsers(userIdentifierField.getText()));
+        userIdentifierField.textProperty().addListener((obs, oldValue, newValue) -> {
+            if (selectingSuggestion) return;
+            selectedRecipient = null;
+            searchRequestVersion++;
+            if (searchDebounce != null) searchDebounce.stop();
+            if (userSearchResultsListView != null) userSearchResultsListView.getItems().clear();
+            if (newValue != null && newValue.trim().length() >= 2 && listId != null) searchDebounce.playFromStart();
+        });
         sharingListView.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, value) -> {
             boolean selected = value != null;
             updatePermissionButton.setDisable(!selected);
             revokeAccessButton.setDisable(!selected);
             if (selected) {
-                Long userId = extractId(value);
+                Long userId = sharingIdByDisplay.get(value);
+                if (userId == null) userId = extractId(value);
                 JsonObject sharing = userId == null ? null : sharingByUserId.get(userId);
                 if (sharing != null) permissionCombo.setValue(stringValue(sharing, "permission", "VIEW"));
             }
@@ -58,8 +106,13 @@ public class ListSharingPopupController {
     public void open(Long listId, String listName) {
         this.listId = listId;
         popupTitleLabel.setText("Condivisioni · " + (listName == null ? "Lista" : listName));
-        userIdField.clear();
+        selectedRecipient = null;
+        searchRequestVersion++;
+        if (searchDebounce != null) searchDebounce.stop();
+        userIdentifierField.clear();
+        if (userSearchResultsListView != null) userSearchResultsListView.getItems().clear();
         permissionCombo.setValue("VIEW");
+        if (newPermissionCombo != null) newPermissionCombo.setValue("VIEW");
         sharingStatusLabel.setText("Caricamento utenti autorizzati…");
         loadSharings();
     }
@@ -69,32 +122,69 @@ public class ListSharingPopupController {
     @FXML
     private void handleShare() {
         if (listId == null) return;
-        String rawId = userIdField.getText();
-        long userId;
-        try {
-            userId = Long.parseLong(rawId == null ? "" : rawId.trim());
-            if (userId <= 0) throw new NumberFormatException();
-        } catch (NumberFormatException ex) {
-            setStatus("Inserisci un ID utente numerico positivo.", true);
+        String identifier = selectedRecipient != null ? selectedRecipient.username()
+                : (userIdentifierField.getText() == null ? "" : userIdentifierField.getText().trim());
+        if (identifier.isBlank() || identifier.length() < 2) {
+            setStatus("Inserisci uno username o un indirizzo email valido; puoi selezionare una corrispondenza dalla ricerca.", true);
             return;
         }
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("listId", listId);
-        payload.put("userId", userId);
-        payload.put("permission", permissionCombo.getValue() == null ? "VIEW" : permissionCombo.getValue());
-        setStatus("Condivisione in corso…", false);
+        payload.put("identifier", identifier);
+        payload.put("permission", newPermissionCombo == null || newPermissionCombo.getValue() == null ? "VIEW" : newPermissionCombo.getValue());
+        setStatus("Invio dell'invito in corso…", false);
         ApiService.call(ApiService.BASE_URL + "/api/list-sharings", ApiService.toJson(payload), ApiService.Method.POST,
                 response -> Platform.runLater(() -> {
-                    userIdField.clear();
-                    setStatus("Lista condivisa con l'utente #" + userId + ".", false);
+                    userIdentifierField.clear();
+                    selectedRecipient = null;
+                    if (userSearchResultsListView != null) userSearchResultsListView.getItems().clear();
+                    setStatus("Invito inviato. L'utente dovrà accettare la notifica per accedere alla lista.", false);
                     loadSharings();
                 }),
-                () -> Platform.runLater(() -> setStatus("Condivisione non riuscita. Verifica l'ID e che l'utente non abbia già accesso.", true)), null);
+                () -> Platform.runLater(() -> setStatus("Invito non riuscito. Verifica che username/email sia corretto e che non esista già un invito pendente.", true)), null);
+    }
+
+    private void searchUsers(String rawQuery) {
+        String query = rawQuery == null ? "" : rawQuery.trim();
+        if (listId == null || query.length() < 2 || userSearchResultsListView == null) return;
+        long requestVersion = searchRequestVersion;
+        Long requestedListId = listId;
+        String encoded = URLEncoder.encode(query, StandardCharsets.UTF_8);
+        userSearchResultsListView.setPlaceholder(new Label("Ricerca utenti…"));
+        ApiService.get(ApiService.BASE_URL + "/api/list-sharings/search-users?listId=" + requestedListId + "&q=" + encoded,
+                response -> Platform.runLater(() -> {
+                    if (requestVersion != searchRequestVersion || !requestedListId.equals(listId)
+                            || !query.equalsIgnoreCase(userIdentifierField.getText() == null ? "" : userIdentifierField.getText().trim())) return;
+                    try {
+                        JsonArray array = JsonParser.parseString(response.body()).getAsJsonArray();
+                        List<UserSearchRow> rows = new ArrayList<>();
+                        for (JsonElement element : array) {
+                            if (!element.isJsonObject()) continue;
+                            JsonObject user = element.getAsJsonObject();
+                            rows.add(new UserSearchRow(stringValue(user, "username", "Utente"),
+                                    stringValue(user, "email", "")));
+                        }
+                        userSearchResultsListView.getItems().setAll(rows);
+                        userSearchResultsListView.setPlaceholder(new Label(rows.isEmpty()
+                                ? "Nessun utente disponibile. Puoi comunque inserire username o email esatti."
+                                : "Seleziona il destinatario da invitare."));
+                        if (rows.isEmpty()) setStatus("Nessuna corrispondenza disponibile per questa lista.", false);
+                    } catch (Exception ex) {
+                        userSearchResultsListView.setPlaceholder(new Label("Impossibile interpretare i risultati della ricerca."));
+                    }
+                }),
+                () -> Platform.runLater(() -> {
+                    if (requestVersion == searchRequestVersion) {
+                        userSearchResultsListView.setPlaceholder(new Label("Ricerca non disponibile. Puoi digitare username o email esatti."));
+                    }
+                }), null);
     }
 
     @FXML
     private void handleUpdatePermission() {
-        Long userId = extractId(sharingListView.getSelectionModel().getSelectedItem());
+        String selected = sharingListView.getSelectionModel().getSelectedItem();
+        Long userId = selected == null ? null : sharingIdByDisplay.get(selected);
+        if (userId == null) userId = extractId(selected);
         if (listId == null || userId == null) return;
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("listId", listId);
@@ -108,7 +198,9 @@ public class ListSharingPopupController {
 
     @FXML
     private void handleRevokeAccess() {
-        Long userId = extractId(sharingListView.getSelectionModel().getSelectedItem());
+        String selected = sharingListView.getSelectionModel().getSelectedItem();
+        Long userId = selected == null ? null : sharingIdByDisplay.get(selected);
+        if (userId == null) userId = extractId(selected);
         if (listId == null || userId == null) return;
         setStatus("Revoca dell'accesso in corso…", false);
         ApiService.call(ApiService.BASE_URL + "/api/list-sharings/list/" + listId + "/user/" + userId, null, ApiService.Method.DELETE,
@@ -126,6 +218,7 @@ public class ListSharingPopupController {
                         JsonArray array = JsonParser.parseString(response.body()).getAsJsonArray();
                         sharingListView.getItems().clear();
                         sharingByUserId.clear();
+                        sharingIdByDisplay.clear();
                         for (JsonElement element : array) {
                             JsonObject item = element.getAsJsonObject();
                             Long userId = item.get("userId").getAsLong();
@@ -133,8 +226,10 @@ public class ListSharingPopupController {
                             String username = stringValue(item, "username", "Utente");
                             String email = stringValue(item, "email", "");
                             String permission = stringValue(item, "permission", "VIEW");
-                            sharingListView.getItems().add(username + (email.isBlank() ? "" : " (" + email + ")")
-                                    + " — " + permission + " #" + userId);
+                            String display = "@" + username + (email.isBlank() ? "" : "  ·  " + email)
+                                    + " — " + permission;
+                            sharingIdByDisplay.put(display, userId);
+                            sharingListView.getItems().add(display);
                         }
                         setStatus(array.size() == 0 ? "Nessun utente ha accesso a questa lista." : "Utenti con accesso: " + array.size(), false);
                     } catch (Exception ex) {
@@ -142,6 +237,12 @@ public class ListSharingPopupController {
                     }
                 }),
                 () -> Platform.runLater(() -> setStatus("Impossibile caricare le condivisioni.", true)), null);
+    }
+
+    private record UserSearchRow(String username, String email) {
+        private String displayText() {
+            return "@" + username + (email == null || email.isBlank() ? "" : "  ·  " + email);
+        }
     }
 
     private void setStatus(String message, boolean error) {

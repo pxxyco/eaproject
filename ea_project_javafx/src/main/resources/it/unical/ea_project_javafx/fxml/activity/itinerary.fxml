@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<HBox maxHeight="Infinity" maxWidth="Infinity" spacing="20" styleClass="container" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.activity.ItineraryController">
+<HBox maxHeight="Infinity" maxWidth="Infinity" spacing="20" styleClass="container" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.activity.ItineraryController">
     <stylesheets>
         <URL value="@../../css/common/style.css" />
         <URL value="@../../css/activity/activity-common.css" />

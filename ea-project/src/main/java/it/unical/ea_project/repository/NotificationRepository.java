@@ -22,6 +22,10 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     boolean existsByUser_IdAndTypeAndRelatedEntityId(
             Long userId, NotificationType type, Long relatedEntityId);
 
+    @Modifying
+    @Query("UPDATE Notification n SET n.type = :resolvedType, n.read = true, n.relatedEntityId = null, n.relatedEntityType = null, n.actionData = null, n.title = 'Invito non più disponibile', n.message = 'La lista non è più condivisa.' WHERE n.relatedEntityId = :listId AND n.type = :invitationType")
+    int invalidateListInvitations(Long listId, NotificationType invitationType, NotificationType resolvedType);
+
     // Recupera le notifiche di un utente ordinate dalla più recente (decrescente per data)
     List<Notification> findByUserOrderByCreatedAtDesc(User user);
 

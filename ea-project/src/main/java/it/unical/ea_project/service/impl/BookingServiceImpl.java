@@ -3,16 +3,21 @@ package it.unical.ea_project.service.impl;
 import it.unical.ea_project.domain.Booking;
 import it.unical.ea_project.domain.Activity;
 import it.unical.ea_project.domain.Trip;
+import it.unical.ea_project.domain.Payment;
 import it.unical.ea_project.dto.BookingDTO;
 import it.unical.ea_project.repository.ActivityRepository;
 import it.unical.ea_project.repository.BookingRepository;
 import it.unical.ea_project.repository.TripRepository;
 import it.unical.ea_project.repository.UserRepository;
+import it.unical.ea_project.repository.PaymentRepository;
 import it.unical.ea_project.service.BookingService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -22,19 +27,25 @@ import java.time.format.DateTimeFormatter;
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
+
+    @jakarta.persistence.PersistenceContext
+    private jakarta.persistence.EntityManager entityManager;
     private final UserRepository userRepository;
     private final TripRepository tripRepository;
     private final ActivityRepository activityRepository;
+    private final PaymentRepository paymentRepository;
 
     public BookingServiceImpl(BookingRepository bookingRepository,
                               UserRepository userRepository,
                               TripRepository tripRepository,
-                              ActivityRepository activityRepository) {
+                              ActivityRepository activityRepository,
+                              PaymentRepository paymentRepository) {
 
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.tripRepository = tripRepository;
         this.activityRepository = activityRepository;
+        this.paymentRepository = paymentRepository;
     
     }
 
@@ -42,8 +53,12 @@ public class BookingServiceImpl implements BookingService {
     public BookingDTO creaPrenotazioneTrip(Long userId, Long tripId, Integer seats) {
 
         validateSeats(seats);
-        Trip trip = tripRepository.findByTripIdAndDeletedAtIsNull(tripId)
+        Trip trip = tripRepository.findActiveForUpdate(tripId)
                 .orElseThrow(() -> new IllegalArgumentException("Viaggio non trovato"));
+        if (trip.getStatus() != Trip.TripStatus.PUBLISHED || trip.getStartDate() == null
+                || !trip.getStartDate().isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("Il viaggio non è prenotabile: deve essere pubblicato e futuro.");
+        }
         reserveSeats(trip.getAvailableSeats(), seats);
         trip.setAvailableSeats(trip.getAvailableSeats() - seats);
 
@@ -52,7 +67,7 @@ public class BookingServiceImpl implements BookingService {
         b.setTrip(trip);
         b.setSeats(seats);
         b.setBookingType(Booking.BookingType.TRIP);
-        b.setBookingStatus(Booking.BookingStatus.PENDING);
+        b.setBookingStatus(Booking.BookingStatus.CONFIRMED);
         b.setPrice(trip.getTotalPrice().multiply(java.math.BigDecimal.valueOf(seats)));
         return toDto(bookingRepository.save(b));
 
@@ -62,8 +77,12 @@ public class BookingServiceImpl implements BookingService {
     public BookingDTO creaPrenotazioneActivity(Long userId, Long activityId, Integer seats) {
 
         validateSeats(seats);
-        Activity activity = activityRepository.findByActivityIdAndDeletedAtIsNull(activityId)
+        Activity activity = activityRepository.findActiveForUpdate(activityId)
                 .orElseThrow(() -> new IllegalArgumentException("Attività non trovata"));
+        if (activity.getStatus() != Activity.Status.PUBLISHED || activity.getStartDate() == null
+                || !activity.getStartDate().isAfter(LocalDateTime.now())) {
+            throw new IllegalArgumentException("L'attività non è prenotabile: deve essere pubblicata e futura.");
+        }
         reserveSeats(activity.getAvailableSeats(), seats);
         activity.setAvailableSeats(activity.getAvailableSeats() - seats);
 
@@ -72,7 +91,7 @@ public class BookingServiceImpl implements BookingService {
         b.setActivity(activity);
         b.setSeats(seats);
         b.setBookingType(Booking.BookingType.ACTIVITY);
-        b.setBookingStatus(Booking.BookingStatus.PENDING);
+        b.setBookingStatus(Booking.BookingStatus.CONFIRMED);
         b.setPrice(java.math.BigDecimal.valueOf(activity.getPrice()).multiply(java.math.BigDecimal.valueOf(seats)));
         return toDto(bookingRepository.save(b));
 
@@ -99,6 +118,13 @@ public class BookingServiceImpl implements BookingService {
             throw new IllegalArgumentException("Non puoi cancellare una prenotazione già completata.");
         }
 
+        if (isAssociatedExperienceCancelled(b)) {
+            throw new IllegalArgumentException("Non puoi cancellare una prenotazione associata a un'esperienza annullata.");
+        }
+        if (isAssociatedExperienceCompleted(b)) {
+            throw new IllegalArgumentException("Non puoi cancellare una prenotazione relativa a un'esperienza già completata.");
+        }
+
         LocalDateTime eventStart = getEventStartDateTime(b);
         if (eventStart != null && !eventStart.isAfter(LocalDateTime.now())) {
             throw new IllegalArgumentException("Non puoi cancellare una prenotazione per un'esperienza già iniziata.");
@@ -107,11 +133,17 @@ public class BookingServiceImpl implements BookingService {
         b.setBookingStatus(Booking.BookingStatus.CANCELLED);
         int seatsToRestore = b.getSeats() == null ? 0 : Math.max(0, b.getSeats());
         if (seatsToRestore > 0 && b.getTrip() != null) {
-            Integer available = b.getTrip().getAvailableSeats();
-            b.getTrip().setAvailableSeats((available == null ? 0 : available) + seatsToRestore);
+            Trip locked = tripRepository.findActiveForUpdate(b.getTrip().getTripId())
+                    .orElseThrow(() -> new IllegalArgumentException("Viaggio non disponibile."));
+            entityManager.refresh(locked);
+            Integer available = locked.getAvailableSeats();
+            locked.setAvailableSeats((available == null ? 0 : available) + seatsToRestore);
         } else if (seatsToRestore > 0 && b.getActivity() != null) {
-            Integer available = b.getActivity().getAvailableSeats();
-            b.getActivity().setAvailableSeats((available == null ? 0 : available) + seatsToRestore);
+            Activity locked = activityRepository.findActiveForUpdate(b.getActivity().getActivityId())
+                    .orElseThrow(() -> new IllegalArgumentException("Attività non disponibile."));
+            entityManager.refresh(locked);
+            Integer available = locked.getAvailableSeats();
+            locked.setAvailableSeats((available == null ? 0 : available) + seatsToRestore);
         }
         
         bookingRepository.save(b);
@@ -122,9 +154,10 @@ public class BookingServiceImpl implements BookingService {
     @Transactional(readOnly = true)
     public List<BookingDTO> getPrenotazioniUtente(Long userId) {
 
-        return bookingRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(userId)
-                .stream()
-                .map(this::toDto)
+        List<Booking> bookings = bookingRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(userId);
+        Map<Long, String> paymentStatuses = loadLatestPaymentStatuses(bookings);
+        return bookings.stream()
+                .map(booking -> toDto(booking, paymentStatuses.get(booking.getBookingId())))
                 .toList();
 
     }
@@ -133,9 +166,10 @@ public class BookingServiceImpl implements BookingService {
     @Transactional(readOnly = true)
     public List<BookingDTO> getPrenotazioniOrganizzatore(Long organizerId) {
 
-        return bookingRepository.findActiveBookingsForOrganizer(organizerId)
-                .stream()
-                .map(this::toDto)
+        List<Booking> bookings = bookingRepository.findActiveBookingsForOrganizer(organizerId);
+        Map<Long, String> paymentStatuses = loadLatestPaymentStatuses(bookings);
+        return bookings.stream()
+                .map(booking -> toDto(booking, paymentStatuses.get(booking.getBookingId())))
                 .toList();
 
     }
@@ -158,6 +192,9 @@ public class BookingServiceImpl implements BookingService {
         
         if (booking.getBookingStatus() == Booking.BookingStatus.CANCELLED) {
             throw new IllegalArgumentException("Non è possibile esportare una prenotazione cancellata");
+        }
+        if (isAssociatedExperienceCancelled(booking)) {
+            throw new IllegalArgumentException("Non è possibile esportare un'esperienza annullata.");
         }
 
         String title;
@@ -280,6 +317,18 @@ public class BookingServiceImpl implements BookingService {
 
     }
 
+    private boolean isAssociatedExperienceCancelled(Booking booking) {
+        return booking != null && (
+                booking.getTrip() != null && booking.getTrip().getStatus() == Trip.TripStatus.CANCELLED
+                || booking.getActivity() != null && booking.getActivity().getStatus() == Activity.Status.CANCELLED);
+    }
+
+    private boolean isAssociatedExperienceCompleted(Booking booking) {
+        return booking != null && (
+                booking.getTrip() != null && booking.getTrip().getStatus() == Trip.TripStatus.COMPLETED
+                || booking.getActivity() != null && booking.getActivity().getStatus() == Activity.Status.COMPLETED);
+    }
+
     private void reserveSeats(Integer availableSeats, int requestedSeats) {
 
         if (availableSeats == null || availableSeats < requestedSeats) {
@@ -288,22 +337,53 @@ public class BookingServiceImpl implements BookingService {
 
     }
 
-    private BookingDTO toDto(Booking booking) {
+    /** Loads current payment states in one query for booking lists, avoiding an N+1 query pattern. */
+    private Map<Long, String> loadLatestPaymentStatuses(List<Booking> bookings) {
+        if (bookings == null || bookings.isEmpty()) return Map.of();
+        List<Long> ids = new ArrayList<>(bookings.size());
+        for (Booking booking : bookings) {
+            if (booking != null) ids.add(booking.getBookingId());
+        }
+        if (ids.isEmpty()) return Map.of();
+        Map<Long, String> statuses = new HashMap<>();
+        // The repository returns newest payments first; retain only the first non-deleted one per booking.
+        for (Payment payment : paymentRepository.findAllByBookingBookingIdInAndDeletedAtIsNullOrderByCreatedAtDesc(ids)) {
+            if (payment == null || payment.getBooking() == null) continue;
+            Long bookingId = payment.getBooking().getBookingId();
+            if (!statuses.containsKey(bookingId)) {
+                statuses.put(bookingId, payment.getStatus() == null ? null : payment.getStatus().name());
+            }
+        }
+        return statuses;
+    }
 
+    private BookingDTO toDto(Booking booking) {
+        String paymentStatus = paymentRepository.findAllByBookingBookingIdAndDeletedAtIsNullOrderByCreatedAtDesc(booking.getBookingId())
+                .stream()
+                .findFirst()
+                .map(payment -> payment.getStatus() != null ? payment.getStatus().name() : null)
+                .orElse(null);
+        return toDto(booking, paymentStatus);
+    }
+
+    private BookingDTO toDto(Booking booking, String paymentStatus) {
         String title = null;
         String date = null;
         String endDate = null;
+        String itemStatus = null;
         String location = null;
         if (booking.getTrip() != null) {
             title = booking.getTrip().getTitle();
+            itemStatus = booking.getTrip().getStatus() != null ? booking.getTrip().getStatus().name() : null;
             date = booking.getTrip().getStartDate() != null ? booking.getTrip().getStartDate().toString() : null;
             endDate = booking.getTrip().getEndDate() != null
                     ? booking.getTrip().getEndDate().toString()
                     : date;
-            location = booking.getTrip().getDestinationCity();
+            location = joinLocation(booking.getTrip().getDestinationCity(), booking.getTrip().getDestinationCountry());
         } else if (booking.getActivity() != null) {
             Activity activity = booking.getActivity();
             title = activity.getTitle();
+            itemStatus = activity.getStatus() != null ? activity.getStatus().name() : null;
             date = activity.getStartDate() != null ? activity.getStartDate().toString() : null;
             LocalDateTime activityEnd = activity.getEndDate();
             if (activityEnd == null && activity.getStartDate() != null) {
@@ -312,7 +392,7 @@ public class BookingServiceImpl implements BookingService {
                 activityEnd = activity.getStartDate().plusMinutes(duration);
             }
             endDate = activityEnd != null ? activityEnd.toString() : date;
-            location = activity.getCity();
+            location = joinLocation(activity.getPlaceName(), activity.getCity());
         }
 
         return BookingDTO.builder()
@@ -325,11 +405,13 @@ public class BookingServiceImpl implements BookingService {
                 .itemTitle(title)
                 .itemDate(date)
                 .itemEndDate(endDate)
+                .itemStatus(itemStatus)
                 .itemLocation(location)
                 .seats(booking.getSeats())
                 .bookingType(booking.getBookingType() != null ? booking.getBookingType().name() : null)
                 .bookingStatus(booking.getBookingStatus() != null ? booking.getBookingStatus().name() : null)
                 .price(booking.getPrice())
+                .paymentStatus(paymentStatus)
                 .createdAt(booking.getCreatedAt())
                 .deletedAt(booking.getDeletedAt())
                 .build();

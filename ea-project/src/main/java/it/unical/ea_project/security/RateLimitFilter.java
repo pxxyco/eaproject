@@ -19,6 +19,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private static final long WINDOW_MS = 60_000;
     private static final int GENERAL_LIMIT = 120;
     private static final int PHOTO_LIMIT = 600;
+    private static final int NOTIFICATION_LIMIT = 60;
     private static final int AUTH_LIMIT = 10;
 
     private static final class Counter {
@@ -49,6 +50,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
         } else if (path.startsWith("/photo/")) {
             bucket = "photo";
             limit = PHOTO_LIMIT;
+        } else if (path.startsWith("/api/notifications")) {
+            // Le notifiche hanno un bucket separato: un burst sull'inbox non deve
+            // consumare il limite generale e bloccare prenotazioni, profilo o ricerca.
+            bucket = "notifications";
+            limit = NOTIFICATION_LIMIT;
         } else {
             bucket = "general";
             limit = GENERAL_LIMIT;
@@ -62,6 +68,9 @@ public class RateLimitFilter extends OncePerRequestFilter {
             }
             response.setStatus(429);
             response.setHeader("Retry-After", "60");
+            response.setContentType("application/json");
+            response.setCharacterEncoding("UTF-8");
+            response.getWriter().write("{\"code\":\"ERR-104\",\"message\":\"Troppe richieste in poco tempo. Attendi 60 secondi e riprova.\"}");
             return;
         }
         chain.doFilter(request, response);

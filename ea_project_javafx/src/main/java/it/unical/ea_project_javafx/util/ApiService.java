@@ -136,10 +136,6 @@ public class ApiService {
     @Setter
     private static Runnable onNetworkFailureGlobal;
 
-
-    @Setter
-    private static Consumer<Integer> onRateLimitedGlobal;
-
     /** HTTP helper that preserves the server's validation/conflict message for forms. */
     public static void callDetailed(String url, String body, Method method,
                                     Consumer<HttpResponse<String>> onSuccess,
@@ -220,6 +216,12 @@ public class ApiService {
         try {
             JsonObject json = GSON.fromJson(responseBody, JsonObject.class);
             if (json != null) {
+                if (statusCode == 429 && json.has("code") && !json.get("code").isJsonNull()) {
+                    String code = json.get("code").getAsString();
+                    if ("ERR-104".equalsIgnoreCase(code) && json.has("message") && !json.get("message").isJsonNull()) {
+                        return "ERR-104 — " + json.get("message").getAsString();
+                    }
+                }
                 for (String key : new String[]{"message", "detail", "reason", "error"}) {
                     if (json.has(key) && !json.get(key).isJsonNull()) {
                         String value = json.get(key).getAsString();
@@ -410,18 +412,10 @@ public class ApiService {
                     onSuccess.accept(response);
                 }
             } else if (response.statusCode() == 429) {
-                int retryAfter = response.headers().firstValue("Retry-After")
-                        .map(v -> {
-                            try { return Integer.parseInt(v.trim()); }
-                            catch (NumberFormatException ex) { return 60; }
-                        })
-                        .orElse(60);
-                if (onRateLimitedGlobal != null) {
-                    onRateLimitedGlobal.accept(retryAfter);
-                }
-                if (onFailure != null) {
-                    onFailure.run();
-                }
+                // ERR-104 è un errore locale della richiesta, non un motivo per cambiare
+                // scena o riavviare la UI. Il chiamante gestisce il limite e può rispettare
+                // Retry-After senza interrompere l'intera applicazione.
+                if (onFailure != null) onFailure.run();
             } else {
                 // Anche le risposte HTTP 4xx/5xx devono notificare il chiamante: altrimenti
                 // la UI può restare bloccata nello stato "Caricamento..." senza feedback.

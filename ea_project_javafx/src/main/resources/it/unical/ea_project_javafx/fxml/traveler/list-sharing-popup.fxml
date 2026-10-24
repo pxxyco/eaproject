@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+<StackPane xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="it.unical.ea_project_javafx.controller.traveler.ListSharingPopupController"
            styleClass="sharing-popup-overlay" pickOnBounds="true">
     <children>
@@ -42,11 +42,12 @@
             <VBox spacing="10.0">
                 <Label text="Condividi con un nuovo utente" styleClass="section-header" />
                 <HBox spacing="10.0" alignment="CENTER_LEFT">
-                    <TextField fx:id="userIdField" promptText="ID utente" HBox.hgrow="ALWAYS" />
-                    <ComboBox fx:id="newPermissionCombo" visible="false" managed="false" />
-                    <Button text="Condividi" onAction="#handleShare" styleClass="btn-primary" />
+                    <TextField fx:id="userIdentifierField" promptText="Cerca username o email" HBox.hgrow="ALWAYS" />
+                    <ComboBox fx:id="newPermissionCombo" prefWidth="105.0" promptText="Permesso" />
+                    <Button text="Invia invito" onAction="#handleShare" styleClass="btn-primary" />
                 </HBox>
-                <Label text="Scegli VIEW per consentire la visualizzazione o EDIT per consentire le modifiche. Il permesso selezionato sopra verrà assegnato al nuovo utente." wrapText="true" styleClass="sharing-popup-hint" />
+                <ListView fx:id="userSearchResultsListView" prefHeight="125.0" styleClass="sharing-users-list" />
+                <Label text="Digita almeno 2 caratteri per cercare gli utenti attivi. VIEW consente la visualizzazione; EDIT consente le modifiche. L'accesso viene attivato solo dopo l'accettazione dell'invito." wrapText="true" styleClass="sharing-popup-hint" />
             </VBox>
             <HBox alignment="CENTER_RIGHT">
                 <Button text="Fatto" onAction="#handleClose" styleClass="btn-primary" />

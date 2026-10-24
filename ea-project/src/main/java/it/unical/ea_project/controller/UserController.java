@@ -25,6 +25,8 @@ public class UserController {
     private final UserService userService;
     private final JwtService jwtService;
 
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
+    public record RegistrationRequest(String username, String email, String fullName, String password, String role) {}
     public record LoginRequest(String identifier, String password) {}
     public record UpdateProfileRequest(String username, String email, String fullName) {}
     public record ChangePasswordRequest(String currentPassword, String newPassword) {}
@@ -35,10 +37,10 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserDTO> registerUser(@RequestBody UserDTO dto) {
+    public ResponseEntity<UserDTO> registerUser(@RequestBody RegistrationRequest dto) {
         User.Role role;
         try {
-            role = User.Role.valueOf(dto.getRole());
+            role = User.Role.valueOf(dto.role());
         } catch (IllegalArgumentException | NullPointerException e) {
             return ResponseEntity.badRequest().build();
         }
@@ -47,13 +49,13 @@ public class UserController {
         }
 
         User user = new User();
-        user.setUsername(dto.getUsername());
-        user.setEmail(dto.getEmail());
-        user.setFullName(dto.getFullName());
+        user.setUsername(dto.username());
+        user.setEmail(dto.email());
+        user.setFullName(dto.fullName());
         user.setRole(role);
         user.setOauthProvider(false);
         user.setOauthSubject(null);
-        user.setHashedPassword(dto.getPassword());
+        user.setHashedPassword(dto.password());
         User saved = userService.registerUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(convertToDto(saved));
     }

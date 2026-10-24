@@ -79,8 +79,22 @@ public class TripImageServiceImpl implements TripImageService {
 
     @Override
     @Transactional
-    public void deleteImage(Long imageId) {
-        tripImageRepository.deleteById(imageId);
+    public void deleteImage(Long imageId, Long organizerId) {
+        var image = tripImageRepository.findById(imageId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Foto non trovata."));
+        var experience = image.getTrip();
+        if (experience == null || experience.getDeletedAt() != null
+                || experience.getCreatedBy() == null
+                || !Objects.equals(experience.getCreatedBy().getId(), organizerId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Non puoi eliminare questa foto.");
+        }
+
+        if (Objects.equals(experience.getCoverPhotoUrl(), image.getImageUrl())) {
+            experience.setCoverPhotoUrl(tripImageRepository.findByTripOrderByOrderIndexAsc(experience).stream()
+                    .filter(candidate -> !Objects.equals(candidate.getImageId(), imageId))
+                    .map(TripImage::getImageUrl).findFirst().orElse(null));
+        }
+        tripImageRepository.delete(image);
     }
 
     private void validateFiles(List<MultipartFile> files) {

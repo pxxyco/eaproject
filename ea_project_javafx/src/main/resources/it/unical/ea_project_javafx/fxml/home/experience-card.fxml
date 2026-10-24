@@ -8,7 +8,7 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 
-<VBox fx:id="cardRoot" prefHeight="378.0" prefWidth="325.0" styleClass="experience-card" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.home.ExperienceCardController">
+<VBox fx:id="cardRoot" prefHeight="378.0" prefWidth="325.0" styleClass="experience-card" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.home.ExperienceCardController">
     <stylesheets>
         <URL value="@../../css/home/experience-card.css" />
     </stylesheets>

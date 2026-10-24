@@ -89,7 +89,7 @@ public class NotificationController {
         }
         FavoriteList favoriteList = lists.findById(notification.getRelatedEntityId())
                 .filter(list -> !list.isDeleted()).orElse(null);
-        if (favoriteList == null) return ResponseEntity.notFound().build();
+        if (favoriteList == null || favoriteList.getVisibility() != FavoriteList.Visibility.SHARED) return ResponseEntity.notFound().build();
         List<ListSharingController.SharedTripResponse> sharedTrips = listTrips.findByFavoriteListId(favoriteList.getId())
                 .stream().map(ListTrips::getTripId)
                 .map(tripId -> trips.findByTripIdAndDeletedAtIsNull(tripId).orElse(null))

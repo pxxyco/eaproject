@@ -82,25 +82,29 @@ public class TripServiceImpl implements TripService {
     @Override
     @Transactional
     public Trip createTrip(Trip trip, Long creatorId) {
+        it.unical.ea_project.util.ExperienceValidation.trip(trip);
         User creator = userRepository.findById(creatorId)
                 .orElseThrow(() -> new RuntimeException("Utente non trovato con ID: " + creatorId));
+        if (creator.getRole() != User.Role.ORGANIZER || creator.getDeletedAt() != null)
+            throw new org.springframework.security.access.AccessDeniedException("Account organizzatore richiesto.");
         trip.setCreatedBy(creator);
+        trip.setAvailableSeats(trip.getMaxSeats());
         if (trip.getStatus() == null) {
             trip.setStatus(TripStatus.PUBLISHED);
         }
         if (trip.getAvailableSeats() == null) {
             trip.setAvailableSeats(trip.getMaxSeats());
         }
-        if (trip.getStages() != null) {
-            trip.getStages().forEach(stage -> stage.setTrip(trip));
-        }
+        if (trip.getStages() == null) trip.setStages(new java.util.ArrayList<>());
+        trip.getStages().forEach(stage -> stage.setTrip(trip));
         return tripRepository.save(trip);
     }
 
     @Override
     @Transactional
     public Trip updateTrip(Long id, Trip details) {
-        Trip existing = getTripById(id)
+        it.unical.ea_project.util.ExperienceValidation.trip(details);
+        Trip existing = tripRepository.findActiveForUpdate(id)
                 .orElseThrow(() -> new RuntimeException("Viaggio non trovato con ID: " + id));
 
         existing.setTitle(details.getTitle());
@@ -110,9 +114,11 @@ public class TripServiceImpl implements TripService {
         existing.setStartDate(details.getStartDate());
         existing.setEndDate(details.getEndDate());
         existing.setTotalPrice(details.getTotalPrice());
+        int available = it.unical.ea_project.util.ExperienceValidation.available(
+                existing.getMaxSeats(), existing.getAvailableSeats(), details.getMaxSeats());
         existing.setMaxSeats(details.getMaxSeats());
-        existing.setAvailableSeats(details.getAvailableSeats());
-        existing.setStatus(details.getStatus());
+        existing.setAvailableSeats(available);
+        if (details.getStatus() != null) existing.setStatus(details.getStatus());
         return tripRepository.save(existing);
     }
 
@@ -125,6 +131,7 @@ public class TripServiceImpl implements TripService {
     @Override
     @Transactional
     public void deleteTripLogically(Trip trip) {
+        trip.setStatus(TripStatus.CANCELLED);
         trip.setDeletedAt(LocalDateTime.now());
         tripRepository.save(trip);
     }
@@ -132,7 +139,7 @@ public class TripServiceImpl implements TripService {
     @Override
     @Transactional
     public void deleteTrip(Long id) {
-        getTripById(id).ifPresent(this::deleteTripLogically);
+        tripRepository.findActiveForUpdate(id).ifPresent(this::deleteTripLogically);
     }
     @Override
     public List<TripDTO> getTripDtosByUser(User user) {
@@ -263,7 +270,7 @@ public class TripServiceImpl implements TripService {
                 .createdAt(trip.getCreatedAt())
                 .updatedAt(trip.getUpdatedAt())
                 .deletedAt(trip.getDeletedAt())
-                .stages(Collections.emptyList())
+                .stages(trip.getStages().stream().map(it.unical.ea_project.dto.StageDTO::toDto).toList())
                 .build();
     }
 

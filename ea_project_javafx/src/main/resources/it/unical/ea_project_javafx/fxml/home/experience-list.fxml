@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxWidth="1000.0" spacing="15.0" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.home.ExperienceListController">
+<VBox maxWidth="1000.0" spacing="15.0" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.home.ExperienceListController">
 
     <HBox alignment="CENTER_LEFT" spacing="10.0">
         <children>

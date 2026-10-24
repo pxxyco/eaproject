@@ -8,13 +8,12 @@ import it.unical.ea_project_javafx.dto.TripDTO;
 
 import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.service.ReviewService;
+import it.unical.ea_project_javafx.util.PopupFactory;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.layout.VBox;
 import lombok.Setter;
 
@@ -150,22 +149,22 @@ public class ReviewsContainerController implements ActivitySectionController, Tr
     }
 
     private void deleteReview(ReviewDTO review) {
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION,
-                "Vuoi eliminare questa recensione?", ButtonType.CANCEL, ButtonType.OK);
-        confirm.setHeaderText("Elimina recensione");
-        if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
-
-        ReviewService.deleteReview(
-                review.getReviewId(),
-                () -> {
-                    reviews.removeIf(r -> r.getReviewId().equals(review.getReviewId()));
-                    if (page > 0 && page * PAGE_SIZE >= reviews.size()) page--;
-                    setReviews();
-                    if (onReviewsChanged != null) onReviewsChanged.run();
-                },
-                null,
-                null
-        );
+        var root = PopupFactory.resolveRoot(bodyContainer);
+        if (root == null) return;
+        PopupFactory.showConfirmation(root, "Elimina recensione",
+                "Vuoi eliminare questa recensione? L'operazione non può essere annullata.",
+                PopupFactory.Size.COMPACT,
+                () -> ReviewService.deleteReview(
+                        review.getReviewId(),
+                        () -> {
+                            reviews.removeIf(r -> r.getReviewId().equals(review.getReviewId()));
+                            if (page > 0 && page * PAGE_SIZE >= reviews.size()) page--;
+                            setReviews();
+                            if (onReviewsChanged != null) onReviewsChanged.run();
+                        },
+                        null,
+                        null
+                ));
     }
 
     public void updateReview(ReviewDTO updated) {

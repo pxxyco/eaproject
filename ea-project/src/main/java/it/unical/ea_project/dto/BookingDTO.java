@@ -34,6 +34,9 @@ public class BookingDTO {
     /** Data/ora di fine dell’esperienza; usata per classificare correttamente lo storico. */
     private String itemEndDate;
 
+    /** Stato corrente del viaggio/attività, distinto dallo stato della prenotazione. */
+    private String itemStatus;
+
     private String itemLocation;
 
     private Integer seats;
@@ -45,6 +48,9 @@ public class BookingDTO {
     private String bookingStatus;
 
     private BigDecimal price;
+
+    /** Stato dell'eventuale pagamento associato alla prenotazione. */
+    private String paymentStatus;
 
     private LocalDateTime createdAt;
 

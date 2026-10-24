@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+<StackPane xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="it.unical.ea_project_javafx.controller.profile.ProfileController">
     <stylesheets>
         <URL value="@../../css/common/style.css" />
@@ -43,10 +43,11 @@
 
                             <HBox alignment="CENTER_LEFT" spacing="18.0">
                                 <StackPane fx:id="avatarContainer" minWidth="104.0" minHeight="104.0"
-                                           prefWidth="104.0" prefHeight="104.0" styleClass="profile-avatar">
+                                           prefWidth="104.0" prefHeight="104.0" maxWidth="104.0" maxHeight="104.0"
+                                           styleClass="profile-avatar">
                                     <Label fx:id="avatarInitialsLabel" styleClass="avatar-initials" text="U" />
                                     <ImageView fx:id="profilePhotoImageView" fitWidth="104.0" fitHeight="104.0"
-                                               preserveRatio="true" smooth="true" />
+                                               preserveRatio="false" smooth="true" managed="true" />
                                 </StackPane>
                                 <VBox spacing="6.0" HBox.hgrow="ALWAYS">
                                     <Label fx:id="fullNameLabel" styleClass="profile-title" text="Nome Utente" wrapText="true" />

@@ -1,151 +1,667 @@
+/* =====================================================================
+   PREFERITI — tema grafite / avorio
+   Unico foglio di stile per favorites.fxml e list-sharing-popup.fxml.
+   I colori e la tipografia restano coerenti con profile.css/traveler.css;
+   le regole sono limitate alla schermata per evitare conflitti globali.
+   ===================================================================== */
 
-/* ===== TABELLE: viaggi e attività ===== */
+/* Palette di riferimento:
+   superfici: grafite scura trasparente
+   testo:     #f5f5f4 / #e7e5e4
+   accento:   avorio, senza colori freddi estranei al resto dell'app
+*/
 
-.custom-table,
-.favorites-table {
-    -fx-background-color: rgba(255, 255, 255, 0.04);
-    -fx-control-inner-background: rgba(255, 255, 255, 0.04);
+.favorites-page-root,
+.favorites-page-shell,
+.favorites-scroll,
+.favorites-scroll > .viewport,
+.favorites-content,
+.favorites-inner-layout {
+    -fx-background-color: transparent;
+}
+
+.favorites-page-root {
+    -fx-font-size: 12px;
+}
+
+.favorites-overlay {
+    -fx-background-color: rgba(12, 12, 12, 0.78);
+}
+
+.favorites-scroll {
     -fx-background-insets: 0;
-    -fx-background-radius: 8px;
-    -fx-border-color: rgba(255, 255, 255, 0.16);
-    -fx-border-radius: 8px;
-    -fx-border-width: 1px;
-    -fx-table-cell-border-color: rgba(255, 255, 255, 0.08);
+    -fx-border-color: transparent;
     -fx-padding: 0;
 }
 
-/* Intestazione delle colonne */
-.custom-table .column-header-background,
-.favorites-table .column-header-background {
-    -fx-background-color: rgba(255, 255, 255, 0.09);
-    -fx-background-radius: 8px 8px 0 0;
+.favorites-content {
+    -fx-spacing: 28px;
+    -fx-fill-width: true;
 }
 
-.custom-table .column-header,
-.favorites-table .column-header {
-    -fx-background-color: transparent;
-    -fx-border-color: transparent rgba(255, 255, 255, 0.10) transparent transparent;
-    -fx-size: 38px;
+.favorites-inner-layout {
+    -fx-max-width: 1240px;
+    -fx-fill-width: true;
 }
 
-.custom-table .column-header .label,
-.favorites-table .column-header .label {
-    -fx-text-fill: #ffffff;
+/* Intestazione */
+.favorites-hero {
+    -fx-alignment: center-left;
+    -fx-spacing: 22px;
+    -fx-padding: 2px 0 18px 0;
+    -fx-border-color: transparent transparent rgba(231, 229, 228, 0.20) transparent;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.favorites-eyebrow,
+.favorites-section-kicker,
+.favorites-count-note {
+    -fx-text-fill: rgba(231, 229, 228, 0.66);
+    -fx-font-size: 10px;
     -fx-font-weight: bold;
-    -fx-font-size: 12px;
-    -fx-alignment: CENTER_LEFT;
-    -fx-padding: 0 10px;
 }
 
-/* Righe */
-.custom-table .table-row-cell,
-.favorites-table .table-row-cell {
-    -fx-background-color: transparent;
-    -fx-border-color: transparent transparent rgba(255, 255, 255, 0.08) transparent;
-    -fx-cell-size: 38px;
+.favorites-title {
+    -fx-text-fill: #fafaf9;
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
 }
 
-.custom-table .table-row-cell:odd,
-.favorites-table .table-row-cell:odd {
-    -fx-background-color: rgba(255, 255, 255, 0.025);
-}
-
-.custom-table .table-row-cell:hover,
-.favorites-table .table-row-cell:hover {
-    -fx-background-color: rgba(255, 255, 255, 0.08);
-}
-
-.custom-table .table-row-cell:selected,
-.favorites-table .table-row-cell:selected {
-    -fx-background-color: rgba(255, 255, 255, 0.15);
-}
-
-.custom-table .table-cell,
-.favorites-table .table-cell {
-    -fx-text-fill: #e7e5e4;
-    -fx-padding: 8px 10px;
-    -fx-alignment: CENTER_LEFT;
-    -fx-border-color: transparent;
-}
-
-/* Tabella vuota e placeholder */
-.custom-table .placeholder .label,
-.favorites-table .placeholder .label {
-    -fx-text-fill: rgba(255, 255, 255, 0.55);
-    -fx-font-size: 12px;
-}
-
-/* Scrollbar delle tabelle */
-.custom-table .scroll-bar:vertical,
-.custom-table .scroll-bar:horizontal,
-.favorites-table .scroll-bar:vertical,
-.favorites-table .scroll-bar:horizontal {
-    -fx-background-color: transparent;
-}
-
-.custom-table .scroll-bar .thumb,
-.favorites-table .scroll-bar .thumb {
-    -fx-background-color: rgba(255, 255, 255, 0.25);
-    -fx-background-radius: 8px;
-}
-
-.custom-table .scroll-bar .thumb:hover,
-.favorites-table .scroll-bar .thumb:hover {
-    -fx-background-color: rgba(255, 255, 255, 0.40);
-}
-
-
-/* ===== BARRE DI RICERCA ===== */
-
-/* Campo di ricerca */
-.custom-input,
-.favorites-search,
-.search-field {
-    -fx-background-color: rgba(255, 255, 255, 0.07);
-    -fx-background-radius: 8px;
-    -fx-border-color: rgba(255, 255, 255, 0.18);
-    -fx-border-radius: 8px;
-    -fx-border-width: 1px;
-    -fx-text-fill: #ffffff;
-    -fx-prompt-text-fill: rgba(255, 255, 255, 0.48);
-    -fx-highlight-fill: rgba(255, 255, 255, 0.20);
-    -fx-highlight-text-fill: #ffffff;
-    -fx-padding: 9px 12px;
+.favorites-subtitle {
+    -fx-text-fill: rgba(231, 229, 228, 0.74);
     -fx-font-size: 13px;
+    -fx-max-width: 760px;
 }
 
-.custom-input:focused,
-.favorites-search:focused,
-.search-field:focused {
-    -fx-background-color: rgba(255, 255, 255, 0.10);
-    -fx-border-color: #d6d3d1;
-    -fx-border-width: 1px;
+.favorites-hero-mark {
+    -fx-alignment: center-right;
+    -fx-padding: 8px 0 8px 24px;
+    -fx-border-color: transparent transparent transparent rgba(231, 229, 228, 0.20);
+    -fx-border-width: 0 0 0 1px;
 }
 
-/* Contenitore della barra, se presente nel FXML */
-.search-bar,
-.favorites-search-bar {
-    -fx-background-color: rgba(255, 255, 255, 0.05);
-    -fx-background-radius: 8px;
-    -fx-border-color: rgba(255, 255, 255, 0.14);
-    -fx-border-radius: 8px;
-    -fx-padding: 6px;
-    -fx-spacing: 8px;
+.favorites-hero-star {
+    -fx-text-fill: #e7e5e4;
+    -fx-font-size: 32px;
 }
 
-/* Pulsante accanto alla ricerca */
-.search-bar .button,
-.favorites-search-bar .button {
-    -fx-background-color: #e7e5e4;
-    -fx-text-fill: #1c1917;
-    -fx-background-radius: 8px;
-    -fx-border-radius: 8px;
+.favorites-hero-caption {
+    -fx-text-fill: rgba(231, 229, 228, 0.56);
+    -fx-font-size: 9px;
     -fx-font-weight: bold;
-    -fx-padding: 8px 14px;
+}
+
+/* Stato / feedback del controller */
+.favorites-status {
+    -fx-padding: 11px 14px;
+    -fx-background-color: rgba(231, 229, 228, 0.08);
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(231, 229, 228, 0.18);
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+    -fx-text-fill: #f5f5f4;
+    -fx-font-size: 12px;
+}
+
+/* Creazione di una nuova lista */
+.favorites-create-line {
+    -fx-alignment: center-left;
+    -fx-spacing: 14px;
+    -fx-padding: 0 0 22px 0;
+    -fx-border-color: transparent transparent rgba(231, 229, 228, 0.18) transparent;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.favorites-section-title {
+    -fx-text-fill: #f5f5f4;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.favorites-muted {
+    -fx-text-fill: rgba(231, 229, 228, 0.66);
+    -fx-font-size: 11px;
+}
+
+/* Campi di testo e menu a tendina */
+.favorites-field,
+.favorites-visibility {
+    -fx-min-height: 38px;
+    -fx-pref-height: 38px;
+    -fx-background-color: rgba(28, 28, 27, 0.72);
+    -fx-background-radius: 9px;
+    -fx-border-color: rgba(231, 229, 228, 0.22);
+    -fx-border-width: 1px;
+    -fx-border-radius: 9px;
+    -fx-text-fill: #f5f5f4;
+    -fx-prompt-text-fill: rgba(231, 229, 228, 0.46);
+    -fx-highlight-fill: rgba(231, 229, 228, 0.26);
+    -fx-highlight-text-fill: #ffffff;
+    -fx-padding: 8px 12px;
+    -fx-font-size: 12px;
+}
+
+.favorites-field:focused,
+.favorites-visibility:focused,
+.favorites-visibility:showing {
+    -fx-background-color: rgba(28, 28, 27, 0.92);
+    -fx-border-color: rgba(231, 229, 228, 0.56);
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.favorites-visibility {
+    -fx-padding: 2px 7px;
+}
+
+.favorites-visibility .list-cell,
+.favorites-visibility .label {
+    -fx-background-color: transparent;
+    -fx-text-fill: #f5f5f4;
+}
+
+.favorites-visibility .arrow {
+    -fx-background-color: #d6d3d1;
+}
+
+.favorites-visibility .list-view {
+    -fx-background-color: #242423;
+    -fx-border-color: rgba(231, 229, 228, 0.20);
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+}
+
+.favorites-visibility .list-cell:filled:hover,
+.favorites-visibility .list-cell:filled:selected {
+    -fx-background-color: rgba(231, 229, 228, 0.14);
+    -fx-text-fill: #ffffff;
+}
+
+/* Pulsanti della pagina */
+.favorites-primary-button,
+.favorites-secondary-button,
+.favorites-danger-action {
+    -fx-min-height: 36px;
+    -fx-background-radius: 9px;
+    -fx-border-radius: 9px;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
     -fx-cursor: hand;
 }
 
-.search-bar .button:hover,
-.favorites-search-bar .button:hover {
+.favorites-primary-button {
+    -fx-background-color: #e7e5e4;
+    -fx-text-fill: #1c1917;
+    -fx-padding: 9px 15px;
+}
+
+.favorites-primary-button:hover {
     -fx-background-color: #fafaf9;
+}
+
+.favorites-primary-button:pressed {
+    -fx-background-color: #d6d3d1;
+}
+
+.favorites-secondary-button {
+    -fx-background-color: rgba(231, 229, 228, 0.09);
+    -fx-text-fill: #f5f5f4;
+    -fx-border-color: rgba(231, 229, 228, 0.20);
+    -fx-padding: 8px 13px;
+}
+
+.favorites-secondary-button:hover {
+    -fx-background-color: rgba(231, 229, 228, 0.17);
+    -fx-border-color: rgba(231, 229, 228, 0.34);
+}
+
+.favorites-secondary-button:pressed {
+    -fx-background-color: rgba(231, 229, 228, 0.22);
+}
+
+.favorites-secondary-button:disabled,
+.favorites-primary-button:disabled {
+    -fx-opacity: 0.48;
+}
+
+.favorites-create-button {
+    -fx-min-height: 38px;
+    -fx-padding: 0 17px;
+}
+
+.favorites-small-action,
+.favorites-search-button,
+.favorites-share-button {
+    -fx-padding: 8px 12px;
+}
+
+.favorites-add-button {
+    -fx-min-height: 38px;
+}
+
+.favorites-danger-action {
+    -fx-background-color: rgba(120, 45, 45, 0.22);
+    -fx-border-color: rgba(248, 113, 113, 0.30);
+    -fx-text-fill: #fecaca;
+    -fx-padding: 8px 12px;
+}
+
+.favorites-danger-action:hover {
+    -fx-background-color: rgba(120, 45, 45, 0.40);
+}
+
+.favorites-danger-action:disabled {
+    -fx-opacity: 0.42;
+}
+
+.favorites-text-action {
+    -fx-background-color: transparent;
+    -fx-text-fill: #e7e5e4;
+    -fx-padding: 4px 0;
+    -fx-font-size: 11px;
+    -fx-cursor: hand;
+}
+
+.favorites-text-action:hover {
+    -fx-text-fill: #ffffff;
+    -fx-underline: true;
+}
+
+/* Workspace: elenco delle liste a sinistra, contenuti a destra */
+.favorites-workspace {
+    -fx-alignment: top-left;
+    -fx-spacing: 28px;
+    -fx-padding: 2px 0 8px 0;
+}
+
+.favorites-sidebar {
+    -fx-padding: 2px 22px 0 0;
+    -fx-border-color: transparent rgba(231, 229, 228, 0.18) transparent transparent;
+    -fx-border-width: 0 1px 0 0;
+}
+
+.favorites-main-area {
+    -fx-padding: 2px 0 0 0;
+    -fx-background-color: transparent;
+}
+
+.favorites-selected-heading {
+    -fx-alignment: center-left;
+    -fx-spacing: 14px;
+    -fx-padding: 0 0 14px 0;
+    -fx-border-color: transparent transparent rgba(231, 229, 228, 0.16) transparent;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.favorites-selected-title {
+    -fx-text-fill: #fafaf9;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+/* Colonne Viaggi e Attività */
+.favorites-collection-grid {
+    -fx-spacing: 24px;
+    -fx-alignment: top-left;
+}
+
+.favorites-collection-column {
+    -fx-spacing: 14px;
+    -fx-padding: 2px 0 0 0;
+    -fx-background-color: transparent;
+}
+
+.favorites-type-glyph {
+    -fx-text-fill: #e7e5e4;
+    -fx-font-size: 22px;
+    -fx-min-width: 32px;
+    -fx-alignment: center;
+}
+
+.favorites-rule {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.favorites-rule .line {
+    -fx-border-color: rgba(231, 229, 228, 0.16);
+    -fx-border-width: 1px 0 0 0;
+}
+
+/* ListView: superficie unica, righe leggibili e selezione chiara */
+.favorites-list-view {
+    -fx-background-color: rgba(18, 18, 17, 0.30);
+    -fx-control-inner-background: rgba(18, 18, 17, 0.26);
+    -fx-control-inner-background-alt: rgba(231, 229, 228, 0.025);
+    -fx-background-insets: 0;
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(231, 229, 228, 0.16);
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+    -fx-padding: 4px;
+}
+
+.favorites-list-view .virtual-flow,
+.favorites-list-view .clipped-container,
+.favorites-list-view .sheet {
+    -fx-background-color: transparent;
+}
+
+.favorites-list-view .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(245, 245, 244, 0.88);
+    -fx-padding: 10px 10px;
+    -fx-border-color: transparent transparent rgba(231, 229, 228, 0.08) transparent;
+    -fx-border-width: 0 0 1px 0;
+    -fx-font-size: 12px;
+}
+
+.favorites-list-view .list-cell:empty {
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.favorites-list-view .list-cell:filled:hover {
+    -fx-background-color: rgba(231, 229, 228, 0.07);
+    -fx-background-radius: 7px;
+}
+
+.favorites-list-view .list-cell:filled:selected {
+    -fx-background-color: rgba(231, 229, 228, 0.15);
+    -fx-background-radius: 7px;
+    -fx-text-fill: #ffffff;
+}
+
+.favorites-list-selector .list-cell {
+    -fx-padding: 12px 10px;
+    -fx-font-size: 12px;
+}
+
+.favorites-content-list {
+    -fx-min-height: 130px;
+}
+
+.favorites-search-results {
+    -fx-min-height: 90px;
+}
+
+.favorites-list-view .placeholder .label {
+    -fx-text-fill: rgba(231, 229, 228, 0.54);
+    -fx-font-size: 11px;
+}
+
+/* Liste condivise */
+.favorites-shared-section {
+    -fx-spacing: 16px;
+    -fx-padding: 22px 0 0 0;
+    -fx-border-color: rgba(231, 229, 228, 0.18) transparent transparent transparent;
+    -fx-border-width: 1px 0 0 0;
+}
+
+.favorites-shared-table {
+    -fx-background-color: rgba(18, 18, 17, 0.28);
+    -fx-control-inner-background: rgba(18, 18, 17, 0.26);
+    -fx-control-inner-background-alt: rgba(231, 229, 228, 0.035);
+    -fx-background-insets: 0;
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(231, 229, 228, 0.16);
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+    -fx-table-cell-border-color: rgba(231, 229, 228, 0.08);
+    -fx-padding: 0;
+}
+
+.favorites-shared-table .column-header-background {
+    -fx-background-color: rgba(231, 229, 228, 0.07);
+    -fx-background-radius: 10px 10px 0 0;
+}
+
+.favorites-shared-table .column-header,
+.favorites-shared-table .filler {
+    -fx-background-color: transparent;
+    -fx-size: 38px;
+    -fx-border-color: transparent transparent rgba(231, 229, 228, 0.12) transparent;
+}
+
+.favorites-shared-table .column-header .label {
+    -fx-text-fill: rgba(245, 245, 244, 0.86);
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-alignment: center-left;
+    -fx-padding: 0 8px;
+}
+
+.favorites-shared-table .table-row-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent rgba(231, 229, 228, 0.07) transparent;
+    -fx-cell-size: 38px;
+}
+
+.favorites-shared-table .table-row-cell:filled:hover {
+    -fx-background-color: rgba(231, 229, 228, 0.07);
+}
+
+.favorites-shared-table .table-row-cell:filled:selected {
+    -fx-background-color: rgba(231, 229, 228, 0.13);
+}
+
+.favorites-shared-table .table-cell {
+    -fx-text-fill: rgba(245, 245, 244, 0.86);
+    -fx-font-size: 11px;
+    -fx-padding: 7px 8px;
+    -fx-border-color: transparent;
+}
+
+.favorites-shared-table .placeholder .label {
+    -fx-text-fill: rgba(231, 229, 228, 0.55);
+}
+
+.favorites-shared-details {
+    -fx-min-height: 180px;
+}
+
+/* Scrollbar coerenti con le superfici scure */
+.favorites-page-root .scroll-bar:vertical,
+.favorites-page-root .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+}
+
+.favorites-page-root .scroll-bar .thumb {
+    -fx-background-color: rgba(231, 229, 228, 0.22);
+    -fx-background-radius: 8px;
+}
+
+.favorites-page-root .scroll-bar .thumb:hover {
+    -fx-background-color: rgba(231, 229, 228, 0.38);
+}
+
+.favorites-page-root .scroll-bar .increment-button,
+.favorites-page-root .scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 3px;
+}
+
+/* =====================================================================
+   POPUP DI CONDIVISIONE — incorporato qui per non richiedere un secondo CSS
+   ===================================================================== */
+.sharing-popup-overlay {
+    -fx-background-color: transparent;
+    -fx-alignment: center;
+}
+
+.sharing-popup-backdrop {
+    -fx-background-color: rgba(8, 8, 8, 0.52);
+}
+
+.sharing-popup-card {
+    -fx-background-color: linear-gradient(to bottom right, rgba(37, 37, 36, 0.98), rgba(24, 24, 23, 0.99));
+    -fx-background-radius: 20px;
+    -fx-border-radius: 20px;
+    -fx-border-color: rgba(231, 229, 228, 0.22);
+    -fx-border-width: 1px;
+    -fx-padding: 22px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.45), 24, 0.18, 0, 8);
+}
+
+.sharing-popup-card .label,
+.sharing-popup-title,
+.sharing-popup-card .section-header {
+    -fx-text-fill: #fafaf9;
+}
+
+.sharing-popup-title,
+.sharing-popup-card .section-header {
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.sharing-popup-subtitle,
+.sharing-popup-hint {
+    -fx-text-fill: rgba(231, 229, 228, 0.70);
+    -fx-font-size: 11px;
+    -fx-wrap-text: true;
+}
+
+.sharing-popup-close {
+    -fx-background-color: rgba(231, 229, 228, 0.08);
+    -fx-text-fill: #f5f5f4;
+    -fx-border-color: rgba(231, 229, 228, 0.20);
+    -fx-border-radius: 18px;
+    -fx-background-radius: 18px;
+    -fx-cursor: hand;
+    -fx-min-width: 36px;
+    -fx-min-height: 36px;
+    -fx-pref-width: 36px;
+    -fx-pref-height: 36px;
+    -fx-font-size: 16px;
+    -fx-padding: 5px 10px;
+}
+
+.sharing-popup-close:hover {
+    -fx-background-color: rgba(231, 229, 228, 0.18);
+}
+
+.sharing-popup-card .separator .line {
+    -fx-border-color: rgba(231, 229, 228, 0.16);
+    -fx-border-width: 1px 0 0 0;
+}
+
+.sharing-popup-card .text-field,
+.sharing-popup-card .combo-box,
+.sharing-popup-card .combo-box-base {
+    -fx-background-color: rgba(18, 18, 17, 0.72);
+    -fx-background-radius: 9px;
+    -fx-border-color: rgba(231, 229, 228, 0.22);
+    -fx-border-radius: 9px;
+    -fx-border-width: 1px;
+    -fx-text-fill: #f5f5f4;
+    -fx-prompt-text-fill: rgba(231, 229, 228, 0.45);
+    -fx-font-size: 12px;
+    -fx-min-height: 36px;
+}
+
+.sharing-popup-card .text-field:focused,
+.sharing-popup-card .combo-box:focused,
+.sharing-popup-card .combo-box-base:focused {
+    -fx-border-color: rgba(231, 229, 228, 0.56);
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.sharing-popup-card .combo-box .list-cell {
+    -fx-text-fill: #f5f5f4;
+    -fx-background-color: transparent;
+}
+
+.sharing-popup-card .sharing-users-list,
+.sharing-popup-card .list-view {
+    -fx-background-color: rgba(18, 18, 17, 0.40);
+    -fx-control-inner-background: rgba(18, 18, 17, 0.40);
+    -fx-control-inner-background-alt: rgba(231, 229, 228, 0.03);
+    -fx-background-radius: 10px;
+    -fx-border-color: rgba(231, 229, 228, 0.18);
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+    -fx-padding: 4px;
+    -fx-fixed-cell-size: 38px;
+}
+
+.sharing-popup-card .list-view .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #f5f5f4;
+    -fx-font-size: 12px;
+    -fx-padding: 8px 10px;
+}
+
+.sharing-popup-card .list-view .list-cell:filled:hover {
+    -fx-background-color: rgba(231, 229, 228, 0.08);
+}
+
+.sharing-popup-card .list-view .list-cell:filled:selected {
+    -fx-background-color: rgba(231, 229, 228, 0.16);
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+}
+
+.sharing-popup-card .list-view .placeholder .label {
+    -fx-text-fill: rgba(231, 229, 228, 0.56);
+}
+
+.sharing-popup-card .btn-primary {
+    -fx-background-color: #e7e5e4;
+    -fx-text-fill: #1c1917;
+    -fx-font-weight: bold;
+    -fx-background-radius: 9px;
+    -fx-padding: 9px 14px;
+}
+
+.sharing-popup-card .btn-primary:hover {
+    -fx-background-color: #fafaf9;
+}
+
+.sharing-popup-card .btn-secondary {
+    -fx-background-color: rgba(231, 229, 228, 0.09);
+    -fx-text-fill: #f5f5f4;
+    -fx-border-color: rgba(231, 229, 228, 0.20);
+    -fx-border-radius: 9px;
+    -fx-background-radius: 9px;
+    -fx-padding: 8px 12px;
+}
+
+.sharing-popup-card .btn-secondary:hover {
+    -fx-background-color: rgba(231, 229, 228, 0.17);
+}
+
+.sharing-popup-card .button:disabled {
+    -fx-opacity: 0.48;
+}
+
+.sharing-status-success {
+    -fx-text-fill: #e7e5e4;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.sharing-status-error {
+    -fx-text-fill: #fecaca;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.delete-confirm-button {
+    -fx-background-color: rgba(120, 45, 45, 0.40);
+    -fx-text-fill: #fecaca;
+    -fx-border-color: rgba(248, 113, 113, 0.30);
+    -fx-border-radius: 9px;
+    -fx-background-radius: 9px;
+    -fx-padding: 10px 16px;
+    -fx-cursor: hand;
+}
+
+.delete-confirm-button:hover {
+    -fx-background-color: rgba(120, 45, 45, 0.58);
+}
+
+.delete-confirm-button:disabled {
+    -fx-opacity: 0.6;
 }

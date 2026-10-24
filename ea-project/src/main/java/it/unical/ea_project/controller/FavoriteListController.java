@@ -195,7 +195,8 @@ public class FavoriteListController {
             return true;
         }
 
-        return sharingRepository.existsByFavoriteList_IdAndUser_Id(
+        return list.getVisibility() == FavoriteList.Visibility.SHARED
+                && sharingRepository.existsByFavoriteList_IdAndUser_Id(
                 list.getId(),
                 userId
         );

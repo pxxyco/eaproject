@@ -8,7 +8,7 @@
 <?import javafx.scene.shape.SVGPath?>
 
 <StackPane fx:id="rootPane" alignment="CENTER"
-           xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+           xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="it.unical.ea_project_javafx.controller.organizer.CreateOfferController">
     <stylesheets>
         <URL value="@../../css/common/style.css" />
@@ -27,7 +27,7 @@
             </padding>
             <Label fx:id="headerTitleLabel" text="Crea Nuova Offerta" styleClass="modal-title" />
             <Region HBox.hgrow="ALWAYS" />
-            <Button text="X" onAction="#handleClose" styleClass="btn-icon-close" />
+            <Button text="×" onAction="#handleClose" styleClass="app-modal-close" accessibleText="Chiudi popup" />
         </HBox>
 
         <Label fx:id="offerErrorLabel" managed="false" visible="false" wrapText="true"

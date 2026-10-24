@@ -3,8 +3,6 @@ package it.unical.ea_project_javafx.controller.common;
 import it.unical.ea_project_javafx.util.ApiService;
 import it.unical.ea_project_javafx.util.AppErrorCode;
 import it.unical.ea_project_javafx.util.SceneNavigator;
-import javafx.animation.KeyFrame;
-import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -16,7 +14,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 
 import java.io.InputStream;
 import java.util.concurrent.Executors;
@@ -32,8 +29,6 @@ public class SplashScreenController {
     private static final String SPLASH_FXML = "/it/unical/ea_project_javafx/fxml/common/splash-screen.fxml";
     private static final String HOME_FXML = "/it/unical/ea_project_javafx/fxml/home/mainview.fxml";
 
-    private static final int MIN_WAIT_SECONDS = 5;
-    private static final int MAX_WAIT_SECONDS = 120;
     private static final int RECOVERY_CHECK_INTERVAL_SECONDS = 3;
 
     @FXML private VBox splashContent;
@@ -47,39 +42,18 @@ public class SplashScreenController {
     @FXML private Button retryButton;
     @FXML private Button exitButton;
 
-    // Stato Rate-Limit condiviso (può rimanere statico se accessibile da interceptor esterni)
-    private static boolean rateLimitScreenActive = false;
-    private static int pendingRateLimitSeconds = 0;
-
-    private Timeline rateLimitCountdown;
     private ScheduledExecutorService recoveryScheduler;
-
-    public static void showRateLimited(int retryAfterSeconds) {
-
-        if (rateLimitScreenActive) {
-            return;
-        }
-
-        rateLimitScreenActive = true;
-        pendingRateLimitSeconds = Math.clamp(retryAfterSeconds, MIN_WAIT_SECONDS, MAX_WAIT_SECONDS);
-        Platform.runLater(() -> SceneNavigator.getInstance().loadScene(SPLASH_FXML, null));
-
-    }
 
     @FXML
     public void initialize() {
 
         ApiService.setOnNetworkFailureGlobal(this::restartAppManually);
-        ApiService.setOnRateLimitedGlobal(SplashScreenController::showRateLimited);
-
+        // Gli HTTP 429 (ERR-104) sono errori locali delle singole richieste.
+        // Non vengono mai usati per riportare l'intera applicazione allo splash.
         retryButton.setOnAction(e -> checkBackendConnection());
         exitButton.setOnAction(e -> shutdownAndExit());
 
-        if (rateLimitScreenActive) {
-            showRateLimitState(pendingRateLimitSeconds);
-        } else {
-            checkBackendConnection();
-        }
+        checkBackendConnection();
 
     }
 
@@ -144,46 +118,6 @@ public class SplashScreenController {
         });
 
         startAutoRecoveryMonitor();
-
-    }
-
-    private void showRateLimitState(int seconds) {
-
-        hideLoadingComponents();
-        showErrorImage();
-
-        setVisibleAndManaged(true, errorTitleLabel, errorMessageLabel);
-        updateRateLimitTexts(seconds);
-        showButtons();
-        retryButton.setDisable(true);
-
-        final int[] remaining = {seconds};
-        if (rateLimitCountdown != null) {
-            rateLimitCountdown.stop();
-        }
-
-        rateLimitCountdown = new Timeline(new KeyFrame(Duration.seconds(1), e -> {
-            remaining[0]--;
-            if (remaining[0] <= 0) {
-                rateLimitCountdown.stop();
-                rateLimitScreenActive = false;
-                loadMainApp();
-            } else {
-                updateRateLimitTexts(remaining[0]);
-            }
-        }));
-
-        rateLimitCountdown.setCycleCount(Timeline.INDEFINITE);
-        rateLimitCountdown.play();
-
-    }
-
-    private void updateRateLimitTexts(int secondsLeft) {
-
-        AppErrorCode code = AppErrorCode.ERR_RATE_LIMITED;
-        errorMessageLabel.setText(String.format("Codice Errore: %s. %s Riprova tra %d s.",
-                code.getCode(), code.getDefaultDescription(), secondsLeft));
-        retryButton.setText("Riprova tra " + secondsLeft + " s");
 
     }
 
@@ -258,10 +192,6 @@ public class SplashScreenController {
     private void shutdownAndExit() {
 
         stopAutoRecoveryMonitor();
-        if (rateLimitCountdown != null) {
-            rateLimitCountdown.stop();
-        }
-
         Platform.exit();
 
     }

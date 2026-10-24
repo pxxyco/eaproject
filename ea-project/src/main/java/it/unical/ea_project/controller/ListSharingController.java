@@ -17,6 +17,7 @@ import it.unical.ea_project.service.ListSharingService;
 import it.unical.ea_project.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +47,8 @@ public class ListSharingController {
     // userId resta interno per modifiche/revoche di condivisioni già accettate.
     public record ShareListRequest(Long listId, String identifier, String username, String email,
                                    Long userId, ListSharing.SharingPermission permission) {}
+
+    public record UserSearchResponse(String username, String email) {}
 
     public record SharingResponse(Long listId, String listName, Long userId, String username, String email,
                                   ListSharing.SharingPermission permission, LocalDateTime sharedAt) {
@@ -80,6 +83,9 @@ public class ListSharingController {
         if (list == null) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Lista non trovata.");
         if (!list.getUser().getId().equals(currentUser.id())) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 
+        if (list.getVisibility() != FavoriteList.Visibility.SHARED) {
+            return ResponseEntity.badRequest().body("Rendi la lista condivisa prima di invitare altri utenti.");
+        }
         String normalizedIdentifier = identifier.trim();
         User recipient = users.findByUsernameIgnoreCase(normalizedIdentifier)
                 .or(() -> users.findByEmailIgnoreCase(normalizedIdentifier))
@@ -115,6 +121,30 @@ public class ListSharingController {
                 "message", "Invito inviato a @" + recipient.getUsername(),
                 "username", recipient.getUsername(),
                 "email", recipient.getEmail()));
+    }
+
+
+    /**
+     * Ricerca persone attive per username o email, limitata alla gestione di una lista posseduta
+     * dall'utente autenticato. Non espone un elenco globale degli utenti senza una lista autorizzata.
+     */
+    @GetMapping("/search-users")
+    @Transactional(readOnly = true)
+    public ResponseEntity<?> searchUsersForSharing(@RequestParam Long listId,
+                                                   @RequestParam String q,
+                                                   @AuthenticationPrincipal AuthUser currentUser) {
+        if (listId == null || !owns(listId, currentUser.id())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        String query = q == null ? "" : q.trim();
+        if (query.length() < 2) return ResponseEntity.ok(List.of());
+        List<UserSearchResponse> result = users.searchActiveUsers(query, currentUser.id(), PageRequest.of(0, 10))
+                .stream()
+                .filter(candidate -> !sharings.existsByFavoriteList_IdAndUser_Id(listId, candidate.getId()))
+                .filter(candidate -> !notifications.hasPendingListInvitation(candidate.getId(), listId))
+                .map(candidate -> new UserSearchResponse(candidate.getUsername(), candidate.getEmail()))
+                .toList();
+        return ResponseEntity.ok(result);
     }
 
     private String firstNonBlank(String... values) {

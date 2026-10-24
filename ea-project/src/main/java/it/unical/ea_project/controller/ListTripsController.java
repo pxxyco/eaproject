@@ -136,7 +136,8 @@ public class ListTripsController {
 
         FavoriteList list = activeList(listId);
         return list != null && (list.getUser().getId().equals(userId)
-                || sharings.existsByFavoriteList_IdAndUser_Id(listId, userId));
+                || list.getVisibility() == FavoriteList.Visibility.SHARED
+                && sharings.existsByFavoriteList_IdAndUser_Id(listId, userId));
 
     }
 
@@ -151,6 +152,7 @@ public class ListTripsController {
             return true;
         }
 
+        if (list.getVisibility() != FavoriteList.Visibility.SHARED) return false;
         return sharings.findByFavoriteListId(listId)
             .stream().anyMatch(s ->
                 s.getUser().getId().equals(userId) && s.getPermission() == ListSharing.SharingPermission.EDIT

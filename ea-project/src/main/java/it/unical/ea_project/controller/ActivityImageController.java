@@ -63,8 +63,8 @@ public class ActivityImageController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteImage(@PathVariable Long id) {
-        activityImageService.deleteImage(id);
+    public ResponseEntity<Void> deleteImage(@PathVariable Long id, @AuthenticationPrincipal AuthUser user) {
+        activityImageService.deleteImage(id, user.id());
         return ResponseEntity.noContent().build();
     }
 }

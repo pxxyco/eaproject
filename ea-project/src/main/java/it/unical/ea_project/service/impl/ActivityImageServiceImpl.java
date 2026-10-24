@@ -75,8 +75,16 @@ public class ActivityImageServiceImpl implements ActivityImageService {
 
     @Override
     @Transactional
-    public void deleteImage(Long imageId) {
-        activityImageRepository.deleteById(imageId);
+    public void deleteImage(Long imageId, Long organizerId) {
+        var image = activityImageRepository.findById(imageId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Foto non trovata."));
+        var experience = image.getActivity();
+        if (experience == null || experience.getDeletedAt() != null
+                || experience.getCreatedBy() == null
+                || !Objects.equals(experience.getCreatedBy().getId(), organizerId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Non puoi eliminare questa foto.");
+        }
+        activityImageRepository.delete(image);
     }
 
     private void validateFiles(List<MultipartFile> files) {

@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox fx:id="container" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="500.0" prefWidth="800.0" styleClass="recensione-container" stylesheets="@../../../css/activity/activity-common.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.activity.reviews.ReviewsContainerController">
+<VBox fx:id="container" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="500.0" prefWidth="800.0" styleClass="recensione-container" stylesheets="@../../../css/activity/activity-common.css" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.activity.reviews.ReviewsContainerController">
    <children>
       <HBox>
          <children>

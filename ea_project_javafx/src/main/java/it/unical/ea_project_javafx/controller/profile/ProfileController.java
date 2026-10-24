@@ -5,19 +5,20 @@ import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.util.ApiService;
 import it.unical.ea_project_javafx.util.BackgroundHelper;
 import it.unical.ea_project_javafx.util.SceneNavigator;
+import it.unical.ea_project_javafx.util.PopupFactory;
 import it.unical.ea_project_javafx.controller.common.NavbarController;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.shape.Circle;
+import javafx.geometry.Rectangle2D;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
 import javafx.scene.layout.StackPane;
@@ -79,11 +80,12 @@ public class ProfileController {
         if (profilePhotoImageView != null) {
             profilePhotoImageView.setFitWidth(104);
             profilePhotoImageView.setFitHeight(104);
-            profilePhotoImageView.setPreserveRatio(true);
+            profilePhotoImageView.setPreserveRatio(false);
             profilePhotoImageView.setSmooth(true);
             profilePhotoImageView.setClip(new Circle(52, 52, 52));
             profilePhotoImageView.setVisible(false);
-            profilePhotoImageView.setManaged(false);
+            // Mantiene fissa la geometria dell'avatar anche quando viene mostrata l'immagine.
+            profilePhotoImageView.setManaged(true);
         }
         updatePhotoButtons();
     }
@@ -303,35 +305,37 @@ public class ProfileController {
             return;
         }
 
-        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmation.setTitle("Rimuovi foto del profilo");
-        confirmation.setHeaderText("Vuoi rimuovere la foto del profilo?");
-        confirmation.setContentText("La foto salvata verrà eliminata. Potrai caricarne un'altra in qualsiasi momento.");
-        if (avatarContainer != null && avatarContainer.getScene() != null) {
-            confirmation.initOwner(avatarContainer.getScene().getWindow());
+        StackPane popupRoot = PopupFactory.resolveRoot(avatarContainer);
+        if (popupRoot == null) {
+            showError("Impossibile aprire la conferma in questo momento.");
+            return;
         }
-        if (confirmation.showAndWait().filter(button -> button == javafx.scene.control.ButtonType.OK).isEmpty()) return;
-
-        ApiService.callDetailed(
-                ApiService.BASE_URL + "/api/users/me/profile-photo",
-                null,
-                ApiService.Method.DELETE,
-                response -> Platform.runLater(() -> {
-                    try {
-                        UserDTO updated = ApiService.fromJson(response.body(), UserDTO.class);
-                        if (updated != null) userSession.setSession(updated);
-                        pendingPhotoPath = null;
-                        populateUserData(false);
-                        updatePhotoButtons();
-                        showSuccess("Foto del profilo rimossa.");
-                    } catch (Exception exception) {
-                        refreshProfileFromServer();
-                        showError("La foto è stata rimossa, ma non è stato possibile aggiornare la schermata.");
-                    }
-                }),
-                message -> Platform.runLater(() -> showError(message)),
-                null
-        );
+        PopupFactory.showConfirmation(popupRoot,
+                "Rimuovi foto del profilo",
+                "La foto salvata verrà eliminata. Potrai caricarne un'altra in qualsiasi momento.",
+                PopupFactory.Size.COMPACT,
+                () -> {
+            ApiService.callDetailed(
+                    ApiService.BASE_URL + "/api/users/me/profile-photo",
+                    null,
+                    ApiService.Method.DELETE,
+                    response -> Platform.runLater(() -> {
+                        try {
+                            UserDTO updated = ApiService.fromJson(response.body(), UserDTO.class);
+                            if (updated != null) userSession.setSession(updated);
+                            pendingPhotoPath = null;
+                            populateUserData(false);
+                            updatePhotoButtons();
+                            showSuccess("Foto del profilo rimossa.");
+                        } catch (Exception exception) {
+                            refreshProfileFromServer();
+                            showError("La foto è stata rimossa, ma non è stato possibile aggiornare la schermata.");
+                        }
+                    }),
+                    message -> Platform.runLater(() -> showError(message)),
+                    null
+            );
+                });
     }
 
     private int[] readImageDimensions(Path path) throws IOException {
@@ -380,11 +384,28 @@ public class ProfileController {
 
     private void showPhoto(Image image) {
         boolean hasPhoto = image != null && !image.isError();
-        profilePhotoImageView.setImage(hasPhoto ? image : null);
+        if (hasPhoto) {
+            double width = image.getWidth();
+            double height = image.getHeight();
+            if (width > 0 && height > 0) {
+                double side = Math.min(width, height);
+                double x = (width - side) / 2.0;
+                double y = (height - side) / 2.0;
+                profilePhotoImageView.setViewport(new Rectangle2D(x, y, side, side));
+            } else {
+                profilePhotoImageView.setViewport(null);
+            }
+            profilePhotoImageView.setImage(image);
+            profilePhotoImageView.setFitWidth(104);
+            profilePhotoImageView.setFitHeight(104);
+        } else {
+            profilePhotoImageView.setImage(null);
+            profilePhotoImageView.setViewport(null);
+        }
         profilePhotoImageView.setVisible(hasPhoto);
-        profilePhotoImageView.setManaged(hasPhoto);
+        profilePhotoImageView.setManaged(true);
         avatarInitialsLabel.setVisible(!hasPhoto);
-        avatarInitialsLabel.setManaged(!hasPhoto);
+        avatarInitialsLabel.setManaged(true);
     }
 
     private void updatePhotoButtons() {

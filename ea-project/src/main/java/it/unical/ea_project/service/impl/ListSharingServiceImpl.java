@@ -34,6 +34,10 @@ public class ListSharingServiceImpl implements ListSharingService {
                 .filter(list -> !list.isDeleted())
                 .orElseThrow(() -> new IllegalArgumentException("Lista non trovata o eliminata con ID: " + listId));
 
+        if (favoriteList.getVisibility() != FavoriteList.Visibility.SHARED) {
+            throw new IllegalArgumentException("La lista non è condivisa. L'invito non è più valido.");
+        }
+
         User user = userRepository.findById(userId)
                 .filter(candidate -> candidate.getDeletedAt() == null)
                 .orElseThrow(() -> new IllegalArgumentException("Utente non trovato con ID: " + userId));
@@ -76,7 +80,8 @@ public class ListSharingServiceImpl implements ListSharingService {
 
         return listSharingRepository.findByUser_Id(userId)
             .stream()
-            .filter(sharing -> !sharing.getFavoriteList().isDeleted())
+            .filter(sharing -> !sharing.getFavoriteList().isDeleted()
+                    && sharing.getFavoriteList().getVisibility() == FavoriteList.Visibility.SHARED)
             .toList();
 
     }

@@ -4,6 +4,7 @@ import com.google.gson.reflect.TypeToken;
 import it.unical.ea_project_javafx.dto.BookingDTO;
 import it.unical.ea_project_javafx.util.ApiService;
 import it.unical.ea_project_javafx.util.BackgroundHelper;
+import it.unical.ea_project_javafx.util.PopupFactory;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -261,11 +262,15 @@ public class BookingsController {
         if (selectedStatus == null || "Tutti".equalsIgnoreCase(selectedStatus)) return true;
         String status = booking.getBookingStatus() == null ? "" : booking.getBookingStatus().toUpperCase(Locale.ROOT);
         return switch (selectedStatus) {
-            case "In attesa" -> "PENDING".equals(status);
-            case "Confermate" -> "CONFIRMED".equals(status);
-            case "Completate / terminate" -> "COMPLETED".equals(status)
-                    || (!"CANCELLED".equals(status) && isEventEnded(booking, evaluationTime));
-            case "Cancellate" -> "CANCELLED".equals(status);
+            case "In attesa" -> "PENDING".equals(status)
+                    && !isCancelled(booking) && !isHistorical(booking, evaluationTime);
+            case "Confermate" -> "CONFIRMED".equals(status)
+                    && !isCancelled(booking) && !isHistorical(booking, evaluationTime);
+            case "Completate / terminate" -> !isCancelled(booking)
+                    && ("COMPLETED".equals(status)
+                    || "COMPLETED".equalsIgnoreCase(booking.getItemStatus())
+                    || isEventEnded(booking, evaluationTime));
+            case "Cancellate" -> isCancelled(booking);
             default -> true;
         };
     }
@@ -305,6 +310,7 @@ public class BookingsController {
         if (booking == null) return false;
         return isCancelled(booking)
                 || "COMPLETED".equalsIgnoreCase(booking.getBookingStatus())
+                || "COMPLETED".equalsIgnoreCase(booking.getItemStatus())
                 || isEventEnded(booking, now);
     }
 
@@ -319,7 +325,8 @@ public class BookingsController {
     }
 
     private boolean isCancelled(BookingDTO booking) {
-        return booking != null && "CANCELLED".equalsIgnoreCase(booking.getBookingStatus());
+        return booking != null && ("CANCELLED".equalsIgnoreCase(booking.getBookingStatus())
+                || "CANCELLED".equalsIgnoreCase(booking.getItemStatus()));
     }
 
     private LocalDateTime eventStartDateTime(BookingDTO booking) {
@@ -381,8 +388,9 @@ public class BookingsController {
     private String displayStatus(BookingDTO booking) {
         if (booking == null) return "—";
         String status = booking.getBookingStatus() == null ? "" : booking.getBookingStatus().toUpperCase(Locale.ROOT);
-        if ("CANCELLED".equals(status)) return "Cancellata";
-        if ("COMPLETED".equals(status)) return "Completata";
+        if ("CANCELLED".equals(status)) return "Prenotazione cancellata";
+        if ("CANCELLED".equalsIgnoreCase(booking.getItemStatus())) return "Esperienza annullata";
+        if ("COMPLETED".equals(status) || "COMPLETED".equalsIgnoreCase(booking.getItemStatus())) return "Completata";
         if (isEventEnded(booking, evaluationTime)) return "Terminata";
         if ("CONFIRMED".equals(status)) return "Confermata";
         if ("PENDING".equals(status)) return "In attesa";
@@ -391,7 +399,7 @@ public class BookingsController {
 
     private String statusStyleClass(String status) {
         return switch (status) {
-            case "Cancellata" -> "booking-status-cancelled";
+            case "Cancellata", "Prenotazione cancellata", "Esperienza annullata" -> "booking-status-cancelled";
             case "Completata", "Terminata" -> "booking-status-completed";
             case "Confermata" -> "booking-status-confirmed";
             case "In attesa" -> "booking-status-pending";
@@ -416,8 +424,8 @@ public class BookingsController {
             showError("Seleziona una prenotazione valida da esportare.");
             return;
         }
-        if ("CANCELLED".equalsIgnoreCase(dto.getBookingStatus())) {
-            showError("Non puoi esportare una prenotazione cancellata.");
+        if (isCancelled(dto)) {
+            showError("Non puoi esportare una prenotazione o un'esperienza cancellata.");
             return;
         }
         pendingExportBooking = dto;
@@ -539,21 +547,25 @@ public class BookingsController {
             showError("Questa prenotazione non può più essere cancellata perché è già iniziata, terminata o annullata.");
             return;
         }
-        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION);
-        confirmation.setTitle("Cancella prenotazione");
-        confirmation.setHeaderText("Vuoi cancellare questa prenotazione?");
-        confirmation.setContentText("L'operazione non può essere annullata. I posti verranno rimessi a disposizione.");
-        if (statusMessageLabel.getScene() != null) confirmation.initOwner(statusMessageLabel.getScene().getWindow());
-        if (confirmation.showAndWait().filter(button -> button == ButtonType.OK).isEmpty()) return;
-
-        ApiService.callDetailed(ApiService.BASE_URL + "/api/bookings/" + dto.getBookingId(), null,
-                ApiService.Method.DELETE,
-                response -> Platform.runLater(() -> {
-                    showSuccess("Prenotazione cancellata correttamente.");
-                    loadBookings();
-                }),
-                message -> Platform.runLater(() -> showError(message)),
-                null);
+        StackPane popupRoot = PopupFactory.resolveRoot(statusMessageLabel);
+        if (popupRoot == null) {
+            showError("Impossibile aprire la conferma in questo momento.");
+            return;
+        }
+        PopupFactory.showConfirmation(popupRoot,
+                "Cancella prenotazione",
+                "L'operazione non può essere annullata. I posti verranno rimessi a disposizione.",
+                PopupFactory.Size.COMPACT,
+                () -> {
+            ApiService.callDetailed(ApiService.BASE_URL + "/api/bookings/" + dto.getBookingId(), null,
+                    ApiService.Method.DELETE,
+                    response -> Platform.runLater(() -> {
+                        showSuccess("Prenotazione cancellata correttamente.");
+                        loadBookings();
+                    }),
+                    message -> Platform.runLater(() -> showError(message)),
+                    null);
+                });
     }
 
     private void showError(String msg) {
