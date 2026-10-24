@@ -10,6 +10,7 @@ import it.unical.ea_project_javafx.dto.home.ActivityHomeDTO;
 import it.unical.ea_project_javafx.dto.home.TripHomeDTO;
 import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.util.ApiService;
+import it.unical.ea_project_javafx.util.PopupFactory;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
@@ -19,15 +20,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.effect.Effect;
-import javafx.scene.effect.GaussianBlur;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.paint.Color;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -66,6 +60,7 @@ public class OrganizerDashboardController implements ProfileDashboardController 
     private List<TripDTO> trips = List.of();
     private List<ActivityDTO> activities = List.of();
     private final Map<String, String> dashboardErrors = new LinkedHashMap<>();
+    private PopupFactory.Handle activeOfferPopup;
 
     private record DashboardOffer(
             String type,
@@ -92,46 +87,33 @@ public class OrganizerDashboardController implements ProfileDashboardController 
             FXMLLoader loader = new FXMLLoader(getClass().getResource(
                     "/it/unical/ea_project_javafx/fxml/organizer/create-offer.fxml"));
             Parent popup = loader.load();
-            if (tripToEdit != null || activityToEdit != null) {
-                CreateOfferController controller = loader.getController();
-                if (tripToEdit != null) controller.setTripToEdit(tripToEdit);
-                else controller.setActivityToEdit(activityToEdit);
+            CreateOfferController controller = loader.getController();
+            if (tripToEdit != null) controller.setTripToEdit(tripToEdit);
+            else if (activityToEdit != null) controller.setActivityToEdit(activityToEdit);
+            controller.setCloseAction(() -> {
+                PopupFactory.Handle handle = activeOfferPopup;
+                activeOfferPopup = null;
+                if (handle != null) handle.close();
+                refreshOrganizerDashboard();
+            });
+            if (popup instanceof javafx.scene.layout.StackPane stackPane
+                    && !stackPane.getStyleClass().contains("popup-factory-transparent-surface")) {
+                stackPane.getStyleClass().add("popup-factory-transparent-surface");
             }
-
-            Stage owner = (Stage) source.getScene().getWindow();
-            Stage modal = new Stage(StageStyle.TRANSPARENT);
-            modal.initOwner(owner);
-            modal.initModality(Modality.APPLICATION_MODAL);
-
-            Scene scene = new Scene(popup, 920, 720);
-            scene.setFill(Color.TRANSPARENT);
-            modal.setScene(scene);
-            modal.setOnShown(ignored -> {
-                modal.setX(owner.getX() + (owner.getWidth() - modal.getWidth()) / 2.0);
-                modal.setY(owner.getY() + (owner.getHeight() - modal.getHeight()) / 2.0);
-            });
-
-            Effect previousEffect = owner.getScene().getRoot().getEffect();
-            owner.getScene().getRoot().setEffect(new GaussianBlur(8));
-            modal.setResizable(false);
-            modal.setOnHidden(ignored -> {
-                owner.getScene().getRoot().setEffect(previousEffect);
-                if (userSession != null) {
-                    loadTrips(userSession);
-                    loadActivities(userSession);
-                    loadSubscribers(userSession);
-                }
-            });
-            modal.showAndWait();
+            activeOfferPopup = PopupFactory.show(rootStackPane, popup, PopupFactory.Size.LARGE);
         } catch (IOException | RuntimeException exception) {
-            ownerSceneRoot(source).setEffect(null);
             LOGGER.log(Level.WARNING, "Unable to open the create-offer form", exception);
             showDashboardError("offer-form", "Non è stato possibile aprire il modulo dell'offerta.");
         }
     }
 
-    private javafx.scene.Parent ownerSceneRoot(Node source) {
-        return source.getScene().getRoot();
+    private void refreshOrganizerDashboard() {
+        if (userSession != null) {
+            loadTrips(userSession);
+            loadActivities(userSession);
+            loadSubscribers(userSession);
+            loadPaidRevenue(userSession);
+        }
     }
 
     public static class SubscriberRow {
@@ -440,21 +422,16 @@ public class OrganizerDashboardController implements ProfileDashboardController 
     }
 
     private void handleDeleteOffer(DashboardOffer offer) {
-        Alert confirmation = new Alert(Alert.AlertType.CONFIRMATION,
-                "Vuoi davvero cancellare \"" + offer.title() + "\"?",
-                ButtonType.CANCEL, ButtonType.OK);
-        confirmation.setHeaderText(offer.type().equals("TRIP") ? "Cancella viaggio" : "Cancella attività");
-        confirmation.showAndWait().filter(button -> button == ButtonType.OK).ifPresent(button ->
-                ApiService.delete(
+        if (offer == null || offer.id() == null) return;
+        PopupFactory.showConfirmation(rootStackPane,
+                offer.type().equals("TRIP") ? "Cancella viaggio" : "Cancella attività",
+                "Vuoi davvero cancellare “" + offer.title() + "”? L'operazione potrebbe non essere reversibile.",
+                PopupFactory.Size.COMPACT,
+                () -> ApiService.delete(
                         ApiService.BASE_URL + "/api/" + (offer.type().equals("TRIP") ? "trips/" : "activities/") + offer.id(),
                         response -> {
                             clearDashboardError("delete");
-                            if (userSession != null) {
-                                loadTrips(userSession);
-                                loadActivities(userSession);
-                                loadSubscribers(userSession);
-                                loadPaidRevenue(userSession);
-                            }
+                            refreshOrganizerDashboard();
                         },
                         () -> showDashboardError("delete", "Impossibile cancellare l'offerta. Verifica i permessi e riprova."),
                         null

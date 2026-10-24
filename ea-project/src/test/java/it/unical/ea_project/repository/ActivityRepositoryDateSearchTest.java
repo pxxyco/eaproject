@@ -13,6 +13,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@org.springframework.test.context.ActiveProfiles("test")
+@org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase(replace = org.springframework.boot.jdbc.test.autoconfigure.AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
 class ActivityRepositoryDateSearchTest {
 
@@ -33,7 +35,7 @@ class ActivityRepositoryDateSearchTest {
         saveActivity(organizer, "ends-at-midnight", dayStart.minusDays(1), dayStart, false);
         saveActivity(organizer, "spans-day", dayStart.minusDays(1), nextDayStart.plusDays(1), false);
         saveActivity(organizer, "starts-tomorrow", nextDayStart, nextDayStart.plusHours(1), false);
-        saveActivity(organizer, "ended-yesterday", dayStart.minusDays(1), dayStart.minusNanos(1), false);
+        saveActivity(organizer, "ended-yesterday", dayStart.minusDays(1), dayStart.minusSeconds(1), false);
         saveActivity(organizer, "deleted", dayStart, nextDayStart, true);
 
         List<String> matching = repository.search("", null, dayStart, nextDayStart, PageRequest.of(0, 9))

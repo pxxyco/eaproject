@@ -118,3 +118,28 @@
     -fx-background-color: rgba(255, 255, 255, 0.28);
     -fx-border-color: #ffffff;
 }
+/* Avatar del profilo: iniziali visibili finché non esiste una foto valida. */
+.profile-avatar {
+    -fx-background-color: rgba(231, 229, 228, 0.14);
+    -fx-border-color: rgba(255, 255, 255, 0.32);
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 52px;
+    -fx-background-radius: 52px;
+    -fx-alignment: center;
+    -fx-overflow: hidden;
+}
+
+.avatar-initials {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+}
+
+.profile-avatar .image-view {
+    -fx-background-radius: 52px;
+}
+
+.profile-subtitle {
+    -fx-text-fill: rgba(255, 255, 255, 0.68);
+    -fx-font-size: 12px;
+}

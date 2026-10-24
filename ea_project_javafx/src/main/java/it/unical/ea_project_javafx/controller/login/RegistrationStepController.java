@@ -156,7 +156,7 @@ public class RegistrationStepController {
                     }
                 }),
                 () -> Platform.runLater(() -> {
-                    SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/pre-main.fxml", null);
+                    SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/common/splash-screen.fxml", null);
                 }),
                 navigator::setLoading
         );

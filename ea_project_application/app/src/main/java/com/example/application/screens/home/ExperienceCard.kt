@@ -24,34 +24,35 @@ fun ExperienceCard(
     rating: String,
     imageUrl: String,
     dateInfo: String?,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier.width(180.dp)
 ) {
     Card(
-        modifier = Modifier
-            .width(180.dp)
-            .wrapContentHeight()
-            .clickable { onClick() },
+        modifier = modifier.clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = PopupSurface)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            // Sostituito AsyncImage con un Box segnaposto stilizzato
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(110.dp)
-                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 16.dp,
+                            topEnd = 16.dp
+                        )
+                    )
                     .background(Stone600),
                 contentAlignment = Alignment.Center
             ) {
-                // Testo o icona di fallback per l'immagine
-                Text(
-                    text = "Foto",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Stone300
+                RemotePhoto(
+                    imageUrl = imageUrl,
+                    modifier = Modifier.fillMaxSize(),
+                    contentDescription = title
                 )
 
-                // Badge Categoria in alto a sinistra
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -66,13 +67,15 @@ fun ExperienceCard(
                             text = category,
                             style = MaterialTheme.typography.labelSmall,
                             color = Color.White,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                            modifier = Modifier.padding(
+                                horizontal = 6.dp,
+                                vertical = 2.dp
+                            )
                         )
                     }
                 }
             }
 
-            // Dettagli Testuali della Card
             Column(modifier = Modifier.padding(10.dp)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),

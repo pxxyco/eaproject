@@ -62,8 +62,8 @@ public class TripImageController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteImage(@PathVariable Long id) {
-        tripImageService.deleteImage(id);
+    public ResponseEntity<Void> deleteImage(@PathVariable Long id, @AuthenticationPrincipal AuthUser user) {
+        tripImageService.deleteImage(id, user.id());
         return ResponseEntity.noContent().build();
     }
 }

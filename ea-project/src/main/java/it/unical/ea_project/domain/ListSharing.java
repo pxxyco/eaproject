@@ -10,10 +10,27 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @ToString(exclude = {"favoriteList", "user"})
 @Entity
-
 @IdClass(ListSharing.ListSharingId.class)
 @Table(name = "\"LIST_SHARING\"")
 public class ListSharing {
+
+    /**
+     * SharingPermission
+     */
+    public enum SharingPermission {
+    
+        VIEW,
+        EDIT
+
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ListSharingId implements Serializable {
+        private Long favoriteList;
+        private Long user;
+    }
 
     @Id
     @ManyToOne(fetch = FetchType.LAZY)
@@ -25,23 +42,10 @@ public class ListSharing {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    public enum SharingPermission {
-        VIEW,
-        EDIT
-    }
-
     @Enumerated(EnumType.STRING)
     @Column(name = "permission", nullable = false)
     private SharingPermission permission;
 
     @Column(name = "shared_at")
     private LocalDateTime sharedAt;
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class ListSharingId implements Serializable {
-        private Long favoriteList;
-        private Long user;
-    }
 }

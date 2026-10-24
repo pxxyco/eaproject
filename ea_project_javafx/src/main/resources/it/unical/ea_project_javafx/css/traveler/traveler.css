@@ -176,3 +176,258 @@
 .danger-action-button:hover {
     -fx-background-color: rgba(239, 68, 68, 0.5);
 }
+
+/* Prenotazioni cancellate: visivamente secondarie e sempre in fondo alla lista. */
+.cancelled-booking-row {
+    -fx-opacity: 0.68;
+}
+.cancelled-booking-row .text {
+    -fx-fill: #7b8492;
+    -fx-font-style: italic;
+}
+.cancelled-booking-row .button {
+    -fx-opacity: 0.8;
+}
+
+/* Stati della prenotazione: etichette leggibili anche nella vista storico. */
+.booking-status-pill {
+    -fx-padding: 4px 9px;
+    -fx-background-radius: 999px;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+}
+.booking-status-confirmed {
+    -fx-background-color: rgba(231, 229, 228, 0.12);
+    -fx-border-color: rgba(231, 229, 228, 0.20);
+    -fx-border-radius: 999px;
+    -fx-text-fill: #e7e5e4;
+}
+.booking-status-pending {
+    -fx-background-color: rgba(245, 158, 11, 0.18);
+    -fx-text-fill: #fcd34d;
+}
+.booking-status-completed {
+    -fx-background-color: rgba(231, 229, 228, 0.08);
+    -fx-border-color: rgba(231, 229, 228, 0.16);
+    -fx-border-radius: 999px;
+    -fx-text-fill: rgba(231, 229, 228, 0.78);
+}
+.booking-status-cancelled {
+    -fx-background-color: rgba(148, 163, 184, 0.16);
+    -fx-text-fill: #94a3b8;
+}
+.booking-status-neutral {
+    -fx-background-color: rgba(255, 255, 255, 0.10);
+    -fx-text-fill: rgba(255, 255, 255, 0.8);
+}
+
+/* Le esperienze già concluse rimangono consultabili, ma meno in evidenza. */
+.historical-booking-row {
+    -fx-opacity: 0.88;
+}
+.historical-booking-row .text {
+    -fx-fill: rgba(203, 213, 225, 0.86);
+}
+
+/* Dashboard viaggiatore: un solo foglio, palette grafite/avorio. */
+.dashboard-section {-fx-spacing: 14px;}
+
+.dashboard-welcome {-fx-padding: 28px 30px;
+    -fx-background-color: linear-gradient(to bottom right, rgba(231,229,228,0.16), rgba(255,255,255,0.045) 58%, rgba(255,255,255,0.025));
+    -fx-background-radius: 22px;
+    -fx-border-color: rgba(231,229,228,0.25);
+    -fx-border-radius: 22px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.20), 24, 0.14, 0, 8);}
+
+.dashboard-welcome-eyebrow {-fx-text-fill: rgba(231,229,228,0.70); -fx-font-size: 10px; -fx-font-weight: bold;}
+
+.dashboard-welcome-subtitle {-fx-text-fill: rgba(231,229,228,0.78); -fx-font-size: 13px;}
+
+.dashboard-kpi-label {-fx-font-size: 10px; -fx-font-weight: bold; -fx-text-fill: rgba(231,229,228,0.65);}
+
+.dashboard-kpi-value {-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #fafaf9;}
+
+.dashboard-kpi-help {-fx-font-size: 11px; -fx-text-fill: rgba(231,229,228,0.64);}
+
+.dashboard-upcoming-row {-fx-alignment: center-left;}
+
+.dashboard-upcoming-card {-fx-padding: 17px; -fx-spacing: 9px; -fx-min-width: 180px; -fx-pref-width: 250px; -fx-min-height: 178px;
+    -fx-background-color: linear-gradient(to bottom right, rgba(255,255,255,0.09), rgba(255,255,255,0.025));
+    -fx-background-radius: 16px; -fx-border-color: rgba(231,229,228,0.17); -fx-border-radius: 16px;}
+
+.dashboard-upcoming-card:hover {-fx-background-color: linear-gradient(to bottom right, rgba(231,229,228,0.14), rgba(255,255,255,0.045)); -fx-border-color: rgba(231,229,228,0.30);}
+
+.dashboard-upcoming-type {-fx-text-fill: rgba(231,229,228,0.62); -fx-font-size: 9px; -fx-font-weight: bold;}
+
+.dashboard-upcoming-title {-fx-text-fill: #fafaf9; -fx-font-size: 15px; -fx-font-weight: bold;}
+
+.dashboard-upcoming-date {-fx-text-fill: #e7e5e4; -fx-font-size: 11px; -fx-font-weight: bold;}
+
+.dashboard-upcoming-location {-fx-text-fill: rgba(231,229,228,0.70); -fx-font-size: 11px;}
+
+.dashboard-upcoming-action {-fx-background-color: rgba(231,229,228,0.11); -fx-text-fill: #f5f5f4; -fx-font-size: 11px;
+    -fx-border-color: rgba(231,229,228,0.22); -fx-border-radius: 9px; -fx-background-radius: 9px;
+    -fx-padding: 8px 10px; -fx-cursor: hand;}
+
+.dashboard-upcoming-action:hover {-fx-background-color: rgba(231,229,228,0.21);}
+
+.dashboard-upcoming-empty {-fx-padding: 19px 22px; -fx-min-height: 95px; -fx-background-color: rgba(255,255,255,0.035);
+    -fx-background-radius: 14px; -fx-border-color: rgba(231,229,228,0.13); -fx-border-radius: 14px;}
+
+.dashboard-upcoming-empty-title {-fx-text-fill: #f5f5f4; -fx-font-size: 14px; -fx-font-weight: bold;}
+
+.dashboard-upcoming-empty-subtitle {-fx-text-fill: rgba(231,229,228,0.65); -fx-font-size: 11px;}
+
+.dashboard-status {-fx-padding: 9px 12px; -fx-background-radius: 9px; -fx-font-size: 12px;}
+
+.dashboard-status-error {-fx-text-fill: #fecaca; -fx-background-color: rgba(185,28,28,0.20);}
+
+.dashboard-status-success {-fx-text-fill: #e7e5e4; -fx-background-color: rgba(231,229,228,0.10);}
+
+.dashboard-empty-label {-fx-text-fill: rgba(231,229,228,0.72); -fx-padding: 25px 18px;}
+
+/* Testata Dashboard: saluto ampio e riepilogo 2x2 a destra. */
+.traveler-dashboard-content .dashboard-welcome {
+    -fx-alignment: center-left;
+    -fx-padding: 28px 30px;
+    -fx-min-height: 238px;
+}
+.dashboard-welcome-intro { -fx-padding: 5px 8px 5px 0; }
+.dashboard-welcome-title { -fx-font-size: 28px; }
+.dashboard-welcome-signature { -fx-font-size: 10px; -fx-text-fill: rgba(231,229,228,0.46); -fx-font-weight: bold; }
+.dashboard-space-panel {
+    -fx-background-color: rgba(12,12,12,0.27);
+    -fx-background-radius: 17px;
+    -fx-border-color: rgba(231,229,228,0.15);
+    -fx-border-radius: 17px;
+    -fx-padding: 16px;
+}
+.dashboard-space-eyebrow { -fx-text-fill: rgba(231,229,228,0.59); -fx-font-size: 9px; -fx-font-weight: bold; }
+.dashboard-space-title { -fx-text-fill: #fafaf9; -fx-font-size: 16px; -fx-font-weight: bold; }
+.dashboard-space-link {
+    -fx-background-color: rgba(231,229,228,0.095);
+    -fx-background-radius: 9px;
+    -fx-border-color: rgba(231,229,228,0.18);
+    -fx-border-radius: 9px;
+    -fx-text-fill: #f5f5f4;
+    -fx-font-size: 11px;
+    -fx-padding: 7px 11px;
+    -fx-cursor: hand;
+}
+.dashboard-space-link:hover { -fx-background-color: rgba(231,229,228,0.20); }
+.dashboard-space-metrics { -fx-fill-height: true; }
+.dashboard-space-stat {
+    -fx-pref-width: 152px;
+    -fx-min-height: 78px;
+    -fx-padding: 11px 12px;
+    -fx-background-color: rgba(255,255,255,0.058);
+    -fx-background-radius: 11px;
+    -fx-border-color: rgba(231,229,228,0.11);
+    -fx-border-radius: 11px;
+}
+.dashboard-space-stat:hover { -fx-background-color: rgba(255,255,255,0.095); }
+.dashboard-space-stat .dashboard-kpi-value { -fx-font-size: 25px; }
+.dashboard-space-stat .dashboard-kpi-label { -fx-font-size: 9px; }
+.dashboard-space-stat .dashboard-kpi-help { -fx-font-size: 10px; }
+
+/* Tabella Dashboard: stile coerente con le card, senza regole duplicate da più fogli. */
+.traveler-dashboard-content .dashboard-bookings-section {
+    -fx-background-color: rgba(255,255,255,0.045);
+    -fx-background-radius: 18px;
+    -fx-border-color: rgba(231,229,228,0.15);
+    -fx-border-radius: 18px;
+    -fx-padding: 21px;
+    -fx-spacing: 15px;
+}
+.traveler-dashboard-content .dashboard-booking-filters { -fx-alignment: center-left; -fx-spacing: 12px; }
+.traveler-dashboard-content .dashboard-booking-filters .text-field,
+.traveler-dashboard-content .dashboard-booking-filters .combo-box {
+    -fx-background-color: rgba(255,255,255,0.065);
+    -fx-border-color: rgba(231,229,228,0.19);
+    -fx-border-width: 1px;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+    -fx-text-fill: #f5f5f4;
+    -fx-prompt-text-fill: rgba(231,229,228,0.60);
+    -fx-pref-height: 42px;
+    -fx-min-height: 42px;
+}
+.traveler-dashboard-content .dashboard-booking-filters .text-field:focused,
+.traveler-dashboard-content .dashboard-booking-filters .combo-box:focused {
+    -fx-border-color: rgba(231,229,228,0.55);
+}
+.traveler-dashboard-content .dashboard-booking-filters .combo-box .list-cell { -fx-text-fill: #f5f5f4; }
+.traveler-dashboard-content .dashboard-booking-filters .combo-box .arrow { -fx-background-color: #e7e5e4; }
+.traveler-dashboard-content .dashboard-bookings-table {
+    -fx-pref-height: 410px;
+    -fx-min-height: 310px;
+    -fx-padding: 0;
+    -fx-background-color: rgba(11,11,11,0.34);
+    -fx-control-inner-background: rgba(19,19,18,0.85);
+    -fx-control-inner-background-alt: rgba(28,28,27,0.75);
+    -fx-table-cell-border-color: transparent;
+    -fx-background-radius: 13px;
+    -fx-border-radius: 13px;
+    -fx-border-width: 1px;
+    -fx-border-color: rgba(231,229,228,0.18);
+    -fx-fixed-cell-size: 57px;
+}
+.traveler-dashboard-content .dashboard-bookings-table .column-header-background {
+    -fx-background-color: rgba(231,229,228,0.105);
+    -fx-background-radius: 12px 12px 0 0;
+}
+.traveler-dashboard-content .dashboard-bookings-table .column-header,
+.traveler-dashboard-content .dashboard-bookings-table .filler {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent rgba(231,229,228,0.15) transparent;
+    -fx-size: 44px;
+}
+.traveler-dashboard-content .dashboard-bookings-table .column-header .label {
+    -fx-text-fill: #e7e5e4;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-alignment: center-left;
+    -fx-padding: 0 5px;
+}
+.traveler-dashboard-content .dashboard-bookings-table .table-row-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent rgba(231,229,228,0.075) transparent;
+    -fx-cell-size: 57px;
+}
+.traveler-dashboard-content .dashboard-bookings-table .table-row-cell:odd { -fx-background-color: rgba(255,255,255,0.018); }
+.traveler-dashboard-content .dashboard-bookings-table .table-row-cell:filled:hover { -fx-background-color: rgba(231,229,228,0.09); }
+.traveler-dashboard-content .dashboard-bookings-table .table-row-cell:filled:selected { -fx-background-color: rgba(231,229,228,0.16); }
+.traveler-dashboard-content .dashboard-bookings-table .table-cell {
+    -fx-border-color: transparent;
+    -fx-padding: 8px 6px;
+    -fx-text-fill: #f5f5f4;
+    -fx-font-size: 11px;
+    -fx-alignment: center-left;
+}
+.traveler-dashboard-content .dashboard-bookings-table .placeholder .label { -fx-text-fill: rgba(231,229,228,0.72); }
+.traveler-dashboard-content .dashboard-bookings-table .scroll-bar:vertical,
+.traveler-dashboard-content .dashboard-bookings-table .scroll-bar:horizontal { -fx-background-color: transparent; }
+.traveler-dashboard-content .dashboard-bookings-table .scroll-bar .thumb {
+    -fx-background-color: rgba(231,229,228,0.28);
+    -fx-background-radius: 9px;
+}
+.traveler-dashboard-content .dashboard-bookings-table .button { -fx-padding: 7px 9px; -fx-font-size: 10px; -fx-background-radius: 8px; }
+.traveler-dashboard-content .dashboard-bookings-table .btn-secondary {
+    -fx-background-color: rgba(231,229,228,0.12);
+    -fx-border-color: rgba(231,229,228,0.25);
+    -fx-border-radius: 8px;
+    -fx-text-fill: #f5f5f4;
+}
+.traveler-dashboard-content .dashboard-bookings-table .btn-secondary:hover { -fx-background-color: rgba(231,229,228,0.22); }
+.traveler-dashboard-content .dashboard-bookings-table .danger-action-button {
+    -fx-background-color: rgba(175,75,70,0.22);
+    -fx-border-color: rgba(220,125,120,0.35);
+    -fx-border-radius: 8px;
+    -fx-text-fill: #f3d7d5;
+}
+.traveler-dashboard-content .dashboard-bookings-table .danger-action-button:hover { -fx-background-color: rgba(175,75,70,0.36); }
+.traveler-dashboard-content .dashboard-bookings-table .booking-status-pill { -fx-padding: 5px 9px; -fx-font-size: 10px; }
+

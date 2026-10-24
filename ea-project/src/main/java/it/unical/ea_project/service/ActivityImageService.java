@@ -9,5 +9,5 @@ public interface ActivityImageService {
     List<ActivityImage> getImagesByActivityId(Long activityId);
     ActivityImage uploadCover(Long activityId, Long organizerId, MultipartFile file);
     List<ActivityImage> uploadPhotos(Long activityId, Long organizerId, List<MultipartFile> files);
-    void deleteImage(Long imageId);
+    void deleteImage(Long imageId, Long organizerId);
 }

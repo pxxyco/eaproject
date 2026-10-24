@@ -549,3 +549,123 @@
     -fx-wrap-text: true;
     -fx-text-alignment: center;
 }
+
+/* Avatar utente nella navbar: usa la foto profilo salvata o le iniziali come fallback. */
+.nav-user-graphic {
+    -fx-alignment: center-left;
+}
+.nav-avatar-container {
+    -fx-background-color: rgba(255, 255, 255, 0.16);
+    -fx-background-radius: 100;
+    -fx-alignment: center;
+}
+.nav-avatar-initials {
+    -fx-min-width: 28px;
+    -fx-min-height: 28px;
+    -fx-pref-width: 28px;
+    -fx-pref-height: 28px;
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-background-color: rgba(87, 83, 78, 0.92);
+    -fx-border-color: rgba(231, 229, 228, 0.26);
+    -fx-border-width: 1px;
+    -fx-border-radius: 100;
+    -fx-background-radius: 100;
+}
+.nav-user-name {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+.menu-button:hover .nav-user-name,
+.menu-button:showing .nav-user-name {
+    -fx-text-fill: #1c1917;
+}
+
+/* PopupFactory — una sola identità visiva per i popup dell'intera applicazione. */
+.app-modal-overlay {
+    -fx-background-color: transparent;
+    -fx-alignment: center;
+    -fx-padding: 0;
+}
+.app-modal-backdrop {
+    -fx-background-color: rgba(8, 8, 8, 0.52);
+}
+.app-modal-panel.app-modal-panel {
+    -fx-background-color: linear-gradient(to bottom right, rgba(37, 37, 36, 0.985), rgba(24, 24, 23, 0.99));
+    -fx-background-radius: 22px;
+    -fx-border-color: rgba(231, 229, 228, 0.24);
+    -fx-border-radius: 22px;
+    -fx-border-width: 1px;
+    -fx-padding: 24px;
+    -fx-spacing: 14px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.48), 28, 0.18, 0, 10);
+}
+.app-modal-panel .label { -fx-text-fill: #f5f5f4; }
+.app-modal-title {
+    -fx-font-size: 21px; -fx-font-weight: bold; -fx-text-fill: #fafaf9;
+}
+.app-modal-subtitle {
+    -fx-font-size: 12.5px; -fx-text-fill: rgba(231, 229, 228, 0.72);
+}
+.app-modal-body {
+    -fx-font-size: 13px; -fx-text-fill: rgba(245, 245, 244, 0.90); -fx-wrap-text: true;
+}
+.app-popup-toolbar { -fx-padding: 0 0 2px 0; -fx-min-height: 28px; -fx-alignment: center-right; }
+.app-modal-close {
+    -fx-background-color: rgba(231, 229, 228, 0.09); -fx-text-fill: #f5f5f4;
+    -fx-border-color: rgba(231, 229, 228, 0.22); -fx-border-radius: 18px; -fx-background-radius: 18px;
+    -fx-min-width: 34px; -fx-min-height: 34px; -fx-pref-width: 34px; -fx-pref-height: 34px;
+    -fx-padding: 0 8px; -fx-font-size: 19px; -fx-cursor: hand;
+}
+.app-modal-close:hover { -fx-background-color: rgba(231, 229, 228, 0.19); }
+.app-modal-panel .text-area, .app-modal-panel .text-area .content,
+.app-modal-panel .scroll-pane, .app-modal-panel .scroll-pane > .viewport {
+    -fx-background-color: rgba(18, 18, 17, 0.28); -fx-text-fill: #f5f5f4;
+}
+.app-modal-panel .text-area, .app-modal-panel .text-field,
+.app-modal-panel .combo-box, .app-modal-panel .combo-box-base,
+.app-modal-panel .date-picker, .app-modal-panel .choice-box, .app-modal-panel .password-field {
+    -fx-background-color: rgba(231, 229, 228, 0.065);
+    -fx-border-color: rgba(231, 229, 228, 0.22); -fx-border-radius: 10px; -fx-background-radius: 10px;
+    -fx-text-fill: #ffffff; -fx-prompt-text-fill: rgba(231, 229, 228, 0.48);
+    -fx-highlight-fill: rgba(231, 229, 228, 0.28); -fx-highlight-text-fill: #ffffff;
+    -fx-font-size: 12px;
+}
+.app-modal-panel .text-area:focused, .app-modal-panel .text-field:focused,
+.app-modal-panel .combo-box:focused, .app-modal-panel .combo-box-base:focused,
+.app-modal-panel .date-picker:focused, .app-modal-panel .choice-box:focused {
+    -fx-border-color: rgba(231, 229, 228, 0.54); -fx-focus-color: transparent; -fx-faint-focus-color: transparent;
+}
+.app-modal-panel .combo-box .list-cell, .app-modal-panel .choice-box .label { -fx-text-fill: #f5f5f4; -fx-background-color: transparent; }
+.app-modal-panel .list-view, .app-modal-panel .table-view {
+    -fx-background-color: rgba(18, 18, 17, 0.32); -fx-control-inner-background: rgba(18, 18, 17, 0.32);
+    -fx-control-inner-background-alt: rgba(231, 229, 228, 0.035); -fx-background-insets: 0;
+    -fx-border-color: rgba(231, 229, 228, 0.17); -fx-border-radius: 10px; -fx-background-radius: 10px;
+}
+.app-modal-panel .list-view .list-cell { -fx-background-color: transparent; -fx-text-fill: #f5f5f4; }
+.app-modal-panel .list-view .list-cell:filled:hover { -fx-background-color: rgba(231, 229, 228, 0.08); }
+.app-modal-panel .list-view .list-cell:filled:selected { -fx-background-color: rgba(231, 229, 228, 0.16); -fx-text-fill: #ffffff; }
+.app-modal-panel .table-view .column-header-background { -fx-background-color: rgba(231, 229, 228, 0.07); }
+.app-modal-panel .table-view .column-header, .app-modal-panel .table-view .filler { -fx-background-color: transparent; -fx-border-color: transparent transparent rgba(231,229,228,0.12) transparent; }
+.app-modal-panel .table-view .column-header .label, .app-modal-panel .table-view .table-cell { -fx-text-fill: #f5f5f4; }
+.app-modal-panel .check-box, .app-modal-panel .radio-button { -fx-text-fill: #f5f5f4; }
+.app-modal-panel .button { -fx-cursor: hand; -fx-background-radius: 9px; -fx-font-size: 12px; }
+.app-modal-panel .btn-primary { -fx-background-color: #e7e5e4; -fx-text-fill: #1c1917; -fx-font-weight: bold; -fx-border-color: transparent; }
+.app-modal-panel .btn-primary:hover { -fx-background-color: #fafaf9; }
+.app-modal-panel .btn-secondary { -fx-background-color: rgba(231,229,228,0.09); -fx-text-fill: #f5f5f4; -fx-border-color: rgba(231,229,228,0.21); -fx-border-radius: 9px; }
+.app-modal-panel .btn-secondary:hover { -fx-background-color: rgba(231,229,228,0.17); }
+.app-modal-panel .sharing-popup-title { -fx-text-fill: #fafaf9; -fx-font-size: 21px; -fx-font-weight: bold; }
+.app-modal-panel .sharing-popup-subtitle, .app-modal-panel .sharing-popup-hint { -fx-text-fill: rgba(231,229,228,0.70); }
+.app-modal-panel .sharing-popup-close { -fx-background-color: rgba(231,229,228,0.09); -fx-text-fill: #f5f5f4; -fx-border-color: rgba(231,229,228,0.22); }
+.app-modal-panel .history-detail-label { -fx-text-fill: rgba(231, 229, 228, 0.66); }
+.app-modal-panel .history-modal-error, .app-modal-panel .history-message-error { -fx-text-fill: #fecaca; }
+.app-popup-content-wrapper { -fx-background-color: transparent; -fx-spacing: 8px; }
+.app-popup-root { -fx-background-color: transparent; }
+.app-popup-scene-wrapper { -fx-background-color: transparent; }
+
+/* Radice di un popup che include già il proprio pannello grafico (es. creazione offerta). */
+.popup-factory-transparent-surface { -fx-background-color: transparent; -fx-background-radius: 0; -fx-border-color: transparent; -fx-padding: 0; }

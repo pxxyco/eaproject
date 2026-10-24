@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -24,7 +25,11 @@ public class UserController {
     private final UserService userService;
     private final JwtService jwtService;
 
+    @com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
+    public record RegistrationRequest(String username, String email, String fullName, String password, String role) {}
     public record LoginRequest(String identifier, String password) {}
+    public record UpdateProfileRequest(String username, String email, String fullName) {}
+    public record ChangePasswordRequest(String currentPassword, String newPassword) {}
 
     @GetMapping("/exists")
     public ResponseEntity<Void> emailExists(@RequestParam String email) {
@@ -32,10 +37,10 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserDTO> registerUser(@RequestBody UserDTO dto) {
+    public ResponseEntity<UserDTO> registerUser(@RequestBody RegistrationRequest dto) {
         User.Role role;
         try {
-            role = User.Role.valueOf(dto.getRole());
+            role = User.Role.valueOf(dto.role());
         } catch (IllegalArgumentException | NullPointerException e) {
             return ResponseEntity.badRequest().build();
         }
@@ -44,13 +49,13 @@ public class UserController {
         }
 
         User user = new User();
-        user.setUsername(dto.getUsername());
-        user.setEmail(dto.getEmail());
-        user.setFullName(dto.getFullName());
+        user.setUsername(dto.username());
+        user.setEmail(dto.email());
+        user.setFullName(dto.fullName());
         user.setRole(role);
         user.setOauthProvider(false);
         user.setOauthSubject(null);
-        user.setHashedPassword(dto.getPassword());
+        user.setHashedPassword(dto.password());
         User saved = userService.registerUser(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(convertToDto(saved));
     }
@@ -90,8 +95,45 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<UserDTO> me(@AuthenticationPrincipal AuthUser auth) {
         return userService.getUserById(auth.id())
+                .filter(u -> u.getDeletedAt() == null)
                 .map(u -> ResponseEntity.ok(convertToDto(u)))
                 .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<UserDTO> updateMyProfile(
+            @AuthenticationPrincipal AuthUser auth,
+            @RequestBody UpdateProfileRequest request) {
+        if (request == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        User updated = userService.updateProfile(auth.id(), request.username(), request.email(), request.fullName());
+        return ResponseEntity.ok(convertToDto(updated));
+    }
+
+    @PostMapping("/me/profile-photo")
+    public ResponseEntity<UserDTO> uploadMyProfilePhoto(
+            @AuthenticationPrincipal AuthUser auth,
+            @RequestParam("file") MultipartFile file) {
+        User updated = userService.updateProfilePhoto(auth.id(), file);
+        return ResponseEntity.ok(convertToDto(updated));
+    }
+
+    @DeleteMapping("/me/profile-photo")
+    public ResponseEntity<UserDTO> deleteMyProfilePhoto(@AuthenticationPrincipal AuthUser auth) {
+        User updated = userService.removeProfilePhoto(auth.id());
+        return ResponseEntity.ok(convertToDto(updated));
+    }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<Void> changePassword(
+            @AuthenticationPrincipal AuthUser auth,
+            @RequestBody ChangePasswordRequest request) {
+        if (request == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        userService.changePassword(auth.id(), request.currentPassword(), request.newPassword());
+        return ResponseEntity.noContent().build();
     }
 
     private UserDTO convertToDto(User user) {
@@ -100,6 +142,7 @@ public class UserController {
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .fullName(user.getFullName())
+                .profilePhotoUrl(user.getProfilePhotoUrl())
                 .role(user.getRole() != null ? user.getRole().name() : null)
                 .oauthProvider(user.isOauthProvider())
                 .createdAt(user.getCreatedAt())

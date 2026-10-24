@@ -17,7 +17,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1"
+<StackPane xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
            fx:controller="it.unical.ea_project_javafx.controller.profile.SettingsController">
     <stylesheets>
         <URL value="@../../css/common/style.css" />
@@ -66,7 +66,7 @@
 
                                     <VBox spacing="4.0">
                                         <Label styleClass="form-label" text="Nuova Password *" />
-                                        <PasswordField fx:id="newPasswordField" promptText="Almeno 6 caratteri" styleClass="custom-input" />
+                                        <PasswordField fx:id="newPasswordField" promptText="8+ caratteri, lettera, numero e simbolo" styleClass="custom-input" />
                                     </VBox>
 
                                     <VBox spacing="4.0">

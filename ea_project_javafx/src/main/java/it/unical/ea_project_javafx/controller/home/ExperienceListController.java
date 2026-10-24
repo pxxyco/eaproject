@@ -56,7 +56,7 @@ public class ExperienceListController {
         organizerHome = "ORGANIZER".equalsIgnoreCase(UserSession.getInstance().getRole());
         mode = organizerHome ? SearchMode.ALL : SearchMode.TOP;
         label1.setText(organizerHome ? "Tutti i viaggi e le attività" : "Esperienze più apprezzate dai viaggiatori");
-        label2.setText(organizerHome ? "Esplora le offerte pubblicate" : "Valutate da utenti reali che hanno partecipato alle attività");
+        label2.setText(organizerHome ? "Esplora le offerte pubblicate" : "Valutate da utenti di tutto il mondo");
         currentQuery = "";
         currentCategoryFilter = null;
         currentDateFilter = null;

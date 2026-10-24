@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -18,15 +19,19 @@ public class WebConfig implements WebMvcConfigurer {
 
     private static final Logger log = LoggerFactory.getLogger(WebConfig.class);
 
+    @Value("${app.storage.path:photo}")
+    private String storagePath;
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Path relativo alla root di esecuzione dell'applicazione
-        Path baseDir = Paths.get("photo").toAbsolutePath();
+        // Usa lo stesso percorso configurato dal servizio che salva le immagini.
+        Path baseDir = Paths.get(storagePath).toAbsolutePath().normalize();
 
         // Creazione cartelle
         createDir(baseDir.resolve("activity"));
         createDir(baseDir.resolve("default"));
         createDir(baseDir.resolve("trip"));
+        createDir(baseDir.resolve("profile"));
 
         // Inserimento immagine di default
         copyDefaultResource("static/experience.jpg", baseDir.resolve("default/experience.jpg"));

@@ -16,6 +16,7 @@ import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.util.ApiService;
 import it.unical.ea_project_javafx.util.BackgroundHelper;
 import it.unical.ea_project_javafx.util.FullscreenPhotoViewer;
+import it.unical.ea_project_javafx.util.PopupFactory;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -26,6 +27,10 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.stage.Stage;
 import javafx.scene.layout.VBox;
 
@@ -79,6 +84,7 @@ public class ActivityDetailsController {
     @FXML private ScrollPane contentScroll;
 
     private ReviewsContainerController recensioniController;
+    private PopupFactory.Handle activeInAppModal;
 
     private List<Button> sectionButtons;
 
@@ -442,46 +448,133 @@ public class ActivityDetailsController {
 
     @FXML
     private void handlePrenota() {
-        if ("ORGANIZER".equalsIgnoreCase(UserSession.getInstance().getRole())) {
-            return;
-        }
+        if ("ORGANIZER".equalsIgnoreCase(UserSession.getInstance().getRole())) return;
         if (!UserSession.getInstance().isLoggedIn()) {
             showAlert(Alert.AlertType.WARNING, "Accesso richiesto", "Devi effettuare il login per prenotare.");
             return;
         }
-
-        Integer seats = spinnerPartecipanti.getValue();
-        BigDecimal total = (myType == Type.ACTIVITY)
-                ? BigDecimal.valueOf(activity.getPrice()).multiply(BigDecimal.valueOf(seats))
-                : trip.getTotalPrice().multiply(BigDecimal.valueOf(seats));
-        Alert confirmation = new Alert(
-                Alert.AlertType.CONFIRMATION,
-                "Partecipanti: " + seats + "\nTotale: " + setMoneyCurrency(total) + "\nConfermi la prenotazione?",
-                ButtonType.CANCEL,
-                ButtonType.OK
-        );
-        confirmation.setHeaderText("Conferma prenotazione");
-        if (confirmation.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
+        if ((myType == Type.ACTIVITY && activity == null) || (myType == Type.TRIP && trip == null)) {
+            showAlert(Alert.AlertType.ERROR, "Esperienza non disponibile", "Non è stato possibile caricare i dati necessari alla prenotazione.");
             return;
         }
 
+        int seats = spinnerPartecipanti.getValue() == null ? 1 : spinnerPartecipanti.getValue();
+        BigDecimal unitPrice = myType == Type.ACTIVITY
+                ? BigDecimal.valueOf(activity.getPrice() == null ? 0.0 : activity.getPrice())
+                : (trip.getTotalPrice() == null ? BigDecimal.ZERO : trip.getTotalPrice());
+        BigDecimal total = unitPrice.multiply(BigDecimal.valueOf(seats));
+
+        VBox panel = new VBox(14);
+        panel.setMaxWidth(500);
+        panel.setMaxHeight(Region.USE_PREF_SIZE);
+        HBox heading = new HBox(12);
+        heading.setAlignment(Pos.CENTER_LEFT);
+        VBox labels = new VBox(4);
+        HBox.setHgrow(labels, javafx.scene.layout.Priority.ALWAYS);
+        Label title = new Label("Conferma prenotazione");
+        title.getStyleClass().add("app-modal-title");
+        Label subtitle = new Label(myType == Type.TRIP ? "Riepilogo del viaggio" : "Riepilogo dell'attività");
+        subtitle.getStyleClass().add("app-modal-subtitle");
+        labels.getChildren().addAll(title, subtitle);
+        Button close = new Button("×");
+        close.getStyleClass().add("app-modal-close");
+        close.setAccessibleText("Chiudi conferma prenotazione");
+        close.setOnAction(event -> closeInAppModal());
+        heading.getChildren().addAll(labels, close);
+
+        Label experience = new Label(lblTitolo.getText() == null ? "Esperienza" : lblTitolo.getText());
+        experience.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+        Label date = new Label("Data: " + (datePicker.getValue() == null ? "secondo il programma dell'esperienza" : datePicker.getValue().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
+        date.getStyleClass().add("app-modal-subtitle");
+        HBox seatsRow = new HBox(8, new Label("Partecipanti"), new Region(), new Label(String.valueOf(seats)));
+        seatsRow.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(seatsRow.getChildren().get(1), javafx.scene.layout.Priority.ALWAYS);
+        HBox totalRow = new HBox(8, new Label("Totale stimato"), new Region(), new Label(setMoneyCurrency(total)));
+        totalRow.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(totalRow.getChildren().get(1), javafx.scene.layout.Priority.ALWAYS);
+        totalRow.getChildren().get(2).setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #e7e5e4;");
+        Label note = new Label("Controlla i dati prima di confermare. La prenotazione verrà registrata sul tuo account.");
+        note.setWrapText(true);
+        note.getStyleClass().add("app-modal-subtitle");
+        HBox actions = new HBox(10);
+        actions.setAlignment(Pos.CENTER_RIGHT);
+        Button cancel = new Button("Annulla");
+        cancel.getStyleClass().add("btn-secondary");
+        cancel.setOnAction(event -> closeInAppModal());
+        Button confirm = new Button("Conferma prenotazione");
+        confirm.getStyleClass().add("btn-primary");
+        confirm.setOnAction(event -> submitBooking(seats, confirm));
+        actions.getChildren().addAll(cancel, confirm);
+        panel.getChildren().addAll(heading, experience, date, seatsRow, totalRow, note, actions);
+        closeInAppModal();
+        activeInAppModal = PopupFactory.show(root, panel, PopupFactory.Size.COMPACT);
+    }
+
+    private void submitBooking(int seats, Button confirmButton) {
+        confirmButton.setDisable(true);
+        confirmButton.setText("Registrazione in corso…");
         String endpoint = myType == Type.TRIP
                 ? "/api/bookings/trips/" + trip.getTripId()
                 : "/api/bookings/activities/" + activity.getActivityId();
-
-        ApiService.post(
-                ApiService.BASE_URL + endpoint + "?seats=" + seats,
-                null,
-                response -> showAlert(Alert.AlertType.INFORMATION, "Prenotazione completata", "La prenotazione è stata registrata."),
-                () -> showAlert(Alert.AlertType.ERROR, "Prenotazione non completata", "Non è stato possibile completare la prenotazione."),
-                null
-        );
+        ApiService.post(ApiService.BASE_URL + endpoint + "?seats=" + seats, null,
+                response -> javafx.application.Platform.runLater(() -> {
+                    closeInAppModal();
+                    showAlert(Alert.AlertType.INFORMATION, "Prenotazione completata", "La prenotazione è stata registrata correttamente.");
+                }),
+                () -> javafx.application.Platform.runLater(() -> showBookingFailure(
+                        "Non è stato possibile registrare la prenotazione. Verifica la disponibilità e riprova.")), null);
     }
 
-    private void showAlert(Alert.AlertType type, String title, String message) {
-        Alert alert = new Alert(type, message);
-        alert.setHeaderText(title);
-        alert.showAndWait();
+
+    private void showBookingFailure(String message) {
+        closeInAppModal();
+        if (root == null) return;
+        VBox panel = new VBox(14);
+        panel.setMaxWidth(480);
+        Label title = new Label("Prenotazione non completata");
+        title.getStyleClass().add("app-modal-title");
+        Label body = new Label(message);
+        body.setWrapText(true);
+        HBox actions = new HBox(10);
+        actions.setAlignment(Pos.CENTER_RIGHT);
+        Button close = new Button("Chiudi");
+        close.getStyleClass().add("btn-secondary");
+        close.setOnAction(event -> closeInAppModal());
+        Button retry = new Button("Riprova");
+        retry.getStyleClass().add("btn-primary");
+        retry.setOnAction(event -> {
+            closeInAppModal();
+            handlePrenota();
+        });
+        actions.getChildren().addAll(close, retry);
+        panel.getChildren().addAll(title, body, actions);
+        activeInAppModal = PopupFactory.show(root, panel, PopupFactory.Size.COMPACT);
+    }
+
+    private void closeInAppModal() {
+        if (activeInAppModal != null) {
+            activeInAppModal.close();
+            activeInAppModal = null;
+        }
+    }
+
+    private void showAlert(Alert.AlertType type, String titleText, String message) {
+        if (root == null) return;
+        closeInAppModal();
+        VBox panel = new VBox(14);
+        panel.setMaxWidth(480);
+        panel.setMaxHeight(Region.USE_PREF_SIZE);
+        Label title = new Label(titleText == null ? "Informazione" : titleText);
+        title.getStyleClass().add("app-modal-title");
+        Label body = new Label(message == null ? "Operazione completata." : message);
+        body.setWrapText(true);
+        Button close = new Button("Ho capito");
+        close.getStyleClass().add("btn-primary");
+        close.setOnAction(event -> closeInAppModal());
+        HBox actions = new HBox(close);
+        actions.setAlignment(Pos.CENTER_RIGHT);
+        panel.getChildren().addAll(title, body, actions);
+        activeInAppModal = PopupFactory.show(root, panel, PopupFactory.Size.COMPACT);
     }
 
     private void aggiornaPrezzoTotale(Integer newValue) {

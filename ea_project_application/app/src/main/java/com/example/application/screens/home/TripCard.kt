@@ -8,7 +8,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -22,34 +21,27 @@ fun TripCard(
     price: String,
     rating: String,
     dateRange: String,
+    imageUrl: String,
     onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
-            .width(280.dp) // Più larga e rettangolare
+            .width(280.dp)
             .height(200.dp)
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = PopupSurface)
     ) {
-        Box(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            // Sfondo dell'immagine panoramica/rettangolare
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Stone600),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "🖼️ Foto Multiple (Galleria)",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Stone300
-                )
-            }
+        Box(modifier = Modifier.fillMaxSize()) {
 
-            // Badge foto in alto a destra
+            // Immagine del viaggio
+            RemotePhoto(
+                imageUrl = imageUrl,
+                modifier = Modifier.fillMaxSize(),
+                contentDescription = title
+            )
+
+            // Badge in alto a destra
             Surface(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
@@ -61,11 +53,14 @@ fun TripCard(
                     text = "📷 + Foto",
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.White,
-                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                    modifier = Modifier.padding(
+                        horizontal = 6.dp,
+                        vertical = 2.dp
+                    )
                 )
             }
 
-            // Contenuto testuale in basso sovrapposto con sfumatura o box scuro
+            // Informazioni del viaggio
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -86,6 +81,7 @@ fun TripCard(
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
+
                         Text(
                             text = "⭐ $rating",
                             style = MaterialTheme.typography.bodySmall,
@@ -117,6 +113,7 @@ fun TripCard(
                             style = MaterialTheme.typography.bodySmall,
                             color = Stone300
                         )
+
                         Text(
                             text = "da $price",
                             style = MaterialTheme.typography.titleSmall,
