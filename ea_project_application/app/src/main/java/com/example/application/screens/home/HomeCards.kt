@@ -11,8 +11,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.application.dto.home.ActivityHomeDTO
-import com.example.application.dto.home.TripHomeDTO
+import com.example.application.dto.ActivityHomeDTO
+import com.example.application.dto.TripHomeDTO
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDate

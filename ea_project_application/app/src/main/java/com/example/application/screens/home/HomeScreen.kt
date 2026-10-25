@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.example.application.dto.SearchSuggestion
-import com.example.application.dto.home.ActivityHomeDTO
-import com.example.application.dto.home.TripHomeDTO
+import com.example.application.dto.ActivityHomeDTO
+import com.example.application.dto.TripHomeDTO
 import com.example.application.network.AppStatus
 import com.example.application.network.HomeRepository
 import com.example.application.screens.common.LoadingOverlay

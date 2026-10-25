@@ -3,9 +3,9 @@ package com.example.application.network
 import android.os.SystemClock
 import com.example.application.dto.ActivitySuggestionDTO
 import com.example.application.dto.SearchSuggestion
-import com.example.application.dto.home.TripHomeDTO
+import com.example.application.dto.TripHomeDTO
 import com.example.application.dto.TripSuggestionDTO
-import com.example.application.dto.home.ActivityHomeDTO
+import com.example.application.dto.ActivityHomeDTO
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async

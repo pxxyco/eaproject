@@ -19,8 +19,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.application.dto.SearchSuggestion
-import com.example.application.dto.home.ActivityHomeDTO
-import com.example.application.dto.home.TripHomeDTO
+import com.example.application.dto.ActivityHomeDTO
+import com.example.application.dto.TripHomeDTO
 import kotlinx.coroutines.launch
 
 @Composable
