@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializer;
 
+import com.google.gson.JsonParser;
 import it.unical.ea_project_javafx.controller.activity.photo.PhotoContainerController;
 import it.unical.ea_project_javafx.controller.activity.photo.PhotoGalleryController;
 import it.unical.ea_project_javafx.controller.activity.reviews.ReviewController;
@@ -82,12 +83,14 @@ public class ActivityDetailsController {
     @FXML private ReviewController newRecCardController;
 
     @FXML private ScrollPane contentScroll;
+    @FXML private Button btnFavorite;
 
     private ReviewsContainerController recensioniController;
     private PopupFactory.Handle activeInAppModal;
 
     private List<Button> sectionButtons;
 
+    private boolean isFavorite;
     private Node itinerarioNode;
     private Node descrizioneNode;
     private Node fotoNode;
@@ -157,7 +160,9 @@ public class ActivityDetailsController {
                         response ->  {
                             activity = GSON.fromJson(response.body(), ActivityDTO.class);
 
+
                             setActivityData();
+                            setupFavorite();
                             handleDescrizione(null);
                             contentScroll.setManaged(true);
                             contentScroll.setVisible(true);
@@ -180,6 +185,7 @@ public class ActivityDetailsController {
                             trip = GSON.fromJson(response.body(), TripDTO.class);
 
                             setTripData();
+                            setupFavorite();
                             handleDescrizione(null);
                             loadingOverlay.setVisible(false);
                             contentScroll.setManaged(true);
@@ -601,6 +607,56 @@ public class ActivityDetailsController {
         }
         active.getStyleClass().remove("section-button");
         active.getStyleClass().add("section-button-active");
+    }
+
+
+    private String favoriteUrl() {
+        return ApiService.BASE_URL + "/api/favorites/"
+                + (myType == Type.ACTIVITY ? "activities/" : "trips/") + id;
+    }
+
+    private void setupFavorite() {
+        boolean isTraveler = UserSession.getInstance().isLoggedIn()
+                && !"ORGANIZER".equalsIgnoreCase(UserSession.getInstance().getRole());
+        btnFavorite.setVisible(isTraveler);
+        btnFavorite.setManaged(isTraveler);
+        if (!isTraveler) return;
+
+        ApiService.get(favoriteUrl(),
+                response -> updateFavoriteButton(readFavorite(response.body())),
+                () -> updateFavoriteButton(false),
+                null);
+    }
+
+    @FXML
+    private void handleFavorite() {
+        btnFavorite.setDisable(true);
+        ApiService.callDetailed(favoriteUrl(), null,
+                isFavorite ? ApiService.Method.DELETE : ApiService.Method.POST,
+                response -> {
+                    updateFavoriteButton(readFavorite(response.body()));
+                    btnFavorite.setDisable(false);
+                },
+                message -> {
+                    btnFavorite.setDisable(false);
+                    showAlert(Alert.AlertType.ERROR, "Preferiti", message);
+                },
+                null);
+    }
+
+    private boolean readFavorite(String body) {
+        try {
+            return JsonParser.parseString(body).getAsJsonObject().get("favorite").getAsBoolean();
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+
+    private void updateFavoriteButton(boolean favorite) {
+        isFavorite = favorite;
+        btnFavorite.setText(favorite ? "♥" : "♡");
+        btnFavorite.getStyleClass().remove("active");
+        if (favorite) btnFavorite.getStyleClass().add("active");
     }
 
 }

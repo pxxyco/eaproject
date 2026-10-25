@@ -77,6 +77,13 @@
                                                             <Label fx:id="lblLocalita" styleClass="hero-subtitle" text="City" />
                                                         </children>
                                                     </VBox>
+
+                                                    <!-- Cuore preferiti (sopra l'hero-content per ricevere i click) -->
+                                                    <Button fx:id="btnFavorite" managed="false" mnemonicParsing="false" onAction="#handleFavorite" styleClass="btn-favorite" text="♡" visible="false" StackPane.alignment="TOP_RIGHT">
+                                                        <StackPane.margin>
+                                                            <Insets right="14.0" top="14.0" />
+                                                        </StackPane.margin>
+                                                    </Button>
                                                 </children>
                                             </StackPane>
 

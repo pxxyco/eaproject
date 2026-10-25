@@ -228,3 +228,27 @@
 .booking-card .booking-spinner > .decrement-arrow-button > .decrement-arrow {
     -fx-background-color: #d6d3d1;
 }
+
+.btn-favorite {
+    -fx-background-color: rgba(0, 0, 0, 0.55);
+    -fx-border-color: rgba(255, 255, 255, 0.35);
+    -fx-background-radius: 50%;
+    -fx-border-radius: 50%;
+    -fx-min-width: 40px;
+    -fx-min-height: 40px;
+    -fx-max-width: 40px;
+    -fx-max-height: 40px;
+    -fx-padding: 0;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 20px;
+    -fx-cursor: hand;
+}
+
+.btn-favorite:hover {
+    -fx-background-color: rgba(0, 0, 0, 0.75);
+}
+
+.btn-favorite.active {
+    -fx-text-fill: #ef4444;
+    -fx-border-color: rgba(239, 68, 68, 0.6);
+}
