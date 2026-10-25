@@ -151,7 +151,7 @@
 
                                 <!-- Box di Prenotazione (Lato Destro) -->
                                 <right>
-                                    <VBox fx:id="bookingCard" maxHeight="400.0" minWidth="250.0"
+                                    <VBox fx:id="bookingCard" maxHeight="-Infinity" minWidth="250.0"
                                         prefWidth="320" spacing="14" styleClass="booking-card"
                                         BorderPane.alignment="TOP_CENTER">
                                         <padding>
@@ -185,6 +185,7 @@
                                             <Button fx:id="btnPrenota" maxWidth="Infinity"
                                                 onAction="#handlePrenota" styleClass="btn-primary"
                                                 text="Prenota Ora" />
+                                            <Label fx:id="bookingAvailabilityLabel" wrapText="true" styleClass="section-subtitle" />
                                             <Button fx:id="btnContactOrganizer" maxWidth="Infinity"
                                                 onAction="#handleContactOrganizer"
                                                 styleClass="btn-secondary"

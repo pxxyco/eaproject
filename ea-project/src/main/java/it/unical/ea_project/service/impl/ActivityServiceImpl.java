@@ -105,7 +105,7 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     @Transactional(readOnly = true)
     public List<Activity> getTopActivities(int page, int size) {
-        return activityRepository.findByDeletedAtIsNullOrderByAverageRatingDescActivityIdDesc(PageUtils.of(page, size));
+        return activityRepository.findBookableOrderByRating(LocalDateTime.now(), PageUtils.of(page, size));
     }
 
     @Override
@@ -150,11 +150,11 @@ public class ActivityServiceImpl implements ActivityService {
 
         List<Activity> activities;
         if (date == null) {
-            activities = activityRepository.searchWithoutDate(normalizedQuery, category, pageable);
+            activities = activityRepository.searchWithoutDate(normalizedQuery, category, LocalDateTime.now(), pageable);
         } else {
             LocalDateTime dayStart = date.atStartOfDay();
             LocalDateTime nextDayStart = dayStart.plusDays(1);
-            activities = activityRepository.search(normalizedQuery, category, dayStart, nextDayStart, pageable);
+            activities = activityRepository.search(normalizedQuery, category, dayStart, nextDayStart, LocalDateTime.now(), pageable);
         }
         return toHomeDtos(activities);
     }
@@ -165,20 +165,20 @@ public class ActivityServiceImpl implements ActivityService {
         if (query == null || query.isBlank()) {
             return List.of();
         }
-        return activityRepository.findSuggestions(query.trim(), PageUtils.suggestions(limit));
+        return activityRepository.findSuggestions(query.trim(), LocalDateTime.now(), PageUtils.suggestions(limit));
     }
 
     @Override
     @Transactional(readOnly = true)
     public long countHomeActivities(String query, Activity.Category category, LocalDate date) {
         String normalized = query == null ? "" : query.trim();
-        return date == null ? activityRepository.countSearchWithoutDate(normalized, category)
-                : activityRepository.countSearch(normalized, category, date.atStartOfDay(), date.plusDays(1).atStartOfDay());
+        return date == null ? activityRepository.countSearchWithoutDate(normalized, category, LocalDateTime.now())
+                : activityRepository.countSearch(normalized, category, date.atStartOfDay(), date.plusDays(1).atStartOfDay(), LocalDateTime.now());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public long countTopHomeActivities() { return activityRepository.countByDeletedAtIsNull(); }
+    public long countTopHomeActivities() { return activityRepository.countBookable(LocalDateTime.now()); }
 
     private List<ActivityDTO> toActivityDtos(List<Activity> activities) {
         if (activities == null || activities.isEmpty()) {

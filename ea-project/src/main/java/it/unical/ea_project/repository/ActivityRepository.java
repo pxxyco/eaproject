@@ -33,8 +33,9 @@ public interface ActivityRepository
     Optional<Activity> findByActivityIdAndDeletedAtIsNull(
             Long activityId);
 
-    List<Activity> findByDeletedAtIsNullOrderByAverageRatingDescActivityIdDesc(
-            Pageable pageable);
+    @Query("select a from Activity a where a.deletedAt is null and a.status=it.unical.ea_project.domain.Activity.Status.PUBLISHED and a.startDate>:now and a.availableSeats>0 order by a.averageRating desc, a.activityId desc")
+    List<Activity> findBookableOrderByRating(
+            @Param("now") LocalDateTime now, Pageable pageable);
 
     List<Activity> findByDeletedAtIsNullAndCategory(
             Activity.Category category);
@@ -47,6 +48,9 @@ public interface ActivityRepository
         )
         FROM Activity a
         WHERE a.deletedAt IS NULL
+    AND a.status = it.unical.ea_project.domain.Activity.Status.PUBLISHED
+    AND a.startDate > :now
+    AND a.availableSeats > 0
         AND (
             LOWER(a.title) LIKE LOWER(CONCAT(:query, '%'))
             OR LOWER(a.city) LIKE LOWER(CONCAT(:query, '%'))
@@ -54,13 +58,16 @@ public interface ActivityRepository
         """)
     List<ActivitySuggestionDTO> findSuggestions(
             @Param("query") String query,
-            Pageable pageable
+            @Param("now") LocalDateTime now, Pageable pageable
     );
 
     @Query("""
     SELECT a
     FROM Activity a
     WHERE a.deletedAt IS NULL
+    AND a.status = it.unical.ea_project.domain.Activity.Status.PUBLISHED
+    AND a.startDate > :now
+    AND a.availableSeats > 0
     AND (
         cast(:category as String) IS NULL
         OR a.category = :category
@@ -81,13 +88,16 @@ public interface ActivityRepository
             @Param("category") Activity.Category category,
             @Param("dayStart") LocalDateTime dayStart,
             @Param("nextDayStart") LocalDateTime nextDayStart,
-            Pageable pageable
+            @Param("now") LocalDateTime now, Pageable pageable
     );
 
     @Query("""
     SELECT a
     FROM Activity a
     WHERE a.deletedAt IS NULL
+    AND a.status = it.unical.ea_project.domain.Activity.Status.PUBLISHED
+    AND a.startDate > :now
+    AND a.availableSeats > 0
     AND (
         cast(:category as String) IS NULL
         OR a.category = :category
@@ -102,12 +112,15 @@ public interface ActivityRepository
     List<Activity> searchWithoutDate(
             @Param("query") String query,
             @Param("category") Activity.Category category,
-            Pageable pageable
+            @Param("now") LocalDateTime now, Pageable pageable
     );
 
     @Query("""
     SELECT COUNT(a) FROM Activity a
     WHERE a.deletedAt IS NULL
+    AND a.status = it.unical.ea_project.domain.Activity.Status.PUBLISHED
+    AND a.startDate > :now
+    AND a.availableSeats > 0
     AND (
         cast(:category as String) IS NULL
         OR a.category = :category
@@ -126,11 +139,14 @@ public interface ActivityRepository
             @Param("query") String query,
             @Param("category") Activity.Category category,
             @Param("dayStart") LocalDateTime dayStart,
-            @Param("nextDayStart") LocalDateTime nextDayStart);
+            @Param("nextDayStart") LocalDateTime nextDayStart, @Param("now") LocalDateTime now);
 
     @Query("""
     SELECT COUNT(a) FROM Activity a
     WHERE a.deletedAt IS NULL
+    AND a.status = it.unical.ea_project.domain.Activity.Status.PUBLISHED
+    AND a.startDate > :now
+    AND a.availableSeats > 0
     AND (
         cast(:category as String) IS NULL
         OR a.category = :category
@@ -143,7 +159,8 @@ public interface ActivityRepository
     """)
     long countSearchWithoutDate(
             @Param("query") String query,
-            @Param("category") Activity.Category category);
+            @Param("category") Activity.Category category, @Param("now") LocalDateTime now);
 
-    long countByDeletedAtIsNull();
+    @Query("select count(a) from Activity a where a.deletedAt is null and a.status=it.unical.ea_project.domain.Activity.Status.PUBLISHED and a.startDate>:now and a.availableSeats>0")
+    long countBookable(@Param("now") LocalDateTime now);
 }

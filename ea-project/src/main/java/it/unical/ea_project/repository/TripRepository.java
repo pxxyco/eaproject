@@ -50,11 +50,13 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
             FROM Trip t
             WHERE t.deletedAt IS NULL
             AND t.status = :status
+            AND t.startDate > :today
+            AND t.availableSeats > 0
             ORDER BY COALESCE(t.averageRating, 0) DESC, t.tripId DESC
             """)
     List<Trip> findTopTrips(
             @Param("status") TripStatus status,
-            Pageable pageable);
+            @Param("today") LocalDate today, Pageable pageable);
 
     @Query("""
             SELECT new it.unical.ea_project.dto.home.TripSuggestionDTO(
@@ -74,6 +76,8 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
             FROM Trip t
             WHERE t.deletedAt IS NULL
             AND t.status = :status
+            AND t.startDate > :today
+            AND t.availableSeats > 0
             AND (
                 LOWER(t.title) LIKE LOWER(CONCAT(:query, '%'))
                 OR LOWER(t.destinationCity) LIKE LOWER(CONCAT(:query, '%'))
@@ -82,13 +86,15 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
             ORDER BY COALESCE(t.averageRating, 0) DESC, t.tripId DESC
             """)
     List<it.unical.ea_project.dto.home.TripSuggestionDTO> findSuggestions(@Param("query") String query,
-            @Param("status") TripStatus status, Pageable pageable);
+            @Param("status") TripStatus status, @Param("today") LocalDate today, Pageable pageable);
 
     @Query("""
             SELECT t
             FROM Trip t
             WHERE t.deletedAt IS NULL
             AND t.status = :status
+            AND t.startDate > :today
+            AND t.availableSeats > 0
             AND (
                 :query = ''
                 OR LOWER(t.title) LIKE CONCAT('%', LOWER(:query), '%')
@@ -97,13 +103,15 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
             )
             ORDER BY COALESCE(t.averageRating, 0) DESC, t.tripId DESC
             """)
-    List<Trip> searchPublished(@Param("query") String query, @Param("status") TripStatus status, Pageable pageable);
+    List<Trip> searchPublished(@Param("query") String query, @Param("status") TripStatus status, @Param("today") LocalDate today, Pageable pageable);
 
     @Query("""
             SELECT t
             FROM Trip t
             WHERE t.deletedAt IS NULL
             AND t.status = :status
+            AND t.startDate > :today
+            AND t.availableSeats > 0
             AND (
                 :query = ''
                 OR LOWER(t.title) LIKE CONCAT('%', LOWER(:query), '%')
@@ -115,12 +123,14 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
             ORDER BY COALESCE(t.averageRating, 0) DESC, t.tripId DESC
             """)
     List<Trip> searchPublishedFromDate(@Param("query") String query, @Param("status") TripStatus status,
-            @Param("date") LocalDate date, Pageable pageable);
+            @Param("date") LocalDate date, @Param("today") LocalDate today, Pageable pageable);
 
     @Query("""
             SELECT COUNT(t) FROM Trip t
             WHERE t.deletedAt IS NULL
             AND t.status = :status
+            AND t.startDate > :today
+            AND t.availableSeats > 0
             AND (
                 :query = ''
                 OR LOWER(t.title) LIKE CONCAT('%', LOWER(:query), '%')
@@ -128,12 +138,14 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
                 OR LOWER(t.destinationCountry) LIKE CONCAT('%', LOWER(:query), '%')
             )
     """)
-    long countSearchPublished(@Param("query") String query, @Param("status") TripStatus status);
+    long countSearchPublished(@Param("query") String query, @Param("status") TripStatus status, @Param("today") LocalDate today);
 
     @Query("""
             SELECT COUNT(t) FROM Trip t
             WHERE t.deletedAt IS NULL
             AND t.status = :status
+            AND t.startDate > :today
+            AND t.availableSeats > 0
             AND (
                 :query = ''
                 OR LOWER(t.title) LIKE CONCAT('%', LOWER(:query), '%')
@@ -144,5 +156,5 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
             AND t.endDate >= :date
     """)
     long countSearchPublishedFromDate(@Param("query") String query, @Param("status") TripStatus status,
-            @Param("date") LocalDate date);
+            @Param("date") LocalDate date, @Param("today") LocalDate today);
 }

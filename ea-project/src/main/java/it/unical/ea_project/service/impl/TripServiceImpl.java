@@ -75,7 +75,7 @@ public class TripServiceImpl implements TripService {
 
     @Override
     public List<Trip> getTopTrips(int page, int size) {
-        return tripRepository.findTopTrips(TripStatus.PUBLISHED, PageUtils.of(page, size));
+        return tripRepository.findTopTrips(TripStatus.PUBLISHED, LocalDate.now(), PageUtils.of(page, size));
     }
 
     @Override
@@ -201,8 +201,8 @@ public class TripServiceImpl implements TripService {
         Pageable pageable = PageUtils.of(page, size);
 
         List<Trip> trips = (date == null)
-                ? tripRepository.searchPublished(normalizedQuery, TripStatus.PUBLISHED, pageable)
-                : tripRepository.searchPublishedFromDate(normalizedQuery, TripStatus.PUBLISHED, date, pageable);
+                ? tripRepository.searchPublished(normalizedQuery, TripStatus.PUBLISHED, LocalDate.now(), pageable)
+                : tripRepository.searchPublishedFromDate(normalizedQuery, TripStatus.PUBLISHED, date, LocalDate.now(), pageable);
 
         return toHomeDtos(trips);
     }
@@ -212,7 +212,7 @@ public class TripServiceImpl implements TripService {
         if (query == null || query.isBlank()) {
             return List.of();
         }
-        return tripRepository.findSuggestions(query.trim(), TripStatus.PUBLISHED, PageUtils.suggestions(limit));
+        return tripRepository.findSuggestions(query.trim(), TripStatus.PUBLISHED, LocalDate.now(), PageUtils.suggestions(limit));
     }
 
     @Override
@@ -225,8 +225,8 @@ public class TripServiceImpl implements TripService {
     @Transactional(readOnly = true)
     public long countHomeTrips(String query, LocalDate date) {
         String normalized = query == null ? "" : query.trim();
-        return date == null ? tripRepository.countSearchPublished(normalized, TripStatus.PUBLISHED)
-                : tripRepository.countSearchPublishedFromDate(normalized, TripStatus.PUBLISHED, date);
+        return date == null ? tripRepository.countSearchPublished(normalized, TripStatus.PUBLISHED, LocalDate.now())
+                : tripRepository.countSearchPublishedFromDate(normalized, TripStatus.PUBLISHED, date, LocalDate.now());
     }
 
     private List<TripHomeDTO> toHomeDtos(List<Trip> trips) {

@@ -68,6 +68,7 @@ public class ActivityDetailsController {
     private Button btnRecensioni;
     @FXML
     private Button btnPrenota;
+    @FXML private Label bookingAvailabilityLabel;
     @FXML
     private Button btnContactOrganizer;
 
@@ -285,6 +286,7 @@ public class ActivityDetailsController {
         BigDecimal prezzo = activity.getPrice() != null ? BigDecimal.valueOf(activity.getPrice()) : null;
         lblPrezzo.setText(setMoneyCurrency(prezzo));
         lblTotale.setText(setMoneyCurrency(prezzo));
+        updateBookingAvailability();
 
     }
 
@@ -307,6 +309,7 @@ public class ActivityDetailsController {
         lblRating.setText("★ " + formatRating(trip.getAverageRating()));
         lblPrezzo.setText(setMoneyCurrency(trip.getTotalPrice()));
         lblTotale.setText(setMoneyCurrency(trip.getTotalPrice()));
+        updateBookingAvailability();
 
     }
 
@@ -522,6 +525,37 @@ public class ActivityDetailsController {
         });
     }
 
+    private String bookingUnavailableReason() {
+        String status = myType == Type.TRIP ? (trip == null ? null : trip.getStatus())
+                : (activity == null ? null : activity.getStatus());
+        if ("CANCELLED".equals(status)) return "Questa esperienza è stata annullata.";
+        if ("COMPLETED".equals(status)) return "Questa esperienza si è già conclusa.";
+        if (!"PUBLISHED".equals(status)) return "Questa esperienza non è attualmente pubblicata.";
+        boolean future = myType == Type.TRIP
+                ? trip.getStartDate() != null && trip.getStartDate().isAfter(LocalDate.now())
+                : activity.getStartDate() != null && activity.getStartDate().isAfter(java.time.LocalDateTime.now());
+        if (!future) return "Questa esperienza è già iniziata o terminata e non è più prenotabile.";
+        Integer available = myType == Type.TRIP ? trip.getAvailableSeats() : activity.getAvailableSeats();
+        if (available == null || available < 1) return "Non ci sono più posti disponibili per questa esperienza.";
+        return null;
+    }
+
+    private void updateBookingAvailability() {
+        boolean organizer = "ORGANIZER".equalsIgnoreCase(UserSession.getInstance().getRole());
+        String reason = organizer ? "Le prenotazioni sono riservate agli account Traveler." : bookingUnavailableReason();
+        btnPrenota.setDisable(reason != null);
+        btnPrenota.setText(reason == null ? "Prenota Ora" : "Non prenotabile");
+        bookingAvailabilityLabel.setText(reason == null ? "Prenota per la data indicata nel programma." : reason);
+        spinnerPartecipanti.setDisable(reason != null);
+        if (reason == null) {
+            int available = myType == Type.TRIP ? trip.getAvailableSeats() : activity.getAvailableSeats();
+            int selected = spinnerPartecipanti.getValue() == null ? 1 : spinnerPartecipanti.getValue();
+            spinnerPartecipanti.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, available, Math.min(selected, available)));
+        }
+        datePicker.setDisable(true);
+        datePicker.setTooltip(new javafx.scene.control.Tooltip("La data è stabilita dal programma dell'esperienza."));
+    }
+
     @FXML
     private void handlePrenota() {
         if ("ORGANIZER".equalsIgnoreCase(UserSession.getInstance().getRole()))
@@ -536,6 +570,12 @@ public class ActivityDetailsController {
             return;
         }
 
+        String unavailable = bookingUnavailableReason();
+        if (unavailable != null) {
+            updateBookingAvailability();
+            showBookingFailure(unavailable);
+            return;
+        }
         int seats = spinnerPartecipanti.getValue() == null ? 1 : spinnerPartecipanti.getValue();
         BigDecimal unitPrice = myType == Type.ACTIVITY
                 ? BigDecimal.valueOf(activity.getPrice() == null ? 0.0 : activity.getPrice())
@@ -596,14 +636,16 @@ public class ActivityDetailsController {
         String endpoint = myType == Type.TRIP
                 ? "/api/bookings/trips/" + trip.getTripId()
                 : "/api/bookings/activities/" + activity.getActivityId();
-        ApiService.post(ApiService.BASE_URL + endpoint + "?seats=" + seats, null,
+        ApiService.callDetailed(ApiService.BASE_URL + endpoint + "?seats=" + seats, null, ApiService.Method.POST,
                 response -> javafx.application.Platform.runLater(() -> {
+                    if (myType == Type.TRIP) trip.setAvailableSeats(trip.getAvailableSeats() - seats);
+                    else activity.setAvailableSeats(activity.getAvailableSeats() - seats);
+                    updateBookingAvailability();
                     closeInAppModal();
                     showAlert(Alert.AlertType.INFORMATION, "Prenotazione completata",
                             "La prenotazione è stata registrata correttamente.");
                 }),
-                () -> javafx.application.Platform.runLater(() -> showBookingFailure(
-                        "Non è stato possibile registrare la prenotazione. Verifica la disponibilità e riprova.")),
+                message -> javafx.application.Platform.runLater(() -> showBookingFailure(message)),
                 null);
     }
 
