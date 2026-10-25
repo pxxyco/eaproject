@@ -35,11 +35,11 @@ class ActivityServiceDateSearchTest {
 
     @Test
     void absentDateDoesNotFilter() {
-        when(repository.search("test", null, null, null, PageRequest.of(1, 9)))
+        when(repository.searchWithoutDate("test", null, PageRequest.of(1, 9)))
                 .thenReturn(List.of());
 
         service.searchActivityHomeDtos(" test ", null, null, 1, 9);
 
-        verify(repository).search("test", null, null, null, PageRequest.of(1, 9));
+        verify(repository).searchWithoutDate("test", null, PageRequest.of(1, 9));
     }
 }

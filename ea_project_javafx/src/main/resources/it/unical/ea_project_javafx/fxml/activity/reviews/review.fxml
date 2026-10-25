@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<StackPane fx:id="root" disable="false" managed="false" maxHeight="300" maxWidth="400" minHeight="300" minWidth="400" onMouseClicked="#handleMainFocus" styleClass="popup-overlay-root" stylesheets="@../../../css/activity/review/review.css" visible="false" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.activity.reviews.ReviewController">
+<StackPane fx:id="root" disable="false" managed="false" maxHeight="300" maxWidth="400" minHeight="300" minWidth="400" onMouseClicked="#handleMainFocus" styleClass="popup-overlay-root" stylesheets="@../../../css/activity/review/review.css" visible="false" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.activity.reviews.ReviewController">
     <children>
         <VBox maxWidth="380.0" minWidth="380.0" spacing="16.0" styleClass="popup-recensione">
             <padding>

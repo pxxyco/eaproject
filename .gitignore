@@ -246,3 +246,6 @@ application-local.yml
 
 ###keystore
 /ea-project/src/main/resources/keystore.p12
+
+# Configurazione locale Docker
+/.env

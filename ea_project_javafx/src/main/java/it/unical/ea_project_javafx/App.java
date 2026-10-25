@@ -43,6 +43,7 @@ public class App extends Application {
         SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/common/splash-screen.fxml", null);
 
         stage.show();
+
     }
 
     @Override
@@ -54,4 +55,5 @@ public class App extends Application {
     public static void main(String[] args) {
         launch(args);
     }
+
 }

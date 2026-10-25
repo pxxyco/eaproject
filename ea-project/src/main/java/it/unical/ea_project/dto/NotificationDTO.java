@@ -27,4 +27,10 @@ public class NotificationDTO {
     private Boolean read;
 
     private LocalDateTime createdAt;
+
+    private Long relatedEntityId;
+
+    private String relatedEntityType;
+
+    private String actionData;
 }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import java.net.URL?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
@@ -12,57 +13,119 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1"
+<VBox fx:id="dashboardRoot" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="it.unical.ea_project_javafx.controller.traveler.TravelerDashboardController"
-      spacing="16.0">
+      spacing="24.0" styleClass="traveler-dashboard-content">
     <stylesheets>
         <URL value="@../../css/common/style.css" />
         <URL value="@../../css/profile/profile.css" />
         <URL value="@../../css/traveler/traveler.css" />
+        <URL value="@../../css/traveler/bookings-export-popup.css" />
     </stylesheets>
 
-    <VBox spacing="10.0">
-        <HBox alignment="CENTER_LEFT">
-            <VBox spacing="3.0">
-                <Label styleClass="section-title" text="Attività consigliate" />
-                <Label styleClass="section-subtitle" text="Idee selezionate per aiutarti a trovare la prossima esperienza." />
+    <!-- Introduzione + riepilogo reale, senza ripetere i contatori in una seconda sezione. -->
+    <HBox alignment="CENTER_LEFT" spacing="22.0" styleClass="dashboard-welcome">
+        <VBox alignment="CENTER_LEFT" spacing="13.0" minWidth="250.0" HBox.hgrow="ALWAYS" styleClass="dashboard-welcome-intro">
+            <Label fx:id="welcomeDateLabel" styleClass="dashboard-welcome-eyebrow" text="OGGI" />
+            <Label fx:id="welcomeTitleLabel" styleClass="dashboard-welcome-title" text="È bello rivederti!" wrapText="true" />
+            <Label fx:id="welcomeSubtitleLabel" styleClass="dashboard-welcome-subtitle"
+                   text="Il prossimo ricordo potrebbe cominciare da qui." wrapText="true" />
+            <Region minHeight="8.0" />
+            <Label text="OGNI ESPERIENZA COMINCIA CON UNA SCELTA" styleClass="dashboard-welcome-signature" wrapText="true" />
+        </VBox>
+        <VBox prefWidth="358.0" minWidth="320.0" maxWidth="375.0" spacing="11.0" styleClass="dashboard-space-panel">
+            <HBox alignment="CENTER_LEFT" spacing="8.0">
+                <VBox spacing="3.0" HBox.hgrow="ALWAYS">
+                    <Label text="IL TUO SPAZIO" styleClass="dashboard-space-eyebrow" />
+                    <Label text="In un colpo d'occhio" styleClass="dashboard-space-title" />
+                </VBox>
+                <Button onAction="#handleOpenHistory" text="Storico →" styleClass="dashboard-space-link" />
+            </HBox>
+            <HBox spacing="9.0" alignment="CENTER_LEFT" styleClass="dashboard-space-metrics">
+                <VBox spacing="3.0" styleClass="dashboard-space-stat" HBox.hgrow="ALWAYS">
+                    <Label text="PRENOTAZIONI" styleClass="dashboard-kpi-label" />
+                    <Label fx:id="bookingValue" styleClass="dashboard-kpi-value" text="0" />
+                    <Label fx:id="bookingDetail" styleClass="dashboard-kpi-help" text="In totale" />
+                </VBox>
+                <VBox spacing="3.0" styleClass="dashboard-space-stat" HBox.hgrow="ALWAYS">
+                    <Label text="IN PROGRAMMA" styleClass="dashboard-kpi-label" />
+                    <Label fx:id="upcomingBookingValue" styleClass="dashboard-kpi-value" text="0" />
+                    <Label text="Esperienze future" styleClass="dashboard-kpi-help" />
+                </VBox>
+            </HBox>
+            <HBox spacing="9.0" alignment="CENTER_LEFT" styleClass="dashboard-space-metrics">
+                <VBox spacing="3.0" styleClass="dashboard-space-stat" HBox.hgrow="ALWAYS">
+                    <Label text="NELLO STORICO" styleClass="dashboard-kpi-label" />
+                    <Label fx:id="historicalBookingValue" styleClass="dashboard-kpi-value" text="0" />
+                    <Label text="Conclusi o annullati" styleClass="dashboard-kpi-help" />
+                </VBox>
+                <VBox spacing="3.0" styleClass="dashboard-space-stat" HBox.hgrow="ALWAYS">
+                    <Label text="LISTE PREFERITE" styleClass="dashboard-kpi-label" />
+                    <Label fx:id="favoriteListsValue" styleClass="dashboard-kpi-value" text="—" />
+                    <Label text="Collezioni salvate" styleClass="dashboard-kpi-help" />
+                </VBox>
+            </HBox>
+        </VBox>
+    </HBox>
+    <Label fx:id="dashboardStatusLabel" managed="false" visible="false" wrapText="true" />
+
+    <VBox spacing="12.0" styleClass="dashboard-section">
+        <HBox alignment="CENTER_LEFT" spacing="14.0">
+            <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                <Label styleClass="section-title" text="Lasciati ispirare" />
+                <Label styleClass="section-subtitle" text="Nuove idee, luoghi da scoprire ed esperienze da vivere al tuo ritmo." wrapText="true" />
             </VBox>
-            <Region HBox.hgrow="ALWAYS" />
             <HBox alignment="CENTER_RIGHT" spacing="8.0" styleClass="traveler-search-bar">
-                <Button fx:id="searchToggleButton" onAction="#toggleSearch" styleClass="search-icon-button" text="⌕" />
-                <TextField fx:id="searchField" managed="false" prefWidth="290.0" visible="false" promptText="Cerca ..." styleClass="custom-input" />
-                <ComboBox fx:id="searchTypeCombo" managed="false" prefWidth="128.0" visible="false" styleClass="traveler-search-type" />
+                <Button onAction="#toggleSearch" styleClass="search-icon-button" text="⌕" accessibleText="Apri ricerca" />
+                <TextField fx:id="searchField" managed="false" prefWidth="250.0" visible="false" promptText="Cerca per titolo o luogo..." styleClass="custom-input" />
+                <ComboBox fx:id="searchTypeCombo" managed="false" prefWidth="120.0" visible="false" styleClass="traveler-search-type" />
             </HBox>
         </HBox>
         <HBox alignment="CENTER" spacing="10.0">
-            <Button onAction="#handlePreviousRecommendation" styleClass="carousel-button" text="&lt;" />
+            <Button onAction="#handlePreviousRecommendation" styleClass="carousel-button" text="&lt;" accessibleText="Proposte precedenti" />
             <ScrollPane fx:id="recommendedScroll" fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" vbarPolicy="NEVER" styleClass="profile-horizontal-scroll" HBox.hgrow="ALWAYS">
                 <content><HBox fx:id="recommendedContainer" spacing="16.0" styleClass="activity-row" /></content>
             </ScrollPane>
-            <Button onAction="#handleNextRecommendation" styleClass="carousel-button" text="&gt;" />
+            <Button onAction="#handleNextRecommendation" styleClass="carousel-button" text="&gt;" accessibleText="Proposte successive" />
         </HBox>
     </VBox>
 
-    <VBox spacing="8.0">
-        <VBox spacing="3.0">
-            <Label styleClass="section-title" text="Le tue prenotazioni" />
-            <Label styleClass="section-subtitle" text="Qui trovi le esperienze che hai scelto e il loro stato aggiornato." wrapText="true" />
-        </VBox>
-        <HBox alignment="TOP_LEFT" spacing="18.0" styleClass="booking-dashboard-row">
-            <VBox fx:id="bookingStat" alignment="CENTER" prefHeight="150.0" prefWidth="150.0" styleClass="booking-count-card">
-                <Label fx:id="bookingValue" styleClass="booking-count-value" text="0" />
-                <Label fx:id="bookingDetail" styleClass="stat-label" text="prenotazioni" />
+    <VBox spacing="12.0" styleClass="dashboard-section, dashboard-upcoming-section">
+        <HBox alignment="CENTER_LEFT" spacing="12.0">
+            <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                <Label styleClass="section-title" text="Prossime esperienze" />
+                <Label styleClass="section-subtitle" text="Le tue prossime 3 prenotazioni, dalla più vicina." wrapText="true" />
             </VBox>
-
-            <TableView fx:id="bookingsTable" prefHeight="190.0" styleClass="profile-table" HBox.hgrow="ALWAYS">
-                <columns>
-                    <TableColumn fx:id="activityColumn" prefWidth="240.0" text="Attività" />
-                    <TableColumn fx:id="dateColumn" prefWidth="160.0" text="Data e ora" />
-                    <TableColumn fx:id="locationColumn" prefWidth="160.0" text="Luogo" />
-                    <TableColumn fx:id="statusColumn" prefWidth="150.0" text="Stato" />
-                    <TableColumn fx:id="actionColumn" prefWidth="110.0" text="Azioni" />
-                </columns>
-            </TableView>
+            <Button onAction="#handleShowAllBookings" text="Tutte le prenotazioni ↓" styleClass="btn-secondary" />
         </HBox>
+        <HBox fx:id="upcomingExperienceContainer" spacing="14.0" styleClass="dashboard-upcoming-row" />
+    </VBox>
+
+    <VBox spacing="12.0" styleClass="dashboard-section, dashboard-bookings-section">
+        <HBox alignment="CENTER_LEFT" spacing="12.0">
+            <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                <Label styleClass="section-title" text="Le tue prenotazioni" />
+                <Label styleClass="section-subtitle" text="Tutte le prenotazioni, sempre a portata di mano." wrapText="true" />
+            </VBox>
+            <Button onAction="#handleOpenHistory" styleClass="btn-primary" text="Consulta lo storico" />
+        </HBox>
+        <HBox alignment="CENTER_LEFT" spacing="10.0" styleClass="dashboard-booking-filters">
+            <TextField fx:id="bookingsSearchField" promptText="Cerca titolo, luogo, data o ID..." styleClass="custom-input" HBox.hgrow="ALWAYS" />
+            <ComboBox fx:id="bookingsPeriodFilter" promptText="Periodo" styleClass="traveler-search-type" prefWidth="155.0" />
+            <ComboBox fx:id="bookingsStatusFilter" promptText="Stato" styleClass="traveler-search-type" prefWidth="190.0" />
+        </HBox>
+        <TableView fx:id="bookingsTable" prefHeight="400.0" minHeight="300.0" styleClass="profile-table, dashboard-bookings-table">
+            <columns>
+                <TableColumn fx:id="itemTitleColumn" prefWidth="205.0" text="Esperienza / Viaggio" />
+                <TableColumn fx:id="dateColumn" prefWidth="180.0" text="Data esperienza" />
+                <TableColumn fx:id="bookedAtColumn" prefWidth="140.0" text="Prenotata il" />
+                <TableColumn fx:id="locationColumn" prefWidth="145.0" text="Luogo" />
+                <TableColumn fx:id="seatsColumn" prefWidth="55.0" text="Posti" />
+                <TableColumn fx:id="priceColumn" prefWidth="95.0" text="Prezzo" />
+                <TableColumn fx:id="statusColumn" prefWidth="150.0" text="Stato" />
+                <TableColumn fx:id="actionColumn" prefWidth="150.0" text="Azioni" />
+            </columns>
+            <columnResizePolicy><TableView fx:constant="CONSTRAINED_RESIZE_POLICY" /></columnResizePolicy>
+        </TableView>
     </VBox>
 </VBox>

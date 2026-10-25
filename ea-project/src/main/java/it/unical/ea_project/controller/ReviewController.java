@@ -19,9 +19,16 @@ public class ReviewController {
         this.reviewService = reviewService;
     }
 
+    @GetMapping("/mine")
+    public ResponseEntity<List<ReviewDTO>> getMyReviews(@AuthenticationPrincipal AuthUser user) {
+        if (user == null) return ResponseEntity.status(401).build();
+        return ResponseEntity.ok(reviewService.findByUserAsDto(user.id()));
+    }
+
     @PostMapping
     public ResponseEntity<ReviewDTO> createReview(@RequestBody ReviewDTO review,
                                                   @AuthenticationPrincipal AuthUser user){
+        if (user == null) return ResponseEntity.status(401).build();
         review.setUserId(user.id());
         return ResponseEntity.ok(reviewService.create(review));
     }
@@ -40,11 +47,13 @@ public class ReviewController {
     public ResponseEntity<ReviewDTO> updateReview(@PathVariable Long id,
                                                   @RequestBody ReviewDTO review,
                                                   @AuthenticationPrincipal AuthUser user){
+        if (user == null) return ResponseEntity.status(401).build();
         return ResponseEntity.ok(reviewService.update(id, review, user.id()));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReview(@PathVariable Long id, @AuthenticationPrincipal AuthUser user){
+        if (user == null) return ResponseEntity.status(401).build();
         reviewService.delete(id, user.id());
         return ResponseEntity.noContent().build();
     }

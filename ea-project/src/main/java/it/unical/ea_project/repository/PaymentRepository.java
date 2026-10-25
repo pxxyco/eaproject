@@ -21,6 +21,10 @@ public interface PaymentRepository extends JpaRepository<Payment,Long> {
 
     Optional<Payment> findByBookingBookingId(Long bookingId);
 
+    List<Payment> findAllByBookingBookingIdAndDeletedAtIsNullOrderByCreatedAtDesc(Long bookingId);
+
+    List<Payment> findAllByBookingBookingIdInAndDeletedAtIsNullOrderByCreatedAtDesc(List<Long> bookingIds);
+
     Optional<Payment> findByTransactionId(String transactionId);
 
     @Query("""

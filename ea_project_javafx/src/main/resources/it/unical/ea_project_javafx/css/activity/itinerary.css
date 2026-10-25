@@ -1,12 +1,21 @@
+.itinerario-box {
+    -fx-padding: 8px 10px;
+    -fx-background-radius: 10px;
+    -fx-cursor: hand;
+}
+
+.itinerario-box:hover {
+    -fx-background-color: rgba(231, 229, 228, 0.12);
+}
+
 .location-text {
-    -fx-text-fill: #ffffff;
+    -fx-text-fill: rgba(255, 255, 255, 0.9);
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
 }
 
 .number-label {
     -fx-text-fill: #ffffff;
     -fx-font-size: 11px;
-}
-
-.itinerario-box {
-    -fx-cursor: hand;
+    -fx-font-weight: bold;
 }

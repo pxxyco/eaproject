@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.URL?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<StackPane fx:id="pageRoot" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
+           fx:controller="it.unical.ea_project_javafx.controller.traveler.BookingHistoryController">
+    <stylesheets>
+        <URL value="@../../css/common/style.css" />
+        <URL value="@../../css/home/home.css" />
+        <URL value="@../../css/profile/profile.css" />
+        <URL value="@../../css/traveler/traveler.css" />
+        <URL value="@../../css/traveler/booking-history.css" />
+    </stylesheets>
+    <ImageView fx:id="bgImageView" pickOnBounds="true" preserveRatio="false" />
+    <Region styleClass="profile-overlay" />
+    <BorderPane fx:id="mainContent">
+        <top><StackPane fx:id="navbarContainer" /></top>
+        <center>
+            <ScrollPane fitToWidth="true" styleClass="main-scroll">
+                <content>
+                    <VBox alignment="TOP_CENTER" spacing="22.0">
+                        <padding><Insets bottom="42.0" left="28.0" right="28.0" top="26.0" /></padding>
+                        <VBox maxWidth="1120.0" spacing="20.0" styleClass="glass-card, history-page-card">
+                            <padding><Insets bottom="30.0" left="30.0" right="30.0" top="28.0" /></padding>
+                            <HBox alignment="CENTER_LEFT" spacing="14.0">
+                                <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                                    <Label styleClass="dash-title" text="Il mio Storico" />
+                                    <Label styleClass="dash-subtitle" text="Rivedi le esperienze passate, consulta i dettagli delle prenotazioni e gestisci le tue recensioni." wrapText="true" />
+                                </VBox>
+                                <Button onAction="#handleRefresh" styleClass="btn-secondary" text="↻ Aggiorna" />
+                            </HBox>
+                            <Label fx:id="statusMessageLabel" managed="false" visible="false" wrapText="true" />
+                            <Separator styleClass="nav-divider" />
+                            <HBox spacing="12.0" styleClass="history-stat-row">
+                                <VBox styleClass="booking-count-card" HBox.hgrow="ALWAYS">
+                                    <Label fx:id="historyTotalLabel" styleClass="booking-count-value" text="0" />
+                                    <Label styleClass="stat-label" text="Nello storico" />
+                                </VBox>
+                                <VBox styleClass="booking-count-card" HBox.hgrow="ALWAYS">
+                                    <Label fx:id="historyCompletedLabel" styleClass="booking-count-value" text="0" />
+                                    <Label styleClass="stat-label" text="Terminate / completate" />
+                                </VBox>
+                                <VBox styleClass="booking-count-card" HBox.hgrow="ALWAYS">
+                                    <Label fx:id="historyCancelledLabel" styleClass="booking-count-value" text="0" />
+                                    <Label styleClass="stat-label" text="Cancellate" />
+                                </VBox>
+                                <VBox styleClass="booking-count-card" HBox.hgrow="ALWAYS">
+                                    <Label fx:id="historyReviewableLabel" styleClass="booking-count-value" text="0" />
+                                    <Label styleClass="stat-label" text="Da recensire" />
+                                </VBox>
+                            </HBox>
+                            <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                <TextField fx:id="searchField" promptText="Cerca per titolo, luogo, ID o data..." styleClass="custom-input" HBox.hgrow="ALWAYS" />
+                                <ComboBox fx:id="historyFilterCombo" prefWidth="205.0" promptText="Filtra storico" styleClass="traveler-search-type" />
+                            </HBox>
+                            <VBox fx:id="historyCardsContainer" spacing="14.0" />
+                            <VBox fx:id="emptyStateContainer" alignment="CENTER" spacing="10.0" styleClass="history-empty-state" visible="false" managed="false">
+                                <Label fx:id="emptyTitleLabel" styleClass="history-empty-title" text="Nessuna esperienza nello storico" />
+                                <Label fx:id="emptyDescriptionLabel" styleClass="history-empty-description" text="Quando un'esperienza sarà terminata o una prenotazione verrà cancellata, la troverai qui." wrapText="true" />
+                                <Button onAction="#handleGoToBookings" styleClass="btn-primary" text="Vai alla Dashboard" />
+                            </VBox>
+                        </VBox>
+                    </VBox>
+                </content>
+            </ScrollPane>
+        </center>
+    </BorderPane>
+</StackPane>

@@ -1,12 +1,16 @@
 package it.unical.ea_project.controller;
 
-
 import it.unical.ea_project.domain.FavoriteList;
+import it.unical.ea_project.dto.FavoriteListDTO;
+import it.unical.ea_project.repository.ListSharingRepository;
+import it.unical.ea_project.security.AuthUser;
 import it.unical.ea_project.service.FavoriteListService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.util.List;
 
@@ -16,31 +20,186 @@ import java.util.List;
 public class FavoriteListController {
 
     private final FavoriteListService favoriteListService;
+    private final ListSharingRepository sharingRepository;
 
-    public record FavoriteListRequest(Long userId, FavoriteList.Visibility visibility) {}
+    public record FavoriteListRequest(String name, FavoriteList.Visibility visibility) {}
 
     @PostMapping
-    public ResponseEntity<FavoriteList> createList(@RequestBody FavoriteListRequest request) {
-        FavoriteList newList = favoriteListService.createFavoriteList(
-                request.userId(),
+    public ResponseEntity<FavoriteListDTO> createList(
+            @AuthenticationPrincipal AuthUser user,
+            @RequestBody FavoriteListRequest request) {
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        if (request == null
+                || request.name() == null
+                || request.name().isBlank()
+                || request.name().trim().length() > 80) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        FavoriteList created = favoriteListService.createFavoriteList(
+                user.id(),
+                request.name(),
                 request.visibility()
         );
-        return new ResponseEntity<>(newList, HttpStatus.CREATED);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(toDTO(created));
+
+    }
+
+    @GetMapping("/mine")
+    public ResponseEntity<List<FavoriteListDTO>> getMyLists(
+            @AuthenticationPrincipal AuthUser user) {
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        List<FavoriteListDTO> lists =
+                favoriteListService.getActiveListsByUser(user.id())
+                        .stream()
+                        .map(this::toDTO)
+                        .toList();
+
+        return ResponseEntity.ok(lists);
+
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<FavoriteList>> getListsByUser(@PathVariable Long userId) {
-        return ResponseEntity.ok(favoriteListService.getActiveListsByUser(userId));
+    public ResponseEntity<List<FavoriteListDTO>> getListsByUser(
+            @PathVariable Long userId,
+            @AuthenticationPrincipal AuthUser user) {
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        if (!user.id().equals(userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        List<FavoriteListDTO> lists =
+                favoriteListService.getActiveListsByUser(userId)
+                        .stream()
+                        .map(this::toDTO)
+                        .toList();
+
+        return ResponseEntity.ok(lists);
+
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<FavoriteList> getListById(@PathVariable Long id) {
-        return ResponseEntity.ok(favoriteListService.getListById(id));
+    public ResponseEntity<FavoriteListDTO> getListById(
+            @PathVariable Long id,
+            @AuthenticationPrincipal AuthUser user) {
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        FavoriteList list = favoriteListService.getListById(id);
+
+        if (!canView(list, user.id())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        return ResponseEntity.ok(toDTO(list));
+
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<FavoriteListDTO> updateList(
+            @PathVariable Long id,
+            @AuthenticationPrincipal AuthUser user,
+            @RequestBody FavoriteListRequest request) {
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        if (request == null 
+            || request.name() == null 
+            || request.name().isBlank()        
+            || request.name().trim().length() > 80 
+            || request.visibility() == null) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        try {
+
+            FavoriteList updated = favoriteListService.updateFavoriteList(
+                    id, user.id(), request.name(), request.visibility()
+            );
+            return ResponseEntity.ok(toDTO(updated));
+
+        } catch (AccessDeniedException ex) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteList(@PathVariable Long id) {
-        favoriteListService.softDeleteList(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> deleteList(
+            @PathVariable Long id,
+            @AuthenticationPrincipal AuthUser user) {
+
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        final FavoriteList list;
+        try {
+            list = favoriteListService.getListById(id);
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.notFound().build();
+        }
+
+        if (list.getUser() == null || !list.getUser().getId().equals(user.id())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        try {
+            favoriteListService.softDeleteList(id);
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.notFound().build();
+        }
+
+    }
+
+    private FavoriteListDTO toDTO(FavoriteList list) {
+
+        return FavoriteListDTO.builder()
+                .id(list.getId())
+                .userId(list.getUser().getId())
+                .name(list.getName())
+                .visibility(
+                        list.getVisibility() != null
+                                ? list.getVisibility().name()
+                                : "PRIVATE"
+                )
+                .deleted(list.isDeleted())
+                .build();
+
+    }
+
+    private boolean canView(FavoriteList list, Long userId) {
+
+        if (list.getUser().getId().equals(userId)) {
+            return true;
+        }
+
+        return list.getVisibility() == FavoriteList.Visibility.SHARED
+                && sharingRepository.existsByFavoriteList_IdAndUser_Id(
+                list.getId(),
+                userId
+        );
+
     }
 }

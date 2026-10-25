@@ -9,14 +9,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
@@ -33,7 +31,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtService jwtService) throws Exception {
 
         http
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint((request, response, ex) -> {
@@ -59,8 +57,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/users/login", "/api/users", "/api/users/refresh").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/exists").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/users/me").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/users/me").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/users/me/profile-photo", "/api/users/change-password").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/users/me/profile-photo").authenticated()
                         .requestMatchers("/api/me/**").authenticated()
-                        .requestMatchers(HttpMethod.GET, "/api/activities/organizer/**").hasRole("ORGANIZER")
+                        .requestMatchers(HttpMethod.GET, "/api/activities/organizer/**", "/api/trips/organizer/**").hasRole("ORGANIZER")
                         .requestMatchers(HttpMethod.GET, "/api/activities/**", "/api/trips/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/activities/**", "/api/trips/**").hasRole("ORGANIZER")
                         .requestMatchers(HttpMethod.POST, "/api/activity-images/**", "/api/trip-images/**").hasRole("ORGANIZER")
@@ -79,5 +80,7 @@ public class SecurityConfig {
                 );
 
         return http.build();
+
     }
+
 }

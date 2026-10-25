@@ -78,6 +78,7 @@ public class CreateOfferController {
 
     private TripDTO tripToEdit;
     private ActivityDTO activityToEdit;
+    private Runnable closeAction;
     private File tripCoverFile;
     private List<File> tripSecondaryPhotoFiles = new ArrayList<>();
     private File activityCoverFile;
@@ -116,9 +117,34 @@ public class CreateOfferController {
 
     }
 
+    /** Consente al form di essere ospitato dalla PopupFactory senza creare un nuovo Stage. */
+    public void setCloseAction(Runnable closeAction) {
+        this.closeAction = closeAction;
+        if (closeAction != null) {
+            if (bgImageView != null) { bgImageView.setVisible(false); bgImageView.setManaged(false); }
+            if (rootPane != null) {
+                rootPane.getChildren().stream()
+                        .filter(node -> node.getStyleClass().contains("glass-overlay"))
+                        .forEach(node -> { node.setVisible(false); node.setManaged(false); });
+                rootPane.getStyleClass().add("popup-factory-transparent-surface");
+            }
+        }
+    }
+
     @FXML
     private void handleClose(ActionEvent event) {
-        ((Stage) ((Node) event.getSource()).getScene().getWindow()).close();
+        closeView();
+    }
+
+    private void closeView() {
+        if (closeAction != null) {
+            closeAction.run();
+            return;
+        }
+        if (rootPane != null && rootPane.getScene() != null
+                && rootPane.getScene().getWindow() instanceof Stage stage) {
+            stage.close();
+        }
     }
 
     @FXML
@@ -687,8 +713,7 @@ public class CreateOfferController {
     }
 
     private void closeAfterSave() {
-        Stage stage = (Stage) rootPane.getScene().getWindow();
-        stage.close();
+        closeView();
     }
 
     private record StageFields(

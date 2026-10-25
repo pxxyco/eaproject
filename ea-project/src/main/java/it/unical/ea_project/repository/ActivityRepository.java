@@ -17,6 +17,11 @@ import java.util.Optional;
 public interface ActivityRepository
         extends JpaRepository<Activity, Long> {
 
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT e FROM Activity e WHERE e.activityId = :id AND e.deletedAt IS NULL")
+    Optional<Activity> findActiveForUpdate(@Param("id") Long id);
+
+
     List<Activity> findByCreatedBy(User createdBy);
 
     List<Activity> findByCreatedByIdAndDeletedAtIsNullOrderByCreatedAtDesc(Long creatorId);
@@ -43,6 +48,7 @@ public interface ActivityRepository
         )
         FROM Activity a
         WHERE a.deletedAt IS NULL
+    AND a.status = it.unical.ea_project.domain.Activity.Status.PUBLISHED
         AND (
             LOWER(a.title) LIKE LOWER(CONCAT(:query, '%'))
             OR LOWER(a.city) LIKE LOWER(CONCAT(:query, '%'))
@@ -57,6 +63,7 @@ public interface ActivityRepository
     SELECT a
     FROM Activity a
     WHERE a.deletedAt IS NULL
+    AND a.status = it.unical.ea_project.domain.Activity.Status.PUBLISHED
     AND (
         cast(:category as String) IS NULL
         OR a.category = :category
@@ -84,6 +91,7 @@ public interface ActivityRepository
     SELECT a
     FROM Activity a
     WHERE a.deletedAt IS NULL
+    AND a.status = it.unical.ea_project.domain.Activity.Status.PUBLISHED
     AND (
         cast(:category as String) IS NULL
         OR a.category = :category
