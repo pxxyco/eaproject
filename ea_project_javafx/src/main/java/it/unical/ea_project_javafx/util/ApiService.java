@@ -12,6 +12,8 @@ import javafx.application.Platform;
 import javafx.concurrent.Task;
 import lombok.Setter;
 
+import javax.net.ssl.*;
+import java.io.InputStream;
 import java.net.URI;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -21,6 +23,10 @@ import java.nio.file.Path;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.security.KeyStore;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -38,9 +44,74 @@ public class ApiService {
 
     public static final String BASE_URL = "https://localhost:8443";
 
+    private static final SSLContext SSL_CONTEXT = buildSslContext();
+
     private static final HttpClient CLIENT = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(5))
+            .sslContext(SSL_CONTEXT)
             .build();
+
+    static {
+        SSLContext.setDefault(SSL_CONTEXT);
+        HttpsURLConnection.setDefaultSSLSocketFactory(SSL_CONTEXT.getSocketFactory());
+    }
+    public static void init() { }
+
+    private static SSLContext buildSslContext() {
+        try {
+            TrustManagerFactory defaultTmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            defaultTmf.init((KeyStore) null);
+            X509TrustManager defaultTm = firstX509(defaultTmf.getTrustManagers());
+            X509TrustManager devTm = loadDevTrustManager();
+
+            X509TrustManager combined = new X509TrustManager() {
+                @Override
+                public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                    defaultTm.checkClientTrusted(chain, authType);
+                }
+
+                @Override
+                public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
+                    try {
+                        defaultTm.checkServerTrusted(chain, authType);
+                    } catch (CertificateException e) {
+                        if (devTm == null) throw e;
+                        devTm.checkServerTrusted(chain, authType);
+                    }
+                }
+
+                @Override
+                public X509Certificate[] getAcceptedIssuers() {
+                    return defaultTm.getAcceptedIssuers();
+                }
+            };
+
+            SSLContext context = SSLContext.getInstance("TLS");
+            context.init(null, new TrustManager[]{combined}, null);
+            return context;
+        } catch (Exception e) {
+            throw new IllegalStateException("Impossibile inizializzare il contesto SSL", e);
+        }
+    }
+
+    private static X509TrustManager loadDevTrustManager() throws Exception {
+        try (InputStream in = ApiService.class.getResourceAsStream(
+                "/it/unical/ea_project_javafx/certs/dev-ca.crt")) {
+            if (in == null) return null;
+            KeyStore devStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            devStore.load(null, null);
+            devStore.setCertificateEntry("dev-ca", CertificateFactory.getInstance("X.509").generateCertificate(in));
+            TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            tmf.init(devStore);
+            return firstX509(tmf.getTrustManagers());
+        }
+    }
+    private static X509TrustManager firstX509(TrustManager[] managers) {
+        for (TrustManager tm : managers) {
+            if (tm instanceof X509TrustManager x509) return x509;
+        }
+        throw new IllegalStateException("Nessun X509TrustManager disponibile");
+    }
 
     private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool(r -> {
         Thread thread = new Thread(r);

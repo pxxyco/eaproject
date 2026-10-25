@@ -1,5 +1,6 @@
 package it.unical.ea_project_javafx;
 
+import it.unical.ea_project_javafx.util.ApiService;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
@@ -17,6 +18,13 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
+        ApiService.init();
+
+        if (!SingleInstanceLock.acquireLock()) {
+            Platform.exit();
+            System.exit(0);
+            return;
+        }
 
         if (!SingleInstanceLock.acquireLock()) {
             Platform.exit();
