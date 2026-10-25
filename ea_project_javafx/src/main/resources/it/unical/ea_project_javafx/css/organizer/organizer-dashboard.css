@@ -179,3 +179,31 @@
     -fx-alignment: center-left;
     -fx-border-color: transparent;
 }
+
+.custom-table .table-row-cell:filled:selected {
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+}
+
+.custom-table .placeholder .label {
+    -fx-text-fill: rgba(255, 255, 255, 0.6);
+}
+
+.custom-table .corner {
+    -fx-background-color: transparent;
+}
+
+.custom-table .scroll-bar:horizontal,
+.custom-table .scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+
+.custom-table .scroll-bar .thumb {
+    -fx-background-color: rgba(231, 229, 228, 0.25);
+    -fx-background-radius: 4px;
+}
+
+.custom-table .scroll-bar .increment-button,
+.custom-table .scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 3px;
+}

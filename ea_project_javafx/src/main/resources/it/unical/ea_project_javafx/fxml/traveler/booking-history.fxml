@@ -33,7 +33,7 @@
                 <content>
                     <VBox alignment="TOP_CENTER" spacing="22.0">
                         <padding><Insets bottom="42.0" left="28.0" right="28.0" top="26.0" /></padding>
-                        <VBox maxWidth="1120.0" spacing="20.0" styleClass="glass-card history-page-card">
+                        <VBox maxWidth="1120.0" spacing="20.0" styleClass="glass-card, history-page-card">
                             <padding><Insets bottom="30.0" left="30.0" right="30.0" top="28.0" /></padding>
                             <HBox alignment="CENTER_LEFT" spacing="14.0">
                                 <VBox spacing="5.0" HBox.hgrow="ALWAYS">

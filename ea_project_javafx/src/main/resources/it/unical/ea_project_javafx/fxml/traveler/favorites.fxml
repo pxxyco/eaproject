@@ -56,7 +56,7 @@
                                 </VBox>
                                 <TextField fx:id="newListNameField" promptText="Es. Weekend in Sicilia" styleClass="favorites-field" HBox.hgrow="ALWAYS" />
                                 <ComboBox fx:id="newListVisibilityCombo" promptText="Visibilità" styleClass="favorites-visibility" prefWidth="150.0" />
-                                <Button text="＋ Crea lista" onAction="#handleCreateList" styleClass="favorites-primary-button favorites-create-button" />
+                                <Button text="＋ Crea lista" onAction="#handleCreateList" styleClass="favorites-primary-button, favorites-create-button" />
                             </HBox>
 
                             <HBox spacing="28.0" styleClass="favorites-workspace" alignment="TOP_LEFT">
@@ -67,13 +67,13 @@
                                         <Label styleClass="favorites-count-note" text="COLLEZIONI" />
                                     </HBox>
                                     <Label text="Seleziona una lista per vedere e organizzare i contenuti." styleClass="favorites-muted" wrapText="true" />
-                                    <ListView fx:id="listsListView" prefHeight="380.0" styleClass="favorites-list-view favorites-list-selector" />
+                                    <ListView fx:id="listsListView" prefHeight="380.0" styleClass="favorites-list-view, favorites-list-selector" />
                                     <Separator styleClass="favorites-rule" />
                                     <Label styleClass="favorites-section-kicker" text="IMPOSTAZIONI LISTA" />
                                     <TextField fx:id="editListNameField" promptText="Nome della lista" styleClass="favorites-field" />
                                     <ComboBox fx:id="editListVisibilityCombo" promptText="Visibilità" styleClass="favorites-visibility" maxWidth="Infinity" />
                                     <HBox spacing="8.0">
-                                        <Button fx:id="saveListChangesButton" text="Salva" onAction="#handleSaveListChanges" styleClass="favorites-secondary-button favorites-small-action" HBox.hgrow="ALWAYS" />
+                                        <Button fx:id="saveListChangesButton" text="Salva" onAction="#handleSaveListChanges" styleClass="favorites-secondary-button, favorites-small-action" HBox.hgrow="ALWAYS" />
                                         <Button fx:id="deleteListButton" text="Elimina" onAction="#handleDeleteList" styleClass="favorites-danger-action" disable="true" />
                                     </HBox>
                                 </VBox>
@@ -85,7 +85,7 @@
                                             <Label fx:id="selectedListNameLabel" styleClass="favorites-selected-title" text="Seleziona una lista" wrapText="true" />
                                             <Label fx:id="selectedListVisibilityLabel" styleClass="favorites-muted" text="—" />
                                         </VBox>
-                                        <Button fx:id="shareListButton" text="↗ Condividi / permessi" onAction="#handleShareList" styleClass="favorites-secondary-button favorites-share-button" visible="false" />
+                                        <Button fx:id="shareListButton" text="↗ Condividi / permessi" onAction="#handleShareList" styleClass="favorites-secondary-button, favorites-share-button" visible="false" />
                                     </HBox>
 
                                     <HBox spacing="24.0" minWidth="0.0" alignment="TOP_LEFT" styleClass="favorites-collection-grid">
@@ -97,7 +97,7 @@
                                                     <Label styleClass="favorites-muted" text="Itinerari da tenere a portata di mano" />
                                                 </VBox>
                                             </HBox>
-                                            <ListView fx:id="savedTripsListView" prefHeight="166.0" styleClass="favorites-list-view favorites-content-list" />
+                                            <ListView fx:id="savedTripsListView" prefHeight="166.0" styleClass="favorites-list-view, favorites-content-list" />
                                             <HBox alignment="CENTER_LEFT" spacing="8.0">
                                                 <Button fx:id="removeTripButton" text="Rimuovi selezionato" onAction="#handleRemoveTrip" styleClass="favorites-text-action" />
                                                 <Region HBox.hgrow="ALWAYS" />
@@ -107,10 +107,10 @@
                                             <Label styleClass="favorites-section-kicker" text="AGGIUNGI UN VIAGGIO" />
                                             <HBox spacing="8.0">
                                                 <TextField fx:id="tripSearchField" promptText="Titolo o destinazione" styleClass="favorites-field" HBox.hgrow="ALWAYS" />
-                                                <Button text="Cerca" onAction="#handleSearchTrips" styleClass="favorites-secondary-button favorites-search-button" />
+                                                <Button text="Cerca" onAction="#handleSearchTrips" styleClass="favorites-secondary-button, favorites-search-button" />
                                             </HBox>
-                                            <ListView fx:id="tripSearchResults" prefHeight="125.0" styleClass="favorites-list-view favorites-search-results" />
-                                            <Button fx:id="addTripButton" text="＋ Aggiungi viaggio" onAction="#handleAddTrip" styleClass="favorites-primary-button favorites-add-button" maxWidth="Infinity" />
+                                            <ListView fx:id="tripSearchResults" prefHeight="125.0" styleClass="favorites-list-view, favorites-search-results" />
+                                            <Button fx:id="addTripButton" text="＋ Aggiungi viaggio" onAction="#handleAddTrip" styleClass="favorites-primary-button, favorites-add-button" maxWidth="Infinity" />
                                         </VBox>
 
                                         <VBox spacing="14.0" minWidth="0.0" prefWidth="360.0" HBox.hgrow="ALWAYS" styleClass="favorites-collection-column">
@@ -121,7 +121,7 @@
                                                     <Label styleClass="favorites-muted" text="Esperienze che vuoi ricordare" />
                                                 </VBox>
                                             </HBox>
-                                            <ListView fx:id="savedActivitiesListView" prefHeight="166.0" styleClass="favorites-list-view favorites-content-list" />
+                                            <ListView fx:id="savedActivitiesListView" prefHeight="166.0" styleClass="favorites-list-view, favorites-content-list" />
                                             <HBox alignment="CENTER_LEFT" spacing="8.0">
                                                 <Button fx:id="removeActivityButton" text="Rimuovi selezionata" onAction="#handleRemoveActivity" styleClass="favorites-text-action" />
                                                 <Region HBox.hgrow="ALWAYS" />
@@ -131,10 +131,10 @@
                                             <Label styleClass="favorites-section-kicker" text="AGGIUNGI UN'ATTIVITÀ" />
                                             <HBox spacing="8.0">
                                                 <TextField fx:id="activitySearchField" promptText="Titolo o città" styleClass="favorites-field" HBox.hgrow="ALWAYS" />
-                                                <Button text="Cerca" onAction="#handleSearchActivities" styleClass="favorites-secondary-button favorites-search-button" />
+                                                <Button text="Cerca" onAction="#handleSearchActivities" styleClass="favorites-secondary-button, favorites-search-button" />
                                             </HBox>
-                                            <ListView fx:id="activitySearchResults" prefHeight="125.0" styleClass="favorites-list-view favorites-search-results" />
-                                            <Button fx:id="addActivityButton" text="＋ Aggiungi attività" onAction="#handleAddActivity" styleClass="favorites-primary-button favorites-add-button" maxWidth="Infinity" />
+                                            <ListView fx:id="activitySearchResults" prefHeight="125.0" styleClass="favorites-list-view, favorites-search-results" />
+                                            <Button fx:id="addActivityButton" text="＋ Aggiungi attività" onAction="#handleAddActivity" styleClass="favorites-primary-button, favorites-add-button" maxWidth="Infinity" />
                                         </VBox>
                                     </HBox>
                                 </VBox>
@@ -147,7 +147,7 @@
                                         <Label styleClass="favorites-section-title" text="Liste condivise con te" />
                                         <Label fx:id="sharedListsStatusLabel" styleClass="favorites-muted" text="Caricamento liste condivise…" wrapText="true" />
                                     </VBox>
-                                    <Button text="↻ Aggiorna" onAction="#handleRefreshSharedLists" styleClass="favorites-secondary-button favorites-small-action" />
+                                    <Button text="↻ Aggiorna" onAction="#handleRefreshSharedLists" styleClass="favorites-secondary-button, favorites-small-action" />
                                 </HBox>
                                 <HBox spacing="24.0" minWidth="0.0" alignment="TOP_LEFT">
                                     <VBox spacing="8.0" minWidth="0.0" HBox.hgrow="ALWAYS">
@@ -162,7 +162,7 @@
                                     </VBox>
                                     <VBox spacing="8.0" minWidth="0.0" prefWidth="330.0" HBox.hgrow="ALWAYS">
                                         <Label styleClass="favorites-section-kicker" text="DETTAGLI DELLA CONDIVISIONE" />
-                                        <ListView fx:id="sharedListDetailsListView" prefHeight="210.0" styleClass="favorites-list-view favorites-shared-details" />
+                                        <ListView fx:id="sharedListDetailsListView" prefHeight="210.0" styleClass="favorites-list-view, favorites-shared-details" />
                                     </VBox>
                                 </HBox>
                             </VBox>

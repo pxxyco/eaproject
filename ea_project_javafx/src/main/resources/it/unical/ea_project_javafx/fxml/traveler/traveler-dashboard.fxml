@@ -90,7 +90,7 @@
         </HBox>
     </VBox>
 
-    <VBox spacing="12.0" styleClass="dashboard-section dashboard-upcoming-section">
+    <VBox spacing="12.0" styleClass="dashboard-section, dashboard-upcoming-section">
         <HBox alignment="CENTER_LEFT" spacing="12.0">
             <VBox spacing="4.0" HBox.hgrow="ALWAYS">
                 <Label styleClass="section-title" text="Prossime esperienze" />
@@ -101,7 +101,7 @@
         <HBox fx:id="upcomingExperienceContainer" spacing="14.0" styleClass="dashboard-upcoming-row" />
     </VBox>
 
-    <VBox spacing="12.0" styleClass="dashboard-section dashboard-bookings-section">
+    <VBox spacing="12.0" styleClass="dashboard-section, dashboard-bookings-section">
         <HBox alignment="CENTER_LEFT" spacing="12.0">
             <VBox spacing="4.0" HBox.hgrow="ALWAYS">
                 <Label styleClass="section-title" text="Le tue prenotazioni" />
@@ -114,7 +114,7 @@
             <ComboBox fx:id="bookingsPeriodFilter" promptText="Periodo" styleClass="traveler-search-type" prefWidth="155.0" />
             <ComboBox fx:id="bookingsStatusFilter" promptText="Stato" styleClass="traveler-search-type" prefWidth="190.0" />
         </HBox>
-        <TableView fx:id="bookingsTable" prefHeight="400.0" minHeight="300.0" styleClass="profile-table dashboard-bookings-table">
+        <TableView fx:id="bookingsTable" prefHeight="400.0" minHeight="300.0" styleClass="profile-table, dashboard-bookings-table">
             <columns>
                 <TableColumn fx:id="itemTitleColumn" prefWidth="205.0" text="Esperienza / Viaggio" />
                 <TableColumn fx:id="dateColumn" prefWidth="180.0" text="Data esperienza" />
