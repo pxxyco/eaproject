@@ -179,3 +179,11 @@
     -fx-background-radius: 12 0 0 12;
     -fx-border-radius: 12 0 0 12;
 }
+
+.itinerary-panel {
+    -fx-background-color: rgba(27, 39, 31, 0.74);
+}
+
+.itinerary-form {
+    -fx-background-color: rgba(27, 39, 31, 0.74);
+}

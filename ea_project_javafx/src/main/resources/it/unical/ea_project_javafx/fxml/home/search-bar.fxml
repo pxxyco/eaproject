@@ -8,56 +8,45 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?><?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.StackPane?>
 
-<VBox alignment="CENTER" maxWidth="1000.0" spacing="16.0" xmlns="http://javafx.com/javafx/21.0.2"
-    xmlns:fx="http://javafx.com/fxml/1"
-    fx:controller="it.unical.ea_project_javafx.controller.home.SearchBarController">
+<VBox alignment="CENTER" maxWidth="1000.0" spacing="16.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.home.SearchBarController">
 
-    <Label styleClass="hero-title, search-intro-title" text="Trova la tua prossima esperienza"
-        textAlignment="CENTER" wrapText="true" />
-    <Label styleClass="hero-subtitle, search-intro-subtitle"
-        text="Esplora escursioni guidate, tour enogastronomici, visite culturali e itinerari condivisi."
-        textAlignment="CENTER" wrapText="true" />
+    <Label styleClass="hero-title" text="Trova la tua prossima esperienza" textAlignment="CENTER" wrapText="true" />
+    <Label styleClass="hero-subtitle" text="Esplora escursioni guidate, tour enogastronomici, visite culturali e itinerari condivisi." textAlignment="CENTER" wrapText="true" />
 
     <StackPane fx:id="searchSlot">
-        <HBox fx:id="searchControls" alignment="CENTER" spacing="12.0"
-            styleClass="booking-search-box" maxWidth="1000">
-            <children>
-                <VBox minWidth="140.0" styleClass="search-field" HBox.hgrow="ALWAYS">
-                    <children>
-                        <Label styleClass="field-label" text="DOVE VUOI ANDARE?" />
-                        <TextField fx:id="searchField" promptText="Cerca città o attività..."
-                            styleClass="transparent-input" />
-                    </children>
-                </VBox>
-                <VBox minWidth="130.0" prefHeight="59.0" prefWidth="286.0" styleClass="search-field"
-                    HBox.hgrow="NEVER">
-                    <children>
-                        <Label styleClass="field-label" text="CATEGORIA" />
-                        <ComboBox fx:id="categoryComboBox" maxWidth="1.7976931348623157E308"
-                            prefWidth="254.0" styleClass="transparent-combo" />
-                    </children>
-                </VBox>
-                <VBox minWidth="130.0" styleClass="search-field" HBox.hgrow="ALWAYS">
-                    <children>
-                        <HBox prefHeight="0.0" prefWidth="200.0" spacing="10.0">
-                            <children>
-                                <Label styleClass="field-label" text="IMPORTA DATA" />
-                                <CheckBox fx:id="SetData" styleClass="checkbox"
-                                    mnemonicParsing="false" textAlignment="CENTER" />
-                            </children>
-                        </HBox>
-                        <DatePicker fx:id="datePicker" maxWidth="1.7976931348623157E308"
-                            styleClass="transparent-datepicker" />
-                    </children>
-                </VBox>
-                <Button onAction="#handleSearch" styleClass="btn-search" text="Cerca"
-                    HBox.hgrow="NEVER" />
-            </children>
-            <padding>
-                <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
-            </padding>
-        </HBox>
+    <HBox fx:id="searchControls" alignment="CENTER" spacing="12.0" styleClass="booking-search-box">
+        <children>
+            <VBox minWidth="140.0" styleClass="search-field" HBox.hgrow="ALWAYS">
+                <children>
+                    <Label styleClass="field-label" text="DOVE VUOI ANDARE?" />
+                    <TextField fx:id="searchField" promptText="Cerca città o attività..." styleClass="transparent-input" />
+                </children>
+            </VBox>
+            <VBox minWidth="130.0" prefHeight="59.0" prefWidth="286.0" styleClass="search-field" HBox.hgrow="NEVER">
+                <children>
+                    <Label styleClass="field-label" text="CATEGORIA" />
+                    <ComboBox fx:id="categoryComboBox" maxWidth="1.7976931348623157E308" prefWidth="254.0" styleClass="transparent-combo" />
+                </children>
+            </VBox>
+            <VBox minWidth="130.0" styleClass="search-field" HBox.hgrow="ALWAYS">
+                <children>
+               <HBox prefHeight="0.0" prefWidth="200.0" spacing="10.0">
+                  <children>
+                          <Label styleClass="field-label" text="IMPORTA DATA" />
+                      <CheckBox fx:id="SetData" styleClass="checkbox" mnemonicParsing="false" textAlignment="CENTER" />
+                  </children>
+               </HBox>
+                    <DatePicker fx:id="datePicker" maxWidth="1.7976931348623157E308" styleClass="transparent-datepicker" />
+                </children>
+            </VBox>
+            <Button onAction="#handleSearch" styleClass="btn-search" text="Cerca" HBox.hgrow="NEVER" />
+        </children>
+        <padding>
+            <Insets bottom="12.0" left="12.0" right="12.0" top="12.0" />
+        </padding>
+    </HBox>
     </StackPane>
 </VBox>

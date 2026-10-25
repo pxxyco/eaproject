@@ -20,6 +20,15 @@ import java.util.Map;
 public class BookingController {
 
     private final BookingService bookingService;
+    private final it.unical.ea_project.service.BookingHistoryService history;
+
+    @GetMapping("/mine/history")
+    public it.unical.ea_project.service.BookingHistoryService.HistoryPage history(
+            @AuthenticationPrincipal AuthUser user, @RequestParam(defaultValue = "") String query,
+            @RequestParam(defaultValue = "ALL") String filter, @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "6") int size) {
+        return history.page(user.id(), query, filter, page, size);
+    }
 
     @GetMapping("/mine")
     public ResponseEntity<List<BookingDTO>> getMine(@AuthenticationPrincipal AuthUser user) {
@@ -33,25 +42,25 @@ public class BookingController {
 
     @PostMapping("/trips/{tripId}")
     public ResponseEntity<BookingDTO> bookTrip(@PathVariable Long tripId,
-                                               @RequestParam Integer seats,
-                                               @AuthenticationPrincipal AuthUser user) {
+            @RequestParam Integer seats,
+            @AuthenticationPrincipal AuthUser user) {
         return ResponseEntity.ok(bookingService.creaPrenotazioneTrip(user.id(), tripId, seats));
     }
 
     @PostMapping("/activities/{activityId}")
     public ResponseEntity<BookingDTO> bookActivity(@PathVariable Long activityId,
-                                                   @RequestParam Integer seats,
-                                                   @AuthenticationPrincipal AuthUser user) {
+            @RequestParam Integer seats,
+            @AuthenticationPrincipal AuthUser user) {
         return ResponseEntity.ok(bookingService.creaPrenotazioneActivity(user.id(), activityId, seats));
     }
 
     @GetMapping(value = "/{bookingId}/export/ics", produces = "text/calendar;charset=UTF-8")
     public ResponseEntity<byte[]> exportBookingToIcs(@PathVariable Long bookingId,
-                                                     @AuthenticationPrincipal AuthUser user) {
+            @AuthenticationPrincipal AuthUser user) {
 
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                .build();
+                    .build();
         }
 
         try {
@@ -62,20 +71,21 @@ public class BookingController {
             headers.setContentDisposition(org.springframework.http.ContentDisposition.attachment()
                     .filename("prenotazione_" + bookingId + ".ics", java.nio.charset.StandardCharsets.UTF_8).build());
             headers.setCacheControl("no-store");
-            return new ResponseEntity<>(content.getBytes(java.nio.charset.StandardCharsets.UTF_8), headers, HttpStatus.OK);
-        
+            return new ResponseEntity<>(content.getBytes(java.nio.charset.StandardCharsets.UTF_8), headers,
+                    HttpStatus.OK);
+
         } catch (org.springframework.security.access.AccessDeniedException ex) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .build();
+                    .build();
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.badRequest()
-                .build();
+                    .build();
         }
     }
 
     @DeleteMapping("/{bookingId}")
     public ResponseEntity<Map<String, String>> cancel(@PathVariable Long bookingId,
-                                                       @AuthenticationPrincipal AuthUser user) {
+            @AuthenticationPrincipal AuthUser user) {
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("message", "Devi accedere per cancellare una prenotazione."));
@@ -89,7 +99,8 @@ public class BookingController {
         } catch (IllegalArgumentException exception) {
             return ResponseEntity.badRequest()
                     .body(Map.of("message", exception.getMessage() == null
-                            ? "Prenotazione non valida." : exception.getMessage()));
+                            ? "Prenotazione non valida."
+                            : exception.getMessage()));
         }
     }
 

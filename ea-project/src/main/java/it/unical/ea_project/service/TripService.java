@@ -60,9 +60,9 @@ public interface TripService {
 
     List<TripDTO> getTopTripDtos(int page, int size);
 
-    List<TripHomeDTO> topHomeCards(int page, int size);
-
     List<TripHomeDTO> searchTripHomeDtos(String query, LocalDate date, int page, int size);
+
+    long countHomeTrips(String query, LocalDate date);
 
     List<TripSuggestionDTO> getSuggestions(String query, int limit);
 

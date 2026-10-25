@@ -127,12 +127,12 @@
 
 /* Popup della tendina opaco per coprire gli elementi sottostanti */
 .context-menu {
-    -fx-background-color: #1c1c1b;
+    -fx-background-color: rgba(25, 35, 30, 0.97);
     -fx-border-color: rgba(231, 229, 228, 0.35);
     -fx-border-width: 1px;
-    -fx-border-radius: 12px;
-    -fx-background-radius: 12px;
-    -fx-padding: 6px;
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+    -fx-padding: 8px;
     -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.85), 20, 0, 0, 10);
 }
 
@@ -243,9 +243,9 @@
 .combo-box-popup .list-view {
     -fx-background-color: #242423;
     -fx-border-color: rgba(231, 229, 228, 0.24);
-    -fx-border-radius: 12px;
-    -fx-background-radius: 12px;
-    -fx-padding: 6px;
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+    -fx-padding: 8px;
     -fx-effect: dropshadow(three-pass-box, rgba(0, 0, 0, 0.5), 16, 0, 0, 8);
 }
 
@@ -857,7 +857,7 @@
 .table-view .column-header-background,
 .table-view .column-header,
 .table-view .filler {
-    -fx-background-color: #292524;
+    -fx-background-color: rgba(27, 36, 31, 0.78);
 }
 
 .table-view .column-header {
@@ -878,7 +878,7 @@
 }
 
 .table-view .table-row-cell:odd {
-    -fx-background-color: #24211f;
+    -fx-background-color: rgba(25, 35, 30, 0.78);
 }
 
 .table-view .table-row-cell:filled:hover {
@@ -913,7 +913,7 @@
 
 .app-modal-panel,
 .app-popup-content-wrapper.app-modal-panel {
-    -fx-background-color: #24211f;
+    -fx-background-color: rgba(25, 35, 30, 0.98);
     -fx-border-color: #57534e;
     -fx-border-width: 1;
     -fx-background-radius: 22;
@@ -926,7 +926,7 @@
 }
 
 .app-popup-root .glass-card {
-    -fx-background-color: #24211f;
+    -fx-background-color: rgba(25, 35, 30, 0.98);
     -fx-effect: null;
 }
 
@@ -956,7 +956,7 @@
 }
 
 .account-panel {
-    -fx-background-color: #24211f;
+    -fx-background-color: rgba(25, 35, 30, 0.78);
     -fx-border-color: #44403c;
     -fx-border-radius: 20;
     -fx-background-radius: 20;
@@ -1019,7 +1019,7 @@
 }
 
 .account-panel .titled-pane>.content {
-    -fx-background-color: #24211f;
+    -fx-background-color: rgba(25, 35, 30, 0.78);
     -fx-border-color: #44403c;
     -fx-padding: 16;
 }
@@ -1035,7 +1035,7 @@
 }
 
 .app-modal-panel.app-modal-panel {
-    -fx-background-color: #24211f;
+    -fx-background-color: rgba(25, 35, 30, 0.98);
     -fx-border-color: #57534e;
 }
 

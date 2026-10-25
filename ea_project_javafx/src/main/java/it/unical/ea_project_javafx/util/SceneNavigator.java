@@ -62,17 +62,10 @@ public class SceneNavigator {
                 controllerInitializer.accept(loader.getController());
             }
 
-            Scene scene;
-
-            if (mainStage.getScene() != null) {
-                scene = new Scene(root, mainStage.getScene().getWidth(), mainStage.getScene().getHeight());
-            } else {
+            Scene scene = mainStage.getScene();
+            if (scene == null)
                 scene = new Scene(root, AppConfig.WINDOW_WIDTH, AppConfig.WINDOW_HEIGHT);
-            }
-
             scene.setUserData(fxmlPath);
-            SmoothScrolling.install(scene);
-            UiEffects.install(scene);
 
             if (mainStage.getScene() != null) {
                 Object previous = mainStage.getScene().getProperties().get("pageController");
@@ -83,7 +76,13 @@ public class SceneNavigator {
                     }
             }
             scene.getProperties().put("pageController", loader.getController());
-            mainStage.setScene(scene);
+            if (scene.getRoot() != root)
+                scene.setRoot(root);
+            SmoothScrolling.install(scene);
+            UiEffects.install(scene);
+            PageTransitions.enter(root);
+            if (mainStage.getScene() != scene)
+                mainStage.setScene(scene);
             mainStage.show();
 
         } catch (IOException e) {

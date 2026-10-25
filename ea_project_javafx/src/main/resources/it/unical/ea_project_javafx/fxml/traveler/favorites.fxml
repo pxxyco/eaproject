@@ -35,18 +35,18 @@
         <center>
             <ScrollPane fitToWidth="true" styleClass="favorites-scroll">
                 <content>
-                    <VBox alignment="TOP_CENTER" spacing="28.0" styleClass="favorites-content">
+                    <VBox alignment="TOP_CENTER" spacing="36.0" styleClass="favorites-content">
                         <padding>
                             <Insets bottom="44.0" left="30.0" right="30.0" top="30.0" />
                         </padding>
-                        <VBox maxWidth="1240.0" spacing="28.0" styleClass="favorites-inner-layout">
+                        <VBox maxWidth="1240.0" spacing="36.0" styleClass="favorites-inner-layout">
                             <HBox alignment="CENTER_LEFT" spacing="22.0" styleClass="favorites-hero">
                                 <VBox spacing="7.0" HBox.hgrow="ALWAYS">
                                     <Label styleClass="favorites-eyebrow"
                                         text="IL TUO SPAZIO PERSONALE" />
-                                    <Label styleClass="favorites-title" text="Preferiti e itinerari" />
+                                    <Label styleClass="favorites-title" text="I tuoi preferiti" />
                                     <Label styleClass="favorites-subtitle"
-                                        text="Raccogli le idee, costruisci i tuoi itinerari e condividili con chi viaggia con te."
+                                        text="Conserva le esperienze che ti ispirano e condividi le tue raccolte."
                                         wrapText="true" />
                                 </VBox>
                                 <VBox alignment="CENTER_RIGHT" spacing="3.0"
@@ -59,7 +59,7 @@
                             <Label fx:id="statusMessageLabel" managed="false" visible="false"
                                 wrapText="true" styleClass="favorites-status" />
 
-                            <HBox alignment="CENTER_LEFT" spacing="14.0"
+                            <HBox alignment="CENTER_LEFT" spacing="20.0"
                                 styleClass="favorites-create-line">
                                 <VBox spacing="4.0" minWidth="190.0">
                                     <Label styleClass="favorites-section-kicker"
@@ -76,9 +76,9 @@
                                     styleClass="favorites-primary-button, favorites-create-button" />
                             </HBox>
 
-                            <HBox spacing="28.0" styleClass="favorites-workspace"
+                            <HBox spacing="36.0" styleClass="favorites-workspace"
                                 alignment="TOP_LEFT">
-                                <VBox spacing="14.0" prefWidth="250.0" minWidth="220.0"
+                                <VBox spacing="20.0" prefWidth="250.0" minWidth="220.0"
                                     styleClass="favorites-sidebar">
                                     <HBox alignment="CENTER_LEFT" spacing="8.0">
                                         <Label styleClass="favorites-section-title"
@@ -112,7 +112,7 @@
 
                                 <VBox spacing="22.0" minWidth="0.0" HBox.hgrow="ALWAYS"
                                     styleClass="favorites-main-area">
-                                    <HBox alignment="CENTER_LEFT" spacing="14.0"
+                                    <HBox alignment="CENTER_LEFT" spacing="20.0"
                                         styleClass="favorites-selected-heading">
                                         <VBox spacing="5.0" HBox.hgrow="ALWAYS">
                                             <Label styleClass="favorites-section-kicker"
@@ -132,7 +132,7 @@
 
                                     <HBox spacing="24.0" minWidth="0.0" alignment="TOP_LEFT"
                                         styleClass="favorites-collection-grid">
-                                        <VBox spacing="14.0" minWidth="0.0" prefWidth="360.0"
+                                        <VBox spacing="20.0" minWidth="0.0" prefWidth="360.0"
                                             HBox.hgrow="ALWAYS"
                                             styleClass="favorites-collection-column">
                                             <HBox alignment="CENTER_LEFT" spacing="10.0">
@@ -173,7 +173,7 @@
                                                 maxWidth="Infinity" />
                                         </VBox>
 
-                                        <VBox spacing="14.0" minWidth="0.0" prefWidth="360.0"
+                                        <VBox spacing="20.0" minWidth="0.0" prefWidth="360.0"
                                             HBox.hgrow="ALWAYS"
                                             styleClass="favorites-collection-column">
                                             <HBox alignment="CENTER_LEFT" spacing="10.0">

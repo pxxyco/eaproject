@@ -6,37 +6,49 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.HBox?><?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
 <VBox xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="it.unical.ea_project_javafx.controller.login.LoginStepController"
-      spacing="20.0">
+    fx:controller="it.unical.ea_project_javafx.controller.login.LoginStepController"
+    spacing="20.0">
 
     <Label styleClass="header-title" text="Login" />
 
-    <Label fx:id="errorLabel" managed="false" visible="false" styleClass="message-error" wrapText="true" />
+    <Label fx:id="errorLabel" managed="false" visible="false" styleClass="message-error"
+        wrapText="true" />
 
     <VBox spacing="8.0">
         <Label styleClass="input-label" text="Email / Username" />
-        <TextField fx:id="loginUsernameField" promptText="Inserisci Email o Username" styleClass="custom-input" />
+        <TextField fx:id="loginUsernameField" promptText="Inserisci Email o Username"
+            styleClass="custom-input" />
     </VBox>
 
     <VBox spacing="8.0">
         <Label styleClass="input-label" text="Password" />
-        <PasswordField fx:id="loginPasswordField" promptText="Inserisci la Password" styleClass="custom-input" />
+        <StackPane styleClass="password-shell">
+            <PasswordField fx:id="loginPasswordField" promptText="Inserisci la Password"
+                styleClass="custom-input, password-input" />
+            <TextField fx:id="visiblePasswordField" promptText="Inserisci la Password"
+                styleClass="custom-input, password-input" visible="false" managed="false" />
+            <Button fx:id="revealPasswordButton" text="◎" accessibleText="Mostra password"
+                onAction="#togglePassword" styleClass="password-reveal"
+                StackPane.alignment="CENTER_RIGHT" />
+        </StackPane>
     </VBox>
 
     <HBox alignment="CENTER_LEFT">
         <children>
             <CheckBox fx:id="rememberMeCheckBox" styleClass="custom-checkbox" text="Ricordami" />
             <Region HBox.hgrow="ALWAYS" />
-            <Hyperlink onAction="#goToForgotPassword" styleClass="custom-link" text="Password dimenticata?" />
+            <Hyperlink onAction="#goToForgotPassword" styleClass="custom-link"
+                text="Password dimenticata?" />
         </children>
     </HBox>
 
-    <Button fx:id="btnLogin" maxWidth="1.7976931348623157E308" onAction="#handleLoginSubmit" styleClass="btn-submit" text="Log In" />
+    <Button fx:id="btnLogin" maxWidth="1.7976931348623157E308" onAction="#handleLoginSubmit"
+        styleClass="btn-submit" text="Log In" />
 
     <HBox alignment="CENTER" spacing="5.0">
         <Label styleClass="switch-text" text="Non hai un Account?" />

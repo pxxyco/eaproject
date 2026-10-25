@@ -36,17 +36,17 @@ public class BookingServiceImpl implements BookingService {
     private final PaymentRepository paymentRepository;
 
     public BookingServiceImpl(BookingRepository bookingRepository,
-                              UserRepository userRepository,
-                              TripRepository tripRepository,
-                              ActivityRepository activityRepository,
-                              PaymentRepository paymentRepository) {
+            UserRepository userRepository,
+            TripRepository tripRepository,
+            ActivityRepository activityRepository,
+            PaymentRepository paymentRepository) {
 
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.tripRepository = tripRepository;
         this.activityRepository = activityRepository;
         this.paymentRepository = paymentRepository;
-    
+
     }
 
     @Transactional
@@ -103,7 +103,8 @@ public class BookingServiceImpl implements BookingService {
         Booking b = bookingRepository.findByBookingIdForUpdate(bookingId)
                 .orElseThrow(() -> new IllegalArgumentException("Prenotazione non trovata."));
         if (b.getUser() == null || !java.util.Objects.equals(b.getUser().getId(), userId)) {
-            throw new org.springframework.security.access.AccessDeniedException("Prenotazione non appartenente all'utente");
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "Prenotazione non appartenente all'utente");
         }
 
         if (b.getDeletedAt() != null) {
@@ -119,10 +120,12 @@ public class BookingServiceImpl implements BookingService {
         }
 
         if (isAssociatedExperienceCancelled(b)) {
-            throw new IllegalArgumentException("Non puoi cancellare una prenotazione associata a un'esperienza annullata.");
+            throw new IllegalArgumentException(
+                    "Non puoi cancellare una prenotazione associata a un'esperienza annullata.");
         }
         if (isAssociatedExperienceCompleted(b)) {
-            throw new IllegalArgumentException("Non puoi cancellare una prenotazione relativa a un'esperienza già completata.");
+            throw new IllegalArgumentException(
+                    "Non puoi cancellare una prenotazione relativa a un'esperienza già completata.");
         }
 
         LocalDateTime eventStart = getEventStartDateTime(b);
@@ -145,7 +148,7 @@ public class BookingServiceImpl implements BookingService {
             Integer available = locked.getAvailableSeats();
             locked.setAvailableSeats((available == null ? 0 : available) + seatsToRestore);
         }
-        
+
         bookingRepository.save(b);
 
     }
@@ -160,6 +163,18 @@ public class BookingServiceImpl implements BookingService {
                 .map(booking -> toDto(booking, paymentStatuses.get(booking.getBookingId())))
                 .toList();
 
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BookingDTO> getBookingsByIds(Long userId, List<Long> ids) {
+        if (ids.isEmpty())
+            return List.of();
+        List<Booking> bookings = bookingRepository.findByUserIdAndBookingIdInAndDeletedAtIsNull(userId, ids);
+        Map<Long, String> payments = loadLatestPaymentStatuses(bookings);
+        Map<Long, BookingDTO> mapped = bookings.stream().collect(java.util.stream.Collectors.toMap(
+                Booking::getBookingId, booking -> toDto(booking, payments.get(booking.getBookingId()))));
+        return ids.stream().map(mapped::get).filter(java.util.Objects::nonNull).toList();
     }
 
     @Override
@@ -189,7 +204,7 @@ public class BookingServiceImpl implements BookingService {
             throw new org.springframework.security.access.AccessDeniedException(
                     "Puoi esportare soltanto le tue prenotazioni");
         }
-        
+
         if (booking.getBookingStatus() == Booking.BookingStatus.CANCELLED) {
             throw new IllegalArgumentException("Non è possibile esportare una prenotazione cancellata");
         }
@@ -214,7 +229,8 @@ public class BookingServiceImpl implements BookingService {
             LocalDate tripEnd = trip.getEndDate() == null ? tripStart.plusDays(1) : trip.getEndDate().plusDays(1);
             title = safeTitle(trip.getTitle());
             location = joinLocation(trip.getDestinationCity(), trip.getDestinationCountry());
-            description = "Prenotazione viaggio. Posti prenotati: " + (booking.getSeats() == null ? 1 : booking.getSeats());
+            description = "Prenotazione viaggio. Posti prenotati: "
+                    + (booking.getSeats() == null ? 1 : booking.getSeats());
             start = tripStart.format(DateTimeFormatter.BASIC_ISO_DATE);
             end = tripEnd.format(DateTimeFormatter.BASIC_ISO_DATE);
             allDay = true;
@@ -226,10 +242,12 @@ public class BookingServiceImpl implements BookingService {
             }
             LocalDateTime activityStart = activity.getStartDate();
             LocalDateTime activityEnd = activity.getEndDate() != null ? activity.getEndDate()
-                    : activityStart.plusMinutes(activity.getDurationMinutes() == null ? 60 : activity.getDurationMinutes());
+                    : activityStart
+                            .plusMinutes(activity.getDurationMinutes() == null ? 60 : activity.getDurationMinutes());
             title = safeTitle(activity.getTitle());
             location = joinLocation(activity.getPlaceName(), activity.getCity());
-            description = "Prenotazione attività. Posti prenotati: " + (booking.getSeats() == null ? 1 : booking.getSeats());
+            description = "Prenotazione attività. Posti prenotati: "
+                    + (booking.getSeats() == null ? 1 : booking.getSeats());
             start = activityStart.format(DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss"));
             end = activityEnd.format(DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss"));
             allDay = false;
@@ -268,7 +286,7 @@ public class BookingServiceImpl implements BookingService {
         if (value == null) {
             return "";
         }
-        
+
         return value.replace("\\", "\\\\")
                 .replace(";", "\\;")
                 .replace(",", "\\,")
@@ -298,7 +316,10 @@ public class BookingServiceImpl implements BookingService {
 
     }
 
-    /** Start instant used to avoid cancelling events that have already started. Trips have day precision. */
+    /**
+     * Start instant used to avoid cancelling events that have already started.
+     * Trips have day precision.
+     */
     private LocalDateTime getEventStartDateTime(Booking booking) {
         if (booking.getTrip() != null && booking.getTrip().getStartDate() != null) {
             return booking.getTrip().getStartDate().atStartOfDay();
@@ -318,14 +339,14 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private boolean isAssociatedExperienceCancelled(Booking booking) {
-        return booking != null && (
-                booking.getTrip() != null && booking.getTrip().getStatus() == Trip.TripStatus.CANCELLED
+        return booking != null && (booking.getTrip() != null
+                && booking.getTrip().getStatus() == Trip.TripStatus.CANCELLED
                 || booking.getActivity() != null && booking.getActivity().getStatus() == Activity.Status.CANCELLED);
     }
 
     private boolean isAssociatedExperienceCompleted(Booking booking) {
-        return booking != null && (
-                booking.getTrip() != null && booking.getTrip().getStatus() == Trip.TripStatus.COMPLETED
+        return booking != null && (booking.getTrip() != null
+                && booking.getTrip().getStatus() == Trip.TripStatus.COMPLETED
                 || booking.getActivity() != null && booking.getActivity().getStatus() == Activity.Status.COMPLETED);
     }
 
@@ -337,18 +358,27 @@ public class BookingServiceImpl implements BookingService {
 
     }
 
-    /** Loads current payment states in one query for booking lists, avoiding an N+1 query pattern. */
+    /**
+     * Loads current payment states in one query for booking lists, avoiding an N+1
+     * query pattern.
+     */
     private Map<Long, String> loadLatestPaymentStatuses(List<Booking> bookings) {
-        if (bookings == null || bookings.isEmpty()) return Map.of();
+        if (bookings == null || bookings.isEmpty())
+            return Map.of();
         List<Long> ids = new ArrayList<>(bookings.size());
         for (Booking booking : bookings) {
-            if (booking != null) ids.add(booking.getBookingId());
+            if (booking != null)
+                ids.add(booking.getBookingId());
         }
-        if (ids.isEmpty()) return Map.of();
+        if (ids.isEmpty())
+            return Map.of();
         Map<Long, String> statuses = new HashMap<>();
-        // The repository returns newest payments first; retain only the first non-deleted one per booking.
-        for (Payment payment : paymentRepository.findAllByBookingBookingIdInAndDeletedAtIsNullOrderByCreatedAtDesc(ids)) {
-            if (payment == null || payment.getBooking() == null) continue;
+        // The repository returns newest payments first; retain only the first
+        // non-deleted one per booking.
+        for (Payment payment : paymentRepository
+                .findAllByBookingBookingIdInAndDeletedAtIsNullOrderByCreatedAtDesc(ids)) {
+            if (payment == null || payment.getBooking() == null)
+                continue;
             Long bookingId = payment.getBooking().getBookingId();
             if (!statuses.containsKey(bookingId)) {
                 statuses.put(bookingId, payment.getStatus() == null ? null : payment.getStatus().name());
@@ -358,7 +388,8 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private BookingDTO toDto(Booking booking) {
-        String paymentStatus = paymentRepository.findAllByBookingBookingIdAndDeletedAtIsNullOrderByCreatedAtDesc(booking.getBookingId())
+        String paymentStatus = paymentRepository
+                .findAllByBookingBookingIdAndDeletedAtIsNullOrderByCreatedAtDesc(booking.getBookingId())
                 .stream()
                 .findFirst()
                 .map(payment -> payment.getStatus() != null ? payment.getStatus().name() : null)
@@ -388,7 +419,8 @@ public class BookingServiceImpl implements BookingService {
             LocalDateTime activityEnd = activity.getEndDate();
             if (activityEnd == null && activity.getStartDate() != null) {
                 int duration = activity.getDurationMinutes() == null || activity.getDurationMinutes() < 1
-                        ? 60 : activity.getDurationMinutes();
+                        ? 60
+                        : activity.getDurationMinutes();
                 activityEnd = activity.getStartDate().plusMinutes(duration);
             }
             endDate = activityEnd != null ? activityEnd.toString() : date;

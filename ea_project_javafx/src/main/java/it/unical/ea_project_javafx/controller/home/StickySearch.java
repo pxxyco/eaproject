@@ -77,7 +77,7 @@ final class StickySearch implements AutoCloseable {
         double range = Math.max(0, content.getLayoutBounds().getHeight() - scroll.getViewportBounds().getHeight());
         double offset = scroll.getVmax() <= scroll.getVmin() ? 0
                 : (scroll.getVvalue() - scroll.getVmin()) / (scroll.getVmax() - scroll.getVmin()) * range;
-        boolean shouldPin = slotTop < offset + navbar.getHeight();
+        boolean shouldPin = slotTop < offset;
         if (shouldPin != pinned)
             relocate(shouldPin);
         if (pinned)
@@ -90,15 +90,20 @@ final class StickySearch implements AutoCloseable {
         // a scrollbar.
         var bounds = dock.getParent().sceneToLocal(search.slot().localToScene(search.slot().getLayoutBounds()));
         double height = search.controls().prefHeight(bounds.getWidth());
-        dock.resizeRelocate(bounds.getMinX(), navbar.getHeight() + 8, bounds.getWidth(), height);
+        dock.resizeRelocate(bounds.getMinX(), 8, bounds.getWidth(), height);
         dock.layout();
     }
 
     private void mask() {
         if (viewport == null)
             return;
+        if (pinAmount.get() == 0) {
+            viewport.setClip(originalClip);
+            maskCutoff = -1;
+            return;
+        }
         double width = scroll.getViewportBounds().getWidth(), height = scroll.getViewportBounds().getHeight();
-        double cutoff = navbar.getHeight() - 14 + pinAmount.get() * (search.controls().getHeight() + 24);
+        double cutoff = pinAmount.get() * (search.controls().getHeight() + 24);
         if (width == maskWidth && height == maskHeight && cutoff == maskCutoff)
             return;
         maskWidth = width;

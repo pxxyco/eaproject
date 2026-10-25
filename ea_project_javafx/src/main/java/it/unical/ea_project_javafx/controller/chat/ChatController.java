@@ -46,7 +46,8 @@ public class ChatController implements AutoCloseable {
         compactMode = compact;
     }
 
-    private long selectedId, requestGeneration, lastRead;
+    private long selectedId, requestGeneration, lastRead, renderedConversation;
+    private Long renderedMaximum;
     private boolean latest = true;
     private boolean followLatest = true;
     private Long oldest, maximum;
@@ -314,8 +315,15 @@ public class ChatController implements AutoCloseable {
                         olderButton.setDisable(ordered.size() < 50);
                         latestButton.setDisable(latest);
                         messagesBox.getChildren().clear();
-                        for (var message : ordered)
-                            messagesBox.getChildren().add(bubble(message));
+                        for (var message : ordered) {
+                            HBox row = bubble(message);
+                            messagesBox.getChildren().add(row);
+                            if (before == null && renderedConversation == conversation
+                                    && (renderedMaximum == null || message.get("id").getAsLong() > renderedMaximum))
+                                it.unical.ea_project_javafx.util.PageTransitions.appear(row);
+                        }
+                        renderedConversation = conversation;
+                        renderedMaximum = maximum;
                         if (ordered.isEmpty())
                             messagesBox.getChildren().add(new Label("Scrivi il primo messaggio."));
                         if (latest && followLatest)

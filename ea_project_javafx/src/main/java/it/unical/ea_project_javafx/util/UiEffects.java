@@ -57,8 +57,11 @@ public final class UiEffects {
         if (scene != null) {
             Parent root = scene.getRoot();
             String base = root.getStyle().replaceAll("-app-accent\\s*:[^;]*;?", "").replaceAll(";\\s*;", ";").strip();
-            root.setStyle((base.isBlank() ? "" : base + (base.endsWith(";") ? "" : ";")) + " -app-accent: "
-                    + css(accent) + ";");
+            String styled = (base.isBlank() ? "" : base + (base.endsWith(";") ? "" : ";")) + " -app-accent: "
+                    + css(accent) + ";";
+            if (root.getStyle().equals(styled))
+                return;
+            root.setStyle(styled);
             Platform.runLater(() -> {
                 root.applyCss();
                 refresh(root);
@@ -84,6 +87,10 @@ public final class UiEffects {
         scene.getStylesheets().add(
                 UiEffects.class.getResource("/it/unical/ea_project_javafx/css/common/motion.css").toExternalForm());
         watch(scene.getRoot());
+        scene.rootProperty().addListener((o, old, root) -> {
+            watch(root);
+            useWallpaper(scene, null);
+        });
     }
 
     private static void watch(Node node) {
@@ -96,6 +103,14 @@ public final class UiEffects {
                 region.applyCss();
                 region.getProperties().computeIfAbsent(STATE, key -> new State(region));
             });
+        }
+        if (node instanceof ScrollBar bar) {
+            Runnable hideVertical = () -> {
+                if (bar.getOrientation() == javafx.geometry.Orientation.VERTICAL)
+                    bar.setStyle("-fx-min-width:0;-fx-pref-width:0;-fx-max-width:0;-fx-opacity:0;");
+            };
+            hideVertical.run();
+            bar.orientationProperty().addListener((o, a, v) -> hideVertical.run());
         }
         if (node instanceof ScrollPane scroll && !"homeScroll".equals(scroll.getId())
                 && scroll.getStyleClass().contains("main-scroll"))
@@ -118,6 +133,8 @@ public final class UiEffects {
     }
 
     private static boolean eligible(Region node) {
+        if (node.getStyleClass().contains("history-feed"))
+            return false;
         // Skin internals are styled by their owning control rather than animated
         // individually.
         if (node instanceof TextInputControl && node.getStyleClass().contains("text-field")
@@ -172,10 +189,14 @@ public final class UiEffects {
                             : inner instanceof Region region ? region : node;
             background = surface.getBackground();
             border = surface.getBorder();
-            radii = border != null && !border.getStrokes().isEmpty() ? border.getStrokes().getFirst().getRadii()
+            CornerRadii chosen = border != null && !border.getStrokes().isEmpty()
+                    ? border.getStrokes().getFirst().getRadii()
                     : background != null && !background.getFills().isEmpty()
                             ? background.getFills().getFirst().getRadii()
-                            : new CornerRadii(10);
+                            : new CornerRadii(12);
+            radii = chosen.getTopLeftHorizontalRadius() < 3 && !(node instanceof RadioButton)
+                    ? new CornerRadii(12)
+                    : chosen;
             nav = node.getStyleClass().contains("nav-item");
             animatedBorder.set(border);
             animatedBackground.set(background);
@@ -199,6 +220,7 @@ public final class UiEffects {
             } else
                 marker = null;
             value.addListener((o, a, b) -> paint(b.doubleValue()));
+            node.getStyleClass().addListener((javafx.collections.ListChangeListener<String>) change -> transition());
             node.hoverProperty().addListener((o, a, b) -> transition());
             node.focusedProperty().addListener((o, a, b) -> {
                 focused = b;
@@ -239,6 +261,7 @@ public final class UiEffects {
             return node.getPseudoClassStates().contains(javafx.css.PseudoClass.getPseudoClass("active"))
                     || node instanceof ToggleButton toggle && toggle.isSelected()
                     || node.getStyleClass().contains("nav-menu-active")
+                    || node.getStyleClass().contains("section-button-active")
                     || node.getStyleClass().contains("tab")
                             && node.getPseudoClassStates().contains(javafx.css.PseudoClass.getPseudoClass("selected"));
         }
@@ -272,10 +295,13 @@ public final class UiEffects {
                 animatedBorder.set(Border.EMPTY);
                 marker.setBackground(
                         new Background(new BackgroundFill(accent, new CornerRadii(2), javafx.geometry.Insets.EMPTY)));
-                marker.setOpacity(selected() ? Math.max(.3, amount) : amount * .45);
+                marker.setOpacity(0);
                 animatedText.set(Color.web("#d8d5d0").interpolate(accent, amount * .85));
             } else {
-                Color neutral = alpha(accent, node.getStyleClass().contains("menu-item") ? 0 : .19);
+                Color neutral = alpha(accent,
+                        node.getStyleClass().contains("menu-item") || node.getStyleClass().contains("discovery-link")
+                                ? 0
+                                : .19);
                 Color color = neutral.interpolate(alpha(accent, .95), amount);
                 animatedBorder
                         .set(new Border(new BorderStroke(color, BorderStrokeStyle.SOLID, radii, new BorderWidths(1))));
@@ -288,7 +314,8 @@ public final class UiEffects {
                         paint = node.getStyleClass().contains("menu-item")
                                 ? c.interpolate(alpha(accent, .18), amount)
                                 : c.interpolate(alpha(accent, Math.max(c.getOpacity(), .08)), amount * .13);
-                    fills.add(new BackgroundFill(paint, fill.getRadii(), fill.getInsets()));
+                    fills.add(new BackgroundFill(paint, fill.getRadii().getTopLeftHorizontalRadius() < 3
+                            && !(node instanceof RadioButton) ? radii : fill.getRadii(), fill.getInsets()));
                 }
                 animatedBackground.set(new Background(fills, background.getImages()));
             }

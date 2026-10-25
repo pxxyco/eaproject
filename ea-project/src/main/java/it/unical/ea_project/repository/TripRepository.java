@@ -116,4 +116,33 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
             """)
     List<Trip> searchPublishedFromDate(@Param("query") String query, @Param("status") TripStatus status,
             @Param("date") LocalDate date, Pageable pageable);
+
+    @Query("""
+            SELECT COUNT(t) FROM Trip t
+            WHERE t.deletedAt IS NULL
+            AND t.status = :status
+            AND (
+                :query = ''
+                OR LOWER(t.title) LIKE CONCAT('%', LOWER(:query), '%')
+                OR LOWER(t.destinationCity) LIKE CONCAT('%', LOWER(:query), '%')
+                OR LOWER(t.destinationCountry) LIKE CONCAT('%', LOWER(:query), '%')
+            )
+    """)
+    long countSearchPublished(@Param("query") String query, @Param("status") TripStatus status);
+
+    @Query("""
+            SELECT COUNT(t) FROM Trip t
+            WHERE t.deletedAt IS NULL
+            AND t.status = :status
+            AND (
+                :query = ''
+                OR LOWER(t.title) LIKE CONCAT('%', LOWER(:query), '%')
+                OR LOWER(t.destinationCity) LIKE CONCAT('%', LOWER(:query), '%')
+                OR LOWER(t.destinationCountry) LIKE CONCAT('%', LOWER(:query), '%')
+            )
+            AND t.startDate <= :date
+            AND t.endDate >= :date
+    """)
+    long countSearchPublishedFromDate(@Param("query") String query, @Param("status") TripStatus status,
+            @Param("date") LocalDate date);
 }

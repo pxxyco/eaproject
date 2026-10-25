@@ -20,24 +20,72 @@ import java.time.LocalDateTime;
 
 public class LoginStepController {
 
-    @FXML private TextField loginUsernameField;
-    @FXML private PasswordField loginPasswordField;
-    @FXML private Button btnLogin;
-    @FXML private Label errorLabel;
-    @FXML private CheckBox rememberMeCheckBox;
+    @FXML
+    private TextField loginUsernameField;
+    @FXML
+    private PasswordField loginPasswordField;
+    @FXML
+    private TextField visiblePasswordField;
+    @FXML
+    private Button revealPasswordButton;
+    @FXML
+    private Button btnLogin;
+    @FXML
+    private Label errorLabel;
+    @FXML
+    private CheckBox rememberMeCheckBox;
 
     private StepNavigator navigator;
 
     @FXML
     public void initialize() {
 
-        loginUsernameField.setOnKeyPressed(event -> { if (event.getCode() == KeyCode.ENTER) handleLoginSubmit(null); });
-        loginPasswordField.setOnKeyPressed(event -> { if (event.getCode() == KeyCode.ENTER) handleLoginSubmit(null); });
+        updatePasswordEye(false);
+        visiblePasswordField.textProperty().bindBidirectional(loginPasswordField.textProperty());
+        visiblePasswordField.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER)
+                handleLoginSubmit(null);
+        });
+        loginUsernameField.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER)
+                handleLoginSubmit(null);
+        });
+        loginPasswordField.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER)
+                handleLoginSubmit(null);
+        });
 
     }
 
+    @FXML
+    private void togglePassword() {
+        boolean reveal = !visiblePasswordField.isVisible();
+        TextInputControl from = reveal ? loginPasswordField : visiblePasswordField;
+        TextInputControl to = reveal ? visiblePasswordField : loginPasswordField;
+        int caret = from.getCaretPosition();
+        loginPasswordField.setVisible(!reveal);
+        loginPasswordField.setManaged(!reveal);
+        visiblePasswordField.setVisible(reveal);
+        visiblePasswordField.setManaged(reveal);
+        revealPasswordButton.setAccessibleText(reveal ? "Nascondi password" : "Mostra password");
+        updatePasswordEye(reveal);
+        to.requestFocus();
+        to.positionCaret(caret);
+    }
+
+    private void updatePasswordEye(boolean revealed) {
+        javafx.scene.shape.SVGPath eye = new javafx.scene.shape.SVGPath();
+        eye.setContent("M1 8 Q10 -4 19 8 Q10 20 1 8 Z M13 8 A3 3 0 1 1 7 8 A3 3 0 1 1 13 8"
+                + (revealed ? " M2 1 L18 15" : ""));
+        eye.setFill(javafx.scene.paint.Color.TRANSPARENT);
+        eye.setStroke(javafx.scene.paint.Color.web("#d6d3d1"));
+        eye.setStrokeWidth(1.5);
+        revealPasswordButton.setText("");
+        revealPasswordButton.setGraphic(eye);
+    }
+
     public void setNavigator(StepNavigator navigator) {
-    
+
         this.navigator = navigator;
         btnLogin.setDefaultButton(true);
 
@@ -92,8 +140,12 @@ public class LoginStepController {
                             String refreshToken = res.headers().firstValue("X-Refresh-Token").orElse(null);
 
                             Gson gson = new GsonBuilder()
-                                    .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, typeOfT, context) -> LocalDateTime.parse(json.getAsString()))
-                                    .registerTypeAdapter(LocalDate.class, (JsonDeserializer<LocalDate>) (json, typeOfT, context) -> LocalDate.parse(json.getAsString()))
+                                    .registerTypeAdapter(LocalDateTime.class,
+                                            (JsonDeserializer<LocalDateTime>) (json, typeOfT, context) -> LocalDateTime
+                                                    .parse(json.getAsString()))
+                                    .registerTypeAdapter(LocalDate.class,
+                                            (JsonDeserializer<LocalDate>) (json, typeOfT, context) -> LocalDate
+                                                    .parse(json.getAsString()))
                                     .create();
 
                             UserDTO user = gson.fromJson(res.body(), UserDTO.class);
@@ -127,8 +179,7 @@ public class LoginStepController {
                     }
                 }),
                 () -> Platform.runLater(() -> showError("Errore di connessione al server.")),
-                navigator::setLoading
-        );
+                navigator::setLoading);
 
     }
 

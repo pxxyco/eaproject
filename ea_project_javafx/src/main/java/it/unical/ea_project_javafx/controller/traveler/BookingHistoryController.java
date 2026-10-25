@@ -37,12 +37,11 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
-public class BookingHistoryController {
+public class BookingHistoryController implements AutoCloseable {
     @FXML
     private StackPane pageRoot;
     @FXML
@@ -66,7 +65,15 @@ public class BookingHistoryController {
     @FXML
     private ComboBox<String> historyFilterCombo;
     @FXML
-    private VBox historyCardsContainer;
+    private VBox historyHeader;
+    @FXML
+    private StackPane historyHost;
+    private final javafx.scene.control.ListView<Object> historyList = new javafx.scene.control.ListView<>();
+    private final javafx.animation.PauseTransition searchDelay = new javafx.animation.PauseTransition(
+            javafx.util.Duration.millis(280));
+    private boolean loading, hasMore = true, closed;
+    private int page;
+    private long generation;
     @FXML
     private VBox emptyStateContainer;
     @FXML
@@ -91,8 +98,34 @@ public class BookingHistoryController {
         historyFilterCombo.getItems().setAll("Tutte", "Terminate / completate", "Cancellate", "Da recensire",
                 "Con recensione");
         historyFilterCombo.getSelectionModel().selectFirst();
-        searchField.textProperty().addListener((obs, oldValue, newValue) -> renderHistory());
-        historyFilterCombo.valueProperty().addListener((obs, oldValue, newValue) -> renderHistory());
+        historyHost.getChildren().clear();
+        historyHost.getChildren().add(historyList);
+        historyList.getStyleClass().add("history-feed");
+        historyList.setCellFactory(list -> new javafx.scene.control.ListCell<>() {
+            @Override
+            protected void updateItem(Object item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(null);
+                setGraphic(empty || item == null ? null
+                        : item instanceof BookingDTO booking ? createBookingCard(booking) : (javafx.scene.Node) item);
+            }
+        });
+        historyList.addEventFilter(javafx.scene.input.ScrollEvent.SCROLL, event -> {
+            if (event.getDeltaY() < 0)
+                Platform.runLater(this::loadNearEnd);
+        });
+        historyList.skinProperty().addListener((o, a, b) -> Platform.runLater(() -> {
+            for (javafx.scene.Node node : historyList.lookupAll(".scroll-bar"))
+                if (node instanceof javafx.scene.control.ScrollBar bar
+                        && bar.getOrientation() == javafx.geometry.Orientation.VERTICAL)
+                    bar.valueProperty().addListener((obs, old, value) -> {
+                        if (value.doubleValue() > old.doubleValue())
+                            loadNearEnd();
+                    });
+        }));
+        searchDelay.setOnFinished(event -> loadHistory());
+        searchField.textProperty().addListener((obs, oldValue, newValue) -> searchDelay.playFromStart());
+        historyFilterCombo.valueProperty().addListener((obs, oldValue, newValue) -> loadHistory());
         loadHistory();
     }
 
@@ -108,63 +141,101 @@ public class BookingHistoryController {
     }
 
     private void loadHistory() {
-        reviewsLoaded = false;
+        evaluationTime = LocalDateTime.now();
+        generation++;
+        page = 0;
+        hasMore = true;
+        loading = false;
+        allBookings.clear();
         myReviews.clear();
-        updateCounters();
-        renderHistory();
-        showMessage("Caricamento dello storico...", false);
-        ApiService.get(ApiService.BASE_URL + "/api/bookings/mine", response -> {
-            try {
-                Type type = new TypeToken<List<BookingDTO>>() {
-                }.getType();
-                List<BookingDTO> result = ApiService.fromJson(response.body(), type);
-                Platform.runLater(() -> {
-                    allBookings.clear();
-                    if (result != null)
-                        allBookings.addAll(result);
-                    evaluationTime = LocalDateTime.now();
-                    updateCounters();
-                    renderHistory();
-                    showMessage(null, false);
-                });
-            } catch (Exception exception) {
-                Platform.runLater(
-                        () -> showMessage("Il server ha restituito un elenco di prenotazioni non valido.", true));
-            }
-        }, () -> Platform.runLater(() -> showMessage(
-                "Impossibile caricare lo storico. Verifica che il backend sia avviato e riprova.", true)), null);
+        reviewsLoaded = false;
+        historyList.getItems().setAll(historyHeader);
+        historyList.scrollTo(0);
+        loadPage();
+    }
 
-        ApiService.get(ApiService.BASE_URL + "/api/reviews/mine", response -> {
-            try {
-                Type type = new TypeToken<List<ReviewDTO>>() {
-                }.getType();
-                List<ReviewDTO> result = ApiService.fromJson(response.body(), type);
-                Platform.runLater(() -> {
-                    myReviews.clear();
-                    if (result != null)
-                        myReviews.addAll(result);
-                    reviewsLoaded = true;
-                    updateCounters();
-                    renderHistory();
-                });
-            } catch (Exception exception) {
-                Platform.runLater(() -> {
-                    reviewsLoaded = false;
-                    updateCounters();
-                    renderHistory();
-                    showMessage(
-                            "Non è stato possibile leggere le recensioni personali. Le azioni di recensione restano disabilitate per evitare doppioni; aggiorna il backend e riprova.",
-                            true);
-                });
-            }
-        }, () -> Platform.runLater(() -> {
-            reviewsLoaded = false;
-            updateCounters();
-            renderHistory();
-            showMessage(
-                    "Le recensioni personali non sono disponibili. Le azioni di recensione restano disabilitate finché il servizio non è raggiungibile.",
-                    true);
-        }), null);
+    private void loadNearEnd() {
+        if (closed || loading || !hasMore)
+            return;
+        boolean near = historyList.lookupAll(".list-cell").stream()
+                .filter(node -> node instanceof javafx.scene.control.ListCell<?> cell && !cell.isEmpty()
+                        && cell.isVisible())
+                .anyMatch(node -> ((javafx.scene.control.ListCell<?>) node).getIndex() >= historyList.getItems().size()
+                        - 2);
+        if (near)
+            loadPage();
+    }
+
+    private void loadPage() {
+        if (closed || loading || !hasMore)
+            return;
+        loading = true;
+        long request = generation;
+        String query = java.net.URLEncoder.encode(searchField.getText().strip(),
+                java.nio.charset.StandardCharsets.UTF_8);
+        String filter = switch (historyFilterCombo.getValue()) {
+            case "Terminate / completate" -> "COMPLETED";
+            case "Cancellate" -> "CANCELLED";
+            case "Da recensire" -> "REVIEWABLE";
+            case "Con recensione" -> "REVIEWED";
+            default -> "ALL";
+        };
+        showMessage("Caricamento dello storico…", false);
+        ApiService.get(
+                ApiService.BASE_URL + "/api/bookings/mine/history?page=" + page + "&size=6&filter=" + filter + "&query="
+                        + query,
+                response -> {
+                    if (closed || request != generation)
+                        return;
+                    try {
+                        var data = com.google.gson.JsonParser.parseString(response.body()).getAsJsonObject();
+                        List<BookingDTO> items = ApiService.fromJson(data.get("items").toString(),
+                                new TypeToken<List<BookingDTO>>() {
+                                }.getType());
+                        List<ReviewDTO> reviews = ApiService.fromJson(data.get("reviews").toString(),
+                                new TypeToken<List<ReviewDTO>>() {
+                                }.getType());
+                        for (ReviewDTO review : reviews)
+                            if (myReviews.stream()
+                                    .noneMatch(r -> Objects.equals(r.getReviewId(), review.getReviewId())))
+                                myReviews.add(review);
+                        allBookings.addAll(items);
+                        reviewsLoaded = true;
+                        historyList.getItems().addAll(items);
+                        hasMore = data.get("hasMore").getAsBoolean();
+                        page++;
+                        loading = false;
+                        historyTotalLabel.setText(data.get("total").getAsString());
+                        historyCompletedLabel.setText(data.get("completed").getAsString());
+                        historyCancelledLabel.setText(data.get("cancelled").getAsString());
+                        historyReviewableLabel.setText(data.get("reviewable").getAsString());
+                        if (allBookings.isEmpty()) {
+                            emptyTitleLabel.setText(data.get("total").getAsLong() == 0 ? "Il tuo storico è ancora vuoto"
+                                    : "Nessuna esperienza corrisponde ai filtri");
+                            emptyStateContainer.setVisible(true);
+                            emptyStateContainer.setManaged(true);
+                            historyList.getItems().add(emptyStateContainer);
+                        }
+                        showMessage(null, false);
+                    } catch (RuntimeException ex) {
+                        loading = false;
+                        showMessage("Storico non disponibile. Premi Aggiorna per riprovare.", true);
+                    }
+                }, () -> {
+                    if (!closed && request == generation) {
+                        loading = false;
+                        showMessage("Caricamento non riuscito. Scorri o premi Aggiorna per riprovare.", true);
+                    }
+                }, null);
+    }
+
+    @Override
+    public void close() {
+        closed = true;
+        generation++;
+        searchDelay.stop();
+        if (activeModal != null)
+            activeModal.close();
     }
 
     @FXML
@@ -175,56 +246,6 @@ public class BookingHistoryController {
     @FXML
     private void handleGoToBookings() {
         SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/profile/dashboard-view.fxml", null);
-    }
-
-    private void updateCounters() {
-        evaluationTime = LocalDateTime.now();
-        List<BookingDTO> history = allBookings.stream().filter(this::isHistorical).toList();
-        historyTotalLabel.setText(String.valueOf(history.size()));
-        historyCompletedLabel.setText(
-                String.valueOf(history.stream().filter(b -> !isCancelledEntry(b) && isEndedOrCompleted(b)).count()));
-        historyCancelledLabel.setText(String.valueOf(history.stream().filter(this::isCancelledEntry).count()));
-        historyReviewableLabel.setText(reviewsLoaded
-                ? String.valueOf(history.stream()
-                        .filter(this::canReview)
-                        .filter(b -> reviewFor(b) == null)
-                        .map(this::reviewTargetKey)
-                        .distinct()
-                        .count())
-                : "—");
-    }
-
-    private void renderHistory() {
-        if (historyCardsContainer == null)
-            return;
-        evaluationTime = LocalDateTime.now();
-        String query = searchField.getText() == null ? "" : searchField.getText().trim().toLowerCase(Locale.ITALY);
-        String filter = historyFilterCombo.getValue() == null ? "Tutte" : historyFilterCombo.getValue();
-        List<BookingDTO> filtered = allBookings.stream()
-                .filter(this::isHistorical)
-                .filter(booking -> matchesSearch(booking, query))
-                .filter(booking -> matchesFilter(booking, filter))
-                .sorted(historyComparator())
-                .toList();
-
-        historyCardsContainer.getChildren().clear();
-        for (BookingDTO booking : filtered)
-            historyCardsContainer.getChildren().add(createBookingCard(booking));
-        boolean empty = filtered.isEmpty();
-        emptyStateContainer.setVisible(empty);
-        emptyStateContainer.setManaged(empty);
-        boolean hasAnyHistory = allBookings.stream().anyMatch(this::isHistorical);
-        if (allBookings.isEmpty()) {
-            emptyTitleLabel.setText("Non hai ancora effettuato prenotazioni");
-            emptyDescriptionLabel.setText("Le prenotazioni concluse e quelle cancellate saranno raccolte qui.");
-        } else if (!hasAnyHistory) {
-            emptyTitleLabel.setText("Il tuo storico è ancora vuoto");
-            emptyDescriptionLabel.setText(
-                    "Le tue prenotazioni sono ancora in programma. Quando un'esperienza terminerà o una prenotazione verrà cancellata, troverai qui tutti i dettagli.");
-        } else if (empty) {
-            emptyTitleLabel.setText("Nessuna esperienza corrisponde ai filtri");
-            emptyDescriptionLabel.setText("Prova a cambiare la ricerca o il filtro selezionato.");
-        }
     }
 
     private VBox createBookingCard(BookingDTO booking) {
@@ -519,51 +540,6 @@ public class BookingHistoryController {
         // Header remains visible; only the form body scrolls on small screens.
         panel.getChildren().add(scroll);
         showInAppModal(panel);
-    }
-
-    private boolean matchesSearch(BookingDTO booking, String query) {
-        if (query.isBlank())
-            return true;
-        return contains(booking.getItemTitle(), query)
-                || contains(booking.getItemLocation(), query)
-                || contains(eventPeriod(booking), query)
-                || contains(typeLabel(booking), query)
-                || contains(bookedAt(booking), query);
-    }
-
-    private boolean matchesFilter(BookingDTO booking, String filter) {
-        return switch (filter) {
-            case "Terminate / completate" -> !isCancelledEntry(booking) && isEndedOrCompleted(booking);
-            case "Cancellate" -> isCancelledEntry(booking);
-            case "Da recensire" -> canReview(booking) && reviewFor(booking) == null;
-            case "Con recensione" -> reviewFor(booking) != null;
-            default -> true;
-        };
-    }
-
-    private Comparator<BookingDTO> historyComparator() {
-        return (left, right) -> {
-            if (isCancelledEntry(left) != isCancelledEntry(right))
-                return isCancelledEntry(left) ? 1 : -1;
-            LocalDateTime leftEnd = eventEndDateTime(left);
-            LocalDateTime rightEnd = eventEndDateTime(right);
-            if (leftEnd != null && rightEnd != null) {
-                int byEndDate = rightEnd.compareTo(leftEnd);
-                if (byEndDate != 0)
-                    return byEndDate;
-            } else if (leftEnd != null)
-                return -1;
-            else if (rightEnd != null)
-                return 1;
-            if (left.getCreatedAt() != null && right.getCreatedAt() != null)
-                return right.getCreatedAt().compareTo(left.getCreatedAt());
-            return Long.compare(right.getBookingId() == null ? 0 : right.getBookingId(),
-                    left.getBookingId() == null ? 0 : left.getBookingId());
-        };
-    }
-
-    private boolean isHistorical(BookingDTO booking) {
-        return booking != null && (isCancelledEntry(booking) || isEndedOrCompleted(booking));
     }
 
     private boolean isEndedOrCompleted(BookingDTO booking) {

@@ -45,16 +45,31 @@ public class BackgroundHelper {
 
         setupBackgroundResize(bgImageView);
 
+        var future = sharedBackground();
+        Image ready = future.isCompletedExceptionally() ? null : future.getNow(null);
+        if (ready != null && !ready.isError())
+            bgImageView.setImage(ready);
+        else if (lastImage != null)
+            bgImageView.setImage(lastImage);
+        else {
+            if (fallbackImage == null)
+                fallbackImage = new Image(BackgroundHelper.class.getResource(
+                        "/it/unical/ea_project_javafx/images/experience-fallback.jpg").toExternalForm(), 1920, 1080,
+                        true, true);
+            bgImageView.setImage(fallbackImage);
+        }
         var target = new WeakReference<>(bgImageView);
-        sharedBackground().whenComplete((image, error) -> Platform.runLater(() -> {
+        future.whenComplete((image, error) -> Platform.runLater(() -> {
             ImageView view = target.get();
-            if (view != null && error == null) {
+            if (view != null && error == null && image != null && !image.isError()) {
+                lastImage = image;
                 view.setImage(image);
                 UiEffects.useWallpaper(view.getScene(), image);
             }
         }));
     }
 
+    private static Image lastImage, fallbackImage;
     private static CompletableFuture<Image> sharedImage;
     private static LocalDate imageDay;
 

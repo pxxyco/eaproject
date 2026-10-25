@@ -194,6 +194,7 @@ public class ActivityDetailsController {
                             handleDescrizione(null);
                             contentScroll.setManaged(true);
                             contentScroll.setVisible(true);
+                            it.unical.ea_project_javafx.util.PageTransitions.appear(contentScroll);
                             loadingOverlay.setVisible(false);
                         },
                         () -> {
@@ -216,6 +217,7 @@ public class ActivityDetailsController {
                             loadingOverlay.setVisible(false);
                             contentScroll.setManaged(true);
                             contentScroll.setVisible(true);
+                            it.unical.ea_project_javafx.util.PageTransitions.appear(contentScroll);
                         },
                         () -> {
                             loadingOverlay.setVisible(true);
@@ -309,6 +311,16 @@ public class ActivityDetailsController {
     }
 
     private void setHeroImage(String imageUrl) {
+        if (!heroImage.fitWidthProperty().isBound()) {
+            heroImage.fitWidthProperty().bind(hero.widthProperty());
+            heroImage.fitHeightProperty().bind(hero.heightProperty());
+            javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle();
+            clip.widthProperty().bind(hero.widthProperty());
+            clip.heightProperty().bind(hero.heightProperty());
+            clip.setArcWidth(32);
+            clip.setArcHeight(32);
+            hero.setClip(clip);
+        }
 
         String defaultImageUrl = "/photo/default/experience.jpg";
         String requestedImageUrl = (imageUrl == null || imageUrl.isBlank()) ? defaultImageUrl : imageUrl;
@@ -467,6 +479,7 @@ public class ActivityDetailsController {
 
     private void showSection(Node node) {
         bodyContainer.getChildren().setAll(node);
+        it.unical.ea_project_javafx.util.PageTransitions.appear(node);
     }
 
     @FXML

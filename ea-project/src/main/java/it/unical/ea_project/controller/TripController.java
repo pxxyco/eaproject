@@ -87,13 +87,8 @@ public class TripController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "9") int size) {
-        return ResponseEntity.ok(tripService.searchTripHomeDtos(query, date, page, size));
-    }
-
-    @GetMapping("/top/cards")
-    public List<TripHomeDTO> topCards(@RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "3") int size) {
-        return tripService.topHomeCards(page, size);
+        return ResponseEntity.ok().header("X-Total-Count", Long.toString(tripService.countHomeTrips(query, date)))
+                .body(tripService.searchTripHomeDtos(query, date, page, size));
     }
 
     @GetMapping("/top")

@@ -157,6 +157,7 @@ public class NavbarController {
             markMenuActive(settingsMenuItem, path.endsWith("settings.fxml"));
             markMenuActive(paymentsMenuItem, path.endsWith("payment-methods.fxml"));
             markMenuActive(supportMenuItem, path.endsWith("support.fxml"));
+            it.unical.ea_project_javafx.util.NavIndicator.select(scene);
         });
     }
 

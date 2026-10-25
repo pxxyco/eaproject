@@ -64,7 +64,7 @@
 
                                             <!-- Section Hero Header -->
                                             <StackPane fx:id="hero" maxHeight="200.0"
-                                                maxWidth="600.0" minHeight="200.0"
+                                                maxWidth="Infinity" minHeight="200.0"
                                                 prefHeight="200.0" styleClass="hero">
                                                 <children>
                                                     <ImageView fx:id="heroImage" fitHeight="200.0"

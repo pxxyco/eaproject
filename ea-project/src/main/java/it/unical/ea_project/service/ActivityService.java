@@ -34,5 +34,8 @@ public interface ActivityService {
             int size
     );
 
+    long countHomeActivities(String query, Activity.Category category, LocalDate date);
+    long countTopHomeActivities();
+
     List<ActivitySuggestionDTO> getSuggestions(String query, int limit);
 }

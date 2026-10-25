@@ -141,7 +141,8 @@ public class ActivityController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "9") int size
     ) {
-        return ResponseEntity.ok(
+        return ResponseEntity.ok().header("X-Total-Count", Long.toString(
+                activityService.countHomeActivities(query, category, date))).body(
                 activityService.searchActivityHomeDtos(
                         query,
                         category,
@@ -170,7 +171,8 @@ public class ActivityController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "9") int size
     ) {
-        return ResponseEntity.ok(
+        return ResponseEntity.ok().header("X-Total-Count", Long.toString(
+                activityService.countTopHomeActivities())).body(
                 activityService.getTopActivityHomeDtos(
                         page,
                         size

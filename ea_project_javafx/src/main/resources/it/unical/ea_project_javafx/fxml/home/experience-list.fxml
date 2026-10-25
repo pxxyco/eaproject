@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxWidth="1000.0" spacing="15.0" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.home.ExperienceListController">
+<VBox maxWidth="1000.0" spacing="15.0" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.home.ExperienceListController">
 
     <HBox alignment="CENTER_LEFT" spacing="10.0">
         <children>
@@ -29,9 +29,14 @@
         </children>
     </VBox>
 
-    <HBox alignment="CENTER" style="-fx-padding: 10 0 20 0;">
-        <children>
-            <Label fx:id="loadMoreLabel" onMouseClicked="#handleLoadMore" styleClass="load-more-label" text="Carica altro" />
-        </children>
-    </HBox>
+    <VBox alignment="CENTER" spacing="12" styleClass="home-pagination">
+        <HBox alignment="CENTER" spacing="10">
+            <Button fx:id="previousPageButton" text="← Precedente" onAction="#handlePreviousPage" styleClass="home-page-nav" />
+            <HBox fx:id="pageNumbers" alignment="CENTER" spacing="8" />
+            <Button fx:id="nextPageButton" text="Successiva →" onAction="#handleNextPage" styleClass="home-page-nav" />
+        </HBox>
+        <Label fx:id="pageSummary" styleClass="section-subtitle" />
+        <Label fx:id="pageError" wrapText="true" managed="false" visible="false" styleClass="section-subtitle" />
+        <Button fx:id="retryPageButton" text="Riprova" onAction="#handleRetryPage" managed="false" visible="false" styleClass="home-page-nav" />
+    </VBox>
 </VBox>

@@ -223,8 +223,10 @@ public class TripServiceImpl implements TripService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<TripHomeDTO> topHomeCards(int page, int size) {
-        return toHomeDtos(getTopTrips(page, size));
+    public long countHomeTrips(String query, LocalDate date) {
+        String normalized = query == null ? "" : query.trim();
+        return date == null ? tripRepository.countSearchPublished(normalized, TripStatus.PUBLISHED)
+                : tripRepository.countSearchPublishedFromDate(normalized, TripStatus.PUBLISHED, date);
     }
 
     private List<TripHomeDTO> toHomeDtos(List<Trip> trips) {
@@ -282,14 +284,12 @@ public class TripServiceImpl implements TripService {
     }
 
     private TripHomeDTO toHomeDto(Trip trip, List<TripImage> images) {
-        String imageUrl = Optional.ofNullable(trip.getCoverPhotoUrl()).filter(url -> !url.isBlank())
-                .orElseGet(() -> images.stream()
-                        .sorted(Comparator.comparing(TripImage::getOrderIndex,
-                                Comparator.nullsLast(Comparator.naturalOrder())))
-                        .map(TripImage::getImageUrl)
-                        .filter(url -> url != null && !url.isBlank())
-                        .findFirst()
-                        .orElse(DEFAULT_IMAGE_URL));
+        String imageUrl = images.stream()
+                .sorted(Comparator.comparing(TripImage::getOrderIndex, Comparator.nullsLast(Comparator.naturalOrder())))
+                .map(TripImage::getImageUrl)
+                .filter(url -> url != null && !url.isBlank())
+                .findFirst()
+                .orElse(DEFAULT_IMAGE_URL);
 
         return new TripHomeDTO(
                 trip.getTripId(),
@@ -299,7 +299,8 @@ public class TripServiceImpl implements TripService {
                 trip.getAverageRating(),
                 imageUrl,
                 trip.getStartDate(),
-                trip.getEndDate());
+                trip.getEndDate()
+        );
     }
 
     private String buildLocation(String city, String country) {

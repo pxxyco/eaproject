@@ -176,3 +176,19 @@
 .chat-root .scroll-bar .decrement-arrow {
     -fx-background-color: #a8a29e;
 }
+
+.chat-panel {
+    -fx-background-color: rgba(24, 35, 29, 0.80);
+}
+
+.chat-conversations {
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-padding: 8;
+}
+
+.chat-conversations .list-cell {
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-padding: 16 12;
+}

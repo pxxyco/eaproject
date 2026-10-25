@@ -1,6 +1,5 @@
 package it.unical.ea_project.service;
 
-
 import it.unical.ea_project.dto.BookingDTO;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +13,8 @@ public interface BookingService {
     BookingDTO creaPrenotazioneActivity(Long userId, Long activityId, Integer seats);
 
     List<BookingDTO> getPrenotazioniUtente(Long userId);
+
+    List<BookingDTO> getBookingsByIds(Long userId, List<Long> ids);
 
     List<BookingDTO> getPrenotazioniOrganizzatore(Long organizerId);
 

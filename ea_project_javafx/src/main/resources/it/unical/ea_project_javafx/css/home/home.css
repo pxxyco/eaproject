@@ -54,13 +54,15 @@
     -fx-cursor: hand;
 }
 
-.btn-search:hover {}
+.btn-search:hover {
+    -fx-background-color: #fafaf9;
+}
 
 /* ==========================================================================
    2. CATEGORY CHIPS
    ========================================================================== */
 .category-scroll,
-.category-scroll>.viewport {
+.category-scroll > .viewport {
     -fx-background-color: transparent;
     -fx-background: transparent;
 }
@@ -118,206 +120,19 @@
     -fx-alignment: center-left;
 }
 
-/* ==========================================================================
-   4. MISCELLANEOUS LABELS
-   ========================================================================== */
-.label-loading {
-    -fx-opacity: 0.6;
-    -fx-cursor: default;
-    -fx-font-weight: normal;
-}
-
-.load-more-label {
-    -fx-cursor: hand;
-    -fx-font-weight: bold;
-}
-
-.home-editorial {
-    -fx-padding: 30 0 20 0;
-}
-
-.home-editorial-title {
-    -fx-font-size: 48;
-    -fx-font-weight: bold;
-    -fx-text-fill: #fafaf9;
-}
-
-.home-guide {
-    -fx-background-color: #24211f;
-    -fx-padding: 26;
-    -fx-background-radius: 22;
-    -fx-border-radius: 22;
-    -fx-border-color: #57534e;
-}
-
-.home-guide .section-title {
-    -fx-font-size: 14;
-    -fx-text-fill: #d6d3d1;
-}
-
-.home-editorial-title {
-    -fx-font-size: 38px;
-}
-
-.home-guide {
-    -fx-background-color: rgba(79, 70, 61, 0.86);
-    -fx-border-color: #78716c;
-    -fx-padding: 26;
-    -fx-background-radius: 22;
-    -fx-border-radius: 22;
-}
-
-.home-feature-title {
-    -fx-font-size: 23px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #fafaf9;
-}
-
-.home-hero-action {
-    -fx-min-height: 44;
-    -fx-pref-height: 44;
-    -fx-padding: 10 18;
-}
-
-.category-chip {
-    -fx-background-color: #34302c;
-    -fx-text-fill: #fafaf9;
-    -fx-border-color: #686059;
-    -fx-border-radius: 24;
-    -fx-background-radius: 24;
-    -fx-padding: 10 17;
-    -fx-cursor: hand;
-}
-
-.category-chip:hover {
-    -fx-background-color: #554a3e;
-    -fx-border-color: #c4a882;
-}
-
-/* Editorial discovery: a mosaic, a deliberate carousel, short rows and paired stories. */
-.discovery-section {
-    -fx-padding: 6 0 12 0;
-}
-
-.discovery-link {
-    -fx-background-color: transparent;
-    -fx-text-fill: #e0c59e;
-    -fx-font-weight: bold;
-    -fx-padding: 9 0 9 12;
-    -fx-cursor: hand;
-    -fx-background-radius: 10;
-}
-
-.discovery-link:hover,
-.discovery-link:focused {}
-
-.discovery-tile,
-.discovery-tile-hero,
-.discovery-row {
-    -fx-background-color: #292622;
-    -fx-background-radius: 16;
-    -fx-border-radius: 16;
-    -fx-border-color: #514a42;
-    -fx-border-width: 1;
-    -fx-padding: 0;
-    -fx-cursor: hand;
-}
-
-.discovery-tile-hero {
-    -fx-background-color: #393229;
-    -fx-border-color: #75634c;
-}
-
-.discovery-tile:hover,
-.discovery-tile-hero:hover,
-.discovery-row:hover,
-.discovery-tile:focused,
-.discovery-tile-hero:focused,
-.discovery-row:focused {}
-
-.discovery-tile:armed,
-.discovery-row:armed,
-.discovery-tile-hero:armed {
-    -fx-background-color: #484034;
-}
-
-.discovery-photo {
-    -fx-background-color: #3e3830;
+/* Pagination replaces the previous page rather than accumulating cards. */
+.home-pagination { -fx-padding: 18 0 24; }
+.home-page-button, .home-page-nav {
+    -fx-background-color: rgba(255,255,255,0.08);
+    -fx-text-fill: #e7e5e4;
     -fx-background-radius: 14;
-}
-
-.discovery-title {
-    -fx-text-fill: #fafaf9;
-    -fx-font-size: 16;
+    -fx-border-radius: 14;
+    -fx-border-color: rgba(231,229,228,0.2);
     -fx-font-weight: bold;
-}
-
-.discovery-hero-title {
-    -fx-text-fill: #fff5e6;
-    -fx-font-size: 25;
-    -fx-font-weight: bold;
-}
-
-.discovery-meta {
-    -fx-text-fill: #c4bdb3;
-    -fx-font-size: 12;
-}
-
-.discovery-price {
-    -fx-text-fill: #fafaf9;
-    -fx-font-size: 13;
-    -fx-font-weight: bold;
-}
-
-.discovery-rating {
-    -fx-text-fill: #d9ba8b;
-    -fx-font-size: 12;
-}
-
-.discovery-arrow {
-    -fx-background-color: #34302a;
-    -fx-text-fill: #f5e5ca;
-    -fx-border-color: #6c6050;
-    -fx-background-radius: 20;
-    -fx-border-radius: 20;
-    -fx-padding: 8 16;
     -fx-cursor: hand;
+    -fx-min-height: 40;
+    -fx-padding: 9 14;
 }
-
-.discovery-arrow:hover {}
-
-.sticky-search-dock {
-    -fx-padding: 8 32 8 32;
-}
-
-.search-controls-pinned {
-    -fx-background-color: #292622;
-    -fx-border-color: #8a7760;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.32), 18, 0, 0, 5);
-}
-
-.home-editorial {
-    -fx-padding: 20 0 12 0;
-}
-
-.home-guide {
-    -fx-background-color: rgba(38, 51, 44, 0.88);
-    -fx-border-color: #69806e;
-    -fx-padding: 28;
-}
-
-.search-intro-title {
-    -fx-font-size: 29;
-    -fx-font-weight: bold;
-    -fx-text-fill: #f1eee8;
-}
-
-.search-intro-subtitle {
-    -fx-font-size: 13;
-    -fx-text-fill: #c5c3b8;
-    -fx-max-width: 760;
-}
-
-.sticky-search-dock {
-    -fx-padding: 0;
-}
+.home-page-button { -fx-min-width: 40; }
+.home-page-button:selected { -fx-background-color: #e7e5e4; -fx-text-fill: #1c1917; }
+.home-page-button:disabled, .home-page-nav:disabled { -fx-opacity: 0.4; }

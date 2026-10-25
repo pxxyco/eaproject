@@ -30,3 +30,38 @@
     -fx-background-radius: 24;
     -fx-border-radius: 24;
 }
+
+.scroll-pane>.scroll-bar:vertical,
+.list-view>.virtual-flow>.scroll-bar:vertical,
+.table-view>.virtual-flow>.scroll-bar:vertical {
+    -fx-min-width: 0;
+    -fx-pref-width: 0;
+    -fx-max-width: 0;
+    -fx-opacity: 0;
+}
+
+.history-host {
+    -fx-padding: 8 28 28 28;
+}
+
+.history-feed,
+.history-feed>.virtual-flow,
+.history-feed .clipped-container,
+.history-feed .sheet,
+.history-feed .list-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.history-feed .list-cell {
+    -fx-padding: 12 24;
+}
+
+.history-header {
+    -fx-padding: 24 0 10 0;
+}
+
+.history-feed,
+.history-feed .list-cell {
+    -fx-font-family: "System";
+}

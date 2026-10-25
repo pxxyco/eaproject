@@ -224,3 +224,17 @@
 }
 
 .feedback-button:hover {}
+
+.password-input {
+    -fx-padding: 12 48 12 14;
+}
+
+.password-reveal {
+    -fx-background-color: transparent;
+    -fx-text-fill: #e7e5e4;
+    -fx-font-size: 21;
+    -fx-min-width: 42;
+    -fx-max-width: 42;
+    -fx-background-radius: 12;
+    -fx-padding: 4 10;
+}

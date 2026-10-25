@@ -25,51 +25,17 @@ import java.util.Map;
 
 public class SearchBarController {
 
-    @FXML
-    public CheckBox SetData;
-    @FXML
-    private javafx.scene.layout.HBox searchControls;
-    @FXML
-    private javafx.scene.layout.StackPane searchSlot;
+    @FXML private javafx.scene.layout.HBox searchControls;
+    @FXML private javafx.scene.layout.StackPane searchSlot;
+    public javafx.scene.layout.HBox controls() { return searchControls; }
+    public javafx.scene.layout.StackPane slot() { return searchSlot; }
+    public void relocated() { if (suggestionsPopup != null) suggestionsPopup.hide(); }
+    public void close() { debounce.stop(); suggestionRequestId++; relocated(); }
 
-    public javafx.scene.layout.HBox controls() {
-        return searchControls;
-    }
-
-    public javafx.scene.layout.StackPane slot() {
-        return searchSlot;
-    }
-
-    public void focusSearch() {
-        searchField.requestFocus();
-    }
-
-    public void relocated() {
-        if (suggestionsPopup != null)
-            suggestionsPopup.hide();
-    }
-
-    public void selectCategory(String category) {
-        if ("TRIP".equals(category))
-            categoryComboBox.setValue(TRIP_LABEL);
-        else
-            categoryComboBox.setValue(CATEGORY_MAP.entrySet().stream()
-                    .filter(entry -> entry.getValue().equals(category)).map(Map.Entry::getKey).findFirst()
-                    .orElse("Attività"));
-    }
-
-    public void close() {
-        debounce.stop();
-        suggestionRequestId++;
-        relocated();
-    }
-
-    @FXML
-    private TextField searchField;
-    @FXML
-    private ComboBox<String> categoryComboBox;
-    @FXML
-    private DatePicker datePicker;
+    @FXML public CheckBox SetData;
+    @FXML private TextField searchField;
+    @FXML private ComboBox<String> categoryComboBox;
+    @FXML private DatePicker datePicker;
 
     @Setter
     private ExperienceListController experienceListController;
@@ -88,13 +54,13 @@ public class SearchBarController {
             "Trasporto", "TRANSPORT",
             "Hotel", "HOTEL",
             "Ristorazione", "MEAL",
-            "Altro", "OTHER");
+            "Altro", "OTHER"
+    );
 
     @FXML
     public void initialize() {
         createCombobox();
-        if (SetData != null)
-            SetData.setSelected(false);
+        if (SetData != null) SetData.setSelected(false);
 
         if (datePicker != null && SetData != null) {
             datePicker.setValue(LocalDate.now());
@@ -105,8 +71,7 @@ public class SearchBarController {
             categoryComboBox.valueProperty().addListener((obs, oldValue, newValue) -> {
                 debounce.stop();
                 suggestionRequestId++;
-                if (suggestionsPopup != null)
-                    suggestionsPopup.hide();
+                if (suggestionsPopup != null) suggestionsPopup.hide();
             });
         }
 
@@ -136,7 +101,8 @@ public class SearchBarController {
 
     private void createCombobox() {
         ObservableList<String> categories = FXCollections.observableArrayList(
-                "Attività", TRIP_LABEL, "Escursione", "Visita", "Trasporto", "Hotel", "Ristorazione", "Altro");
+                "Attività", TRIP_LABEL, "Escursione", "Visita", "Trasporto", "Hotel", "Ristorazione", "Altro"
+        );
         if (categoryComboBox != null) {
             categoryComboBox.setItems(categories);
             categoryComboBox.getSelectionModel().selectFirst();
@@ -156,16 +122,14 @@ public class SearchBarController {
         String normalizedQuery = query.trim();
         long requestId = suggestionRequestId;
         String endpoint = isTripSelected() ? "/api/trips/suggest" : "/api/activities/suggest";
-        String url = ApiService.BASE_URL + endpoint + "?query="
-                + URLEncoder.encode(normalizedQuery, StandardCharsets.UTF_8) + "&limit=6";
+        String url = ApiService.BASE_URL + endpoint + "?query=" + URLEncoder.encode(normalizedQuery, StandardCharsets.UTF_8) + "&limit=6";
 
         ApiService.get(
                 url,
                 response -> {
                     if (response.statusCode() != 200) {
                         Platform.runLater(() -> {
-                            if (requestId == suggestionRequestId)
-                                suggestionsPopup.hide();
+                            if (requestId == suggestionRequestId) suggestionsPopup.hide();
                         });
                         return;
                     }
@@ -173,22 +137,20 @@ public class SearchBarController {
                     if (isTripSelected()) {
                         List<TripSuggestionDTO> suggestions = parseTripSuggestions(response.body());
                         Platform.runLater(() -> {
-                            if (requestId == suggestionRequestId)
-                                showTripSuggestions(suggestions);
+                            if (requestId == suggestionRequestId) showTripSuggestions(suggestions);
                         });
                     } else {
                         List<ActivitySuggestionDTO> suggestions = parseActivitySuggestions(response.body());
                         Platform.runLater(() -> {
-                            if (requestId == suggestionRequestId)
-                                showActivitySuggestions(suggestions);
+                            if (requestId == suggestionRequestId) showActivitySuggestions(suggestions);
                         });
                     }
                 },
                 () -> Platform.runLater(() -> {
-                    if (requestId == suggestionRequestId)
-                        suggestionsPopup.hide();
+                    if (requestId == suggestionRequestId) suggestionsPopup.hide();
                 }),
-                null);
+                null
+        );
     }
 
     private void showActivitySuggestions(List<ActivitySuggestionDTO> suggestions) {
@@ -240,8 +202,7 @@ public class SearchBarController {
     }
 
     private void showSuggestionsPopup() {
-        if (suggestionsPopup.isShowing())
-            return;
+        if (suggestionsPopup.isShowing()) return;
 
         Point2D point = searchField.localToScreen(0, searchField.getHeight());
         if (point != null) {
@@ -251,8 +212,7 @@ public class SearchBarController {
 
     private List<ActivitySuggestionDTO> parseActivitySuggestions(String jsonBody) {
         try {
-            Type listType = new TypeToken<List<ActivitySuggestionDTO>>() {
-            }.getType();
+            Type listType = new TypeToken<List<ActivitySuggestionDTO>>() {}.getType();
             List<ActivitySuggestionDTO> result = GSON.fromJson(jsonBody, listType);
             return result != null ? result : List.of();
         } catch (Exception e) {
@@ -263,8 +223,7 @@ public class SearchBarController {
 
     private List<TripSuggestionDTO> parseTripSuggestions(String jsonBody) {
         try {
-            Type listType = new TypeToken<List<TripSuggestionDTO>>() {
-            }.getType();
+            Type listType = new TypeToken<List<TripSuggestionDTO>>() {}.getType();
             List<TripSuggestionDTO> result = GSON.fromJson(jsonBody, listType);
             return result != null ? result : List.of();
         } catch (Exception e) {
@@ -275,21 +234,20 @@ public class SearchBarController {
 
     @FXML
     void handleSearch(ActionEvent event) {
-        if (experienceListController == null)
-            return;
+        if (experienceListController == null) return;
 
         String query = searchField != null ? searchField.getText() : "";
         boolean tripSearch = isTripSelected();
         String selectedLabel = categoryComboBox != null ? categoryComboBox.getValue() : null;
         String backendCategory = tripSearch ? null : CATEGORY_MAP.get(selectedLabel);
-        LocalDate selectedDate = (SetData != null && SetData.isSelected() && datePicker != null) ? datePicker.getValue()
-                : null;
+        LocalDate selectedDate = (SetData != null && SetData.isSelected() && datePicker != null) ? datePicker.getValue() : null;
 
         experienceListController.search(
                 tripSearch ? ExperienceListController.SearchMode.TRIP : ExperienceListController.SearchMode.ACTIVITY,
                 query,
                 backendCategory,
-                selectedDate);
+                selectedDate
+        );
     }
 
     public void reset() {
@@ -300,13 +258,9 @@ public class SearchBarController {
             suggestionsPopup.hide();
             suggestionsPopup.getItems().clear();
         }
-        if (searchField != null)
-            searchField.clear();
-        if (categoryComboBox != null)
-            categoryComboBox.getSelectionModel().selectFirst();
-        if (datePicker != null)
-            datePicker.setValue(LocalDate.now());
-        if (SetData != null)
-            SetData.setSelected(false);
+        if (searchField != null) searchField.clear();
+        if (categoryComboBox != null) categoryComboBox.getSelectionModel().selectFirst();
+        if (datePicker != null) datePicker.setValue(LocalDate.now());
+        if (SetData != null) SetData.setSelected(false);
     }
 }

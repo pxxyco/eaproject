@@ -32,75 +32,63 @@
             <StackPane fx:id="navbarContainer" />
         </top>
         <center>
-            <ScrollPane fitToWidth="true" styleClass="main-scroll">
-                <content>
-                    <VBox alignment="TOP_CENTER" spacing="22.0">
-                        <padding>
-                            <Insets bottom="42.0" left="28.0" right="28.0" top="26.0" />
-                        </padding>
-                        <VBox maxWidth="1120.0" spacing="20.0"
-                            styleClass="glass-card, history-page-card">
-                            <padding>
-                                <Insets bottom="30.0" left="30.0" right="30.0" top="28.0" />
-                            </padding>
-                            <HBox alignment="CENTER_LEFT" spacing="14.0">
-                                <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-                                    <Label styleClass="dash-title" text="Il mio Storico" />
-                                    <Label styleClass="dash-subtitle"
-                                        text="Rivedi le esperienze passate, consulta i dettagli delle prenotazioni e gestisci le tue recensioni."
-                                        wrapText="true" />
-                                </VBox>
-                                <Button onAction="#handleRefresh" styleClass="btn-secondary"
-                                    text="↻ Aggiorna" />
-                            </HBox>
-                            <Label fx:id="statusMessageLabel" managed="false" visible="false"
+            <StackPane fx:id="historyHost" styleClass="history-host">
+                <VBox fx:id="historyHeader" maxWidth="1120" spacing="26" styleClass="history-header">
+                    <HBox alignment="CENTER_LEFT" spacing="14.0">
+                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
+                            <Label styleClass="dash-title" text="Il mio Storico" />
+                            <Label styleClass="dash-subtitle"
+                                text="Rivedi le esperienze passate, consulta i dettagli delle prenotazioni e gestisci le tue recensioni."
                                 wrapText="true" />
-                            <Separator styleClass="nav-divider" />
-                            <HBox spacing="12.0" styleClass="history-stat-row">
-                                <VBox styleClass="booking-count-card" HBox.hgrow="ALWAYS">
-                                    <Label fx:id="historyTotalLabel"
-                                        styleClass="booking-count-value" text="0" />
-                                    <Label styleClass="stat-label" text="Nello storico" />
-                                </VBox>
-                                <VBox styleClass="booking-count-card" HBox.hgrow="ALWAYS">
-                                    <Label fx:id="historyCompletedLabel"
-                                        styleClass="booking-count-value" text="0" />
-                                    <Label styleClass="stat-label" text="Terminate / completate" />
-                                </VBox>
-                                <VBox styleClass="booking-count-card" HBox.hgrow="ALWAYS">
-                                    <Label fx:id="historyCancelledLabel"
-                                        styleClass="booking-count-value" text="0" />
-                                    <Label styleClass="stat-label" text="Cancellate" />
-                                </VBox>
-                                <VBox styleClass="booking-count-card" HBox.hgrow="ALWAYS">
-                                    <Label fx:id="historyReviewableLabel"
-                                        styleClass="booking-count-value" text="0" />
-                                    <Label styleClass="stat-label" text="Da recensire" />
-                                </VBox>
-                            </HBox>
-                            <HBox alignment="CENTER_LEFT" spacing="10.0">
-                                <TextField fx:id="searchField"
-                                    promptText="Cerca per titolo, luogo o data..."
-                                    styleClass="custom-input" HBox.hgrow="ALWAYS" />
-                                <ComboBox fx:id="historyFilterCombo" prefWidth="205.0"
-                                    promptText="Filtra storico" styleClass="traveler-search-type" />
-                            </HBox>
-                            <VBox fx:id="historyCardsContainer" spacing="14.0" />
-                            <VBox fx:id="emptyStateContainer" alignment="CENTER" spacing="10.0"
-                                styleClass="history-empty-state" visible="false" managed="false">
-                                <Label fx:id="emptyTitleLabel" styleClass="history-empty-title"
-                                    text="Nessuna esperienza nello storico" />
-                                <Label fx:id="emptyDescriptionLabel"
-                                    styleClass="history-empty-description"
-                                    text="Quando un'esperienza sarà terminata o una prenotazione verrà cancellata, la troverai qui."
-                                    wrapText="true" />
-                                <Button onAction="#handleGoToBookings" styleClass="btn-primary"
-                                    text="Vai alla Dashboard" />
-                            </VBox>
                         </VBox>
-                    </VBox>
-                </content>
-            </ScrollPane>
+                        <Button onAction="#handleRefresh" styleClass="btn-secondary"
+                            text="↻ Aggiorna" />
+                    </HBox>
+                    <Label fx:id="statusMessageLabel" managed="false" visible="false"
+                        wrapText="true" />
+                    <Separator styleClass="nav-divider" />
+                    <HBox spacing="12.0" styleClass="history-stat-row">
+                        <VBox styleClass="booking-count-card" HBox.hgrow="ALWAYS">
+                            <Label fx:id="historyTotalLabel"
+                                styleClass="booking-count-value" text="0" />
+                            <Label styleClass="stat-label" text="Nello storico" />
+                        </VBox>
+                        <VBox styleClass="booking-count-card" HBox.hgrow="ALWAYS">
+                            <Label fx:id="historyCompletedLabel"
+                                styleClass="booking-count-value" text="0" />
+                            <Label styleClass="stat-label" text="Terminate / completate" />
+                        </VBox>
+                        <VBox styleClass="booking-count-card" HBox.hgrow="ALWAYS">
+                            <Label fx:id="historyCancelledLabel"
+                                styleClass="booking-count-value" text="0" />
+                            <Label styleClass="stat-label" text="Cancellate" />
+                        </VBox>
+                        <VBox styleClass="booking-count-card" HBox.hgrow="ALWAYS">
+                            <Label fx:id="historyReviewableLabel"
+                                styleClass="booking-count-value" text="0" />
+                            <Label styleClass="stat-label" text="Da recensire" />
+                        </VBox>
+                    </HBox>
+                    <HBox alignment="CENTER_LEFT" spacing="10.0">
+                        <TextField fx:id="searchField"
+                            promptText="Cerca per titolo, luogo o data..."
+                            styleClass="custom-input" HBox.hgrow="ALWAYS" />
+                        <ComboBox fx:id="historyFilterCombo" prefWidth="205.0"
+                            promptText="Filtra storico" styleClass="traveler-search-type" />
+                    </HBox>
+                </VBox>
+                <VBox fx:id="emptyStateContainer" alignment="CENTER" spacing="10.0"
+                    styleClass="history-empty-state" visible="false" managed="false">
+                    <Label fx:id="emptyTitleLabel" styleClass="history-empty-title"
+                        text="Nessuna esperienza nello storico" />
+                    <Label fx:id="emptyDescriptionLabel"
+                        styleClass="history-empty-description"
+                        text="Quando un'esperienza sarà terminata o una prenotazione verrà cancellata, la troverai qui."
+                        wrapText="true" />
+                    <Button onAction="#handleGoToBookings" styleClass="btn-primary"
+                        text="Vai alla Dashboard" />
+                </VBox>
+            </StackPane>
         </center>
     </BorderPane>
 </StackPane>

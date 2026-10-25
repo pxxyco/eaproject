@@ -685,3 +685,18 @@
 .favorites-page-root .table-view .table-row-cell:filled:selected {
     -fx-background-color: #44403c;
 }
+
+.favorites-title {
+    -fx-font-size: 34;
+    -fx-font-weight: bold;
+}
+
+.favorites-inner-layout {
+    -fx-spacing: 34;
+}
+
+.favorites-list-panel,
+.favorites-content-panel,
+.favorites-create-line {
+    -fx-padding: 24;
+}

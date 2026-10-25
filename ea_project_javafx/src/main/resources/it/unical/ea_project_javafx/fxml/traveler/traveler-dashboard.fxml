@@ -15,7 +15,7 @@
 <VBox xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
     fx:id="dashboardRoot"
     fx:controller="it.unical.ea_project_javafx.controller.traveler.TravelerDashboardController"
-    spacing="24.0" styleClass="traveler-dashboard-content">
+    spacing="34.0" styleClass="traveler-dashboard-content">
     <stylesheets>
         <URL value="@../../css/common/style.css" />
         <URL value="@../../css/profile/profile.css" />
@@ -35,7 +35,7 @@
             <Label text="OGNI ESPERIENZA COMINCIA CON UNA SCELTA"
                 styleClass="dashboard-welcome-signature" wrapText="true" />
         </VBox>
-        <VBox prefWidth="450.0" minWidth="390.0" maxWidth="470.0" spacing="11.0"
+        <VBox prefWidth="500.0" minWidth="410.0" maxWidth="520.0" spacing="11.0"
             styleClass="dashboard-space-panel">
             <HBox alignment="CENTER_LEFT" spacing="8.0">
                 <VBox spacing="3.0" HBox.hgrow="ALWAYS">
@@ -72,23 +72,7 @@
         </VBox>
     </HBox>
     <Label fx:id="dashboardStatusLabel" managed="false" visible="false" wrapText="true" />
-    <FlowPane hgap="10" vgap="10">
-        <Button text="Per te" userData="RECOMMENDED" onAction="#handleCategory"
-            styleClass="btn-secondary" />
-        <Button text="Viaggi" userData="TRIP" onAction="#handleCategory" styleClass="btn-secondary" />
-        <Button text="Escursioni" userData="EXCURSION" onAction="#handleCategory"
-            styleClass="btn-secondary" />
-        <Button text="Cultura e visite" userData="VISIT" onAction="#handleCategory"
-            styleClass="btn-secondary" />
-        <Button text="Sapori locali" userData="MEAL" onAction="#handleCategory"
-            styleClass="btn-secondary" />
-        <Button text="Soggiorni" userData="HOTEL" onAction="#handleCategory"
-            styleClass="btn-secondary" />
-        <Button text="Trasporti" userData="TRANSPORT" onAction="#handleCategory"
-            styleClass="btn-secondary" />
-        <Button text="Altre esperienze" userData="OTHER" onAction="#handleCategory"
-            styleClass="btn-secondary" />
-    </FlowPane>
+
     <VBox spacing="12.0" styleClass="dashboard-section">
         <HBox alignment="CENTER_LEFT" spacing="14.0">
             <VBox spacing="4.0" HBox.hgrow="ALWAYS">
@@ -106,6 +90,24 @@
                     styleClass="traveler-search-type" />
             </HBox>
         </HBox>
+        <FlowPane hgap="10" vgap="10">
+            <Button text="Per te" userData="RECOMMENDED" onAction="#handleCategory"
+                styleClass="btn-secondary" />
+            <Button text="Viaggi" userData="TRIP" onAction="#handleCategory"
+                styleClass="btn-secondary" />
+            <Button text="Escursioni" userData="EXCURSION" onAction="#handleCategory"
+                styleClass="btn-secondary" />
+            <Button text="Cultura e visite" userData="VISIT" onAction="#handleCategory"
+                styleClass="btn-secondary" />
+            <Button text="Sapori locali" userData="MEAL" onAction="#handleCategory"
+                styleClass="btn-secondary" />
+            <Button text="Soggiorni" userData="HOTEL" onAction="#handleCategory"
+                styleClass="btn-secondary" />
+            <Button text="Trasporti" userData="TRANSPORT" onAction="#handleCategory"
+                styleClass="btn-secondary" />
+            <Button text="Altre esperienze" userData="OTHER" onAction="#handleCategory"
+                styleClass="btn-secondary" />
+        </FlowPane>
         <HBox alignment="CENTER" spacing="10.0">
             <Button fx:id="previousRecommendation" onAction="#handlePreviousRecommendation"
                 styleClass="carousel-button" text="&lt;" accessibleText="Proposte precedenti" />

@@ -105,7 +105,7 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     @Transactional(readOnly = true)
     public List<Activity> getTopActivities(int page, int size) {
-        return activityRepository.searchWithoutDate("", null, PageUtils.of(page, size));
+        return activityRepository.findByDeletedAtIsNullOrderByAverageRatingDescActivityIdDesc(PageUtils.of(page, size));
     }
 
     @Override
@@ -167,6 +167,18 @@ public class ActivityServiceImpl implements ActivityService {
         }
         return activityRepository.findSuggestions(query.trim(), PageUtils.suggestions(limit));
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long countHomeActivities(String query, Activity.Category category, LocalDate date) {
+        String normalized = query == null ? "" : query.trim();
+        return date == null ? activityRepository.countSearchWithoutDate(normalized, category)
+                : activityRepository.countSearch(normalized, category, date.atStartOfDay(), date.plusDays(1).atStartOfDay());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long countTopHomeActivities() { return activityRepository.countByDeletedAtIsNull(); }
 
     private List<ActivityDTO> toActivityDtos(List<Activity> activities) {
         if (activities == null || activities.isEmpty()) {
