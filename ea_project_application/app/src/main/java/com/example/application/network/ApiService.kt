@@ -138,6 +138,35 @@ object ApiService {
             }
         }
 
+    suspend fun getRaw(
+        path: String
+    ): ApiResult<String> = withContext(Dispatchers.IO) {
+        try {
+            client.newCall(
+                buildRequest("GET", path, null)
+            ).execute().use { response ->
+                when {
+                    response.isSuccessful ->
+                        ApiResult.Success(
+                            response.body?.string().orEmpty()
+                        )
+
+                    response.code == 429 ->
+                        rateLimited(response)
+
+                    else ->
+                        ApiResult.HttpError(
+                            response.code,
+                            response.body?.string().orEmpty().take(300)
+                        )
+                }
+            }
+        } catch (e: IOException) {
+            reportNetworkFailure()
+            ApiResult.NetworkError(e)
+        }
+    }
+
     suspend fun isBackendReachable(): Boolean = withContext(Dispatchers.IO) {
         try {
             bareClient.newCall(Request.Builder().url("$BASE_URL/api/health").build())

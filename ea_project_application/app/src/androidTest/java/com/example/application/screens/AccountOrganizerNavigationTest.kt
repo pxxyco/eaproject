@@ -20,7 +20,7 @@ class AccountOrganizerNavigationTest {
     @Test fun organizerOpensDashboardAndCanReturnFromAccountSettings() {
         UserSession.setSession(UserDTO(id = -1, fullName = "Organizzatore Test", username = "organizer-test", role = "ORGANIZER"))
         compose.setContent {
-            ApplicationTheme { ProfileScreen(true, {}, {}) }
+            ApplicationTheme { ProfileScreen(user = UserSession.user, onLoginSuccess = {}, onLogoutClick = {}) }
         }
         compose.onNodeWithText("Dashboard Organizzatore").assertIsDisplayed()
         val menu = compose.onNodeWithContentDescription("Apri menu account")
@@ -36,10 +36,10 @@ class AccountOrganizerNavigationTest {
     @Test fun travelerKeepsAccountProfileInsteadOfOrganizerDashboard() {
         UserSession.setSession(UserDTO(id = -2, fullName = "Viaggiatore Test", username = "traveler-test", role = "TRAVELER"))
         compose.setContent {
-            ApplicationTheme { ProfileScreen(true, {}, {}) }
+            ApplicationTheme { ProfileScreen(user = UserSession.user, onLoginSuccess = {}, onLogoutClick = {}) }
         }
         compose.onNodeWithText("@traveler-test").assertIsDisplayed()
         compose.onNodeWithText("Dashboard Organizzatore").assertDoesNotExist()
-        compose.onNodeWithText("Account Viaggiatore").assertIsDisplayed()
+        compose.onNodeWithText("Account Personal (Traveler)").assertIsDisplayed()
     }
 }
