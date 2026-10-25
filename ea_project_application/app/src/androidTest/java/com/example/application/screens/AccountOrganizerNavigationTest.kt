@@ -1,13 +1,14 @@
 package com.example.application.screens
 
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
 import androidx.compose.ui.test.*
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.example.application.MainNavigation
 import com.example.application.dto.UserDTO
-import com.example.application.network.UserSession
 import com.example.application.ui.theme.ApplicationTheme
-import org.junit.After
-import org.junit.Assert.assertTrue
+import org.junit.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -15,31 +16,63 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class AccountOrganizerNavigationTest {
     @get:Rule val compose = createComposeRule()
-    @After fun clearSession() { UserSession.clear() }
+    private val organizer = UserDTO(id = -1, fullName = "Organizzatore Test", username = "organizer-test", role = "ORGANIZER")
+    private val traveler = UserDTO(id = -2, fullName = "Viaggiatore Test", username = "traveler-test", role = "TRAVELER")
 
-    @Test fun organizerOpensDashboardAndCanReturnFromAccountSettings() {
-        UserSession.setSession(UserDTO(id = -1, fullName = "Organizzatore Test", username = "organizer-test", role = "ORGANIZER"))
+    @Test fun organizerDashboardIsSeparateFromAccountAndLogoutIsConfirmed() {
+        var user by mutableStateOf<UserDTO?>(organizer)
+        var logouts = 0
         compose.setContent {
-            ApplicationTheme { ProfileScreen(user = UserSession.user, onLoginSuccess = {}, onLogoutClick = {}) }
+            ApplicationTheme {
+                MainNavigation(user, { logouts++; user = null }, homeContent = { Text("Home di prova", it) },
+                    tripsContent = { Text("Viaggi di prova", it) }, dashboardContent = { _, modifier -> Text("Gestione organizzatore", modifier) })
+            }
         }
-        compose.onNodeWithText("Dashboard Organizzatore").assertIsDisplayed()
-        val menu = compose.onNodeWithContentDescription("Apri menu account")
-        val menuBounds = menu.fetchSemanticsNode().boundsInRoot
-        val rootBounds = compose.onRoot().fetchSemanticsNode().boundsInRoot
-        assertTrue("Account menu must be on the right", menuBounds.center.x > rootBounds.center.x)
-        menu.performClick()
-        compose.onNodeWithText("Impostazioni account").performClick()
-        compose.onNodeWithText("Torna alla dashboard").performScrollTo().performClick()
-        compose.onNodeWithText("Dashboard Organizzatore").assertIsDisplayed()
+        compose.onNodeWithText("Dashboard").performClick()
+        compose.onNodeWithText("Gestione organizzatore").assertIsDisplayed()
+        compose.onNodeWithText("Viaggi").assertDoesNotExist()
+        compose.onNodeWithText("Account").performClick()
+        compose.onNodeWithText("@organizer-test").assertIsDisplayed()
+        compose.onNodeWithText("Gestione organizzatore").assertDoesNotExist()
+        compose.onNodeWithText("Disconnettiti").performScrollTo().performClick()
+        compose.onNodeWithText("Annulla").performClick()
+        compose.runOnIdle { assertEquals(0, logouts) }
+        compose.onNodeWithText("Disconnettiti").performScrollTo().performClick()
+        compose.onNodeWithText("Disconnetti").performClick()
+        compose.runOnIdle { assertEquals(1, logouts) }
+        compose.onNodeWithText("Dashboard").assertDoesNotExist()
+        compose.onNodeWithText("Viaggi").performClick()
+        compose.onNodeWithText("Accedi o registrati").assertIsDisplayed()
     }
 
-    @Test fun travelerKeepsAccountProfileInsteadOfOrganizerDashboard() {
-        UserSession.setSession(UserDTO(id = -2, fullName = "Viaggiatore Test", username = "traveler-test", role = "TRAVELER"))
+    @Test fun guestCanExploreAndProtectedTabOffersLoginOrReturnToExplore() {
         compose.setContent {
-            ApplicationTheme { ProfileScreen(user = UserSession.user, onLoginSuccess = {}, onLogoutClick = {}) }
+            ApplicationTheme { MainNavigation(null, {}, homeContent = { Text("Home di prova", it) }) }
         }
-        compose.onNodeWithText("@traveler-test").assertIsDisplayed()
-        compose.onNodeWithText("Dashboard Organizzatore").assertDoesNotExist()
-        compose.onNodeWithText("Account Personal (Traveler)").assertIsDisplayed()
+        compose.onNodeWithText("Home di prova").assertIsDisplayed()
+        compose.onNodeWithText("Dashboard").assertDoesNotExist()
+        compose.onNodeWithText("Viaggi").performClick()
+        compose.onNodeWithText("Accedi o registrati").assertIsDisplayed()
+        compose.onNodeWithText("Continua a esplorare").performClick()
+        compose.onNodeWithText("Home di prova").assertIsDisplayed()
+        compose.onNodeWithText("Viaggi").performClick()
+        compose.onNodeWithText("Accedi o registrati").performClick()
+        compose.onNodeWithText("I tuoi viaggi, in un unico posto").assertDoesNotExist()
+        compose.onNodeWithText("Account").assertIsSelected()
+    }
+
+    @Test fun middleTabUpdatesWhenRoleChangesAndSessionExpires() {
+        var user by mutableStateOf<UserDTO?>(organizer)
+        compose.setContent {
+            ApplicationTheme { MainNavigation(user, {}, homeContent = { Text("Home di prova", it) },
+                tripsContent = { Text("Viaggi di prova", it) }, dashboardContent = { _, modifier -> Text("Gestione organizzatore", modifier) }) }
+        }
+        compose.onNodeWithText("Dashboard").performClick()
+        compose.runOnIdle { user = traveler }
+        compose.onNodeWithText("Viaggi di prova").assertIsDisplayed()
+        compose.onNodeWithText("Gestione organizzatore").assertDoesNotExist()
+        compose.runOnIdle { user = null }
+        compose.onNodeWithText("Viaggi di prova").assertDoesNotExist()
+        compose.onNodeWithText("Accedi o registrati").assertIsDisplayed()
     }
 }

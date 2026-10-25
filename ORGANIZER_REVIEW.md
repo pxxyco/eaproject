@@ -56,3 +56,20 @@ Riavviare il backend e compilare/avviare i client aggiornati. Le correzioni ai s
 - Caricamento Android: il fallimento di una lista non nasconde più le offerte già caricate dall'altra. Filtri e ricerca non alterano i totali dei KPI.
 - Aggiunti 6 test locali Android su itinerari, filtri e limite foto, oltre ai 6 precedenti; aggiunti test API sul passaggio da attività annullata a pubblicata, sulla prenotabilità e sul ciclo copertina/galleria/eliminazione delle foto delle attività.
 - Tentato il collaudo dell'interfaccia su un emulatore separato in modalità read-only, senza modificare l'AVD abituale. L'emulatore è terminato con segmentation fault all'avvio in entrambe le configurazioni grafiche provate. Gli APK dell'app e dei test compilano; i test dell'interfaccia restano da eseguire su un dispositivo funzionante.
+
+## Navigazione Android per ruolo - 25 ottobre 2026
+
+La dashboard è stata separata dal profilo e ha una voce dedicata nella barra inferiore, mantenendo tre destinazioni:
+
+| Stato | Barra inferiore |
+| --- | --- |
+| Ospite | Esplora, Viaggi, Account |
+| Viaggiatore autenticato | Esplora, Viaggi, Account |
+| Organizzatore autenticato | Esplora, Dashboard, Account |
+
+- Account mostra il profilo e la conferma di logout per entrambi i ruoli. Il precedente menu hamburger e la dashboard dentro Account sono stati rimossi, conservando il profilo introdotto dal ramo di Luca.
+- L'ospite può esplorare; la sezione Viaggi propone accesso/registrazione o ritorno a Esplora. Account apre il modulo di autenticazione.
+- Dopo l'accesso iniziato dalla sezione riservata si torna alla voce centrale, adattata al ruolo appena autenticato.
+- Logout, sessione scaduta e cambi di ruolo aggiornano immediatamente voce e contenuto centrali; lo stato delle schermate viene separato per identità utente.
+- La sezione Viaggi già esistente non è stata estesa in questa modifica: resta da completare il relativo contenuto del viaggiatore.
+- Verifica: 19 test locali Android passati, inclusi 6 nuovi test sulla scelta delle destinazioni per ruolo. Compilati anche i test di interfaccia aggiornati. Tentativo di esecuzione sull'emulatore già collegato non completato: il dispositivo si è disconnesso prima dell'installazione; non è stato avviato un altro emulatore.
