@@ -18,7 +18,7 @@ import com.example.application.network.AuthRepository
 import com.example.application.network.UserSession
 import com.example.application.screens.AppErrorDialog
 import com.example.application.screens.home.HomeScreen
-import com.example.application.screens.MyTrip
+import com.example.application.screens.favorite.MyTrip
 import com.example.application.screens.ProfileScreen
 
 @Composable
