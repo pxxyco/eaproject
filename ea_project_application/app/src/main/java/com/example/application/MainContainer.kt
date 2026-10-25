@@ -1,7 +1,6 @@
 package com.example.application
 
 import android.app.Activity
-import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -13,13 +12,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.core.content.edit
 import com.example.application.network.ApiService
 import com.example.application.network.AppStatus
 import com.example.application.network.AuthRepository
 import com.example.application.network.UserSession
 import com.example.application.screens.AppErrorDialog
-import com.example.application.screens.HomeScreen
+import com.example.application.screens.home.HomeScreen
 import com.example.application.screens.MyTrip
 import com.example.application.screens.ProfileScreen
 
@@ -77,6 +75,6 @@ enum class AppDestinations(
     val icon: Int,
 ) {
     HOME("Esplora", R.drawable.ic_home),
-    `MY-TRIP`("Viaggi", R.drawable.ic_favorite), //TODO Sostituire con Preferiti e non Trip (Trip è gestito dalla home inseme ad Activity)
+    `MY-TRIP`("Preferiti", R.drawable.ic_favorite), //TODO Sostituire con Preferiti e non Trip (Trip è gestito dalla home inseme ad Activity)
     PROFILE("Account", R.drawable.ic_account_box),
 }

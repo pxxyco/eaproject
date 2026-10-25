@@ -1,5 +1,6 @@
 package com.example.application.network
 
+import android.os.SystemClock
 import com.example.application.dto.ActivitySuggestionDTO
 import com.example.application.dto.SearchSuggestion
 import com.example.application.dto.home.TripHomeDTO
@@ -11,12 +12,21 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import java.lang.reflect.Type
 import java.net.URLEncoder
-import kotlin.collections.get
+import java.util.concurrent.ConcurrentHashMap
 
 object HomeRepository {
 
     private const val PAGE_SIZE = 9
+    private const val CACHE_TTL_MS = 60_000L
+    private const val MAX_CACHE_ENTRIES = 64
 
+    private data class CacheEntry(
+        val value: List<*>,
+        val timestamp: Long
+    )
+
+    private val cache = ConcurrentHashMap<String, CacheEntry>()
+    private val cacheLock = Any()
     private val activityListType =
         object : TypeToken<List<ActivityHomeDTO>>() {}.type
 
@@ -161,27 +171,75 @@ object HomeRepository {
         path: String,
         type: Type
     ): List<T> {
+        val now = SystemClock.elapsedRealtime()
+        pruneCache(now)
+
+        // Riutilizza i dati se la cache è ancora valida.
+        cache[path]?.let { entry ->
+            if (now - entry.timestamp < CACHE_TTL_MS) {
+                @Suppress("UNCHECKED_CAST")
+                return entry.value as List<T>
+            } else {
+                cache.remove(path, entry)
+            }
+        }
+
         return when (val result = ApiService.getRaw(path)) {
             is ApiResult.Success -> {
-                ApiService.gson.fromJson<List<T>>(
-                    result.data,
-                    type
-                ) ?: emptyList()
+                val data: List<T> =
+                    ApiService.gson.fromJson<List<T>>(result.data, type)
+                        ?: emptyList()
+
+                synchronized(cacheLock) {
+                    cache[path] = CacheEntry(
+                        value = data,
+                        timestamp = SystemClock.elapsedRealtime()
+                    )
+                    pruneCache(SystemClock.elapsedRealtime())
+                }
+
+                data
             }
 
-            is ApiResult.HttpError ->
+            is ApiResult.HttpError -> {
                 throw IllegalStateException(
                     "Errore HTTP ${result.code}: ${result.message}"
                 )
+            }
 
-            is ApiResult.RateLimited ->
+            is ApiResult.RateLimited -> {
                 throw IllegalStateException(
                     "Troppe richieste. Riprova tra " +
                             "${result.retryAfterSeconds} secondi."
                 )
+            }
 
-            is ApiResult.NetworkError ->
+            is ApiResult.NetworkError -> {
                 throw result.cause
+            }
+        }
+    }
+
+
+    /**
+     * Elimina le entry scadute e limita la cache per evitare crescita senza limiti
+     * quando vengono eseguite ricerche con query sempre diverse.
+     */
+    private fun pruneCache(now: Long) {
+        cache.forEach { (key, entry) ->
+            if (now - entry.timestamp >= CACHE_TTL_MS) {
+                cache.remove(key, entry)
+            }
+        }
+
+        val excessEntries = cache.size - MAX_CACHE_ENTRIES
+        if (excessEntries > 0) {
+            cache.entries
+                .sortedBy { it.value.timestamp }
+                .take(excessEntries)
+                .forEach { entry ->
+                    cache.remove(entry.key, entry.value)
+                }
         }
     }
 }
