@@ -36,7 +36,7 @@ public class ApiService {
 
     public enum Method { GET, POST, PUT, DELETE }
 
-    public static final String BASE_URL = "http://localhost:8080";
+    public static final String BASE_URL = "https://localhost:8443";
 
     private static final HttpClient CLIENT = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(5))
@@ -474,6 +474,7 @@ public class ApiService {
             CLIENT.send(request, HttpResponse.BodyHandlers.discarding());
             return true;
         } catch (Exception e) {
+           // e.printStackTrace();
             return false;
         }
     }

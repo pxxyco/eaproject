@@ -24,9 +24,9 @@ sealed interface ApiResult<out T> {
 
 object ApiService {
 
-    // Sviluppo: serve "adb reverse tcp:8080 tcp:8080" dopo ogni riavvio di emulatore/adb.
+    // Sviluppo: serve "adb reverse tcp:8443 tcp:8443" dopo ogni riavvio di emulatore/adb.
     // Senza, l'app mostra il popup ERR-101 (comportamento corretto).
-    const val BASE_URL = "http://localhost:8080"
+    const val BASE_URL = "https://localhost:8443"
 
     val gson = Gson()
     private val JSON = "application/json".toMediaType()
