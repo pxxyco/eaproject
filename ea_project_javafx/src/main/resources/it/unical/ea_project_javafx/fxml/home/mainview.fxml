@@ -1,46 +1,81 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-
 <StackPane xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="it.unical.ea_project_javafx.controller.home.MainViewController">
+    fx:controller="it.unical.ea_project_javafx.controller.home.MainViewController">
     <stylesheets>
         <URL value="@../../css/common/style.css" />
         <URL value="@../../css/home/home.css" />
     </stylesheets>
-
-    <ImageView
-            fx:id="bgImageView"
-            pickOnBounds="true"
-            preserveRatio="false"/>
+    <ImageView fx:id="bgImageView" pickOnBounds="true" preserveRatio="false" />
     <Region styleClass="bg-overlay" />
-
     <BorderPane>
-        <top>
-            <StackPane fx:id="navbarContainer" />
-        </top>
         <center>
-            <ScrollPane fitToWidth="true" styleClass="main-scroll">
-                <content>
-                    <VBox alignment="TOP_CENTER" spacing="30.0">
-                        <padding>
-                            <Insets bottom="40.0" left="20.0" right="20.0" top="20.0" />
-                        </padding>
-                        <children>
-                            <fx:include fx:id="searchBar" source="search-bar.fxml" />
-                            <fx:include fx:id="experienceList" source="experience-list.fxml" />
-                        </children>
-                    </VBox>
-                </content>
-            </ScrollPane>
+            <StackPane>
+                <ScrollPane fx:id="homeScroll" fitToWidth="true" styleClass="main-scroll">
+                    <content>
+                        <VBox alignment="TOP_CENTER" spacing="30.0">
+                            <padding>
+                                <Insets bottom="40.0" left="20.0" right="20.0" top="20.0" />
+                            </padding>
+                            <children>
+                                <HBox fx:id="homeHero" maxWidth="1000" spacing="30"
+                                    alignment="CENTER_LEFT" styleClass="home-editorial">
+                                    <VBox spacing="14" alignment="CENTER_LEFT" maxHeight="-Infinity"
+                                        HBox.hgrow="ALWAYS">
+                                        <Label text="ITINERA · NUOVI ORIZZONTI"
+                                            styleClass="account-kicker" />
+                                        <Label text="Il tuo prossimo viaggio&#10;comincia qui."
+                                            styleClass="home-editorial-title" />
+                                        <Label
+                                            text="Dai luoghi che ami a quelli che non hai ancora immaginato. Trova il tuo prossimo punto di partenza."
+                                            styleClass="account-subtitle" wrapText="true"
+                                            maxWidth="560" />
+                                        <HBox spacing="12" alignment="CENTER_LEFT">
+                                            <Button text="Esplora i viaggi →"
+                                                onAction="#handleExploreTrips"
+                                                styleClass="btn-primary, home-hero-action" />
+                                            <Button text="All’aria aperta"
+                                                onAction="#handleExploreNature"
+                                                styleClass="btn-secondary, home-hero-action" />
+                                        </HBox>
+                                    </VBox>
+                                    <VBox spacing="12" prefWidth="310" minWidth="270" maxWidth="340"
+                                        styleClass="home-guide">
+                                        <Label text="UN BUON PUNTO DI PARTENZA"
+                                            styleClass="account-kicker" />
+                                        <Label
+                                            text="Un’idea, una destinazione.&#10;Il resto lo scegli tu."
+                                            wrapText="true" styleClass="home-feature-title" />
+                                        <Label
+                                            text="Confronta luoghi, date e prezzi. Apri un’esperienza per conoscere programma e organizzatore, poi decidi come partire."
+                                            wrapText="true" styleClass="account-subtitle" />
+                                    </VBox>
+                                </HBox>
+                                <fx:include fx:id="searchBar" source="search-bar.fxml" />
+                                <VBox fx:id="discoverySections" maxWidth="1000" spacing="48" />
+                                <fx:include fx:id="experienceList" source="experience-list.fxml" />
+                            </children>
+                        </VBox>
+                    </content>
+                </ScrollPane>
+                <VBox fx:id="stickySearchDock" alignment="TOP_CENTER" maxHeight="-Infinity"
+                    pickOnBounds="false" styleClass="sticky-search-dock"
+                    StackPane.alignment="TOP_CENTER" viewOrder="-0.5" />
+            </StackPane>
         </center>
     </BorderPane>
+    <StackPane fx:id="navbarContainer" maxHeight="-Infinity" StackPane.alignment="TOP_CENTER"
+        viewOrder="-2" />
 </StackPane>

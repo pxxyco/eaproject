@@ -27,6 +27,4 @@
     -fx-padding: 2px 6px;
 }
 
-.btn-modifica-risposta:hover {
-    -fx-text-fill: #e7e5e4;
-}
+.btn-modifica-risposta:hover {}

@@ -1,56 +1,255 @@
 /* Storico prenotazioni: vetro scuro, grafite e avorio come tema globale. */
-.history-page-card { -fx-max-width: 1120px; }
-.history-stat-row { -fx-alignment: center; }
+.history-page-card {
+    -fx-max-width: 1120px;
+}
+
+.history-stat-row {
+    -fx-alignment: center;
+}
 
 .history-booking-card {
-    -fx-background-color: linear-gradient(to bottom right, rgba(255,255,255,0.085), rgba(255,255,255,0.025));
-    -fx-background-radius: 17px; -fx-border-color: rgba(231,229,228,0.17); -fx-border-radius: 17px;
-    -fx-border-width: 1px; -fx-padding: 18px; -fx-spacing: 12px;
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.17), 16, 0.12, 0, 4);
+    -fx-background-color: linear-gradient(to bottom right, rgba(255, 255, 255, 0.085), rgba(255, 255, 255, 0.025));
+    -fx-background-radius: 17px;
+    -fx-border-color: rgba(231, 229, 228, 0.17);
+    -fx-border-radius: 17px;
+    -fx-border-width: 1px;
+    -fx-padding: 18px;
+    -fx-spacing: 12px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.17), 16, 0.12, 0, 4);
 }
-.history-booking-card:hover {
-    -fx-background-color: linear-gradient(to bottom right, rgba(231,229,228,0.13), rgba(255,255,255,0.035));
-    -fx-border-color: rgba(231,229,228,0.31); -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.23), 20, 0.12, 0, 5);
-}
-.history-card-title { -fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #fafaf9; }
-.history-card-meta { -fx-font-size: 11px; -fx-text-fill: rgba(231,229,228,0.67); }
-.history-card-date { -fx-font-size: 12px; -fx-font-weight: bold; -fx-text-fill: #e7e5e4; }
-.history-card-price { -fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #fafaf9; }
-.history-card-seats { -fx-font-size: 11px; -fx-text-fill: rgba(231,229,228,0.68); }
-.history-status-pill { -fx-padding: 4px 9px; -fx-background-radius: 100px; -fx-font-size: 10px; -fx-font-weight: bold; -fx-border-radius: 100px; }
-.history-status-cancelled { -fx-background-color: rgba(248,113,113,0.13); -fx-border-color: rgba(248,113,113,0.23); -fx-text-fill: #fecaca; }
-.history-status-completed { -fx-background-color: rgba(231,229,228,0.12); -fx-border-color: rgba(231,229,228,0.22); -fx-text-fill: #e7e5e4; }
-.history-status-confirmed { -fx-background-color: rgba(231,229,228,0.10); -fx-border-color: rgba(231,229,228,0.20); -fx-text-fill: #fafaf9; }
-.history-status-pending { -fx-background-color: rgba(217,166,87,0.12); -fx-border-color: rgba(217,166,87,0.24); -fx-text-fill: #f3d7a2; }
-.history-status-neutral { -fx-background-color: rgba(231,229,228,0.07); -fx-border-color: rgba(231,229,228,0.16); -fx-text-fill: rgba(231,229,228,0.82); }
-.history-action-button { -fx-cursor: hand; -fx-padding: 8px 12px; -fx-background-radius: 9px; -fx-font-size: 11px; }
-.history-review-button { -fx-background-color: #e7e5e4; -fx-text-fill: #1c1917; -fx-font-weight: bold; }
-.history-review-button:hover { -fx-background-color: #fafaf9; }
-.history-detail-button { -fx-background-color: rgba(231,229,228,0.075); -fx-text-fill: #f5f5f4; -fx-border-color: rgba(231,229,228,0.21); -fx-border-radius: 9px; }
-.history-detail-button:hover { -fx-background-color: rgba(231,229,228,0.15); }
-.history-delete-review-button { -fx-background-color: rgba(248,113,113,0.12); -fx-text-fill: #fecaca; -fx-border-color: rgba(248,113,113,0.24); -fx-border-radius: 9px; -fx-background-radius: 9px; }
-.history-delete-review-button:hover { -fx-background-color: rgba(248,113,113,0.21); }
-.history-cancelled-card { -fx-opacity: 0.75; -fx-border-color: rgba(248,113,113,0.20); }
-.history-review-note { -fx-font-size: 11px; -fx-text-fill: #e7e5e4; }
-.history-empty-state { -fx-padding: 40px 22px; -fx-background-color: rgba(255,255,255,0.035); -fx-background-radius: 18px; -fx-border-color: rgba(231,229,228,0.14); -fx-border-radius: 18px; -fx-alignment: center; }
-.history-empty-title { -fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #f5f5f4; }
-.history-empty-description { -fx-font-size: 12px; -fx-text-fill: rgba(231,229,228,0.68); -fx-text-alignment: center; -fx-wrap-text: true; -fx-max-width: 560px; }
-.history-detail-label { -fx-font-weight: bold; -fx-font-size: 11px; -fx-text-fill: rgba(231,229,228,0.65); -fx-min-width: 145px; }
-.history-detail-value { -fx-font-size: 12px; -fx-text-fill: #f5f5f4; -fx-wrap-text: true; }
-.history-form-counter { -fx-font-size: 11px; -fx-text-fill: rgba(231,229,228,0.62); }
-.history-star-button { -fx-font-size: 27px; -fx-background-color: transparent; -fx-text-fill: rgba(231,229,228,0.30); -fx-padding: 2px 5px; }
-.history-star-button:selected { -fx-text-fill: #e7e5e4; }
-.history-star-button:hover { -fx-text-fill: #fafaf9; }
-.history-dialog-content { -fx-spacing: 12px; -fx-padding: 0; }
-.history-message-error { -fx-text-fill: #fecaca; -fx-background-color: rgba(248,113,113,0.12); -fx-background-radius: 8px; -fx-padding: 10px; }
-.history-message-success { -fx-text-fill: #e7e5e4; -fx-background-color: rgba(231,229,228,0.09); -fx-background-radius: 8px; -fx-padding: 10px; }
 
-.history-modal-panel { -fx-max-width: 660px; -fx-spacing: 14px; }
-.history-modal-scroll, .history-modal-scroll > .viewport { -fx-background-color: transparent; -fx-background: transparent; }
-.history-modal-scroll { -fx-border-color: transparent; -fx-padding: 0; }
-.history-modal-scroll .scroll-bar:vertical, .history-modal-scroll .scroll-bar:horizontal { -fx-background-color: transparent; }
-.history-modal-scroll .scroll-bar .thumb { -fx-background-color: rgba(231,229,228,0.24); -fx-background-radius: 8px; }
-.history-modal-panel .history-dialog-content { -fx-padding: 0; }
-.history-modal-panel .text-area, .history-modal-panel .text-area .content { -fx-background-color: rgba(255,255,255,0.035); -fx-text-fill: #f5f5f4; }
-.history-modal-error { -fx-text-fill: #fecaca; -fx-font-size: 11px; -fx-wrap-text: true; }
-.history-modal-panel .text-area:focused { -fx-border-color: rgba(231,229,228,0.42); -fx-focus-color: transparent; -fx-faint-focus-color: transparent; }
+.history-booking-card:hover {
+    -fx-background-color: linear-gradient(to bottom right, rgba(231, 229, 228, 0.13), rgba(255, 255, 255, 0.035));
+    -fx-border-color: rgba(231, 229, 228, 0.31);
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.23), 20, 0.12, 0, 5);
+}
+
+.history-card-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #fafaf9;
+}
+
+.history-card-meta {
+    -fx-font-size: 11px;
+    -fx-text-fill: rgba(231, 229, 228, 0.67);
+}
+
+.history-card-date {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #e7e5e4;
+}
+
+.history-card-price {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #fafaf9;
+}
+
+.history-card-seats {
+    -fx-font-size: 11px;
+    -fx-text-fill: rgba(231, 229, 228, 0.68);
+}
+
+.history-status-pill {
+    -fx-padding: 4px 9px;
+    -fx-background-radius: 100px;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-border-radius: 100px;
+}
+
+.history-status-cancelled {
+    -fx-background-color: rgba(248, 113, 113, 0.13);
+    -fx-border-color: rgba(248, 113, 113, 0.23);
+    -fx-text-fill: #fecaca;
+}
+
+.history-status-completed {
+    -fx-background-color: rgba(231, 229, 228, 0.12);
+    -fx-border-color: rgba(231, 229, 228, 0.22);
+    -fx-text-fill: #e7e5e4;
+}
+
+.history-status-confirmed {
+    -fx-background-color: rgba(231, 229, 228, 0.10);
+    -fx-border-color: rgba(231, 229, 228, 0.20);
+    -fx-text-fill: #fafaf9;
+}
+
+.history-status-pending {
+    -fx-background-color: rgba(217, 166, 87, 0.12);
+    -fx-border-color: rgba(217, 166, 87, 0.24);
+    -fx-text-fill: #f3d7a2;
+}
+
+.history-status-neutral {
+    -fx-background-color: rgba(231, 229, 228, 0.07);
+    -fx-border-color: rgba(231, 229, 228, 0.16);
+    -fx-text-fill: rgba(231, 229, 228, 0.82);
+}
+
+.history-action-button {
+    -fx-cursor: hand;
+    -fx-padding: 8px 12px;
+    -fx-background-radius: 9px;
+    -fx-font-size: 11px;
+}
+
+.history-review-button {
+    -fx-background-color: #e7e5e4;
+    -fx-text-fill: #1c1917;
+    -fx-font-weight: bold;
+}
+
+.history-review-button:hover {}
+
+.history-detail-button {
+    -fx-background-color: rgba(231, 229, 228, 0.075);
+    -fx-text-fill: #f5f5f4;
+    -fx-border-color: rgba(231, 229, 228, 0.21);
+    -fx-border-radius: 9px;
+}
+
+.history-detail-button:hover {}
+
+.history-delete-review-button {
+    -fx-background-color: rgba(248, 113, 113, 0.12);
+    -fx-text-fill: #fecaca;
+    -fx-border-color: rgba(248, 113, 113, 0.24);
+    -fx-border-radius: 9px;
+    -fx-background-radius: 9px;
+}
+
+.history-delete-review-button:hover {}
+
+.history-cancelled-card {
+    -fx-opacity: 0.75;
+    -fx-border-color: rgba(248, 113, 113, 0.20);
+}
+
+.history-review-note {
+    -fx-font-size: 11px;
+    -fx-text-fill: #e7e5e4;
+}
+
+.history-empty-state {
+    -fx-padding: 40px 22px;
+    -fx-background-color: rgba(255, 255, 255, 0.035);
+    -fx-background-radius: 18px;
+    -fx-border-color: rgba(231, 229, 228, 0.14);
+    -fx-border-radius: 18px;
+    -fx-alignment: center;
+}
+
+.history-empty-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f5f5f4;
+}
+
+.history-empty-description {
+    -fx-font-size: 12px;
+    -fx-text-fill: rgba(231, 229, 228, 0.68);
+    -fx-text-alignment: center;
+    -fx-wrap-text: true;
+    -fx-max-width: 560px;
+}
+
+.history-detail-label {
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-text-fill: rgba(231, 229, 228, 0.65);
+    -fx-min-width: 145px;
+}
+
+.history-detail-value {
+    -fx-font-size: 12px;
+    -fx-text-fill: #f5f5f4;
+    -fx-wrap-text: true;
+}
+
+.history-form-counter {
+    -fx-font-size: 11px;
+    -fx-text-fill: rgba(231, 229, 228, 0.62);
+}
+
+.history-star-button {
+    -fx-font-size: 27px;
+    -fx-background-color: transparent;
+    -fx-text-fill: rgba(231, 229, 228, 0.30);
+    -fx-padding: 2px 5px;
+}
+
+.history-star-button:selected {
+    -fx-text-fill: #e7e5e4;
+}
+
+.history-star-button:hover {}
+
+.history-dialog-content {
+    -fx-spacing: 12px;
+    -fx-padding: 0;
+}
+
+.history-message-error {
+    -fx-text-fill: #fecaca;
+    -fx-background-color: rgba(248, 113, 113, 0.12);
+    -fx-background-radius: 8px;
+    -fx-padding: 10px;
+}
+
+.history-message-success {
+    -fx-text-fill: #e7e5e4;
+    -fx-background-color: rgba(231, 229, 228, 0.09);
+    -fx-background-radius: 8px;
+    -fx-padding: 10px;
+}
+
+.history-modal-panel {
+    -fx-max-width: 660px;
+    -fx-spacing: 14px;
+}
+
+.history-modal-scroll,
+.history-modal-scroll>.viewport {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.history-modal-scroll {
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.history-modal-scroll .scroll-bar:vertical,
+.history-modal-scroll .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+}
+
+.history-modal-scroll .scroll-bar .thumb {
+    -fx-background-color: rgba(231, 229, 228, 0.24);
+    -fx-background-radius: 8px;
+}
+
+.history-modal-panel .history-dialog-content {
+    -fx-padding: 0;
+}
+
+.history-modal-panel .text-area,
+.history-modal-panel .text-area .content {
+    -fx-background-color: rgba(255, 255, 255, 0.035);
+    -fx-text-fill: #f5f5f4;
+}
+
+.history-modal-error {
+    -fx-text-fill: #fecaca;
+    -fx-font-size: 11px;
+    -fx-wrap-text: true;
+}
+
+.history-modal-panel .text-area:focused {
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}

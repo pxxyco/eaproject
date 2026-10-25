@@ -2,7 +2,7 @@
 .app-shell,
 .content-wrapper,
 .content-scroll,
-.content-scroll > .viewport {
+.content-scroll>.viewport {
     -fx-background-color: transparent;
 }
 
@@ -37,10 +37,7 @@
     -fx-cursor: hand;
 }
 
-.btn-login-pill:hover {
-    -fx-background-color: #e7e5e4;
-    -fx-text-fill: #1c1917;
-}
+.btn-login-pill:hover {}
 
 /* ScrollBar Customization */
 .content-scroll .scroll-bar:vertical,
@@ -79,7 +76,7 @@
 .section-button:hover,
 .section-button-active:hover {
     -fx-translate-y: -3px;
-    -fx-effect: dropshadow(gaussian, rgba(231, 229, 228, 0.4), 16, 0.2, 0, 4);
+
 }
 
 /* Hero Header (scoped: home.css definisce .hero-title/.hero-subtitle per la home) */
@@ -183,7 +180,7 @@
     -fx-background-radius: 6px;
 }
 
-.booking-card .booking-spinner > .text-field {
+.booking-card .booking-spinner>.text-field {
     -fx-background-color: transparent;
     -fx-background-insets: 0;
     -fx-border-color: transparent;
@@ -192,26 +189,26 @@
 }
 
 
-.booking-card .booking-spinner > .increment-arrow-button,
-.booking-card .booking-spinner > .decrement-arrow-button {
+.booking-card .booking-spinner>.increment-arrow-button,
+.booking-card .booking-spinner>.decrement-arrow-button {
     -fx-background-color: transparent;
     -fx-background-insets: 0;
     -fx-border-color: transparent;
     -fx-cursor: hand;
 }
 
-.booking-card .booking-spinner > .increment-arrow-button:hover,
-.booking-card .booking-spinner > .decrement-arrow-button:hover {
+.booking-card .booking-spinner>.increment-arrow-button:hover,
+.booking-card .booking-spinner>.decrement-arrow-button:hover {
     -fx-background-color: rgba(231, 229, 228, 0.18);
 }
 
-.booking-card .booking-spinner > .increment-arrow-button:pressed,
-.booking-card .booking-spinner > .decrement-arrow-button:pressed {
+.booking-card .booking-spinner>.increment-arrow-button:pressed,
+.booking-card .booking-spinner>.decrement-arrow-button:pressed {
     -fx-background-color: rgba(231, 229, 228, 0.28);
 }
 
-.booking-card .booking-spinner > .increment-arrow-button > .increment-arrow,
-.booking-card .booking-spinner > .decrement-arrow-button > .decrement-arrow {
+.booking-card .booking-spinner>.increment-arrow-button>.increment-arrow,
+.booking-card .booking-spinner>.decrement-arrow-button>.decrement-arrow {
     -fx-background-color: #d6d3d1;
 }
 
@@ -222,21 +219,19 @@
     -fx-background-radius: 6px;
 }
 
-.date-picker > .text-field {
+.date-picker>.text-field {
     -fx-background-color: transparent;
     -fx-text-fill: #ffffff;
     -fx-prompt-text-fill: rgba(255, 255, 255, 0.5);
 }
 
-.date-picker > .arrow-button {
+.date-picker>.arrow-button {
     -fx-background-color: transparent;
     -fx-cursor: hand;
 }
 
-.date-picker > .arrow-button:hover {
-    -fx-background-color: rgba(231, 229, 228, 0.18);
-}
+.date-picker>.arrow-button:hover {}
 
-.date-picker > .arrow-button > .arrow {
+.date-picker>.arrow-button>.arrow {
     -fx-background-color: #d6d3d1;
 }

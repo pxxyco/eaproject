@@ -28,17 +28,26 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 public class ExperienceListController {
+    public void close() {
+        requestCounter++;
+        loading = false;
+    }
 
     public Label label1;
     public Label label2;
-    @FXML private VBox cardsContainer;
-    @FXML private Label loadMoreLabel;
-    @FXML private VBox loadingIndicatorBox;
-    @FXML private javafx.scene.control.Button resetButton;
+    @FXML
+    private VBox cardsContainer;
+    @FXML
+    private Label loadMoreLabel;
+    @FXML
+    private VBox loadingIndicatorBox;
+    @FXML
+    private javafx.scene.control.Button resetButton;
 
-    @Setter private SearchBarController searchBarController;
+    @Setter
+    private SearchBarController searchBarController;
 
-    private static final int PAGE_SIZE = 9;
+    private static final int PAGE_SIZE = 3;
     private int currentPage = 0;
     private boolean loading = false;
     private int requestCounter = 0;
@@ -48,14 +57,54 @@ public class ExperienceListController {
     private LocalDate currentDateFilter = null;
     private static final Gson GSON = new Gson();
 
-    public enum SearchMode { TOP, ACTIVITY, TRIP, ALL }
+    public enum SearchMode {
+        TOP, ACTIVITY, TRIP, ALL
+    }
+
     private SearchMode mode = SearchMode.TOP;
     private boolean organizerHome;
+    private boolean editorialHome;
+
+    public void setEditorialHome(boolean value) {
+        editorialHome = value;
+    }
+
+    private javafx.scene.control.ScrollPane pageScroll;
+    private Consumer<Boolean> browsingModeChanged = value -> {
+    };
+
+    public void setBrowsingModeChanged(Consumer<Boolean> action) {
+        browsingModeChanged = action;
+    }
+
+    public void attachScroll(javafx.scene.control.ScrollPane scroll) {
+        pageScroll = scroll;
+        scroll.vvalueProperty().addListener((o, a, b) -> {
+            if (b.doubleValue() > .84 && b.doubleValue() > a.doubleValue())
+                loadMoreOnDemand();
+        });
+    }
+
+    private void loadMoreOnDemand() {
+        if ((!editorialHome || cardsContainer.isVisible() && cardsContainer.getParent().isVisible())
+                && !loading && loadMoreLabel != null && !loadMoreLabel.isDisabled())
+            loadNextPage();
+    }
+
+    private void emptyState() {
+        if (cardsContainer.getChildren().isEmpty()) {
+            Label empty = new Label(
+                    "Nessuna esperienza corrisponde alla ricerca. Prova un'altra destinazione o modifica i filtri.");
+            empty.setWrapText(true);
+            empty.getStyleClass().add("section-subtitle");
+            cardsContainer.getChildren().add(empty);
+        }
+    }
 
     public void loadHomeForCurrentUser() {
         organizerHome = "ORGANIZER".equalsIgnoreCase(UserSession.getInstance().getRole());
         mode = organizerHome ? SearchMode.ALL : SearchMode.TOP;
-        label1.setText(organizerHome ? "Tutti i viaggi e le attività" : "Esperienze più apprezzate dai viaggiatori");
+        label1.setText(organizerHome ? "Tutti i viaggi e le attività" : "Attività con le valutazioni più alte");
         label2.setText(organizerHome ? "Esplora le offerte pubblicate" : "Valutate da utenti di tutto il mondo");
         currentQuery = "";
         currentCategoryFilter = null;
@@ -63,9 +112,11 @@ public class ExperienceListController {
         currentPage = 0;
         loading = false;
         requestCounter++;
-        if (cardsContainer != null) cardsContainer.getChildren().clear();
+        if (cardsContainer != null)
+            cardsContainer.getChildren().clear();
         resetLoadMoreLabel();
-        if (searchBarController != null) searchBarController.reset();
+        if (searchBarController != null)
+            searchBarController.reset();
         loadNextPage();
     }
 
@@ -84,7 +135,8 @@ public class ExperienceListController {
     }
 
     private <T> void loadPage(String url, Type type, Consumer<List<T>> onCardsLoaded) {
-        if (loading) return;
+        if (loading)
+            return;
         loading = true;
         showLoading(true);
 
@@ -92,30 +144,37 @@ public class ExperienceListController {
 
         ApiService.get(url, response -> {
             if (response.statusCode() == 200) {
-                List<T> dtos = GSON.fromJson(response.body(), type);
+                List<T> dtos = ApiService.fromJson(response.body(), type);
                 List<T> safeList = dtos != null ? dtos : List.of();
                 Platform.runLater(() -> {
-                    if (currentRequest != requestCounter) return;
+                    if (currentRequest != requestCounter)
+                        return;
 
                     currentPage++;
-                    if (safeList.size() < PAGE_SIZE) disableLoadMore();
-                    else resetLoadMoreLabel();
+                    if (safeList.size() < PAGE_SIZE)
+                        disableLoadMore();
+                    else
+                        resetLoadMoreLabel();
 
                     onCardsLoaded.accept(safeList);
+                    if (safeList.isEmpty() && currentPage == 1)
+                        emptyState();
 
                     loading = false;
                     showLoading(false);
                 });
             } else {
                 Platform.runLater(() -> {
-                    if (currentRequest != requestCounter) return;
+                    if (currentRequest != requestCounter)
+                        return;
                     loading = false;
                     showLoading(false);
                     resetLoadMoreLabel();
                 });
             }
         }, () -> Platform.runLater(() -> {
-            if (currentRequest != requestCounter) return;
+            if (currentRequest != requestCounter)
+                return;
             loading = false;
             showLoading(false);
             disableLoadMore();
@@ -123,13 +182,16 @@ public class ExperienceListController {
     }
 
     private void loadActivities() {
-        String url = String.format("%s/api/activities/top/cards?page=%d&size=%d", ApiService.BASE_URL, currentPage, PAGE_SIZE);
-        Type type = new TypeToken<List<ActivityHomeDTO>>() {}.getType();
+        String url = String.format("%s/api/activities/top/cards?page=%d&size=%d", ApiService.BASE_URL, currentPage,
+                PAGE_SIZE);
+        Type type = new TypeToken<List<ActivityHomeDTO>>() {
+        }.getType();
         loadPage(url, type, this::appendActivityCards);
     }
 
     private void loadSearchResults() {
-        StringBuilder url = new StringBuilder(ApiService.BASE_URL + "/api/activities/search?page=" + currentPage + "&size=" + PAGE_SIZE);
+        StringBuilder url = new StringBuilder(
+                ApiService.BASE_URL + "/api/activities/search?page=" + currentPage + "&size=" + PAGE_SIZE);
         if (!currentQuery.isEmpty())
             url.append("&query=").append(URLEncoder.encode(currentQuery, StandardCharsets.UTF_8));
         if (currentCategoryFilter != null && !currentCategoryFilter.isEmpty())
@@ -137,23 +199,27 @@ public class ExperienceListController {
         if (currentDateFilter != null)
             url.append("&date=").append(currentDateFilter);
 
-        Type type = new TypeToken<List<ActivityHomeDTO>>() {}.getType();
+        Type type = new TypeToken<List<ActivityHomeDTO>>() {
+        }.getType();
         loadPage(url.toString(), type, this::appendActivityCards);
     }
 
     private void loadTripResults() {
-        StringBuilder url = new StringBuilder(ApiService.BASE_URL + "/api/trips/search?page=" + currentPage + "&size=" + PAGE_SIZE);
+        StringBuilder url = new StringBuilder(
+                ApiService.BASE_URL + "/api/trips/search?page=" + currentPage + "&size=" + PAGE_SIZE);
         if (!currentQuery.isEmpty())
             url.append("&query=").append(URLEncoder.encode(currentQuery, StandardCharsets.UTF_8));
         if (currentDateFilter != null)
             url.append("&date=").append(currentDateFilter);
 
-        Type type = new TypeToken<List<TripHomeDTO>>() {}.getType();
+        Type type = new TypeToken<List<TripHomeDTO>>() {
+        }.getType();
         loadPage(url.toString(), type, this::appendTripCards);
     }
 
     private void loadAllResults() {
-        if (loading) return;
+        if (loading)
+            return;
         loading = true;
         showLoading(true);
 
@@ -164,9 +230,11 @@ public class ExperienceListController {
         AtomicReference<List<ActivityHomeDTO>> activities = new AtomicReference<>(List.of());
         AtomicReference<List<TripHomeDTO>> trips = new AtomicReference<>(List.of());
         Runnable complete = () -> {
-            if (remaining.decrementAndGet() != 0) return;
+            if (remaining.decrementAndGet() != 0)
+                return;
             Platform.runLater(() -> {
-                if (request != requestCounter) return;
+                if (request != requestCounter)
+                    return;
                 loading = false;
                 showLoading(false);
                 if (failed.get()) {
@@ -186,13 +254,15 @@ public class ExperienceListController {
             });
         };
 
-        Type activityType = new TypeToken<List<ActivityHomeDTO>>() {}.getType();
-        Type tripType = new TypeToken<List<TripHomeDTO>>() {}.getType();
+        Type activityType = new TypeToken<List<ActivityHomeDTO>>() {
+        }.getType();
+        Type tripType = new TypeToken<List<TripHomeDTO>>() {
+        }.getType();
         ApiService.get(
                 ApiService.BASE_URL + "/api/activities/search?page=" + page + "&size=" + PAGE_SIZE,
                 response -> {
                     try {
-                        List<ActivityHomeDTO> results = GSON.fromJson(response.body(), activityType);
+                        List<ActivityHomeDTO> results = ApiService.fromJson(response.body(), activityType);
                         activities.set(results != null ? results : List.of());
                     } catch (JsonParseException exception) {
                         failed.set(true);
@@ -204,13 +274,12 @@ public class ExperienceListController {
                     failed.set(true);
                     complete.run();
                 },
-                null
-        );
+                null);
         ApiService.get(
                 ApiService.BASE_URL + "/api/trips/search?page=" + page + "&size=" + PAGE_SIZE,
                 response -> {
                     try {
-                        List<TripHomeDTO> results = GSON.fromJson(response.body(), tripType);
+                        List<TripHomeDTO> results = ApiService.fromJson(response.body(), tripType);
                         trips.set(results != null ? results : List.of());
                     } catch (JsonParseException exception) {
                         failed.set(true);
@@ -222,29 +291,33 @@ public class ExperienceListController {
                     failed.set(true);
                     complete.run();
                 },
-                null
-        );
+                null);
     }
 
     @FXML
     public void handleLoadMore(MouseEvent mouseEvent) {
-        if (loading) return;
-        if (loadMoreLabel != null && loadMoreLabel.isDisabled()) return;
+        if (loading)
+            return;
+        if (loadMoreLabel != null && loadMoreLabel.isDisabled())
+            return;
         loadNextPage();
     }
 
     private void loadNextPage() {
         switch (mode) {
-            case TOP      -> loadActivities();
+            case TOP -> loadActivities();
             case ACTIVITY -> loadSearchResults();
-            case TRIP     -> loadTripResults();
-            case ALL       -> loadAllResults();
+            case TRIP -> loadTripResults();
+            case ALL -> loadAllResults();
         }
     }
 
     private void disableLoadMore() {
-        if (loadMoreLabel == null) return;
-        loadMoreLabel.setText("Nessun'altra attività da mostrare");
+        if (loadMoreLabel == null)
+            return;
+        loadMoreLabel.setVisible(false);
+        loadMoreLabel.setManaged(false);
+        loadMoreLabel.setText("Nessun'altra esperienza da mostrare");
         loadMoreLabel.setDisable(true);
         if (!loadMoreLabel.getStyleClass().contains("label-loading")) {
             loadMoreLabel.getStyleClass().add("label-loading");
@@ -252,8 +325,11 @@ public class ExperienceListController {
     }
 
     private void resetLoadMoreLabel() {
-        if (loadMoreLabel == null) return;
-        loadMoreLabel.setText("Carica altro");
+        if (loadMoreLabel == null)
+            return;
+        loadMoreLabel.setVisible(true);
+        loadMoreLabel.setManaged(true);
+        loadMoreLabel.setText("Scopri altre esperienze");
         loadMoreLabel.setDisable(false);
         loadMoreLabel.getStyleClass().remove("label-loading");
     }
@@ -267,7 +343,8 @@ public class ExperienceListController {
     }
 
     private <T> void appendCardsGeneric(List<T> items, Consumer2<ExperienceCardController, T> binder) {
-        if (cardsContainer == null || items == null || items.isEmpty()) return;
+        if (cardsContainer == null || items == null || items.isEmpty())
+            return;
 
         final int CARDS_PER_ROW = 3;
         HBox currentRow = null;
@@ -287,7 +364,8 @@ public class ExperienceListController {
                 cardsContainer.getChildren().add(currentRow);
             }
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/it/unical/ea_project_javafx/fxml/home/experience-card.fxml"));
+                FXMLLoader loader = new FXMLLoader(
+                        getClass().getResource("/it/unical/ea_project_javafx/fxml/home/experience-card.fxml"));
                 VBox cardNode = loader.load();
                 ExperienceCardController controller = loader.getController();
                 binder.accept(controller, item);
@@ -305,6 +383,7 @@ public class ExperienceListController {
 
     public void search(SearchMode mode, String query, String category, LocalDate date) {
         this.mode = mode;
+        browsingModeChanged.accept(false);
         currentQuery = query == null ? "" : query.trim();
         currentCategoryFilter = category;
         currentDateFilter = date;
@@ -314,16 +393,25 @@ public class ExperienceListController {
         if (mode == SearchMode.TRIP) {
             label1.setText("Ricerca tra i viaggi");
         } else if (category != null) {
-            label1.setText("Ricerca su categoria " + category);
+            label1.setText(switch (category) {
+                case "EXCURSION" -> "Escursioni e natura";
+                case "VISIT" -> "Cultura e visite";
+                case "MEAL" -> "Sapori locali";
+                case "HOTEL" -> "Soggiorni";
+                case "TRANSPORT" -> "Trasporti";
+                default -> "Altre esperienze";
+            });
         } else {
             label1.setText("Ricerca su tutte le attività");
         }
         label2.setText(currentQuery);
 
-        if (cardsContainer != null) cardsContainer.getChildren().clear();
+        if (cardsContainer != null)
+            cardsContainer.getChildren().clear();
         loading = false;
         resetLoadMoreLabel();
-        if (resetButtonExists()) showResetButton(true);
+        if (resetButtonExists())
+            showResetButton(true);
         loadNextPage();
     }
 
@@ -333,8 +421,21 @@ public class ExperienceListController {
     }
 
     public void resetSearch() {
-        label1.setText(organizerHome ? "Tutti i viaggi e le attività" : "Esperienze più apprezzate dai viaggiatori");
-        label2.setText(organizerHome ? "Esplora le offerte pubblicate" : "Valutate da utenti reali che hanno partecipato alle attività");
+        browsingModeChanged.accept(true);
+        if (editorialHome) {
+            requestCounter++;
+            loading = false;
+            cardsContainer.getChildren().clear();
+            showLoading(false);
+            disableLoadMore();
+            showResetButton(false);
+            if (searchBarController != null)
+                searchBarController.reset();
+            return;
+        }
+        label1.setText(organizerHome ? "Tutti i viaggi e le attività" : "Attività con le valutazioni più alte");
+        label2.setText(organizerHome ? "Esplora le offerte pubblicate"
+                : "Valutate da utenti reali che hanno partecipato alle attività");
         currentQuery = "";
         currentCategoryFilter = null;
         currentDateFilter = null;
@@ -357,7 +458,8 @@ public class ExperienceListController {
     }
 
     private void showResetButton(boolean show) {
-        if (resetButton == null) return;
+        if (resetButton == null)
+            return;
         resetButton.setVisible(show);
         resetButton.setManaged(show);
     }

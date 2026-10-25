@@ -44,6 +44,11 @@ public class ChatController {
         return service.open(user.id(), request.organizerId());
     }
 
+    @GetMapping("/conversations/{id}")
+    public ChatService.ConversationView conversation(@PathVariable Long id, @AuthenticationPrincipal AuthUser user) {
+        return service.conversation(id, user.id());
+    }
+
     @GetMapping("/conversations/{id}/messages")
     public List<ChatService.MessageView> history(@PathVariable Long id, @AuthenticationPrincipal AuthUser user,
             @RequestParam(required = false) Long before) {

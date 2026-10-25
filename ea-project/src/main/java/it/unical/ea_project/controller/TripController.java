@@ -35,8 +35,10 @@ public class TripController {
     }
 
     @GetMapping("/organizer/{creatorId}")
-    public ResponseEntity<List<TripDTO>> getTripsByOrganizer(@PathVariable Long creatorId, @AuthenticationPrincipal AuthUser user) {
-        if (user == null || !user.id().equals(creatorId)) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+    public ResponseEntity<List<TripDTO>> getTripsByOrganizer(@PathVariable Long creatorId,
+            @AuthenticationPrincipal AuthUser user) {
+        if (user == null || !user.id().equals(creatorId))
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         return userRepository.findById(creatorId)
                 .map(creator -> ResponseEntity.ok(tripService.getTripDtosByUser(creator)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -48,14 +50,16 @@ public class TripController {
     }
 
     @GetMapping("/suggest")
-    public ResponseEntity<List<TripSuggestionDTO>> suggestTrips(@RequestParam String query, @RequestParam(defaultValue = "6") int limit) {
+    public ResponseEntity<List<TripSuggestionDTO>> suggestTrips(@RequestParam String query,
+            @RequestParam(defaultValue = "6") int limit) {
         return ResponseEntity.ok(tripService.getSuggestions(query, limit));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<TripDTO> getTripById(@PathVariable Long id, @AuthenticationPrincipal AuthUser user) {
         return tripService.getTripDtoById(id)
-                .filter(dto -> !"DRAFT".equals(dto.getStatus()) || user != null && java.util.Objects.equals(dto.getCreatedByUserId(), user.id()))
+                .filter(dto -> !"DRAFT".equals(dto.getStatus())
+                        || user != null && java.util.Objects.equals(dto.getCreatedByUserId(), user.id()))
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -86,6 +90,12 @@ public class TripController {
         return ResponseEntity.ok(tripService.searchTripHomeDtos(query, date, page, size));
     }
 
+    @GetMapping("/top/cards")
+    public List<TripHomeDTO> topCards(@RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "3") int size) {
+        return tripService.topHomeCards(page, size);
+    }
+
     @GetMapping("/top")
     public ResponseEntity<List<TripDTO>> getTopTrips(
             @RequestParam(defaultValue = "0") int page,
@@ -95,7 +105,7 @@ public class TripController {
 
     @PostMapping
     public ResponseEntity<TripDTO> createTrip(@RequestBody Trip trip,
-                                              @AuthenticationPrincipal AuthUser user) {
+            @AuthenticationPrincipal AuthUser user) {
         trip.setTripId(null);
         trip.setCoverPhotoUrl(null);
         return ResponseEntity.ok(tripService.createTripDto(trip, user.id()));
@@ -103,20 +113,24 @@ public class TripController {
 
     @PutMapping("/{id}")
     public ResponseEntity<TripDTO> updateTrip(@PathVariable Long id,
-                                              @RequestBody Trip details,
-                                              @AuthenticationPrincipal AuthUser user) {
+            @RequestBody Trip details,
+            @AuthenticationPrincipal AuthUser user) {
         var existing = tripService.getTripById(id);
-        if (existing.isEmpty()) return ResponseEntity.notFound().build();
-        if (!isOwner(existing.get(), user)) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        if (existing.isEmpty())
+            return ResponseEntity.notFound().build();
+        if (!isOwner(existing.get(), user))
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         return ResponseEntity.ok(tripService.updateTripDto(id, details));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTrip(@PathVariable Long id,
-                                           @AuthenticationPrincipal AuthUser user) {
+            @AuthenticationPrincipal AuthUser user) {
         var existing = tripService.getTripById(id);
-        if (existing.isEmpty()) return ResponseEntity.notFound().build();
-        if (!isOwner(existing.get(), user)) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        if (existing.isEmpty())
+            return ResponseEntity.notFound().build();
+        if (!isOwner(existing.get(), user))
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         tripService.deleteTrip(id);
         return ResponseEntity.noContent().build();
     }
@@ -137,7 +151,6 @@ public class TripController {
                 .map(StageDTO::toDto)
                 .collect(Collectors.toList());
     }
-
 
     // DEBUG
     private TripDTO toDto(Trip trip) {

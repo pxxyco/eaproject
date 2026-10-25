@@ -1,5 +1,5 @@
 .profile-scroll,
-.profile-scroll > .viewport {
+.profile-scroll>.viewport {
     -fx-background-color: transparent;
 }
 
@@ -75,10 +75,14 @@
 .custom-combo:focused,
 .custom-combo:showing,
 .custom-datepicker:focused,
+.custom-datepicker:showing {}
+
+.custom-combo:showing,
 .custom-datepicker:showing {
-    -fx-border-color: #d6d3d1;
     -fx-background-color: rgba(255, 255, 255, 0.12);
+    -fx-border-color: #d6d3d1;
 }
+
 
 /* ComboBox e DatePicker: il riquadro è sul controllo, il contenuto interno resta trasparente */
 .custom-combo,
@@ -114,10 +118,8 @@
     -fx-cursor: hand;
 }
 
-.btn-secondary:hover {
-    -fx-background-color: rgba(255, 255, 255, 0.28);
-    -fx-border-color: #ffffff;
-}
+.btn-secondary:hover {}
+
 /* Avatar del profilo: iniziali visibili finché non esiste una foto valida. */
 .profile-avatar {
     -fx-background-color: rgba(231, 229, 228, 0.14);

@@ -35,7 +35,7 @@ public class WallpaperService {
 
             URL apiUrl = URI.create(BING_API_URL).toURL();
             try (InputStream is = apiUrl.openStream();
-                 InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
+                    InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
 
                 JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
                 JsonArray imagesArray = jsonObject.getAsJsonArray("images");
@@ -82,8 +82,9 @@ public class WallpaperService {
     }
 
     /**
-    * Restituisce il percorso dell'immagine di oggi se è già presente nella cache locale.
-    */
+     * Restituisce il percorso dell'immagine di oggi se è già presente nella cache
+     * locale.
+     */
     public static Optional<Path> getTodayCachedWallpaper() {
 
         String todayPrefix = CACHE_FILE_PREFIX + LocalDate.now().toString() + "_";

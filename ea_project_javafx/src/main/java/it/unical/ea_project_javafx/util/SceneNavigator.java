@@ -71,6 +71,8 @@ public class SceneNavigator {
             }
 
             scene.setUserData(fxmlPath);
+            SmoothScrolling.install(scene);
+            UiEffects.install(scene);
 
             if (mainStage.getScene() != null) {
                 Object previous = mainStage.getScene().getProperties().get("pageController");

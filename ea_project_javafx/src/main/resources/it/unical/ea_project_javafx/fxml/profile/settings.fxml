@@ -1,133 +1,111 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<?import java.net.URL?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.PasswordField?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.TextArea?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
-
-<StackPane xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="it.unical.ea_project_javafx.controller.profile.SettingsController">
+<?import java.net.URL?><?import javafx.scene.control.*?><?import javafx.scene.layout.*?><?import javafx.scene.image.*?><?import javafx.geometry.Insets?><?import javafx.scene.shape.Circle?>
+<StackPane xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="it.unical.ea_project_javafx.controller.profile.SettingsController"
+    styleClass="account-page">
     <stylesheets>
-        <URL value="@../../css/common/style.css" />
-        <URL value="@../../css/home/home.css" />
         <URL value="@../../css/profile/profile.css" />
-        <URL value="@../../css/profile/settings.css" />
+        <URL value="@../../css/common/style.css" />
     </stylesheets>
-
-    <ImageView fx:id="bgImageView" pickOnBounds="true" preserveRatio="false" />
-    <Region styleClass="profile-overlay" />
-
+    <ImageView fx:id="bgImageView" mouseTransparent="true" opacity="0.12" />
     <BorderPane>
         <top>
             <StackPane fx:id="navbarContainer" />
         </top>
         <center>
             <ScrollPane fitToWidth="true" styleClass="main-scroll">
-                <content>
-                    <VBox alignment="TOP_CENTER" spacing="24.0">
-                        <padding>
-                            <Insets bottom="40.0" left="32.0" right="32.0" top="28.0" />
-                        </padding>
-
-                        <VBox maxWidth="800.0" spacing="20.0" styleClass="glass-card">
-                            <padding>
-                                <Insets bottom="28.0" left="28.0" right="28.0" top="28.0" />
-                            </padding>
-
-                            <VBox spacing="4.0">
-                                <Label styleClass="dash-title" text="Impostazioni &amp; Sicurezza" />
-                                <Label styleClass="dash-subtitle" text="Gestisci le credenziali di accesso e le preferenze del tuo account." />
+                <VBox alignment="TOP_CENTER" styleClass="account-layout">
+                    <VBox maxWidth="1080" spacing="24">
+                        <Label text="CONTROLLO E TRANQUILLITÀ" styleClass="account-kicker"
+                            wrapText="true" />
+                        <Label text="Impostazioni e sicurezza" styleClass="account-title"
+                            wrapText="true" />
+                        <Label text="Credenziali, preferenze e accessi, raccolti in un unico posto."
+                            styleClass="account-subtitle" wrapText="true" />
+                        <Label fx:id="statusMessageLabel" visible="false" managed="false"
+                            wrapText="true" />
+                        <HBox spacing="24" alignment="TOP_LEFT">
+                            <VBox spacing="18" prefWidth="510" HBox.hgrow="ALWAYS"
+                                styleClass="account-panel">
+                                <Label text="Proteggi il tuo accesso" styleClass="section-header"
+                                    wrapText="true" />
+                                <Label text="Il cambio password chiude tutte le sessioni attive."
+                                    styleClass="section-subtitle" wrapText="true" />
+                                <VBox spacing="7">
+                                    <Label text="Password attuale" styleClass="form-label"
+                                        wrapText="true" />
+                                    <PasswordField fx:id="currentPasswordField"
+                                        promptText="La tua password" styleClass="custom-input" />
+                                </VBox>
+                                <VBox spacing="7">
+                                    <Label text="Nuova password" styleClass="form-label"
+                                        wrapText="true" />
+                                    <PasswordField fx:id="newPasswordField"
+                                        promptText="Almeno 8 caratteri, lettera, numero e simbolo"
+                                        styleClass="custom-input" />
+                                </VBox>
+                                <Label fx:id="passwordStrengthLabel" styleClass="section-subtitle" />
+                                <VBox spacing="7">
+                                    <Label text="Ripeti la nuova password" styleClass="form-label"
+                                        wrapText="true" />
+                                    <PasswordField fx:id="confirmPasswordField"
+                                        promptText="Conferma password" styleClass="custom-input" />
+                                </VBox>
+                                <Button fx:id="passwordButton" text="Aggiorna password"
+                                    onAction="#handleChangePassword" styleClass="btn-primary" />
+                                <Separator />
+                                <Label text="Sessioni attive" styleClass="section-header"
+                                    wrapText="true" />
+                                <Label
+                                    text="Se hai lasciato l’account aperto su un altro dispositivo, puoi chiudere tutti gli accessi."
+                                    styleClass="section-subtitle" wrapText="true" />
+                                <Button text="Esci da tutti i dispositivi"
+                                    onAction="#handleRevokeSessions" styleClass="btn-secondary" />
                             </VBox>
-
-                            <Label fx:id="statusMessageLabel" managed="false" visible="false" wrapText="true" />
-
-                            <Separator styleClass="nav-divider" />
-
-                            <VBox spacing="14.0">
-                                <Label styleClass="section-header" text="Sicurezza Account &amp; Cambio Password" />
-
-                                <VBox spacing="10.0" maxWidth="450.0">
-                                    <VBox spacing="4.0">
-                                        <Label styleClass="form-label" text="Password Attuale *" />
-                                        <PasswordField fx:id="currentPasswordField" promptText="Inserisci la password attuale" styleClass="custom-input" />
+                            <VBox spacing="24" prefWidth="510" HBox.hgrow="ALWAYS">
+                                <VBox spacing="16" styleClass="account-panel">
+                                    <Label text="Scegli cosa ricevere" styleClass="section-header"
+                                        wrapText="true" />
+                                    <Label
+                                        text="Queste preferenze regolano gli avvisi nel vassoio di Itinera."
+                                        styleClass="section-subtitle" wrapText="true" />
+                                    <CheckBox fx:id="emailBookingNotificationCheck"
+                                        text="Conferme e avvisi sulle prenotazioni" wrapText="true" />
+                                    <CheckBox fx:id="emailMarketingCheck"
+                                        text="Avvisi per nuovi messaggi" wrapText="true" />
+                                    <VBox fx:id="travelerSettingsSection" spacing="12">
+                                        <CheckBox fx:id="publicProfileCheck"
+                                            text="Personalizza i consigli usando le mie esperienze"
+                                            wrapText="true" />
                                     </VBox>
-
-                                    <VBox spacing="4.0">
-                                        <Label styleClass="form-label" text="Nuova Password *" />
-                                        <PasswordField fx:id="newPasswordField" promptText="8+ caratteri, lettera, numero e simbolo" styleClass="custom-input" />
+                                    <Button fx:id="preferencesButton" text="Salva preferenze"
+                                        onAction="#handleSavePreferences" styleClass="btn-secondary" />
+                                </VBox>
+                                <VBox fx:id="organizerSettingsSection" spacing="16"
+                                    styleClass="account-panel">
+                                    <Label text="Il tuo spazio organizzatore"
+                                        styleClass="section-header" wrapText="true" />
+                                    <VBox spacing="7">
+                                        <Label text="Nome organizzazione" styleClass="form-label"
+                                            wrapText="true" />
+                                        <TextField fx:id="organizerBrandNameField"
+                                            promptText="Il tuo brand" styleClass="custom-input" />
                                     </VBox>
-
-                                    <VBox spacing="4.0">
-                                        <Label styleClass="form-label" text="Conferma Nuova Password *" />
-                                        <PasswordField fx:id="confirmPasswordField" promptText="Ripeti la nuova password" styleClass="custom-input" />
+                                    <VBox spacing="7">
+                                        <Label text="Presentazione" styleClass="form-label"
+                                            wrapText="true" />
+                                        <TextArea fx:id="organizerBioArea" prefRowCount="4"
+                                            promptText="Racconta la tua attività"
+                                            styleClass="custom-input" />
                                     </VBox>
-
-                                    <HBox alignment="CENTER_LEFT">
-                                        <padding>
-                                            <Insets top="6.0" />
-                                        </padding>
-                                        <Button text="Aggiorna Password" onAction="#handleChangePassword" styleClass="btn-primary" />
-                                    </HBox>
+                                    <Button text="Salva presentazione"
+                                        onAction="#handleSaveOrganizerInfo"
+                                        styleClass="btn-secondary" />
                                 </VBox>
                             </VBox>
-
-                            <Separator styleClass="nav-divider" />
-
-                            <VBox spacing="12.0">
-                                <Label styleClass="section-header" text="Notifiche &amp; Avvisi" />
-
-                                <CheckBox fx:id="emailBookingNotificationCheck" text="Ricevi email di conferma e promemoria per le prenotazioni" styleClass="checkbox" selected="true" />
-                                <CheckBox fx:id="emailMarketingCheck" text="Ricevi aggiornamenti e offerte speciali su nuovi viaggi" styleClass="checkbox" />
-                            </VBox>
-
-                            <VBox fx:id="organizerSettingsSection" managed="false" visible="false" spacing="14.0">
-                                <Separator styleClass="nav-divider" />
-                                <Label styleClass="section-header" text="Informazioni Aziendali / Organizzatore" />
-
-                                <VBox spacing="10.0" maxWidth="600.0">
-                                    <VBox spacing="4.0">
-                                        <Label styleClass="form-label" text="Nome Brand / Organizzazione" />
-                                        <TextField fx:id="organizerBrandNameField" promptText="Es. Calabria Explorer" styleClass="custom-input" />
-                                    </VBox>
-
-                                    <VBox spacing="4.0">
-                                        <Label styleClass="form-label" text="Descrizione Organizzatore / Bio" />
-                                        <TextArea fx:id="organizerBioArea" prefRowCount="3" promptText="Presenta la tua attività ai viaggiatori..." styleClass="custom-textarea" />
-                                    </VBox>
-
-                                    <HBox alignment="CENTER_LEFT">
-                                        <padding>
-                                            <Insets top="6.0" />
-                                        </padding>
-                                        <Button text="Salva Informazioni Organizzatore" onAction="#handleSaveOrganizerInfo" styleClass="btn-secondary" />
-                                    </HBox>
-                                </VBox>
-                            </VBox>
-
-                            <VBox fx:id="travelerSettingsSection" managed="false" visible="false" spacing="14.0">
-                                <Separator styleClass="nav-divider" />
-                                <Label styleClass="section-header" text="Preferenze Viaggiatore" />
-
-                                <VBox spacing="10.0">
-                                    <CheckBox fx:id="publicProfileCheck" text="Rendi visibile il mio nome negli elenchi partecipanti dei viaggi a cui mi iscrivo" styleClass="checkbox" selected="true" />
-                                </VBox>
-                            </VBox>
-
-                        </VBox>
+                        </HBox>
                     </VBox>
-                </content>
+                </VBox>
             </ScrollPane>
         </center>
     </BorderPane>

@@ -1,0 +1,32 @@
+/* Shared focus colors; all animation runs only while a control changes state. */
+.root {
+    -app-accent: #d0b38b;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.navbar {
+    -fx-min-height: 88;
+}
+
+.nav-item {
+    -fx-padding: 5 10 3 10;
+    -fx-border-width: 0;
+}
+
+.nav-item:active {
+    -fx-border-color: transparent;
+}
+
+.btn-nav-login {
+    -fx-min-height: 48;
+    -fx-pref-height: 48;
+    -fx-max-height: 48;
+    -fx-background-radius: 24;
+    -fx-border-radius: 24;
+}
+
+.notification-bell-container {
+    -fx-background-radius: 24;
+    -fx-border-radius: 24;
+}

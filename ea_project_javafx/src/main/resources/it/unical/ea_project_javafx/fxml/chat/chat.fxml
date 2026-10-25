@@ -1,15 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import java.net.URL?>
+<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
-<StackPane fx:id="pageRoot" xmlns:fx="http://javafx.com/fxml/1"
+<StackPane xmlns:fx="http://javafx.com/fxml/1" fx:id="pageRoot"
     fx:controller="it.unical.ea_project_javafx.controller.chat.ChatController"
     styleClass="chat-root">
     <stylesheets>
         <URL value="@../../css/common/style.css" />
         <URL value="@../../css/chat/chat.css" />
     </stylesheets>
+    <ImageView fx:id="bgImageView" preserveRatio="false" mouseTransparent="true" />
     <BorderPane>
         <top>
             <StackPane fx:id="navbarContainer" />
@@ -55,7 +57,7 @@
                         </top>
                         <center>
                             <ScrollPane fx:id="messagesScroll" fitToWidth="true" hbarPolicy="NEVER"
-                                styleClass="main-scroll chat-scroll">
+                                styleClass="main-scroll, chat-scroll">
                                 <VBox fx:id="messagesBox" spacing="12">
                                     <padding>
                                         <Insets top="18" right="10" bottom="18" left="10" />

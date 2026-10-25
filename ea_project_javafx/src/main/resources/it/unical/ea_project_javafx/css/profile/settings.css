@@ -58,7 +58,7 @@
     -fx-cursor: hand;
 }
 
-.radio-button > .radio {
+.radio-button>.radio {
     -fx-background-color: rgba(0, 0, 0, 0.25);
     -fx-border-color: rgba(255, 255, 255, 0.25);
     -fx-border-radius: 50%;
@@ -66,19 +66,17 @@
     -fx-padding: 3px;
 }
 
-.radio-button:selected > .radio {
+.radio-button:selected>.radio {
     -fx-background-color: #e7e5e4;
     -fx-border-color: #e7e5e4;
 }
 
-.radio-button:selected > .radio > .dot {
+.radio-button:selected>.radio>.dot {
     -fx-background-color: #1c1917;
     -fx-background-radius: 50%;
 }
 
-.radio-button:hover > .radio {
-    -fx-border-color: #d6d3d1;
-}
+.radio-button:hover>.radio {}
 
 /* ==========================================================================
    3. AZIONI & SALVATAGGIO
@@ -93,9 +91,7 @@
     -fx-cursor: hand;
 }
 
-.btn-save-settings:hover {
-    -fx-background-color: #fafaf9;
-}
+.btn-save-settings:hover {}
 
 .btn-danger-settings {
     -fx-background-color: rgba(239, 68, 68, 0.2);
@@ -109,10 +105,7 @@
     -fx-cursor: hand;
 }
 
-.btn-danger-settings:hover {
-    -fx-background-color: rgba(239, 68, 68, 0.35);
-    -fx-border-color: #ef4444;
-}
+.btn-danger-settings:hover {}
 
 .action-row-padding {
     -fx-padding: 6px 0 0 0;

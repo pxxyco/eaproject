@@ -36,28 +36,47 @@ import java.util.Locale;
 
 public class BookingsController {
 
-    @FXML private ImageView bgImageView;
-    @FXML private StackPane navbarContainer;
-    @FXML private Label statusMessageLabel;
+    @FXML
+    private ImageView bgImageView;
+    @FXML
+    private StackPane navbarContainer;
+    @FXML
+    private Label statusMessageLabel;
 
-    @FXML private Label totalBookingsLabel;
-    @FXML private Label activeBookingsLabel;
-    @FXML private Label historicalBookingsLabel;
-    @FXML private Label spentTotalLabel;
+    @FXML
+    private Label totalBookingsLabel;
+    @FXML
+    private Label activeBookingsLabel;
+    @FXML
+    private Label historicalBookingsLabel;
+    @FXML
+    private Label spentTotalLabel;
 
-    @FXML private TextField searchFilterField;
-    @FXML private ComboBox<String> periodFilterCombo;
-    @FXML private ComboBox<String> statusFilterCombo;
+    @FXML
+    private TextField searchFilterField;
+    @FXML
+    private ComboBox<String> periodFilterCombo;
+    @FXML
+    private ComboBox<String> statusFilterCombo;
 
-    @FXML private TableView<BookingDTO> bookingsTableView;
-    @FXML private TableColumn<BookingDTO, String> itemTitleColumn;
-    @FXML private TableColumn<BookingDTO, String> dateColumn;
-    @FXML private TableColumn<BookingDTO, String> bookedAtColumn;
-    @FXML private TableColumn<BookingDTO, String> locationColumn;
-    @FXML private TableColumn<BookingDTO, String> seatsColumn;
-    @FXML private TableColumn<BookingDTO, String> priceColumn;
-    @FXML private TableColumn<BookingDTO, String> statusColumn;
-    @FXML private TableColumn<BookingDTO, Void> actionsColumn;
+    @FXML
+    private TableView<BookingDTO> bookingsTableView;
+    @FXML
+    private TableColumn<BookingDTO, String> itemTitleColumn;
+    @FXML
+    private TableColumn<BookingDTO, String> dateColumn;
+    @FXML
+    private TableColumn<BookingDTO, String> bookedAtColumn;
+    @FXML
+    private TableColumn<BookingDTO, String> locationColumn;
+    @FXML
+    private TableColumn<BookingDTO, String> seatsColumn;
+    @FXML
+    private TableColumn<BookingDTO, String> priceColumn;
+    @FXML
+    private TableColumn<BookingDTO, String> statusColumn;
+    @FXML
+    private TableColumn<BookingDTO, Void> actionsColumn;
 
     private final ObservableList<BookingDTO> masterList = FXCollections.observableArrayList();
     private StackPane exportPopupOverlay;
@@ -65,7 +84,8 @@ public class BookingsController {
     private BookingDTO pendingExportBooking;
     private LocalDateTime evaluationTime = LocalDateTime.now();
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ITALY);
-    private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm", Locale.ITALY);
+    private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm",
+            Locale.ITALY);
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm", Locale.ITALY);
 
     @FXML
@@ -79,7 +99,8 @@ public class BookingsController {
 
     private void loadNavbar() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml"));
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml"));
             Parent navbar = loader.load();
             navbarContainer.getChildren().setAll(navbar);
         } catch (IOException e) {
@@ -112,12 +133,14 @@ public class BookingsController {
         statusColumn.setCellValueFactory(cell -> new SimpleStringProperty(displayStatus(cell.getValue())));
         statusColumn.setCellFactory(column -> new TableCell<>() {
             private final Label badge = new Label();
+
             @Override
             protected void updateItem(String status, boolean empty) {
                 super.updateItem(status, empty);
                 setText(null);
                 setGraphic(null);
-                if (empty || status == null || status.isBlank()) return;
+                if (empty || status == null || status.isBlank())
+                    return;
                 badge.setText(status);
                 badge.getStyleClass().setAll("label", "booking-status-pill", statusStyleClass(status));
                 setGraphic(badge);
@@ -125,15 +148,19 @@ public class BookingsController {
         });
 
         bookingsTableView.setPlaceholder(new Label("Non hai ancora effettuato prenotazioni."));
-        // Le prenotazioni future vengono mostrate prima dello storico; le cancellate restano in fondo.
+        // Le prenotazioni future vengono mostrate prima dello storico; le cancellate
+        // restano in fondo.
         bookingsTableView.setRowFactory(table -> new TableRow<>() {
             @Override
             protected void updateItem(BookingDTO booking, boolean empty) {
                 super.updateItem(booking, empty);
                 getStyleClass().removeAll("cancelled-booking-row", "historical-booking-row");
-                if (empty || booking == null) return;
-                if (isCancelled(booking)) getStyleClass().add("cancelled-booking-row");
-                else if (isHistorical(booking, evaluationTime)) getStyleClass().add("historical-booking-row");
+                if (empty || booking == null)
+                    return;
+                if (isCancelled(booking))
+                    getStyleClass().add("cancelled-booking-row");
+                else if (isHistorical(booking, evaluationTime))
+                    getStyleClass().add("historical-booking-row");
             }
         });
 
@@ -176,7 +203,8 @@ public class BookingsController {
 
             private BookingDTO currentRowBooking() {
                 int index = getIndex();
-                if (index < 0 || index >= getTableView().getItems().size()) return null;
+                if (index < 0 || index >= getTableView().getItems().size())
+                    return null;
                 return getTableView().getItems().get(index);
             }
         });
@@ -186,7 +214,8 @@ public class BookingsController {
         ApiService.get(ApiService.BASE_URL + "/api/bookings/mine",
                 response -> {
                     try {
-                        Type type = new TypeToken<List<BookingDTO>>() { }.getType();
+                        Type type = new TypeToken<List<BookingDTO>>() {
+                        }.getType();
                         List<BookingDTO> list = ApiService.fromJson(response.body(), type);
                         Platform.runLater(() -> {
                             evaluationTime = LocalDateTime.now();
@@ -195,12 +224,13 @@ public class BookingsController {
                             filterTable();
                         });
                     } catch (Exception exception) {
-                        Platform.runLater(() -> showError("Il server ha restituito uno storico prenotazioni non valido."));
+                        Platform.runLater(
+                                () -> showError("Il server ha restituito uno storico prenotazioni non valido."));
                     }
                 },
-                () -> Platform.runLater(() -> showError("Impossibile caricare le prenotazioni. Verifica la connessione e riprova.")),
-                null
-        );
+                () -> Platform.runLater(
+                        () -> showError("Impossibile caricare le prenotazioni. Verifica la connessione e riprova.")),
+                null);
     }
 
     private void updateKPIs() {
@@ -222,7 +252,8 @@ public class BookingsController {
     private void filterTable() {
         evaluationTime = LocalDateTime.now();
         String query = searchFilterField.getText() == null
-                ? "" : searchFilterField.getText().toLowerCase(Locale.ITALY).trim();
+                ? ""
+                : searchFilterField.getText().toLowerCase(Locale.ITALY).trim();
         String selectedStatus = statusFilterCombo.getValue();
         String selectedPeriod = periodFilterCombo.getValue();
 
@@ -242,24 +273,28 @@ public class BookingsController {
     }
 
     private boolean matchesQuery(BookingDTO booking, String query) {
-        if (query.isBlank()) return true;
+        if (query.isBlank())
+            return true;
         return contains(booking.getItemTitle(), query)
                 || contains(booking.getItemLocation(), query)
                 || contains(formatEventPeriod(booking), query)
-                || contains(booking.getBookingType(), query)
-                || contains(String.valueOf(booking.getBookingId()), query);
+                || contains(booking.getBookingType(), query);
     }
 
     private boolean matchesPeriod(BookingDTO booking, String period) {
-        if (period == null || "Tutte".equalsIgnoreCase(period)) return true;
+        if (period == null || "Tutte".equalsIgnoreCase(period))
+            return true;
         boolean historical = isHistorical(booking, evaluationTime);
-        if ("Storico".equalsIgnoreCase(period)) return historical;
-        if ("In programma".equalsIgnoreCase(period)) return !historical && !isCancelled(booking);
+        if ("Storico".equalsIgnoreCase(period))
+            return historical;
+        if ("In programma".equalsIgnoreCase(period))
+            return !historical && !isCancelled(booking);
         return true;
     }
 
     private boolean matchesStatus(BookingDTO booking, String selectedStatus) {
-        if (selectedStatus == null || "Tutti".equalsIgnoreCase(selectedStatus)) return true;
+        if (selectedStatus == null || "Tutti".equalsIgnoreCase(selectedStatus))
+            return true;
         String status = booking.getBookingStatus() == null ? "" : booking.getBookingStatus().toUpperCase(Locale.ROOT);
         return switch (selectedStatus) {
             case "In attesa" -> "PENDING".equals(status)
@@ -268,28 +303,34 @@ public class BookingsController {
                     && !isCancelled(booking) && !isHistorical(booking, evaluationTime);
             case "Completate / terminate" -> !isCancelled(booking)
                     && ("COMPLETED".equals(status)
-                    || "COMPLETED".equalsIgnoreCase(booking.getItemStatus())
-                    || isEventEnded(booking, evaluationTime));
+                            || "COMPLETED".equalsIgnoreCase(booking.getItemStatus())
+                            || isEventEnded(booking, evaluationTime));
             case "Cancellate" -> isCancelled(booking);
             default -> true;
         };
     }
 
-    /** Upcoming first (nearest date first), then the most recent historical items; cancelled last. */
+    /**
+     * Upcoming first (nearest date first), then the most recent historical items;
+     * cancelled last.
+     */
     private int compareBookings(BookingDTO left, BookingDTO right) {
         boolean leftCancelled = isCancelled(left);
         boolean rightCancelled = isCancelled(right);
-        if (leftCancelled != rightCancelled) return leftCancelled ? 1 : -1;
+        if (leftCancelled != rightCancelled)
+            return leftCancelled ? 1 : -1;
 
         boolean leftHistory = isHistorical(left, evaluationTime);
         boolean rightHistory = isHistorical(right, evaluationTime);
-        if (leftHistory != rightHistory) return leftHistory ? 1 : -1;
+        if (leftHistory != rightHistory)
+            return leftHistory ? 1 : -1;
 
         LocalDateTime leftDate = leftHistory ? eventEndDateTime(left) : eventStartDateTime(left);
         LocalDateTime rightDate = rightHistory ? eventEndDateTime(right) : eventStartDateTime(right);
         if (leftDate != null && rightDate != null) {
             int dateComparison = leftHistory ? rightDate.compareTo(leftDate) : leftDate.compareTo(rightDate);
-            if (dateComparison != 0) return dateComparison;
+            if (dateComparison != 0)
+                return dateComparison;
         } else if (leftDate != null) {
             return -1;
         } else if (rightDate != null) {
@@ -298,16 +339,20 @@ public class BookingsController {
 
         LocalDateTime leftCreated = left.getCreatedAt();
         LocalDateTime rightCreated = right.getCreatedAt();
-        if (leftCreated != null && rightCreated != null) return rightCreated.compareTo(leftCreated);
-        if (leftCreated != null) return -1;
-        if (rightCreated != null) return 1;
+        if (leftCreated != null && rightCreated != null)
+            return rightCreated.compareTo(leftCreated);
+        if (leftCreated != null)
+            return -1;
+        if (rightCreated != null)
+            return 1;
         Long leftId = left.getBookingId();
         Long rightId = right.getBookingId();
         return Long.compare(rightId == null ? 0 : rightId, leftId == null ? 0 : leftId);
     }
 
     private boolean isHistorical(BookingDTO booking, LocalDateTime now) {
-        if (booking == null) return false;
+        if (booking == null)
+            return false;
         return isCancelled(booking)
                 || "COMPLETED".equalsIgnoreCase(booking.getBookingStatus())
                 || "COMPLETED".equalsIgnoreCase(booking.getItemStatus())
@@ -330,10 +375,12 @@ public class BookingsController {
     }
 
     private LocalDateTime eventStartDateTime(BookingDTO booking) {
-        if (booking == null || booking.getItemDate() == null || booking.getItemDate().isBlank()) return null;
+        if (booking == null || booking.getItemDate() == null || booking.getItemDate().isBlank())
+            return null;
         String value = booking.getItemDate().trim();
         try {
-            if (isTrip(booking) || !value.contains("T")) return LocalDate.parse(value).atStartOfDay();
+            if (isTrip(booking) || !value.contains("T"))
+                return LocalDate.parse(value).atStartOfDay();
             return LocalDateTime.parse(value);
         } catch (RuntimeException ignored) {
             return null;
@@ -341,21 +388,26 @@ public class BookingsController {
     }
 
     private LocalDateTime eventEndDateTime(BookingDTO booking) {
-        if (booking == null) return null;
+        if (booking == null)
+            return null;
         String value = booking.getItemEndDate();
         if (value == null || value.isBlank()) {
             // Graceful fallback for older backend responses without itemEndDate.
             LocalDateTime start = eventStartDateTime(booking);
-            if (start == null) return null;
+            if (start == null)
+                return null;
             return isTrip(booking) ? start.toLocalDate().atTime(LocalTime.MAX) : start.plusHours(1);
         }
         try {
-            if (isTrip(booking) || !value.contains("T")) return LocalDate.parse(value).atTime(LocalTime.MAX);
+            if (isTrip(booking) || !value.contains("T"))
+                return LocalDate.parse(value).atTime(LocalTime.MAX);
             return LocalDateTime.parse(value);
         } catch (RuntimeException ignored) {
             LocalDateTime start = eventStartDateTime(booking);
-            return start == null ? null : (isTrip(booking)
-                    ? start.toLocalDate().atTime(LocalTime.MAX) : start.plusHours(1));
+            return start == null ? null
+                    : (isTrip(booking)
+                            ? start.toLocalDate().atTime(LocalTime.MAX)
+                            : start.plusHours(1));
         }
     }
 
@@ -366,14 +418,17 @@ public class BookingsController {
     private String formatEventPeriod(BookingDTO booking) {
         LocalDateTime start = eventStartDateTime(booking);
         LocalDateTime end = eventEndDateTime(booking);
-        if (start == null) return "Data non disponibile";
+        if (start == null)
+            return "Data non disponibile";
         if (isTrip(booking)) {
             String formattedStart = start.toLocalDate().format(DATE_FORMAT);
-            if (end == null || end.toLocalDate().equals(start.toLocalDate())) return formattedStart;
+            if (end == null || end.toLocalDate().equals(start.toLocalDate()))
+                return formattedStart;
             return formattedStart + " – " + end.toLocalDate().format(DATE_FORMAT);
         }
         String formattedStart = start.format(DATE_TIME_FORMAT);
-        if (end == null || end.equals(start)) return formattedStart;
+        if (end == null || end.equals(start))
+            return formattedStart;
         if (end.toLocalDate().equals(start.toLocalDate())) {
             return formattedStart + " – " + end.format(TIME_FORMAT);
         }
@@ -382,18 +437,26 @@ public class BookingsController {
 
     private String formatBookedAt(BookingDTO booking) {
         return booking == null || booking.getCreatedAt() == null
-                ? "—" : booking.getCreatedAt().format(DATE_TIME_FORMAT);
+                ? "—"
+                : booking.getCreatedAt().format(DATE_TIME_FORMAT);
     }
 
     private String displayStatus(BookingDTO booking) {
-        if (booking == null) return "—";
+        if (booking == null)
+            return "—";
         String status = booking.getBookingStatus() == null ? "" : booking.getBookingStatus().toUpperCase(Locale.ROOT);
-        if ("CANCELLED".equals(status)) return "Prenotazione cancellata";
-        if ("CANCELLED".equalsIgnoreCase(booking.getItemStatus())) return "Esperienza annullata";
-        if ("COMPLETED".equals(status) || "COMPLETED".equalsIgnoreCase(booking.getItemStatus())) return "Completata";
-        if (isEventEnded(booking, evaluationTime)) return "Terminata";
-        if ("CONFIRMED".equals(status)) return "Confermata";
-        if ("PENDING".equals(status)) return "In attesa";
+        if ("CANCELLED".equals(status))
+            return "Prenotazione cancellata";
+        if ("CANCELLED".equalsIgnoreCase(booking.getItemStatus()))
+            return "Esperienza annullata";
+        if ("COMPLETED".equals(status) || "COMPLETED".equalsIgnoreCase(booking.getItemStatus()))
+            return "Completata";
+        if (isEventEnded(booking, evaluationTime))
+            return "Terminata";
+        if ("CONFIRMED".equals(status))
+            return "Confermata";
+        if ("PENDING".equals(status))
+            return "In attesa";
         return status.isBlank() ? "Stato non disponibile" : status;
     }
 
@@ -431,7 +494,8 @@ public class BookingsController {
         pendingExportBooking = dto;
         String suggested = dto.getItemTitle() == null ? "prenotazione" : dto.getItemTitle();
         suggested = suggested.replaceAll("[\\\\/:*?\"<>|]", "_").trim();
-        if (suggested.isBlank()) suggested = "prenotazione";
+        if (suggested.isBlank())
+            suggested = "prenotazione";
         exportFileNameField = new TextField(suggested + ".ics");
         showExportPopup(dto);
     }
@@ -457,7 +521,8 @@ public class BookingsController {
         HBox titleBar = new HBox(12, title, new Region(), close);
         titleBar.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
         HBox.setHgrow(titleBar.getChildren().get(1), javafx.scene.layout.Priority.ALWAYS);
-        Label subtitle = new Label("Verrà creato un file .ics compatibile con Google Calendar, Apple Calendar e Outlook.");
+        Label subtitle = new Label(
+                "Verrà creato un file .ics compatibile con Google Calendar, Apple Calendar e Outlook.");
         subtitle.getStyleClass().add("export-popup-description");
         subtitle.setWrapText(true);
         Label eventLabel = new Label(dto.getItemTitle() == null ? "Prenotazione" : dto.getItemTitle());
@@ -466,7 +531,8 @@ public class BookingsController {
         filenameLabel.getStyleClass().add("export-popup-label");
         exportFileNameField.getStyleClass().add("custom-input");
         exportFileNameField.setPromptText("Insert a filename ...");
-        Label info = new Label("Il file conterrà solo i dati della tua prenotazione. Per esportare devi essere autenticato.");
+        Label info = new Label(
+                "Il file conterrà solo i dati della tua prenotazione. Per esportare devi essere autenticato.");
         info.getStyleClass().add("export-popup-description");
         info.setWrapText(true);
 
@@ -493,14 +559,16 @@ public class BookingsController {
 
     private void downloadAndSaveIcs() {
         BookingDTO dto = pendingExportBooking;
-        if (dto == null) return;
+        if (dto == null)
+            return;
         String filename = exportFileNameField.getText() == null ? "" : exportFileNameField.getText().trim();
         if (filename.isBlank()) {
             exportFileNameField.setPromptText("Inserisci un nome file");
             return;
         }
         filename = filename.replaceAll("[\\\\/:*?\"<>|]", "_");
-        if (!filename.toLowerCase().endsWith(".ics")) filename += ".ics";
+        if (!filename.toLowerCase().endsWith(".ics"))
+            filename += ".ics";
         final String suggestedFilename = filename;
         closeExportPopup();
 
@@ -509,8 +577,10 @@ public class BookingsController {
                     FileChooser chooser = new FileChooser();
                     chooser.setTitle("Salva esportazione calendario");
                     chooser.setInitialFileName(suggestedFilename);
-                    chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Calendario iCalendar (*.ics)", "*.ics"));
-                    Window owner = statusMessageLabel.getScene() == null ? null : statusMessageLabel.getScene().getWindow();
+                    chooser.getExtensionFilters()
+                            .add(new FileChooser.ExtensionFilter("Calendario iCalendar (*.ics)", "*.ics"));
+                    Window owner = statusMessageLabel.getScene() == null ? null
+                            : statusMessageLabel.getScene().getWindow();
                     File file = chooser.showSaveDialog(owner);
                     if (file == null) {
                         showSuccess("Esportazione annullata: nessun file salvato.");
@@ -523,9 +593,9 @@ public class BookingsController {
                         showError("Non è stato possibile salvare il file .ics.");
                     }
                 }),
-                () -> Platform.runLater(() -> showError("Esportazione non riuscita. Verifica di essere loggato e che la prenotazione sia ancora attiva.")),
-                null
-        );
+                () -> Platform.runLater(() -> showError(
+                        "Esportazione non riuscita. Verifica di essere loggato e che la prenotazione sia ancora attiva.")),
+                null);
     }
 
     private void closeExportPopup() {
@@ -544,7 +614,8 @@ public class BookingsController {
         LocalDateTime now = LocalDateTime.now();
         if (isCancelled(dto) || isHistorical(dto, now) || hasEventStarted(dto, now)
                 || "COMPLETED".equalsIgnoreCase(dto.getBookingStatus())) {
-            showError("Questa prenotazione non può più essere cancellata perché è già iniziata, terminata o annullata.");
+            showError(
+                    "Questa prenotazione non può più essere cancellata perché è già iniziata, terminata o annullata.");
             return;
         }
         StackPane popupRoot = PopupFactory.resolveRoot(statusMessageLabel);
@@ -557,14 +628,14 @@ public class BookingsController {
                 "L'operazione non può essere annullata. I posti verranno rimessi a disposizione.",
                 PopupFactory.Size.COMPACT,
                 () -> {
-            ApiService.callDetailed(ApiService.BASE_URL + "/api/bookings/" + dto.getBookingId(), null,
-                    ApiService.Method.DELETE,
-                    response -> Platform.runLater(() -> {
-                        showSuccess("Prenotazione cancellata correttamente.");
-                        loadBookings();
-                    }),
-                    message -> Platform.runLater(() -> showError(message)),
-                    null);
+                    ApiService.callDetailed(ApiService.BASE_URL + "/api/bookings/" + dto.getBookingId(), null,
+                            ApiService.Method.DELETE,
+                            response -> Platform.runLater(() -> {
+                                showSuccess("Prenotazione cancellata correttamente.");
+                                loadBookings();
+                            }),
+                            message -> Platform.runLater(() -> showError(message)),
+                            null);
                 });
     }
 

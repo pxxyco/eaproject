@@ -19,6 +19,8 @@ public class CollaborativeItineraryController {
     }
 
     @FXML
+    private javafx.scene.image.ImageView bgImageView;
+    @FXML
     private StackPane navbarContainer;
     @FXML
     private ComboBox<ListChoice> listPicker;
@@ -43,6 +45,7 @@ public class CollaborativeItineraryController {
 
     @FXML
     public void initialize() {
+        it.unical.ea_project_javafx.util.BackgroundHelper.setupBackground(bgImageView);
         try {
             navbarContainer.getChildren().setAll((Parent) FXMLLoader
                     .load(getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml")));

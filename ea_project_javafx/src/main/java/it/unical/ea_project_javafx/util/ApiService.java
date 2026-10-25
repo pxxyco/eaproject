@@ -47,7 +47,7 @@ public class ApiService {
             .connectTimeout(Duration.ofSeconds(5))
             .build();
 
-    private static final ExecutorService EXECUTOR = Executors.newCachedThreadPool(r -> {
+    private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(4, r -> {
         Thread thread = new Thread(r);
         thread.setDaemon(true);
         return thread;

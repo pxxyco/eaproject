@@ -66,11 +66,7 @@
 }
 
 .profile-table .table-cell .button:hover,
-.btn-table-action:hover {
-    -fx-background-color: #e7e5e4;
-    -fx-border-color: #e7e5e4;
-    -fx-text-fill: #1c1917;
-}
+.btn-table-action:hover {}
 
 /* Pulsante Elimina / Pericolo dentro la tabella */
 .btn-table-danger {
@@ -85,8 +81,4 @@
     -fx-cursor: hand;
 }
 
-.btn-table-danger:hover {
-    -fx-background-color: rgba(239, 68, 68, 0.65);
-    -fx-border-color: #ef4444;
-    -fx-text-fill: #ffffff;
-}
+.btn-table-danger:hover {}

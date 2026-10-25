@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import java.net.URL?><?import javafx.scene.control.*?><?import javafx.scene.layout.*?><?import javafx.geometry.Insets?>
+<?import java.net.URL?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
 <StackPane xmlns:fx="http://javafx.com/fxml/1"
     fx:controller="it.unical.ea_project_javafx.controller.traveler.CollaborativeItineraryController"
     styleClass="chat-root">
@@ -8,43 +12,63 @@
         <URL value="@../../css/chat/chat.css" />
         <URL value="@../../css/traveler/collaborative-itinerary.css" />
     </stylesheets>
+    <ImageView fx:id="bgImageView" preserveRatio="false" mouseTransparent="true" />
     <BorderPane>
         <top>
             <StackPane fx:id="navbarContainer" />
         </top>
         <center>
-            <VBox spacing="18" styleClass="itinerary-editor">
-                <padding>
-                    <Insets top="22" right="32" bottom="30" left="32" />
-                </padding>
-                <Label text="Itinerari collaborativi" styleClass="chat-title" />
-                <HBox spacing="14" alignment="CENTER_LEFT">
-                    <ComboBox fx:id="listPicker" promptText="Scegli una lista" prefWidth="360" />
-                    <Button fx:id="refreshButton" text="Aggiorna" onAction="#handleRefresh"
-                        styleClass="btn-secondary" />
-                </HBox>
-                <Label fx:id="permissionLabel" wrapText="true" styleClass="chat-meta" />
-                <Label fx:id="statusLabel" wrapText="true" styleClass="chat-status" />
-                <SplitPane VBox.vgrow="ALWAYS" dividerPositions="0.58">
-                    <items>
-                        <TableView fx:id="stops">
-                            <placeholder>
-                                <Label text="Nessuna tappa. Aggiungi la prima dal modulo."
-                                    wrapText="true" />
-                            </placeholder>
-                            <columns>
-                                <TableColumn fx:id="dayColumn" text="Giorno" prefWidth="65" />
-                                <TableColumn fx:id="positionColumn" text="Ordine" prefWidth="65" />
-                                <TableColumn fx:id="titleColumn" text="Tappa" prefWidth="220" />
-                                <TableColumn fx:id="cityColumn" text="Città" prefWidth="150" />
-                            </columns>
-                        </TableView>
-                        <ScrollPane fitToWidth="true" styleClass="main-scroll">
-                            <VBox spacing="12" styleClass="itinerary-form">
+            <ScrollPane fitToWidth="true" styleClass="main-scroll">
+                <VBox alignment="TOP_CENTER">
+                    <VBox spacing="18" maxWidth="1160" styleClass="itinerary-editor">
+                        <padding>
+                            <Insets top="22" right="32" bottom="30" left="32" />
+                        </padding>
+                        <Label text="IL VIAGGIO, INSIEME" styleClass="account-kicker" />
+                        <Label text="Dai forma al tuo itinerario" styleClass="itinerary-title" />
+                        <Label
+                            text="Organizza luoghi, orari e appunti con chi parte con te. I Preferiti raccolgono le idee; qui costruite il programma."
+                            wrapText="true" styleClass="chat-meta" />
+                        <HBox spacing="14" alignment="CENTER_LEFT">
+                            <ComboBox fx:id="listPicker" promptText="Scegli una lista"
+                                prefWidth="360" />
+                            <Button fx:id="refreshButton" text="Aggiorna" onAction="#handleRefresh"
+                                styleClass="btn-secondary" />
+                        </HBox>
+                        <Label fx:id="permissionLabel" wrapText="true" styleClass="chat-meta" />
+                        <Label fx:id="statusLabel" wrapText="true" styleClass="chat-status" />
+                        <HBox spacing="20" alignment="TOP_LEFT">
+                            <VBox spacing="14" HBox.hgrow="ALWAYS" minWidth="380"
+                                styleClass="itinerary-panel">
+                                <Label text="Il programma" styleClass="itinerary-panel-title" />
+                                <Label
+                                    text="Seleziona una tappa per vedere e modificare i dettagli."
+                                    wrapText="true" styleClass="chat-meta" />
+                                <TableView fx:id="stops" prefHeight="490" minHeight="280">
+                                    <columnResizePolicy>
+                                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                    </columnResizePolicy>
+                                    <placeholder>
+                                        <Label text="Nessuna tappa. Aggiungi la prima dal modulo."
+                                            wrapText="true" />
+                                    </placeholder>
+                                    <columns>
+                                        <TableColumn fx:id="dayColumn" text="Giorno" prefWidth="65" />
+                                        <TableColumn fx:id="positionColumn" text="Ordine"
+                                            prefWidth="65" />
+                                        <TableColumn fx:id="titleColumn" text="Tappa"
+                                            prefWidth="220" />
+                                        <TableColumn fx:id="cityColumn" text="Città" prefWidth="150" />
+                                    </columns>
+                                </TableView>
+                            </VBox>
+                            <VBox spacing="12" minWidth="340" prefWidth="380" maxWidth="400"
+                                styleClass="itinerary-form, itinerary-panel">
                                 <padding>
                                     <Insets top="16" right="20" bottom="20" left="20" />
                                 </padding>
-                                <Label text="Organizza una tappa" styleClass="chat-title" />
+                                <Label text="Organizza una tappa" styleClass="itinerary-panel-title" />
+                                <Label text="Dove andiamo?" styleClass="chat-meta" />
                                 <TextField fx:id="titleField" promptText="Titolo della tappa" />
                                 <TextField fx:id="cityField" promptText="Città o luogo" />
                                 <HBox spacing="12">
@@ -66,19 +90,19 @@
                                 <TextArea fx:id="notesField"
                                     promptText="Note per te e per i collaboratori" wrapText="true"
                                     prefRowCount="5" />
-                                <HBox spacing="10">
+                                <FlowPane hgap="8" vgap="8">
                                     <Button fx:id="saveButton" text="Salva tappa"
                                         onAction="#handleSave" styleClass="btn-primary" />
                                     <Button fx:id="newButton" text="Nuova" onAction="#handleNew"
                                         styleClass="btn-secondary" />
                                     <Button fx:id="deleteButton" text="Elimina"
                                         onAction="#handleDelete" styleClass="btn-secondary" />
-                                </HBox>
+                                </FlowPane>
                             </VBox>
-                        </ScrollPane>
-                    </items>
-                </SplitPane>
-            </VBox>
+                        </HBox>
+                    </VBox>
+                </VBox>
+            </ScrollPane>
         </center>
     </BorderPane>
 </StackPane>

@@ -18,8 +18,10 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 /**
- * Unico polling delle notifiche per tutta l'app: evita che ogni navbar avvii un proprio timer.
- * Esegue al massimo una richiesta contemporaneamente e aggiorna i listener attivi.
+ * Unico polling delle notifiche per tutta l'app: evita che ogni navbar avvii un
+ * proprio timer.
+ * Esegue al massimo una richiesta contemporaneamente e aggiorna i listener
+ * attivi.
  */
 public final class NotificationPollingService {
     private static final NotificationPollingService INSTANCE = new NotificationPollingService();
@@ -31,23 +33,39 @@ public final class NotificationPollingService {
     private final Set<Long> seenUnreadIds = new HashSet<>();
     private final List<TrayCallback> trayCallbacks = new ArrayList<>();
     private Timeline timeline;
+    private AutoCloseable chatSubscription;
+    private final javafx.animation.PauseTransition chatRefresh = new javafx.animation.PauseTransition(
+            Duration.millis(350));
     private boolean requestInFlight;
     private boolean initialPoll = true;
     private boolean hasSnapshot;
+    private JsonArray latestUnread = new JsonArray();
+    private long snapshotAt;
     private int lastUnreadCount;
     private long retryAfterEpochMillis;
     private long sessionGeneration;
     private String lastRateLimitMessage = "ERR-104 — Troppe richieste. Riprova tra 60 secondi.";
 
-    private NotificationPollingService() { }
+    private NotificationPollingService() {
+    }
 
-    public static NotificationPollingService getInstance() { return INSTANCE; }
+    public static NotificationPollingService getInstance() {
+        return INSTANCE;
+    }
 
     public Subscription subscribe(Consumer<Snapshot> listener) {
         requireFxThread();
-        if (listener == null) throw new IllegalArgumentException("Il listener delle notifiche è obbligatorio.");
+        if (listener == null)
+            throw new IllegalArgumentException("Il listener delle notifiche è obbligatorio.");
         listeners.add(listener);
-        if (hasSnapshot) listener.accept(new Snapshot(lastUnreadCount, null));
+        if (hasSnapshot)
+            listener.accept(new Snapshot(lastUnreadCount, null));
+        if (chatSubscription == null) {
+            chatRefresh.setOnFinished(e -> pollNow());
+            chatSubscription = it.unical.ea_project_javafx.service.ChatEventHub
+                    .subscribe(id -> chatRefresh.playFromStart(), status -> {
+                    });
+        }
         if (timeline == null) {
             pollNow();
             timeline = new Timeline(new KeyFrame(Duration.seconds(POLLING_SECONDS), event -> pollNow()));
@@ -64,33 +82,51 @@ public final class NotificationPollingService {
     }
 
     /**
-     * Carica l'elenco per il vassoio condividendo un eventuale polling già in corso.
-     * In questo modo il click sulla campanella non genera una seconda GET concorrente.
+     * Carica l'elenco per il vassoio condividendo un eventuale polling già in
+     * corso.
+     * In questo modo il click sulla campanella non genera una seconda GET
+     * concorrente.
      */
     public void fetchUnreadForTray(Consumer<JsonArray> onSuccess, Consumer<String> onFailure) {
         requireFxThread();
         if (!UserSession.getInstance().isLoggedIn()) {
-            if (onFailure != null) onFailure.accept("Effettua l'accesso per vedere le notifiche.");
+            if (onFailure != null)
+                onFailure.accept("Effettua l'accesso per vedere le notifiche.");
+            return;
+        }
+        if (hasSnapshot && System.currentTimeMillis() - snapshotAt < 5000) {
+            if (onSuccess != null)
+                onSuccess.accept(latestUnread.deepCopy());
             return;
         }
         if (isRateLimitBackoffActive()) {
-            if (onFailure != null) onFailure.accept(lastRateLimitMessage);
+            if (onFailure != null)
+                onFailure.accept(lastRateLimitMessage);
             return;
         }
-        if (onSuccess != null || onFailure != null) trayCallbacks.add(new TrayCallback(onSuccess, onFailure));
+        if (onSuccess != null || onFailure != null)
+            trayCallbacks.add(new TrayCallback(onSuccess, onFailure));
         pollNow();
     }
 
-    /** Va invocato al logout per non riutilizzare gli ID della sessione precedente. */
+    /**
+     * Va invocato al logout per non riutilizzare gli ID della sessione precedente.
+     */
     public void clearSessionState() {
         requireFxThread();
-        // Invalida le risposte avviate nella sessione precedente: un logout/login rapido
+        // Invalida le risposte avviate nella sessione precedente: un logout/login
+        // rapido
         // non deve mostrare notifiche appartenenti all'utente precedente.
         sessionGeneration++;
+        chatRefresh.stop();
+        it.unical.ea_project_javafx.service.ChatEventHub.reset();
+        chatSubscription = null;
         seenUnreadIds.clear();
         trayCallbacks.clear();
         initialPoll = true;
         hasSnapshot = false;
+        latestUnread = new JsonArray();
+        snapshotAt = 0;
         lastUnreadCount = 0;
         retryAfterEpochMillis = 0L;
         lastRateLimitMessage = "ERR-104 — Troppe richieste. Riprova tra 60 secondi.";
@@ -99,7 +135,8 @@ public final class NotificationPollingService {
 
     private void pollNow() {
         if (requestInFlight || !UserSession.getInstance().isLoggedIn()
-                || (listeners.isEmpty() && trayCallbacks.isEmpty()) || isRateLimitBackoffActive()) return;
+                || (listeners.isEmpty() && trayCallbacks.isEmpty()) || isRateLimitBackoffActive())
+            return;
         requestInFlight = true;
         long requestGeneration = sessionGeneration;
         ApiService.callDetailed(UNREAD_URL, null, ApiService.Method.GET, response -> {
@@ -108,42 +145,50 @@ public final class NotificationPollingService {
                 // La sessione è cambiata mentre la richiesta era in corso: ignora il body
                 // precedente e, se necessario, carica i dati della sessione attuale.
                 if (UserSession.getInstance().isLoggedIn()
-                        && (!listeners.isEmpty() || !trayCallbacks.isEmpty())) pollNow();
+                        && (!listeners.isEmpty() || !trayCallbacks.isEmpty()))
+                    pollNow();
                 return;
             }
             if ((!listeners.isEmpty() || !trayCallbacks.isEmpty()) && UserSession.getInstance().isLoggedIn()) {
-            try {
-                JsonArray unread = JsonParser.parseString(response.body()).getAsJsonArray();
-                List<Long> currentIds = new ArrayList<>();
-                JsonObject firstNew = null;
-                for (JsonElement element : unread) {
-                    if (!element.isJsonObject()) continue;
-                    JsonObject notification = element.getAsJsonObject();
-                    if (!notification.has("notificationId") || notification.get("notificationId").isJsonNull()) continue;
-                    long id = notification.get("notificationId").getAsLong();
-                    currentIds.add(id);
-                    if (initialPoll) {
-                        seenUnreadIds.add(id);
-                    } else if (seenUnreadIds.add(id) && firstNew == null) {
-                        firstNew = notification;
+                try {
+                    JsonArray unread = JsonParser.parseString(response.body()).getAsJsonArray();
+                    List<Long> currentIds = new ArrayList<>();
+                    JsonObject firstNew = null;
+                    for (JsonElement element : unread) {
+                        if (!element.isJsonObject())
+                            continue;
+                        JsonObject notification = element.getAsJsonObject();
+                        if (!notification.has("notificationId") || notification.get("notificationId").isJsonNull())
+                            continue;
+                        long id = notification.get("notificationId").getAsLong();
+                        currentIds.add(id);
+                        if (initialPoll) {
+                            seenUnreadIds.add(id);
+                        } else if (seenUnreadIds.add(id) && firstNew == null) {
+                            firstNew = notification;
+                        }
                     }
+                    if (initialPoll)
+                        initialPoll = false;
+                    if (seenUnreadIds.size() > MAX_REMEMBERED_IDS) {
+                        seenUnreadIds.clear();
+                        seenUnreadIds.addAll(currentIds);
+                    } else {
+                        seenUnreadIds.retainAll(new HashSet<>(currentIds));
+                    }
+                    latestUnread = unread;
+                    snapshotAt = System.currentTimeMillis();
+                    lastUnreadCount = unread.size();
+                    hasSnapshot = true;
+                    // Se l'utente sta aprendo il vassoio, mostra già le notifiche lì senza un toast
+                    // duplicato.
+                    publish(new Snapshot(lastUnreadCount, trayCallbacks.isEmpty() ? firstNew : null));
+                    notifyTraySuccess(unread);
+                } catch (RuntimeException ignored) {
+                    notifyTrayFailure("Non è stato possibile leggere le notifiche.");
+                    // Un errore transitorio non deve interrompere la navbar; il prossimo polling
+                    // riprova.
                 }
-                if (initialPoll) initialPoll = false;
-                if (seenUnreadIds.size() > MAX_REMEMBERED_IDS) {
-                    seenUnreadIds.clear();
-                    seenUnreadIds.addAll(currentIds);
-                } else {
-                    seenUnreadIds.retainAll(new HashSet<>(currentIds));
-                }
-                lastUnreadCount = unread.size();
-                hasSnapshot = true;
-                // Se l'utente sta aprendo il vassoio, mostra già le notifiche lì senza un toast duplicato.
-                publish(new Snapshot(lastUnreadCount, trayCallbacks.isEmpty() ? firstNew : null));
-                notifyTraySuccess(unread);
-            } catch (RuntimeException ignored) {
-                notifyTrayFailure("Non è stato possibile leggere le notifiche.");
-                // Un errore transitorio non deve interrompere la navbar; il prossimo polling riprova.
-            }
             } else {
                 notifyTrayFailure("La sessione non è più attiva.");
             }
@@ -151,11 +196,13 @@ public final class NotificationPollingService {
             requestInFlight = false;
             if (requestGeneration != sessionGeneration) {
                 if (UserSession.getInstance().isLoggedIn()
-                        && (!listeners.isEmpty() || !trayCallbacks.isEmpty())) pollNow();
+                        && (!listeners.isEmpty() || !trayCallbacks.isEmpty()))
+                    pollNow();
                 return;
             }
             String failure = message == null || message.isBlank()
-                    ? "Non è stato possibile caricare le notifiche." : message;
+                    ? "Non è stato possibile caricare le notifiche."
+                    : message;
             // ERR-104 indica un limite esplicito del server. Rispettiamo Retry-After
             // evitando che click ripetuti sulla campanella generino un altro burst.
             if (failure.toUpperCase(java.util.Locale.ROOT).contains("ERR-104")) {
@@ -174,20 +221,24 @@ public final class NotificationPollingService {
         List<TrayCallback> copy = new ArrayList<>(trayCallbacks);
         trayCallbacks.clear();
         for (TrayCallback callback : copy) {
-            if (callback.success() != null) callback.success().accept(unread);
+            if (callback.success() != null)
+                callback.success().accept(unread);
         }
     }
 
     private void notifyTrayFailure(String message) {
-        if (trayCallbacks.isEmpty()) return;
+        if (trayCallbacks.isEmpty())
+            return;
         List<TrayCallback> copy = new ArrayList<>(trayCallbacks);
         trayCallbacks.clear();
         for (TrayCallback callback : copy) {
-            if (callback.failure() != null) callback.failure().accept(message);
+            if (callback.failure() != null)
+                callback.failure().accept(message);
         }
     }
 
-    private record TrayCallback(Consumer<JsonArray> success, Consumer<String> failure) { }
+    private record TrayCallback(Consumer<JsonArray> success, Consumer<String> failure) {
+    }
 
     private void publish(Snapshot snapshot) {
         List<Consumer<Snapshot>> copy = new ArrayList<>(listeners);
@@ -201,6 +252,14 @@ public final class NotificationPollingService {
     private void unsubscribe(Consumer<Snapshot> listener) {
         requireFxThread();
         listeners.remove(listener);
+        if (listeners.isEmpty() && chatSubscription != null) {
+            try {
+                chatSubscription.close();
+            } catch (Exception ignored) {
+            }
+            chatSubscription = null;
+            chatRefresh.stop();
+        }
         if (listeners.isEmpty() && timeline != null) {
             timeline.stop();
             timeline = null;
@@ -209,11 +268,13 @@ public final class NotificationPollingService {
 
     private static void requireFxThread() {
         if (!Platform.isFxApplicationThread()) {
-            throw new IllegalStateException("NotificationPollingService deve essere utilizzato dal JavaFX Application Thread.");
+            throw new IllegalStateException(
+                    "NotificationPollingService deve essere utilizzato dal JavaFX Application Thread.");
         }
     }
 
-    public record Snapshot(int unreadCount, JsonObject newNotification) { }
+    public record Snapshot(int unreadCount, JsonObject newNotification) {
+    }
 
     public static final class Subscription implements AutoCloseable {
         private final NotificationPollingService owner;
@@ -225,8 +286,10 @@ public final class NotificationPollingService {
             this.listener = listener;
         }
 
-        @Override public void close() {
-            if (closed) return;
+        @Override
+        public void close() {
+            if (closed)
+                return;
             closed = true;
             owner.unsubscribe(listener);
         }

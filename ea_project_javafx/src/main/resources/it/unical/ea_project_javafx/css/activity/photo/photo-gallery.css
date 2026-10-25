@@ -10,7 +10,7 @@
 
 .more-button:hover {
     -fx-translate-y: -3px;
-    -fx-effect: dropshadow(gaussian, rgba(231, 229, 228, 0.4), 16, 0.2, 0, 4);
+
 }
 
 /* Sfondo della scena galleria (sotto .bg-overlay) */

@@ -72,10 +72,7 @@
     -fx-padding: 10px 12px;
 }
 
-.export-popup-panel .custom-input:focused {
-    -fx-border-color: #356ac3;
-    -fx-effect: dropshadow(gaussian, rgba(53, 106, 195, 0.18), 6, 0.1, 0, 0);
-}
+.export-popup-panel .custom-input:focused {}
 
 .export-popup-panel .btn-primary {
     -fx-background-color: #356ac3;
@@ -86,9 +83,7 @@
     -fx-cursor: hand;
 }
 
-.export-popup-panel .btn-primary:hover {
-    -fx-background-color: #2858a8;
-}
+.export-popup-panel .btn-primary:hover {}
 
 .export-popup-panel .btn-secondary {
     -fx-background-color: #f5f7fb;
@@ -100,6 +95,4 @@
     -fx-cursor: hand;
 }
 
-.export-popup-panel .btn-secondary:hover {
-    -fx-background-color: #e9eef7;
-}
+.export-popup-panel .btn-secondary:hover {}

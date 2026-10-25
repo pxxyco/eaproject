@@ -50,16 +50,13 @@
     -fx-padding: 10px;
 }
 
-.custom-input:focused {
-    -fx-border-color: #a8a29e;
-    -fx-background-color: rgba(231, 229, 228, 0.14);
-}
+.custom-input:focused {}
 
 .date-picker.custom-input {
     -fx-padding: 0px;
 }
 
-.date-picker.custom-input > .text-field {
+.date-picker.custom-input>.text-field {
     -fx-padding: 10px;
 }
 
@@ -72,7 +69,7 @@
     -fx-text-fill: rgba(255, 255, 255, 0.8);
 }
 
-.custom-link, 
+.custom-link,
 .custom-link-bold {
     -fx-text-fill: #ffffff;
     -fx-underline: true;
@@ -84,7 +81,7 @@
 }
 
 /* Messaggi di Stato */
-.message-error, 
+.message-error,
 .message-success {
     -fx-font-size: 13px;
     -fx-font-weight: bold;
@@ -116,9 +113,7 @@
     -fx-cursor: hand;
 }
 
-.btn-submit:hover {
-    -fx-background-color: #fafaf9;
-}
+.btn-submit:hover {}
 
 .btn-back {
     -fx-background-color: transparent;
@@ -128,9 +123,7 @@
     -fx-padding: 0;
 }
 
-.btn-back:hover {
-    -fx-text-fill: #ffffff;
-}
+.btn-back:hover {}
 
 /* Selezione Ruolo */
 .role-card {
@@ -230,6 +223,4 @@
     -fx-cursor: hand;
 }
 
-.feedback-button:hover {
-    -fx-background-color: #fafaf9;
-}
+.feedback-button:hover {}

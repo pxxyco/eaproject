@@ -25,13 +25,18 @@ public class ChatService {
     private final ChatMessageRepository messages;
     private final UserRepository users;
     private final ApplicationEventPublisher events;
+    private final it.unical.ea_project.repository.NotificationRepository notifications;
+    private final it.unical.ea_project.account.AccountSettingsRepository preferences;
 
     public ChatService(ConversationRepository c, ChatMessageRepository m, UserRepository u,
-            ApplicationEventPublisher e) {
+            ApplicationEventPublisher e, it.unical.ea_project.repository.NotificationRepository notifications,
+            it.unical.ea_project.account.AccountSettingsRepository preferences) {
         conversations = c;
         messages = m;
         users = u;
         events = e;
+        this.notifications = notifications;
+        this.preferences = preferences;
     }
 
     public List<ConversationView> inbox(Long user, int page) {
@@ -52,6 +57,10 @@ public class ChatService {
                     "La chat collega un viaggiatore a un organizzatore.");
         conversations.ensure(travelerId, organizerId);
         return view(conversations.findByTravelerIdAndOrganizerId(travelerId, organizerId).orElseThrow(), travelerId, 0);
+    }
+
+    public ConversationView conversation(Long id, Long user) {
+        return view(access(id, user, false), user, 0);
     }
 
     public List<MessageView> history(Long conversation, Long user, Long before) {
@@ -87,6 +96,20 @@ public class ChatService {
         c.setUpdatedAt(message.getSentAt());
         c.setPreview(normalized.substring(0,
                 normalized.offsetByCodePoints(0, Math.min(160, normalized.codePointCount(0, normalized.length())))));
+        Long recipient = c.getTraveler().getId().equals(user) ? c.getOrganizer().getId() : c.getTraveler().getId();
+        if (preferences.findById(recipient).map(it.unical.ea_project.account.AccountSettings::isChatAlerts)
+                .orElse(true)) {
+            var n = notifications.findFirstByUser_IdAndRelatedEntityTypeAndRelatedEntityIdAndReadFalse(recipient,
+                    "CHAT", conversation).orElseGet(it.unical.ea_project.domain.Notification::new);
+            n.setUser(users.getReferenceById(recipient));
+            n.setType(it.unical.ea_project.domain.Notification.NotificationType.NOTICE);
+            n.setTitle("Nuovo messaggio da @" + users.findById(user).orElseThrow().getUsername());
+            n.setMessage("Hai nuovi messaggi nella conversazione. Apri la chat per leggerli.");
+            n.setRead(false);
+            n.setRelatedEntityType("CHAT");
+            n.setRelatedEntityId(conversation);
+            notifications.save(n);
+        }
         events.publishEvent(new ChatEvents.Changed(c.getId(), c.getTraveler().getId(), c.getOrganizer().getId()));
         return view(message);
     }
@@ -96,6 +119,7 @@ public class ChatService {
         var c = access(conversation, user, true);
         if (through == null || !messages.existsByIdAndConversationId(through, conversation))
             throw new IllegalArgumentException("Messaggio non trovato in questa conversazione.");
+        notifications.readConversation(user, conversation);
         if (c.getTraveler().getId().equals(user))
             c.setTravelerReadId(Math.max(c.getTravelerReadId() == null ? 0 : c.getTravelerReadId(), through));
         else

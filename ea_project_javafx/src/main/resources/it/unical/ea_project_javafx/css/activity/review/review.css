@@ -26,8 +26,8 @@
 }
 
 .btn-elimina:hover {
-    -fx-text-fill: #ef4444;
-    -fx-background-color: rgba(239, 68, 68, 0.1);
+
+
     -fx-background-radius: 50%;
 }
 
@@ -129,6 +129,4 @@
     -fx-cursor: hand;
 }
 
-.btn-invia:hover {
-    -fx-background-color: #fafaf9;
-}
+.btn-invia:hover {}

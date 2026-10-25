@@ -55,15 +55,13 @@
     -fx-padding: 0;
 }
 
-.add-button:hover {
-    -fx-background-color: #fafaf9;
-}
+.add-button:hover {}
 
 .add-button:pressed {
     -fx-background-color: #d6d3d1;
 }
 
-.next, 
+.next,
 .previous {
     -fx-background-color: transparent;
     -fx-text-fill: rgba(255, 255, 255, 0.85);
@@ -73,7 +71,7 @@
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 1);
 }
 
-.next:hover, 
+.next:hover,
 .previous:hover {
     -fx-text-fill: #ffffff;
 }

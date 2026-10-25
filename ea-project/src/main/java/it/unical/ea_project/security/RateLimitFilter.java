@@ -63,6 +63,12 @@ public class RateLimitFilter extends OncePerRequestFilter {
         } else if (path.equals("/api/users/refresh")) {
             bucket = "refresh";
             capacity = 30;
+        } else if (path.equals("/api/account/tickets") && method.equals("POST")) {
+            bucket = "support";
+            capacity = 5;
+        } else if (path.equals("/api/account/cards") && method.equals("POST")) {
+            bucket = "cards";
+            capacity = 10;
         } else if (path.startsWith("/photo/")) {
             bucket = "photos";
             capacity = 600;

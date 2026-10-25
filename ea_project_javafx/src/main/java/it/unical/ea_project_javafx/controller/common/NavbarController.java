@@ -71,6 +71,10 @@ public class NavbarController {
     @FXML
     private Label dashboardNavItem;
     @FXML
+    private Label homeNavItem;
+    @FXML
+    private MenuItem profileMenuItem, settingsMenuItem, supportMenuItem;
+    @FXML
     private Label travelerHistoryNavItem;
     @FXML
     private Label travelerFavoritesNavItem;
@@ -89,6 +93,19 @@ public class NavbarController {
     private Popup toastPopup;
     private long avatarLoadRequestId = 0;
     private boolean notificationTrayLoading;
+    private long lastTrayAutoHide;
+    private long trayRequest;
+    private Scene watchedScene;
+    private Window watchedWindow;
+    private final javafx.beans.value.ChangeListener<Window> notificationWindowListener = (o, a, b) -> watchWindow(b);
+    private final javafx.beans.value.ChangeListener<Boolean> notificationShowingListener = (o, a, b) -> {
+        if (b)
+            startNotificationPolling();
+        else
+            stopNotificationPolling();
+    };
+    @FXML
+    private Label travelerItineraryNavItem;
 
     @FXML
     public void initialize() {
@@ -103,12 +120,77 @@ public class NavbarController {
         configureUserAvatar();
         updateNavbarState();
         if (notificationBellContainer != null) {
-            notificationBellContainer.sceneProperty().addListener((obs, oldScene, newScene) -> {
-                if (newScene == null)
-                    stopNotificationPolling();
-                else if (UserSession.getInstance().isLoggedIn())
-                    startNotificationPolling();
+            notificationBellContainer.sceneProperty().addListener((o, a, b) -> watchScene(b));
+            watchScene(notificationBellContainer.getScene());
+        }
+    }
+
+    private void watchScene(Scene scene) {
+        updateActiveSection(scene);
+        if (watchedScene != null)
+            watchedScene.windowProperty().removeListener(notificationWindowListener);
+        watchedScene = scene;
+        if (scene != null)
+            scene.windowProperty().addListener(notificationWindowListener);
+        watchWindow(scene == null ? null : scene.getWindow());
+    }
+
+    private void updateActiveSection(Scene scene) {
+        if (scene == null)
+            return;
+        javafx.application.Platform.runLater(() -> {
+            if (scene != watchedScene)
+                return;
+            String path = String.valueOf(scene.getUserData());
+            var active = javafx.css.PseudoClass.getPseudoClass("active");
+            markActive(homeNavItem, path.endsWith("home/mainview.fxml"), active);
+            markActive(dashboardNavItem, path.endsWith("profile/dashboard-view.fxml"), active);
+            markActive(travelerHistoryNavItem,
+                    path.endsWith("booking-history.fxml") || path.endsWith("traveler/bookings.fxml"), active);
+            markActive(travelerFavoritesNavItem, path.endsWith("favorites.fxml"), active);
+            markActive(travelerItineraryNavItem, path.endsWith("collaborative-itinerary.fxml"), active);
+            markActive(organizerEventsNavItem, path.endsWith("events.fxml") || path.endsWith("create-offer.fxml"),
+                    active);
+            markActive(organizerAttendeesNavItem, path.endsWith("attendees.fxml"), active);
+            markMenuActive(chatMenuItem, path.endsWith("chat/chat.fxml"));
+            markMenuActive(profileMenuItem, path.endsWith("profile/profile.fxml"));
+            markMenuActive(settingsMenuItem, path.endsWith("settings.fxml"));
+            markMenuActive(paymentsMenuItem, path.endsWith("payment-methods.fxml"));
+            markMenuActive(supportMenuItem, path.endsWith("support.fxml"));
+        });
+    }
+
+    private void markActive(Label label, boolean selected, javafx.css.PseudoClass active) {
+        if (label == null)
+            return;
+        label.pseudoClassStateChanged(active, selected);
+        label.setAccessibleText(label.getText() + (selected ? ", sezione attuale" : ""));
+    }
+
+    private void markMenuActive(MenuItem item, boolean selected) {
+        if (item == null)
+            return;
+        item.getStyleClass().remove("nav-menu-active");
+        if (selected)
+            item.getStyleClass().add("nav-menu-active");
+    }
+
+    private void watchWindow(Window window) {
+        if (watchedWindow != null)
+            watchedWindow.showingProperty().removeListener(notificationShowingListener);
+        watchedWindow = window;
+        stopNotificationPolling();
+        if (window != null) {
+            javafx.application.Platform.runLater(() -> {
+                Node node = notificationBellContainer;
+                while (node != null && !node.getStyleClass().contains("navbar"))
+                    node = node.getParent();
+                if (node != null && node.getParent() != null)
+                    node.getParent().setViewOrder(-1);
             });
+            window.showingProperty().addListener(notificationShowingListener);
+            if (window.isShowing())
+                startNotificationPolling();
         }
     }
 
@@ -121,6 +203,10 @@ public class NavbarController {
         boolean isLoggedIn = UserSession.getInstance().isLoggedIn();
         boolean isOrganizer = isLoggedIn && "ORGANIZER".equalsIgnoreCase(UserSession.getInstance().getRole());
         boolean isTraveler = isLoggedIn && !isOrganizer;
+        if (travelerItineraryNavItem != null) {
+            travelerItineraryNavItem.setVisible(isTraveler);
+            travelerItineraryNavItem.setManaged(isTraveler);
+        }
 
         if (chatMenuItem != null)
             chatMenuItem.setVisible(isLoggedIn);
@@ -278,8 +364,12 @@ public class NavbarController {
             return;
         notificationSubscription = NotificationPollingService.getInstance().subscribe(snapshot -> {
             updateNotificationBadge(snapshot.unreadCount());
-            if (snapshot.newNotification() != null)
-                showToast(snapshot.newNotification());
+            if (snapshot.newNotification() != null) {
+                if (notificationPopup != null && notificationPopup.isShowing())
+                    NotificationPollingService.getInstance().fetchUnreadForTray(this::showNotificationTray, null);
+                else
+                    showToast(snapshot.newNotification());
+            }
         });
     }
 
@@ -314,6 +404,14 @@ public class NavbarController {
 
     @FXML
     private void handleNotifications(MouseEvent event) {
+        event.consume();
+        if (System.nanoTime() - lastTrayAutoHide < 250_000_000L)
+            return;
+        if (notificationTrayLoading) {
+            notificationTrayLoading = false;
+            trayRequest++;
+            return;
+        }
         if (notificationPopup != null && notificationPopup.isShowing()) {
             notificationPopup.hide();
             notificationPopup = null;
@@ -327,14 +425,19 @@ public class NavbarController {
                 || notificationTrayLoading)
             return;
         notificationTrayLoading = true;
+        long request = ++trayRequest;
         NotificationPollingService.getInstance().fetchUnreadForTray(
                 notifications -> {
+                    if (request != trayRequest)
+                        return;
                     notificationTrayLoading = false;
                     if (notificationBellContainer != null && notificationBellContainer.getScene() != null) {
                         showNotificationTray(notifications);
                     }
                 },
                 message -> {
+                    if (request != trayRequest)
+                        return;
                     notificationTrayLoading = false;
                     if (notificationBellContainer != null && notificationBellContainer.getScene() != null) {
                         showToast("Notifiche", message);
@@ -396,7 +499,10 @@ public class NavbarController {
         root.getChildren().add(scroll);
 
         notificationPopup = new Popup();
+        notificationPopup.setOnShown(
+                e -> it.unical.ea_project_javafx.util.UiEffects.useWallpaper(notificationPopup.getScene(), null));
         notificationPopup.setAutoHide(true);
+        notificationPopup.setOnAutoHide(e -> lastTrayAutoHide = System.nanoTime());
         notificationPopup.setHideOnEscape(true);
         notificationPopup.getContent().add(root);
         positionPopup(notificationPopup, popupAnchor(), 360);
@@ -419,6 +525,21 @@ public class NavbarController {
         message.getStyleClass().add("notification-card-message");
         message.setWrapText(true);
         card.getChildren().addAll(title, message);
+        if ("CHAT".equals(jsonString(notification, "relatedEntityType", ""))) {
+            Button open = new Button("Apri conversazione →");
+            open.getStyleClass().add("notification-mark-all");
+            open.setOnAction(e -> {
+                if (notificationPopup != null)
+                    notificationPopup.hide();
+                long conversation = notification.get("relatedEntityId").getAsLong();
+                SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/chat/chat.fxml", c -> {
+                    if (c instanceof it.unical.ea_project_javafx.controller.chat.ChatController chat)
+                        chat.openConversation(conversation);
+                });
+            });
+            card.getChildren().add(open);
+        }
+
         if ("LIST_INVITATION".equals(type) && id > 0) {
             HBox actions = new HBox(8);
             actions.setAlignment(Pos.CENTER_RIGHT);
@@ -593,6 +714,8 @@ public class NavbarController {
         message.setWrapText(true);
         toast.getChildren().addAll(title, message);
         toastPopup = new Popup();
+        toastPopup
+                .setOnShown(e -> it.unical.ea_project_javafx.util.UiEffects.useWallpaper(toastPopup.getScene(), null));
         toastPopup.setAutoHide(false);
         toastPopup.getContent().add(toast);
         positionPopup(toastPopup, popupAnchor(), 330);
@@ -607,7 +730,7 @@ public class NavbarController {
     }
 
     private Node popupAnchor() {
-        return userMenuButton != null ? userMenuButton : notificationBellContainer;
+        return notificationBellContainer != null ? notificationBellContainer : userMenuButton;
     }
 
     private void positionPopup(Popup popup, Node anchor, double width) {
@@ -620,13 +743,27 @@ public class NavbarController {
             Bounds bounds = anchor.localToScreen(anchor.getBoundsInLocal());
             if (bounds == null)
                 return;
-            popup.setX(Math.max(8, bounds.getMaxX() - width));
-            popup.setY(bounds.getMaxY() + 8);
+            Bounds viewport = anchor.getScene().getRoot().localToScreen(anchor.getScene().getRoot().getBoundsInLocal());
+            if (viewport == null)
+                return;
+            double w = Math.min(width, Math.max(180, viewport.getWidth() - 80));
+            double h = popup.getHeight();
+            if (!popup.getContent().isEmpty()
+                    && popup.getContent().getFirst() instanceof javafx.scene.layout.Region panel) {
+                panel.setPrefWidth(w);
+                panel.setMaxHeight(Math.min(430, Math.max(160, viewport.getHeight() - 80)));
+            }
+            double actualWidth = Math.max(w, popup.getWidth());
+            popup.setX(Math.max(viewport.getMinX() + 16,
+                    Math.min(bounds.getCenterX() - actualWidth / 2, viewport.getMaxX() - actualWidth - 16)));
+            popup.setY(Math.max(viewport.getMinY() + 12, Math.min(bounds.getMaxY() + 12, viewport.getMaxY() - h - 16)));
         };
         Bounds bounds = anchor.localToScreen(anchor.getBoundsInLocal());
         if (bounds == null)
             return;
-        popup.show(owner, Math.max(8, bounds.getMaxX() - width), bounds.getMaxY() + 8);
+        popup.setAutoFix(false);
+        popup.show(owner, bounds.getMinX(), bounds.getMaxY() + 12);
+        javafx.application.Platform.runLater(reposition);
 
         // A Popup JavaFX is una finestra separata: seguiamo spostamento e
         // ridimensionamento
@@ -636,6 +773,8 @@ public class NavbarController {
         owner.yProperty().addListener(windowListener);
         owner.widthProperty().addListener(windowListener);
         owner.heightProperty().addListener(windowListener);
+        popup.widthProperty().addListener(windowListener);
+        popup.heightProperty().addListener(windowListener);
         javafx.beans.value.ChangeListener<Bounds> boundsListener = (obs, oldValue, newValue) -> reposition.run();
         javafx.beans.value.ChangeListener<javafx.scene.transform.Transform> transformListener = (obs, oldValue,
                 newValue) -> reposition.run();
@@ -646,6 +785,8 @@ public class NavbarController {
             owner.yProperty().removeListener(windowListener);
             owner.widthProperty().removeListener(windowListener);
             owner.heightProperty().removeListener(windowListener);
+            popup.widthProperty().removeListener(windowListener);
+            popup.heightProperty().removeListener(windowListener);
             anchor.boundsInLocalProperty().removeListener(boundsListener);
             anchor.localToSceneTransformProperty().removeListener(transformListener);
         });
@@ -727,7 +868,7 @@ public class NavbarController {
     }
 
     @FXML
-    private void handleCollaborativeItinerary(ActionEvent event) {
+    private void handleCollaborativeItinerary() {
         SceneNavigator.getInstance()
                 .loadScene("/it/unical/ea_project_javafx/fxml/traveler/collaborative-itinerary.fxml", null);
     }

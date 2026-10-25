@@ -75,7 +75,7 @@ public interface ActivityRepository
                 cast(:dayStart as LocalDateTime) IS NULL
                 OR (a.startDate < :nextDayStart AND a.endDate >= :dayStart)
             )
-            ORDER BY a.averageRating DESC
+            ORDER BY COALESCE(a.averageRating,0) DESC, a.activityId DESC
             """)
     List<Activity> search(
             @Param("query") String query,
@@ -98,7 +98,7 @@ public interface ActivityRepository
                 OR LOWER(a.title) LIKE CONCAT('%', LOWER(:query), '%')
                 OR LOWER(a.city) LIKE CONCAT('%', LOWER(:query), '%')
             )
-            ORDER BY a.averageRating DESC
+            ORDER BY COALESCE(a.averageRating,0) DESC, a.activityId DESC
             """)
     List<Activity> searchWithoutDate(
             @Param("query") String query,

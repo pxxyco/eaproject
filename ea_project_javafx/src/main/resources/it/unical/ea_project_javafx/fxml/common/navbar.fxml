@@ -32,7 +32,8 @@
 
                 <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="nav-links">
                     <children>
-                        <Label onMouseClicked="#handleHome" styleClass="nav-item" text="Home" />
+                        <Label fx:id="homeNavItem" onMouseClicked="#handleHome"
+                            styleClass="nav-item" text="Home" />
                         <Label fx:id="dashboardNavItem" onMouseClicked="#handleDashboard"
                             styleClass="nav-item" text="Dashboard" />
 
@@ -41,6 +42,9 @@
                             styleClass="nav-item" text="Storico" />
                         <Label fx:id="travelerFavoritesNavItem" onMouseClicked="#handleFavorites"
                             styleClass="nav-item" text="Preferiti" />
+                        <Label fx:id="travelerItineraryNavItem"
+                            onMouseClicked="#handleCollaborativeItinerary" styleClass="nav-item"
+                            text="Itinerari" />
 
                         <!-- Voci Organizer -->
                         <Label fx:id="organizerEventsNavItem"
@@ -56,14 +60,14 @@
     </left>
 
     <right>
-        <HBox alignment="CENTER_RIGHT" spacing="10.0" BorderPane.alignment="CENTER">
+        <HBox alignment="CENTER_RIGHT" spacing="12.0" BorderPane.alignment="CENTER">
             <children>
                 <Label fx:id="loginLabel" onMouseClicked="#handleLogin" styleClass="btn-nav-login"
                     text="Login" />
 
                 <StackPane fx:id="notificationBellContainer" onMouseClicked="#handleNotifications"
-                    styleClass="notification-bell-container" prefWidth="42.0" prefHeight="42.0"
-                    minWidth="42.0" minHeight="42.0" maxWidth="42.0" maxHeight="42.0"
+                    styleClass="notification-bell-container" prefWidth="48.0" prefHeight="48.0"
+                    minWidth="48.0" minHeight="48.0" maxWidth="48.0" maxHeight="48.0"
                     visible="false" managed="false" accessibleText="Notifiche"
                     focusTraversable="true">
                     <Label text="🔔" styleClass="notification-bell-icon" />
@@ -71,6 +75,7 @@
                         visible="false" managed="false" />
                 </StackPane>
                 <MenuButton fx:id="userMenuButton" styleClass="btn-nav-login" text=""
+                    prefHeight="48" minHeight="48" maxHeight="48"
                     accessibleText="Menu utente">
                     <graphic>
                         <HBox alignment="CENTER_LEFT" spacing="8.0" styleClass="nav-user-graphic">
@@ -88,17 +93,16 @@
                     </graphic>
                     <items>
                         <MenuItem fx:id="chatMenuItem" onAction="#handleChat" text="Messaggi" />
-                        <MenuItem fx:id="recommendationsMenuItem" onAction="#handleRecommendations"
-                            text="Scelte per te" />
-                        <MenuItem fx:id="itineraryMenuItem" onAction="#handleCollaborativeItinerary"
-                            text="Itinerari collaborativi" />
                         <SeparatorMenuItem />
-                        <MenuItem onAction="#handleProfileInfos" text="Il mio Profilo" />
-                        <MenuItem onAction="#handleSettings" text="Impostazioni &amp; Sicurezza" />
+                        <MenuItem fx:id="profileMenuItem" onAction="#handleProfileInfos"
+                            text="Il mio Profilo" />
+                        <MenuItem fx:id="settingsMenuItem" onAction="#handleSettings"
+                            text="Impostazioni &amp; Sicurezza" />
                         <MenuItem fx:id="paymentsMenuItem" onAction="#handlePaymentMethods"
                             text="Metodi di Pagamento" />
                         <SeparatorMenuItem />
-                        <MenuItem onAction="#handleSupport" text="Centro Assistenza" />
+                        <MenuItem fx:id="supportMenuItem" onAction="#handleSupport"
+                            text="Centro Assistenza" />
                         <SeparatorMenuItem />
                         <MenuItem onAction="#handleLogout" styleClass="logout-item" text="Logout" />
                     </items>
@@ -108,6 +112,6 @@
     </right>
 
     <padding>
-        <Insets bottom="15.0" left="20.0" right="20.0" top="15.0" />
+        <Insets bottom="20.0" left="24.0" right="24.0" top="20.0" />
     </padding>
 </BorderPane>

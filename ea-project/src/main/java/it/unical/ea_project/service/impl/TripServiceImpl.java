@@ -38,7 +38,6 @@ public class TripServiceImpl implements TripService {
     private final UserRepository userRepository;
     private final TripImageRepository tripImageRepository;
 
-
     @Override
     public List<Trip> getTripsByUser(User user) {
         return tripRepository.findByCreatedByAndDeletedAtIsNull(user);
@@ -95,7 +94,8 @@ public class TripServiceImpl implements TripService {
         if (trip.getAvailableSeats() == null) {
             trip.setAvailableSeats(trip.getMaxSeats());
         }
-        if (trip.getStages() == null) trip.setStages(new java.util.ArrayList<>());
+        if (trip.getStages() == null)
+            trip.setStages(new java.util.ArrayList<>());
         trip.getStages().forEach(stage -> stage.setTrip(trip));
         return tripRepository.save(trip);
     }
@@ -118,7 +118,8 @@ public class TripServiceImpl implements TripService {
                 existing.getMaxSeats(), existing.getAvailableSeats(), details.getMaxSeats());
         existing.setMaxSeats(details.getMaxSeats());
         existing.setAvailableSeats(available);
-        if (details.getStatus() != null) existing.setStatus(details.getStatus());
+        if (details.getStatus() != null)
+            existing.setStatus(details.getStatus());
         return tripRepository.save(existing);
     }
 
@@ -141,6 +142,7 @@ public class TripServiceImpl implements TripService {
     public void deleteTrip(Long id) {
         tripRepository.findActiveForUpdate(id).ifPresent(this::deleteTripLogically);
     }
+
     @Override
     public List<TripDTO> getTripDtosByUser(User user) {
         return toDtoList(getTripsByUser(user));
@@ -219,6 +221,12 @@ public class TripServiceImpl implements TripService {
         throw new UnsupportedOperationException("Unimplemented method 'exportTripToIcs'");
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<TripHomeDTO> topHomeCards(int page, int size) {
+        return toHomeDtos(getTopTrips(page, size));
+    }
+
     private List<TripHomeDTO> toHomeDtos(List<Trip> trips) {
         if (trips == null || trips.isEmpty()) {
             return List.of();
@@ -236,8 +244,7 @@ public class TripServiceImpl implements TripService {
         return trips.stream()
                 .map(trip -> toHomeDto(
                         trip,
-                        imagesByTrip.getOrDefault(trip.getTripId(), List.of())
-                ))
+                        imagesByTrip.getOrDefault(trip.getTripId(), List.of())))
                 .toList();
     }
 
@@ -275,12 +282,14 @@ public class TripServiceImpl implements TripService {
     }
 
     private TripHomeDTO toHomeDto(Trip trip, List<TripImage> images) {
-        String imageUrl = images.stream()
-                .sorted(Comparator.comparing(TripImage::getOrderIndex, Comparator.nullsLast(Comparator.naturalOrder())))
-                .map(TripImage::getImageUrl)
-                .filter(url -> url != null && !url.isBlank())
-                .findFirst()
-                .orElse(DEFAULT_IMAGE_URL);
+        String imageUrl = Optional.ofNullable(trip.getCoverPhotoUrl()).filter(url -> !url.isBlank())
+                .orElseGet(() -> images.stream()
+                        .sorted(Comparator.comparing(TripImage::getOrderIndex,
+                                Comparator.nullsLast(Comparator.naturalOrder())))
+                        .map(TripImage::getImageUrl)
+                        .filter(url -> url != null && !url.isBlank())
+                        .findFirst()
+                        .orElse(DEFAULT_IMAGE_URL));
 
         return new TripHomeDTO(
                 trip.getTripId(),
@@ -290,17 +299,19 @@ public class TripServiceImpl implements TripService {
                 trip.getAverageRating(),
                 imageUrl,
                 trip.getStartDate(),
-                trip.getEndDate()
-        );
+                trip.getEndDate());
     }
 
     private String buildLocation(String city, String country) {
         boolean hasCity = city != null && !city.isBlank();
         boolean hasCountry = country != null && !country.isBlank();
 
-        if (hasCity && hasCountry) return city + ", " + country;
-        if (hasCity) return city;
-        if (hasCountry) return country;
+        if (hasCity && hasCountry)
+            return city + ", " + country;
+        if (hasCity)
+            return city;
+        if (hasCountry)
+            return country;
         return "";
     }
 }

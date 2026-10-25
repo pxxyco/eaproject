@@ -33,7 +33,8 @@ public final class PopupFactory {
     private static final String COMMON_CSS = "/it/unical/ea_project_javafx/css/common/style.css";
     private static final Map<StackPane, Handle> ACTIVE_POPUPS = new WeakHashMap<>();
 
-    private PopupFactory() { }
+    private PopupFactory() {
+    }
 
     public enum Size {
         COMPACT(540, 500),
@@ -66,16 +67,23 @@ public final class PopupFactory {
         sceneRoot = fullSceneRoot(sceneRoot);
 
         Handle previous = ACTIVE_POPUPS.get(sceneRoot);
-        if (previous != null) previous.closeImmediately();
+        if (previous != null)
+            previous.closeImmediately();
 
         ensureStylesheet(sceneRoot.getScene());
         ensurePopupStylesheet(content);
-        if (!content.getStyleClass().contains("app-popup-root")) content.getStyleClass().add("app-popup-root");
+        if (!content.getStyleClass().contains("app-popup-root"))
+            content.getStyleClass().add("app-popup-root");
 
         Map<Node, Effect> previousEffects = new LinkedHashMap<>();
+        Map<Node, Boolean> previousCaches = new LinkedHashMap<>();
         for (Node node : new ArrayList<>(sceneRoot.getChildren())) {
             previousEffects.put(node, node.getEffect());
-            node.setEffect(new GaussianBlur(6.0));
+            node.setEffect(new GaussianBlur(10.0));
+            if (node instanceof Parent) {
+                previousCaches.put(node, node.isCache());
+                node.setCache(true);
+            }
         }
 
         double viewportWidth = sceneRoot.getScene() == null ? sceneRoot.getWidth() : sceneRoot.getScene().getWidth();
@@ -84,8 +92,10 @@ public final class PopupFactory {
         double maxHeight = resolvedSize.maxHeight;
         // Mantiene margine visibile anche su finestre ridimensionate; non impone una
         // larghezza minima superiore allo spazio reale disponibile.
-        if (viewportWidth > 0) maxWidth = Math.min(maxWidth, Math.max(200, viewportWidth - 40));
-        if (viewportHeight > 0) maxHeight = Math.min(maxHeight, Math.max(180, viewportHeight - 40));
+        if (viewportWidth > 0)
+            maxWidth = Math.min(maxWidth, Math.max(200, viewportWidth - 40));
+        if (viewportHeight > 0)
+            maxHeight = Math.min(maxHeight, Math.max(180, viewportHeight - 40));
         applyMaxSize(content, maxWidth, maxHeight);
         if (!content.getStyleClass().contains("app-modal-panel")
                 && !content.getStyleClass().contains("popup-factory-transparent-surface")) {
@@ -108,36 +118,54 @@ public final class PopupFactory {
         StackPane.setMargin(content, new Insets(18));
         sceneRoot.getChildren().add(overlay);
 
-        Handle handle = new Handle(sceneRoot, overlay, previousEffects);
+        Handle handle = new Handle(sceneRoot, overlay, previousEffects, previousCaches);
         ACTIVE_POPUPS.put(sceneRoot, handle);
-        if (!hasCloseControl(content)) addStandardCloseButton(content, handle);
+        if (!hasCloseControl(content))
+            addStandardCloseButton(content, handle);
         overlay.setFocusTraversable(true);
         overlay.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.ESCAPE) handle.close();
+            if (event.getCode() == KeyCode.ESCAPE)
+                handle.close();
         });
         overlay.requestFocus();
 
         FadeTransition fadeIn = new FadeTransition(Duration.millis(180), overlay);
         fadeIn.setFromValue(0.0);
         fadeIn.setToValue(1.0);
+        fadeIn.setInterpolator(javafx.animation.Interpolator.EASE_BOTH);
+        handle.openTransition = fadeIn;
+        javafx.animation.TranslateTransition slide = new javafx.animation.TranslateTransition(Duration.millis(220),
+                content);
+        slide.setFromY(8);
+        slide.setToY(0);
+        slide.setInterpolator(javafx.animation.Interpolator.EASE_OUT);
+        sceneRoot.applyCss();
+        sceneRoot.layout();
         fadeIn.play();
+        slide.play();
         return handle;
     }
 
-    /** Risolve una radice StackPane che copre l'intera scena, anche se la vista ne usa un altro tipo. */
+    /**
+     * Risolve una radice StackPane che copre l'intera scena, anche se la vista ne
+     * usa un altro tipo.
+     */
     public static StackPane resolveRoot(Node anchor) {
-        if (anchor == null || anchor.getScene() == null) return null;
+        if (anchor == null || anchor.getScene() == null)
+            return null;
         return fullSceneRoot(anchor.getScene());
     }
 
     private static StackPane fullSceneRoot(StackPane requestedRoot) {
-        if (requestedRoot == null) return null;
+        if (requestedRoot == null)
+            return null;
         Scene scene = requestedRoot.getScene();
         return scene == null ? requestedRoot : fullSceneRoot(scene);
     }
 
     private static StackPane fullSceneRoot(Scene scene) {
-        if (scene.getRoot() instanceof StackPane stackPane) return stackPane;
+        if (scene.getRoot() instanceof StackPane stackPane)
+            return stackPane;
         Parent oldRoot = scene.getRoot();
         StackPane wrapper = new StackPane(oldRoot);
         wrapper.getStyleClass().add("app-popup-scene-wrapper");
@@ -165,7 +193,7 @@ public final class PopupFactory {
     }
 
     public static Handle showConfirmation(StackPane root, String title, String message,
-                                          Size size, Runnable onConfirm) {
+            Size size, Runnable onConfirm) {
         VBox panel = new VBox(16);
         Label heading = new Label(title == null || title.isBlank() ? "Conferma operazione" : title);
         heading.getStyleClass().add("app-modal-title");
@@ -184,7 +212,8 @@ public final class PopupFactory {
         cancel.setOnAction(event -> handle.close());
         confirm.setOnAction(event -> {
             handle.close();
-            if (onConfirm != null) onConfirm.run();
+            if (onConfirm != null)
+                onConfirm.run();
         });
         return handle;
     }
@@ -203,23 +232,28 @@ public final class PopupFactory {
         }
 
         // Per i pannelli non VBox, la barra di chiusura deve stare dentro la stessa
-        // superficie glass; altrimenti la X resta fuori dal pannello e sembra un popup diverso.
+        // superficie glass; altrimenti la X resta fuori dal pannello e sembra un popup
+        // diverso.
         if (content.getParent() instanceof StackPane parent) {
             int index = parent.getChildren().indexOf(content);
             if (index >= 0) {
                 boolean hadModalPanel = content.getStyleClass().remove("app-modal-panel");
                 double maxWidth = content instanceof Region region ? region.getMaxWidth() : Double.MAX_VALUE;
                 double maxHeight = content instanceof Region region ? region.getMaxHeight() : Double.MAX_VALUE;
+                parent.getChildren().remove(content);
                 VBox wrapper = new VBox(8, toolbar, content);
                 wrapper.getStyleClass().add("app-popup-content-wrapper");
-                if (hadModalPanel) wrapper.getStyleClass().add("app-modal-panel");
+                if (hadModalPanel)
+                    wrapper.getStyleClass().add("app-modal-panel");
                 if (content.getStyleClass().contains("popup-factory-transparent-surface")) {
                     wrapper.getStyleClass().add("popup-factory-transparent-surface");
                 }
-                if (maxWidth > 0) wrapper.setMaxWidth(maxWidth);
-                if (maxHeight > 0) wrapper.setMaxHeight(maxHeight);
+                if (maxWidth > 0)
+                    wrapper.setMaxWidth(maxWidth);
+                if (maxHeight > 0)
+                    wrapper.setMaxHeight(maxHeight);
                 ensurePopupStylesheet(wrapper);
-                parent.getChildren().set(index, wrapper);
+                parent.getChildren().add(index, wrapper);
                 StackPane.setAlignment(wrapper, Pos.CENTER);
                 StackPane.setMargin(wrapper, new Insets(18));
             }
@@ -230,10 +264,12 @@ public final class PopupFactory {
         if (node.getStyleClass().contains("app-modal-close")
                 || node.getStyleClass().contains("btn-icon-close")
                 || node.getStyleClass().contains("popup-close-button")
-                || node.getStyleClass().contains("sharing-popup-close")) return true;
+                || node.getStyleClass().contains("sharing-popup-close"))
+            return true;
         if (node instanceof Parent parent) {
             for (Node child : parent.getChildrenUnmodifiable()) {
-                if (hasCloseControl(child)) return true;
+                if (hasCloseControl(child))
+                    return true;
             }
         }
         return false;
@@ -244,24 +280,33 @@ public final class PopupFactory {
             double currentWidth = region.getMaxWidth();
             double currentHeight = region.getMaxHeight();
             region.setMaxWidth(currentWidth <= 0 || currentWidth == Double.MAX_VALUE
-                    ? maxWidth : Math.min(currentWidth, maxWidth));
+                    ? maxWidth
+                    : Math.min(currentWidth, maxWidth));
             region.setMaxHeight(currentHeight <= 0 || currentHeight == Double.MAX_VALUE
-                    ? maxHeight : Math.min(currentHeight, maxHeight));
+                    ? maxHeight
+                    : Math.min(currentHeight, maxHeight));
         }
     }
 
     private static void ensureStylesheet(Scene scene) {
-        if (scene == null) return;
+        if (scene == null)
+            return;
         var resource = PopupFactory.class.getResource(COMMON_CSS);
-        if (resource == null) return;
+        if (resource == null)
+            return;
         String css = resource.toExternalForm();
-        if (!scene.getStylesheets().contains(css)) scene.getStylesheets().add(css);
+        if (!scene.getStylesheets().contains(css))
+            scene.getStylesheets().add(css);
     }
 
-    /** Applica la stylesheet comune direttamente al popup, dopo i fogli specifici del FXML. */
+    /**
+     * Applica la stylesheet comune direttamente al popup, dopo i fogli specifici
+     * del FXML.
+     */
     private static void ensurePopupStylesheet(Parent content) {
         var resource = PopupFactory.class.getResource(COMMON_CSS);
-        if (resource == null) return;
+        if (resource == null)
+            return;
         String css = resource.toExternalForm();
         content.getStylesheets().remove(css);
         content.getStylesheets().add(css);
@@ -277,44 +322,75 @@ public final class PopupFactory {
         private final StackPane root;
         private final StackPane overlay;
         private final Map<Node, Effect> previousEffects;
+        private final Map<Node, Boolean> previousCaches;
         private FadeTransition closeTransition;
+        private FadeTransition openTransition;
+        private Runnable closedAction;
+
+        public Handle onClosed(Runnable action) {
+            this.closedAction = action;
+            return this;
+        }
+
         private boolean closed;
 
-        private Handle(StackPane root, StackPane overlay, Map<Node, Effect> previousEffects) {
+        private Handle(StackPane root, StackPane overlay, Map<Node, Effect> previousEffects,
+                Map<Node, Boolean> previousCaches) {
             this.root = root;
             this.overlay = overlay;
             this.previousEffects = previousEffects;
+            this.previousCaches = previousCaches;
         }
 
         public void close() {
             requireFxThread();
-            if (closed || closeTransition != null) return;
+            if (closed || closeTransition != null)
+                return;
+            if (openTransition != null)
+                openTransition.stop();
             closeTransition = new FadeTransition(Duration.millis(150), overlay);
             closeTransition.setFromValue(overlay.getOpacity());
             closeTransition.setToValue(0.0);
+            closeTransition.setInterpolator(javafx.animation.Interpolator.EASE_BOTH);
             closeTransition.setOnFinished(event -> finishClose());
             closeTransition.play();
         }
 
         private void closeImmediately() {
-            if (closeTransition != null) closeTransition.stop();
+            if (closeTransition != null)
+                closeTransition.stop();
             finishClose();
         }
 
         private void finishClose() {
-            if (closed) return;
+            if (closed)
+                return;
             closed = true;
+            if (openTransition != null)
+                openTransition.stop();
+            if (closedAction != null) {
+                closedAction.run();
+                closedAction = null;
+            }
             root.getChildren().remove(overlay);
+            previousCaches.forEach(Node::setCache);
             previousEffects.forEach((node, effect) -> {
-                if (root.getChildren().contains(node)) node.setEffect(effect);
+                if (root.getChildren().contains(node))
+                    node.setEffect(effect);
             });
             // Stacca i contenuti dall'overlay rimosso: i popup FXML riutilizzati
             // (es. gestione condivisioni) possono essere aperti una seconda volta.
             overlay.getChildren().clear();
-            if (ACTIVE_POPUPS.get(root) == this) ACTIVE_POPUPS.remove(root);
+            if (ACTIVE_POPUPS.get(root) == this)
+                ACTIVE_POPUPS.remove(root);
         }
 
-        public StackPane getOverlay() { return overlay; }
-        public boolean isClosed() { return closed; }
+        public StackPane getOverlay() {
+            return overlay;
+        }
+
+        public boolean isClosed() {
+            return closed;
+        }
     }
 }

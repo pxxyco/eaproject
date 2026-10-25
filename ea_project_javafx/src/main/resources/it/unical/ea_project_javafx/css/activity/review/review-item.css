@@ -39,8 +39,8 @@
 }
 
 .btn-rispondi:hover {
-    -fx-text-fill: #ffffff;
-    -fx-background-color: rgba(231, 229, 228, 0.15);
+
+
     -fx-background-radius: 6px;
 }
 
@@ -53,19 +53,16 @@
     -fx-background-radius: 6px;
 }
 
-.btn-annulla:hover {
-    -fx-background-color: rgba(255, 255, 255, 0.1);
-    -fx-text-fill: #ffffff;
-}
+.btn-annulla:hover {}
 
 .btn-actions,
 .btn-actions:focused,
 .btn-actions:pressed {
-    -fx-background-color: transparent;
+
     -fx-background-insets: 0;
     -fx-background-radius: 50%;
-    -fx-border-color: transparent;
-    -fx-effect: null;
+
+
     -fx-min-width: 36px;
     -fx-min-height: 36px;
     -fx-pref-width: 36px;
@@ -75,13 +72,26 @@
     -fx-cursor: hand;
 }
 
+.btn-actions,
+.btn-actions:pressed {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-effect: null;
+}
+
+
 .btn-actions:hover,
 .btn-actions:showing {
-    -fx-background-color: rgba(255, 255, 255, 0.15);
+
     -fx-background-radius: 50%;
 }
 
-.btn-actions > .arrow-button {
+.btn-actions:showing {
+    -fx-background-color: rgba(255, 255, 255, 0.15);
+}
+
+
+.btn-actions>.arrow-button {
     -fx-padding: 0;
     -fx-min-width: 0;
     -fx-pref-width: 0;
@@ -89,7 +99,7 @@
     -fx-background-color: transparent;
 }
 
-.btn-actions > .arrow-button > .arrow {
+.btn-actions>.arrow-button>.arrow {
     -fx-shape: " ";
     -fx-padding: 0;
     -fx-min-width: 0;
@@ -97,7 +107,7 @@
     -fx-background-color: transparent;
 }
 
-.btn-actions > .label {
+.btn-actions>.label {
     -fx-text-fill: #ffffff;
     -fx-font-size: 22px;
     -fx-padding: 0;
@@ -105,7 +115,7 @@
     -fx-text-alignment: center;
 }
 
-.context-menu .menu-item.menu-delete > .label {
+.context-menu .menu-item.menu-delete>.label {
     -fx-text-fill: #fca5a5;
 }
 
@@ -122,8 +132,8 @@
 }
 
 .btn-elimina:hover {
-    -fx-text-fill: #ef4444;
-    -fx-background-color: rgba(239, 68, 68, 0.1);
+
+
     -fx-background-radius: 50%;
 }
 
@@ -135,7 +145,7 @@
     -fx-border-width: 1px 0 0 0;
 }
 
-.risposta-container > .text-area {
+.risposta-container>.text-area {
     -fx-control-inner-background: rgba(231, 229, 228, 0.08);
     -fx-background-color: rgba(231, 229, 228, 0.08);
     -fx-background-radius: 8px;
@@ -145,7 +155,7 @@
     -fx-prompt-text-fill: rgba(255, 255, 255, 0.5);
 }
 
-.risposta-container > .text-area .content {
+.risposta-container>.text-area .content {
     -fx-background-color: rgba(231, 229, 228, 0.08);
     -fx-background-radius: 8px;
 }

@@ -18,14 +18,17 @@ import java.util.Optional;
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final it.unical.ea_project.account.AccountSettingsRepository preferences;
 
-    public NotificationServiceImpl(NotificationRepository notificationRepository) {
+    public NotificationServiceImpl(NotificationRepository notificationRepository,
+            it.unical.ea_project.account.AccountSettingsRepository preferences) {
         this.notificationRepository = notificationRepository;
+        this.preferences = preferences;
     }
 
     @Override
     public List<Notification> getAllNotifications(User user) {
-        return notificationRepository.findByUserOrderByCreatedAtDesc(user);
+        return notificationRepository.findByUser(user, PageRequest.of(0, 100)).getContent();
     }
 
     @Override
@@ -35,7 +38,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public List<Notification> getUnreadNotifications(User user) {
-        return notificationRepository.findByUserAndReadOrderByCreatedAtDesc(user, false);
+        return notificationRepository.findByUserAndReadOrderByCreatedAtDesc(user, false, PageRequest.of(0, 100));
     }
 
     @Override
@@ -52,6 +55,11 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional
     public Notification createNotification(Notification notification) {
+        if ((notification.getType() == Notification.NotificationType.BOOKING
+                || notification.getType() == Notification.NotificationType.CONFIRMATION)
+                && !preferences.findById(notification.getUser().getId())
+                        .map(it.unical.ea_project.account.AccountSettings::isBookingAlerts).orElse(true))
+            return notification;
         return notificationRepository.save(notification);
     }
 

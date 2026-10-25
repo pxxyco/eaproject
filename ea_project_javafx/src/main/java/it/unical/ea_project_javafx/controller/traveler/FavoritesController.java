@@ -28,45 +28,76 @@ import java.util.regex.Pattern;
 
 public class FavoritesController {
 
-    @FXML private ImageView bgImageView;
-    
-    @FXML private StackPane navbarContainer;
-    
-    @FXML private ComboBox<String> newListVisibilityCombo;
-    
-    
-    @FXML private Label statusMessageLabel;
-    @FXML private Label selectedListNameLabel;
-    @FXML private Label selectedListVisibilityLabel;
-    
-    @FXML private TextField newListNameField;
-    @FXML private TextField editListNameField;
-    @FXML private ComboBox<String> editListVisibilityCombo;
-    @FXML private Button saveListChangesButton;
-    @FXML private Button deleteListButton;
-    @FXML private TextField tripSearchField;
-    @FXML private TextField activitySearchField;
-    
-    @FXML private ListView<String> listsListView;
-    @FXML private ListView<String> tripSearchResults;
-    @FXML private ListView<String> savedTripsListView;
-    @FXML private ListView<String> activitySearchResults;
-    @FXML private ListView<String> savedActivitiesListView;
-    @FXML private TableView<SharedListRow> sharedListsTable;
-    @FXML private TableColumn<SharedListRow, String> sharedListNameColumn;
-    @FXML private TableColumn<SharedListRow, String> sharedListOrganizerColumn;
-    @FXML private TableColumn<SharedListRow, String> sharedListPermissionColumn;
-    @FXML private TableColumn<SharedListRow, String> sharedListSharedAtColumn;
-    @FXML private ListView<String> sharedListDetailsListView;
-    @FXML private Label sharedListsStatusLabel;
+    @FXML
+    private ImageView bgImageView;
 
-    @FXML private Button shareListButton;
-    @FXML private javafx.scene.layout.StackPane sharingPopup;
-    @FXML private ListSharingPopupController sharingPopupController;
-    @FXML private Button addTripButton;
-    @FXML private Button removeTripButton;
-    @FXML private Button addActivityButton;
-    @FXML private Button removeActivityButton;
+    @FXML
+    private StackPane navbarContainer;
+
+    @FXML
+    private ComboBox<String> newListVisibilityCombo;
+
+    @FXML
+    private Label statusMessageLabel;
+    @FXML
+    private Label selectedListNameLabel;
+    @FXML
+    private Label selectedListVisibilityLabel;
+
+    @FXML
+    private TextField newListNameField;
+    @FXML
+    private TextField editListNameField;
+    @FXML
+    private ComboBox<String> editListVisibilityCombo;
+    @FXML
+    private Button saveListChangesButton;
+    @FXML
+    private Button deleteListButton;
+    @FXML
+    private TextField tripSearchField;
+    @FXML
+    private TextField activitySearchField;
+
+    @FXML
+    private ListView<String> listsListView;
+    @FXML
+    private ListView<String> tripSearchResults;
+    @FXML
+    private ListView<String> savedTripsListView;
+    @FXML
+    private ListView<String> activitySearchResults;
+    @FXML
+    private ListView<String> savedActivitiesListView;
+    @FXML
+    private TableView<SharedListRow> sharedListsTable;
+    @FXML
+    private TableColumn<SharedListRow, String> sharedListNameColumn;
+    @FXML
+    private TableColumn<SharedListRow, String> sharedListOrganizerColumn;
+    @FXML
+    private TableColumn<SharedListRow, String> sharedListPermissionColumn;
+    @FXML
+    private TableColumn<SharedListRow, String> sharedListSharedAtColumn;
+    @FXML
+    private ListView<String> sharedListDetailsListView;
+    @FXML
+    private Label sharedListsStatusLabel;
+
+    @FXML
+    private Button shareListButton;
+    @FXML
+    private javafx.scene.layout.StackPane sharingPopup;
+    @FXML
+    private ListSharingPopupController sharingPopupController;
+    @FXML
+    private Button addTripButton;
+    @FXML
+    private Button removeTripButton;
+    @FXML
+    private Button addActivityButton;
+    @FXML
+    private Button removeActivityButton;
 
     private static final Pattern ID_PATTERN = Pattern.compile("#(\\d+)\\s*$");
     private Long selectedListId;
@@ -76,12 +107,24 @@ public class FavoritesController {
 
     @FXML
     public void initialize() {
-    
+
         BackgroundHelper.setupBackground(bgImageView);
         loadNavbar();
         newListVisibilityCombo.getItems().setAll("PRIVATE", "SHARED", "PUBLIC");
         editListVisibilityCombo.getItems().setAll("PRIVATE", "SHARED", "PUBLIC");
         newListVisibilityCombo.getSelectionModel().selectFirst();
+        for (var list : java.util.List.of(listsListView, tripSearchResults, savedTripsListView,
+                activitySearchResults, savedActivitiesListView)) {
+            list.setCellFactory(view -> new javafx.scene.control.ListCell<>() {
+                @Override
+                protected void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    String display = empty || item == null ? null : ID_PATTERN.matcher(item).replaceFirst("").strip();
+                    setText(display);
+                    setAccessibleText(display);
+                }
+            });
+        }
         listsListView.setItems(FXCollections.observableArrayList());
         tripSearchResults.setItems(FXCollections.observableArrayList());
         savedTripsListView.setItems(FXCollections.observableArrayList());
@@ -93,8 +136,8 @@ public class FavoritesController {
         sharedListOrganizerColumn.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().organizer));
         sharedListPermissionColumn.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().permission));
         sharedListSharedAtColumn.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().sharedAt));
-        sharedListsTable.getSelectionModel().selectedItemProperty().addListener((obs, oldRow, newRow) ->
-                showSharedListDetails(newRow));
+        sharedListsTable.getSelectionModel().selectedItemProperty()
+                .addListener((obs, oldRow, newRow) -> showSharedListDetails(newRow));
         listsListView.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, value) -> {
 
             selectedListId = extractId(value);
@@ -104,7 +147,8 @@ public class FavoritesController {
                 editListNameField.clear();
                 editListVisibilityCombo.getSelectionModel().clearSelection();
                 saveListChangesButton.setDisable(true);
-                if (deleteListButton != null) deleteListButton.setDisable(true);
+                if (deleteListButton != null)
+                    deleteListButton.setDisable(true);
                 shareListButton.setVisible(false);
                 shareListButton.setManaged(false);
                 savedTripsListView.getItems().clear();
@@ -119,7 +163,8 @@ public class FavoritesController {
             editListNameField.setText(displayName(value));
             editListVisibilityCombo.setValue(visibility);
             saveListChangesButton.setDisable(false);
-            if (deleteListButton != null) deleteListButton.setDisable(false);
+            if (deleteListButton != null)
+                deleteListButton.setDisable(false);
             boolean canShare = "SHARED".equals(visibility);
             shareListButton.setVisible(canShare);
             shareListButton.setManaged(canShare);
@@ -129,7 +174,8 @@ public class FavoritesController {
         });
         setContentControlsEnabled(false);
         saveListChangesButton.setDisable(true);
-        if (deleteListButton != null) deleteListButton.setDisable(true);
+        if (deleteListButton != null)
+            deleteListButton.setDisable(true);
         sharingPopup.setVisible(false);
         sharingPopup.setManaged(false);
         sharingPopupPanel = sharingPopup.getChildrenUnmodifiable().stream()
@@ -150,14 +196,15 @@ public class FavoritesController {
         removeTripButton.setDisable(!enabled);
         addActivityButton.setDisable(!enabled);
         removeActivityButton.setDisable(!enabled);
-    
+
     }
 
     private void loadNavbar() {
 
         try {
 
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml"));
+            FXMLLoader loader = new FXMLLoader(
+                    getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml"));
             Parent navbar = loader.load();
             navbarContainer.getChildren().setAll(navbar);
 
@@ -178,7 +225,7 @@ public class FavoritesController {
                         for (JsonElement el : arr) {
                             JsonObject obj = el.getAsJsonObject();
                             String id = obj.get("id").getAsString();
-                            String name = stringValue(obj, "name", "Lista #" + id);
+                            String name = stringValue(obj, "name", "Lista senza nome");
                             String visibility = stringValue(obj, "visibility", "PRIVATE");
                             listsListView.getItems().add(name + " [" + visibility + "] #" + id);
                         }
@@ -210,7 +257,8 @@ public class FavoritesController {
     }
 
     private void loadSharedLists() {
-        if (sharedListsStatusLabel != null) sharedListsStatusLabel.setText("Caricamento liste condivise…");
+        if (sharedListsStatusLabel != null)
+            sharedListsStatusLabel.setText("Caricamento liste condivise…");
         ApiService.call(ApiService.BASE_URL + "/api/list-sharings/shared-with-me", null, ApiService.Method.GET,
                 response -> Platform.runLater(() -> {
                     try {
@@ -223,68 +271,89 @@ public class FavoritesController {
                             String organizer = stringValue(obj, "organizerUsername", "Non disponibile");
                             String permission = stringValue(obj, "permission", "VIEW");
                             String sharedAt = stringValue(obj, "sharedAt", "");
-                            if (sharedAt.length() >= 16) sharedAt = sharedAt.replace('T', ' ');
-                            sharedListsTable.getItems().add(new SharedListRow(listName, organizer, permission, sharedAt, obj));
+                            if (sharedAt.length() >= 16)
+                                sharedAt = sharedAt.replace('T', ' ');
+                            sharedListsTable.getItems()
+                                    .add(new SharedListRow(listName, organizer, permission, sharedAt, obj));
                         }
                         if (sharedListsStatusLabel != null) {
                             sharedListsStatusLabel.setText(array.size() == 0
                                     ? "Non hai ancora liste condivise con te. Gli inviti accettati appariranno qui."
                                     : "Liste condivise con te: " + array.size());
                         }
-                        if (!sharedListsTable.getItems().isEmpty()) sharedListsTable.getSelectionModel().selectFirst();
+                        if (!sharedListsTable.getItems().isEmpty())
+                            sharedListsTable.getSelectionModel().selectFirst();
                     } catch (Exception ex) {
-                        if (sharedListsStatusLabel != null) sharedListsStatusLabel.setText("Risposta non valida dal server durante il caricamento delle liste condivise.");
+                        if (sharedListsStatusLabel != null)
+                            sharedListsStatusLabel.setText(
+                                    "Risposta non valida dal server durante il caricamento delle liste condivise.");
                     }
                 }),
                 () -> Platform.runLater(() -> {
-                    if (sharedListsStatusLabel != null) sharedListsStatusLabel.setText("Impossibile caricare le liste condivise. Controlla il backend.");
+                    if (sharedListsStatusLabel != null)
+                        sharedListsStatusLabel
+                                .setText("Impossibile caricare le liste condivise. Controlla il backend.");
                 }), null);
     }
 
     private void showSharedListDetails(SharedListRow row) {
         sharedListDetailsListView.getItems().clear();
-        if (row == null || row.data == null) return;
+        if (row == null || row.data == null)
+            return;
         JsonArray trips = row.data.has("trips") && row.data.get("trips").isJsonArray()
-                ? row.data.getAsJsonArray("trips") : new JsonArray();
+                ? row.data.getAsJsonArray("trips")
+                : new JsonArray();
         if (trips.size() == 0) {
             sharedListDetailsListView.getItems().add("Questa lista non contiene ancora viaggi.");
             return;
         }
         for (JsonElement tripElement : trips) {
-            if (!tripElement.isJsonObject()) continue;
+            if (!tripElement.isJsonObject())
+                continue;
             JsonObject trip = tripElement.getAsJsonObject();
             String title = stringValue(trip, "title", "Viaggio senza titolo");
             String city = stringValue(trip, "destinationCity", "");
             String country = stringValue(trip, "destinationCountry", "");
             String destination = (city + (city.isBlank() || country.isBlank() ? "" : ", ") + country).trim();
             sharedListDetailsListView.getItems().add("✈ " + title + (destination.isBlank() ? "" : " — " + destination));
-            sharedListDetailsListView.getItems().add("  Organizzatore del viaggio: @" + stringValue(trip, "organizerUsername", "non disponibile"));
+            sharedListDetailsListView.getItems()
+                    .add("  Organizzatore del viaggio: @" + stringValue(trip, "organizerUsername", "non disponibile"));
             String start = stringValue(trip, "startDate", "");
             String end = stringValue(trip, "endDate", "");
-            if (!start.isBlank() || !end.isBlank()) sharedListDetailsListView.getItems().add("  Date: " + (start.isBlank() ? "?" : start) + " → " + (end.isBlank() ? "?" : end));
+            if (!start.isBlank() || !end.isBlank())
+                sharedListDetailsListView.getItems()
+                        .add("  Date: " + (start.isBlank() ? "?" : start) + " → " + (end.isBlank() ? "?" : end));
             JsonArray stages = trip.has("stages") && trip.get("stages").isJsonArray()
-                    ? trip.getAsJsonArray("stages") : new JsonArray();
+                    ? trip.getAsJsonArray("stages")
+                    : new JsonArray();
             if (stages.size() == 0) {
                 sharedListDetailsListView.getItems().add("  Nessuna tappa inserita.");
             } else {
                 for (JsonElement stageElement : stages) {
-                    if (!stageElement.isJsonObject()) continue;
+                    if (!stageElement.isJsonObject())
+                        continue;
                     JsonObject stage = stageElement.getAsJsonObject();
                     String day = stringValue(stage, "day", "?");
                     String order = stringValue(stage, "orderInDay", "?");
                     String stageTitle = stringValue(stage, "title", "Tappa");
-                    String location = firstNonBlank(stringValue(stage, "locationName", ""), stringValue(stage, "city", ""));
+                    String location = firstNonBlank(stringValue(stage, "locationName", ""),
+                            stringValue(stage, "city", ""));
                     String countryStage = stringValue(stage, "country", "");
-                    if (!location.isBlank() && !countryStage.isBlank() && !location.equals(countryStage)) location += ", " + countryStage;
+                    if (!location.isBlank() && !countryStage.isBlank() && !location.equals(countryStage))
+                        location += ", " + countryStage;
                     String startTime = stringValue(stage, "startTime", "");
                     String endTime = stringValue(stage, "endTime", "");
-                    String time = startTime.isBlank() && endTime.isBlank() ? "" : " · " + (startTime.isBlank() ? "--:--" : startTime) + "–" + (endTime.isBlank() ? "--:--" : endTime);
+                    String time = startTime.isBlank() && endTime.isBlank() ? ""
+                            : " · " + (startTime.isBlank() ? "--:--" : startTime) + "–"
+                                    + (endTime.isBlank() ? "--:--" : endTime);
                     String category = stringValue(stage, "category", "");
-                    sharedListDetailsListView.getItems().add("    Giorno " + day + " · tappa " + order + ": " + stageTitle
-                            + (category.isBlank() ? "" : " [" + category + "]")
-                            + (location.isBlank() ? "" : " — " + location) + time);
+                    sharedListDetailsListView.getItems()
+                            .add("    Giorno " + day + " · tappa " + order + ": " + stageTitle
+                                    + (category.isBlank() ? "" : " [" + category + "]")
+                                    + (location.isBlank() ? "" : " — " + location) + time);
                     String description = stringValue(stage, "description", "");
-                    if (!description.isBlank()) sharedListDetailsListView.getItems().add("      " + description);
+                    if (!description.isBlank())
+                        sharedListDetailsListView.getItems().add("      " + description);
                 }
             }
             sharedListDetailsListView.getItems().add(" ");
@@ -292,7 +361,9 @@ public class FavoritesController {
     }
 
     private String firstNonBlank(String... values) {
-        for (String value : values) if (value != null && !value.isBlank()) return value;
+        for (String value : values)
+            if (value != null && !value.isBlank())
+                return value;
         return "";
     }
 
@@ -302,6 +373,7 @@ public class FavoritesController {
         private final String permission;
         private final String sharedAt;
         private final JsonObject data;
+
         private SharedListRow(String listName, String organizer, String permission, String sharedAt, JsonObject data) {
             this.listName = listName;
             this.organizer = organizer == null ? "" : "@" + organizer;
@@ -361,7 +433,7 @@ public class FavoritesController {
                         for (JsonElement el : arr) {
                             JsonObject obj = el.getAsJsonObject();
                             String id = obj.get("id").getAsString();
-                            String name = stringValue(obj, "name", "Lista #" + id);
+                            String name = stringValue(obj, "name", "Lista senza nome");
                             String visibility = stringValue(obj, "visibility", "PRIVATE");
                             listsListView.getItems().add(name + " [" + visibility + "] #" + id);
                             if (Long.parseLong(id) == idToSelect) {
@@ -448,13 +520,14 @@ public class FavoritesController {
                 }), null);
     }
 
-    @FXML private void handleCreateList() {
+    @FXML
+    private void handleCreateList() {
 
         String name = newListNameField.getText();
         String visibility = newListVisibilityCombo.getValue();
-        if (name == null || name.isBlank()) { 
+        if (name == null || name.isBlank()) {
             showError("Inserisci un nome per la lista.");
-            return; 
+            return;
         }
 
         Map<String, String> payload = new LinkedHashMap<>();
@@ -467,12 +540,12 @@ public class FavoritesController {
                     loadLists();
                 }),
                 () -> Platform.runLater(() -> showError("Impossibile creare la lista.")),
-                null
-            );
+                null);
 
     }
 
-    @FXML private void handleSearchTrips() {
+    @FXML
+    private void handleSearchTrips() {
 
         String query = tripSearchField.getText() == null ? "" : tripSearchField.getText().trim();
         String url = ApiService.BASE_URL + "/api/trips/search?query="
@@ -487,8 +560,8 @@ public class FavoritesController {
                             String id = stringValue(o, "tripId", null);
                             if (id != null) {
                                 tripSearchResults.getItems()
-                                    .add(stringValue(o, "title", "Viaggio") + " — "
-                                       + stringValue(o, "location", "") + " #" + id);
+                                        .add(stringValue(o, "title", "Viaggio") + " — "
+                                                + stringValue(o, "location", "") + " #" + id);
                             }
 
                         }
@@ -497,55 +570,64 @@ public class FavoritesController {
                             showError("Nessun viaggio trovato.");
                         }
 
-                    } catch (Exception ex) { showError("Impossibile leggere i risultati dei viaggi."); }
+                    } catch (Exception ex) {
+                        showError("Impossibile leggere i risultati dei viaggi.");
+                    }
                 }),
                 () -> Platform.runLater(() -> showError("Ricerca viaggi non riuscita.")),
                 null);
 
     }
 
-    @FXML private void handleAddTrip() {
+    @FXML
+    private void handleAddTrip() {
 
         Long tripId = extractId(tripSearchResults.getSelectionModel().getSelectedItem());
-        if (selectedListId == null) { 
+        if (selectedListId == null) {
             showError("Seleziona prima una lista.");
-            return; 
+            return;
         }
 
-        if (tripId == null) { 
+        if (tripId == null) {
             showError("Seleziona un viaggio dai risultati.");
-            return; 
+            return;
         }
 
         Map<String, Long> payload = Map.of("listId", selectedListId, "tripId", tripId);
         ApiService.call(ApiService.BASE_URL + "/api/list-trips", ApiService.toJson(payload), ApiService.Method.POST,
-                response -> Platform.runLater(() -> { 
-                    showSuccess("Viaggio aggiunto alla lista."); loadSavedContents(); 
+                response -> Platform.runLater(() -> {
+                    showSuccess("Viaggio aggiunto alla lista.");
+                    loadSavedContents();
                 }),
-                () -> Platform.runLater(() -> showError("Impossibile aggiungere il viaggio. Potrebbe essere già presente o non essere pubblicato.")), null
-            );
-    
+                () -> Platform.runLater(() -> showError(
+                        "Impossibile aggiungere il viaggio. Potrebbe essere già presente o non essere pubblicato.")),
+                null);
+
     }
 
-    @FXML private void handleRemoveTrip() {
+    @FXML
+    private void handleRemoveTrip() {
 
         Long tripId = extractId(savedTripsListView.getSelectionModel().getSelectedItem());
-        if (selectedListId == null || tripId == null) { 
+        if (selectedListId == null || tripId == null) {
             showError("Seleziona un viaggio salvato da rimuovere.");
             return;
         }
 
         ApiService.call(ApiService.BASE_URL + "/api/list-trips/list/" + selectedListId + "/trip/" + tripId,
                 null, ApiService.Method.DELETE,
-                response -> Platform.runLater(() -> { 
-                    showSuccess("Viaggio rimosso dalla lista."); loadSavedContents(); 
+                response -> Platform.runLater(() -> {
+                    showSuccess("Viaggio rimosso dalla lista.");
+                    loadSavedContents();
                 }),
-                () -> Platform.runLater(() -> showError("Non è stato possibile rimuovere il viaggio: verifica i permessi.")),
+                () -> Platform
+                        .runLater(() -> showError("Non è stato possibile rimuovere il viaggio: verifica i permessi.")),
                 null);
 
     }
 
-    @FXML private void handleSearchActivities() {
+    @FXML
+    private void handleSearchActivities() {
 
         String query = activitySearchField.getText() == null ? "" : activitySearchField.getText().trim();
         String url = ApiService.BASE_URL + "/api/activities/search?query="
@@ -561,8 +643,8 @@ public class FavoritesController {
                             String id = stringValue(o, "activityId", null);
                             if (id != null) {
                                 activitySearchResults.getItems()
-                                    .add(stringValue(o, "title", "Attività") + " — "
-                                       + stringValue(o, "city", "") + " #" + id);
+                                        .add(stringValue(o, "title", "Attività") + " — "
+                                                + stringValue(o, "city", "") + " #" + id);
                             }
 
                         }
@@ -571,50 +653,59 @@ public class FavoritesController {
                             showError("Nessuna attività trovata.");
                         }
 
-                    } catch (Exception ex) { showError("Impossibile leggere i risultati delle attività."); }
+                    } catch (Exception ex) {
+                        showError("Impossibile leggere i risultati delle attività.");
+                    }
                 }),
                 () -> Platform.runLater(() -> showError("Ricerca attività non riuscita.")), null);
 
     }
 
-    @FXML private void handleAddActivity() {
+    @FXML
+    private void handleAddActivity() {
 
         Long activityId = extractId(activitySearchResults.getSelectionModel().getSelectedItem());
-        if (selectedListId == null) { 
+        if (selectedListId == null) {
             showError("Seleziona prima una lista.");
             return;
         }
 
-        if (activityId == null) { 
+        if (activityId == null) {
             showError("Seleziona un'attività dai risultati.");
             return;
         }
 
         Map<String, Long> payload = Map.of("listId", selectedListId, "activityId", activityId);
-        ApiService.call(ApiService.BASE_URL + "/api/list-activities", ApiService.toJson(payload), ApiService.Method.POST,
-                response -> Platform.runLater(() -> { 
+        ApiService.call(ApiService.BASE_URL + "/api/list-activities", ApiService.toJson(payload),
+                ApiService.Method.POST,
+                response -> Platform.runLater(() -> {
                     showSuccess("Attività aggiunta alla lista.");
                     loadSavedContents();
                 }),
-                () -> Platform.runLater(() -> showError("Impossibile aggiungere l'attività. Potrebbe essere già presente o non pubblicata.")), null
-            );
+                () -> Platform.runLater(() -> showError(
+                        "Impossibile aggiungere l'attività. Potrebbe essere già presente o non pubblicata.")),
+                null);
 
     }
 
-    @FXML private void handleRemoveActivity() {
+    @FXML
+    private void handleRemoveActivity() {
 
         Long activityId = extractId(savedActivitiesListView.getSelectionModel().getSelectedItem());
-        if (selectedListId == null || activityId == null) { 
+        if (selectedListId == null || activityId == null) {
             showError("Seleziona un'attività salvata da rimuovere.");
             return;
         }
 
         ApiService.call(ApiService.BASE_URL + "/api/list-activities/list/" + selectedListId + "/activity/" + activityId,
                 null, ApiService.Method.DELETE,
-                response -> Platform.runLater(() -> { 
-                    showSuccess("Attività rimossa dalla lista."); loadSavedContents(); 
+                response -> Platform.runLater(() -> {
+                    showSuccess("Attività rimossa dalla lista.");
+                    loadSavedContents();
                 }),
-                () -> Platform.runLater(() -> showError("Non è stato possibile rimuovere l'attività: verifica i permessi.")), null);
+                () -> Platform
+                        .runLater(() -> showError("Non è stato possibile rimuovere l'attività: verifica i permessi.")),
+                null);
 
     }
 
@@ -635,8 +726,10 @@ public class FavoritesController {
                             savedTripsListView.getItems().add(stringValue(o, "title", "Viaggio")
                                     + " — " + stringValue(o, "location", "") + " #" + o.get("tripId").getAsString());
                         }
-    
-                    } catch (Exception ex) { showError("Impossibile leggere i viaggi della lista."); }
+
+                    } catch (Exception ex) {
+                        showError("Impossibile leggere i viaggi della lista.");
+                    }
                 }),
                 () -> Platform.runLater(() -> showError("Impossibile caricare i viaggi della lista.")),
                 null);
@@ -651,7 +744,9 @@ public class FavoritesController {
                                     + " — " + stringValue(o, "city", "") + " #" + o.get("activityId").getAsString());
                         }
 
-                    } catch (Exception ex) { showError("Impossibile leggere le attività della lista."); }
+                    } catch (Exception ex) {
+                        showError("Impossibile leggere le attività della lista.");
+                    }
                 }),
                 () -> Platform.runLater(() -> showError("Impossibile caricare le attività della lista.")),
                 null);
@@ -679,13 +774,15 @@ public class FavoritesController {
         if (sharingPopupPanel.getParent() instanceof StackPane oldParent) {
             oldParent.getChildren().remove(sharingPopupPanel);
         }
-        var sharingCssResource = getClass().getResource("/it/unical/ea_project_javafx/css/traveler/list-sharing-popup.css");
+        var sharingCssResource = getClass()
+                .getResource("/it/unical/ea_project_javafx/css/traveler/list-sharing-popup.css");
         if (sharingCssResource == null) {
             showError("Non è stato possibile caricare lo stile della finestra di condivisione.");
             return;
         }
         String sharingCss = sharingCssResource.toExternalForm();
-        if (!sharingPopupPanel.getStylesheets().contains(sharingCss)) sharingPopupPanel.getStylesheets().add(sharingCss);
+        if (!sharingPopupPanel.getStylesheets().contains(sharingCss))
+            sharingPopupPanel.getStylesheets().add(sharingCss);
         activeSharingPopup = PopupFactory.show(root, sharingPopupPanel, PopupFactory.Size.LARGE);
         sharingPopupController.open(selectedListId, selectedListNameLabel.getText());
     }
@@ -711,10 +808,10 @@ public class FavoritesController {
             return null;
         }
 
-        try { 
-            return Long.parseLong(matcher.group(1)); 
-        } catch (NumberFormatException ex) { 
-            return null; 
+        try {
+            return Long.parseLong(matcher.group(1));
+        } catch (NumberFormatException ex) {
+            return null;
         }
 
     }
@@ -744,12 +841,14 @@ public class FavoritesController {
     private void showError(String msg) {
         statusMessageLabel.setText(msg);
         statusMessageLabel.getStyleClass().setAll("status-message", "status-error");
-        statusMessageLabel.setVisible(true); statusMessageLabel.setManaged(true);
+        statusMessageLabel.setVisible(true);
+        statusMessageLabel.setManaged(true);
     }
 
     private void showSuccess(String msg) {
         statusMessageLabel.setText(msg);
         statusMessageLabel.getStyleClass().setAll("status-message", "status-success");
-        statusMessageLabel.setVisible(true); statusMessageLabel.setManaged(true);
+        statusMessageLabel.setVisible(true);
+        statusMessageLabel.setManaged(true);
     }
 }

@@ -51,6 +51,11 @@ public class SettingsController {
     @FXML
     private CheckBox publicProfileCheck;
 
+    @FXML
+    private Label passwordStrengthLabel;
+    @FXML
+    private Button passwordButton, preferencesButton;
+    private boolean settingsLoaded;
     private final UserSession userSession = UserSession.getInstance();
 
     @FXML
@@ -59,6 +64,26 @@ public class SettingsController {
         BackgroundHelper.setupBackground(bgImageView);
         loadNavbar();
         setupRoleSpecificSections();
+        newPasswordField.textProperty()
+                .addListener((o, a,
+                        b) -> passwordStrengthLabel.setText(b.isEmpty() ? ""
+                                : PasswordPolicy.isValid(b) ? "La password rispetta i requisiti."
+                                        : "Servono almeno 8 caratteri, una lettera, un numero e un simbolo."));
+        passwordStrengthLabel.managedProperty().bind(passwordStrengthLabel.textProperty().isNotEmpty());
+        passwordStrengthLabel.visibleProperty().bind(passwordStrengthLabel.managedProperty());
+        preferencesButton.setDisable(true);
+        ApiService.callDetailed(ApiService.BASE_URL + "/api/account/settings", null, ApiService.Method.GET, r -> {
+            var data = com.google.gson.JsonParser.parseString(r.body()).getAsJsonObject();
+            emailBookingNotificationCheck.setSelected(data.get("bookingAlerts").getAsBoolean());
+            emailMarketingCheck.setSelected(data.get("chatAlerts").getAsBoolean());
+            publicProfileCheck.setSelected(data.get("personalized").getAsBoolean());
+            if (data.has("brand") && !data.get("brand").isJsonNull())
+                organizerBrandNameField.setText(data.get("brand").getAsString());
+            if (data.has("bio") && !data.get("bio").isJsonNull())
+                organizerBioArea.setText(data.get("bio").getAsString());
+            settingsLoaded = true;
+            preferencesButton.setDisable(false);
+        }, this::showError, null);
 
     }
 
@@ -134,29 +159,45 @@ public class SettingsController {
                     confirmPasswordField.clear();
                 }),
                 message -> Platform.runLater(() -> showError(message)),
-                null);
+                passwordButton::setDisable);
 
     }
 
     @FXML
     private void handleSaveOrganizerInfo(ActionEvent event) {
 
-        clearMessage();
-        String brand = organizerBrandNameField.getText();
-        String bio = organizerBioArea.getText();
+        handleSavePreferences();
+    }
 
-        Map<String, String> payload = new LinkedHashMap<>();
-        payload.put("brandName", brand);
-        payload.put("bio", bio);
+    @FXML
+    private void handleSavePreferences() {
+        if (!settingsLoaded)
+            return;
+        var payload = new LinkedHashMap<String, Object>();
+        payload.put("chatAlerts", emailMarketingCheck.isSelected());
+        payload.put("bookingAlerts", emailBookingNotificationCheck.isSelected());
+        payload.put("personalized", publicProfileCheck.isSelected());
+        payload.put("brand", organizerBrandNameField.getText());
+        payload.put("bio", organizerBioArea.getText());
+        ApiService.callDetailed(ApiService.BASE_URL + "/api/account/settings", ApiService.toJson(payload),
+                ApiService.Method.PUT, r -> showSuccess("Preferenze salvate."), this::showError,
+                preferencesButton::setDisable);
+    }
 
-        ApiService.call(
-                ApiService.BASE_URL + "/api/organizers/profile",
-                ApiService.toJson(payload),
-                ApiService.Method.PUT,
-                response -> Platform.runLater(() -> showSuccess("Dati organizzatore salvati con successo!")),
-                () -> Platform.runLater(() -> showError("Errore durante il salvataggio dei dati organizzatore.")),
-                null);
-
+    @FXML
+    private void handleRevokeSessions() {
+        var root = it.unical.ea_project_javafx.util.PopupFactory.resolveRoot(navbarContainer);
+        it.unical.ea_project_javafx.util.PopupFactory.showConfirmation(root, "Chiudere tutte le sessioni?",
+                "Dovrai accedere nuovamente anche su questo dispositivo.",
+                it.unical.ea_project_javafx.util.PopupFactory.Size.COMPACT, () -> ApiService
+                        .callDetailed(ApiService.BASE_URL + "/api/users/logout", null, ApiService.Method.POST, r -> {
+                            userSession.clear();
+                            it.unical.ea_project_javafx.util.TokenStorage.clear();
+                            it.unical.ea_project_javafx.util.NotificationPollingService.getInstance()
+                                    .clearSessionState();
+                            it.unical.ea_project_javafx.util.SceneNavigator.getInstance()
+                                    .loadScene("/it/unical/ea_project_javafx/fxml/login/login.fxml", null);
+                        }, this::showError, null));
     }
 
     private boolean blank(String value) {

@@ -17,33 +17,48 @@ import java.util.Optional;
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
-    Optional<Notification> findByNotificationIdAndUser_Id(Long notificationId, Long userId);
+        Optional<Notification> findFirstByUser_IdAndRelatedEntityTypeAndRelatedEntityIdAndReadFalse(Long user,
+                        String type,
+                        Long entity);
 
-    boolean existsByUser_IdAndTypeAndRelatedEntityId(
-            Long userId, NotificationType type, Long relatedEntityId);
+        @Modifying
+        @Query("update Notification n set n.read=true where n.user.id=:user and n.relatedEntityType='CHAT' and n.relatedEntityId=:conversation and n.read=false")
+        void readConversation(Long user, Long conversation);
 
-    @Modifying
-    @Query("UPDATE Notification n SET n.type = :resolvedType, n.read = true, n.relatedEntityId = null, n.relatedEntityType = null, n.actionData = null, n.title = 'Invito non più disponibile', n.message = 'La lista non è più condivisa.' WHERE n.relatedEntityId = :listId AND n.type = :invitationType")
-    int invalidateListInvitations(Long listId, NotificationType invitationType, NotificationType resolvedType);
+        Optional<Notification> findByNotificationIdAndUser_Id(Long notificationId, Long userId);
 
-    // Recupera le notifiche di un utente ordinate dalla più recente (decrescente per data)
-    List<Notification> findByUserOrderByCreatedAtDesc(User user);
+        boolean existsByUser_IdAndTypeAndRelatedEntityId(
+                        Long userId, NotificationType type, Long relatedEntityId);
 
-    // Recupera le notifiche con supporto alla paginazione (utile per non rallentare l'app se l'utente ne ha centinaia)
-    Page<Notification> findByUser(User user, Pageable pageable);
+        @Modifying
+        @Query("UPDATE Notification n SET n.type = :resolvedType, n.read = true, n.relatedEntityId = null, n.relatedEntityType = null, n.actionData = null, n.title = 'Invito non più disponibile', n.message = 'La lista non è più condivisa.' WHERE n.relatedEntityId = :listId AND n.type = :invitationType")
+        int invalidateListInvitations(Long listId, NotificationType invitationType, NotificationType resolvedType);
 
-    // Trova le notifiche filtrate per stato di lettura (es. solo quelle non lette: read = false)
-    List<Notification> findByUserAndReadOrderByCreatedAtDesc(User user, Boolean read);
+        // Recupera le notifiche di un utente ordinate dalla più recente (decrescente
+        // per data)
+        List<Notification> findByUserOrderByCreatedAtDesc(User user);
 
-    // Conta quante notifiche NON lette ha un utente
-    long countByUserAndReadFalse(User user);
+        // Recupera le notifiche con supporto alla paginazione (utile per non rallentare
+        // l'app se l'utente ne ha centinaia)
+        Page<Notification> findByUser(User user, Pageable pageable);
 
-    // Trova le notifiche di un utente per una categoria specifica (es. solo quelle di PAYMENTS)
-    List<Notification> findByUserAndTypeOrderByCreatedAtDesc(User user, NotificationType type);
+        // Trova le notifiche filtrate per stato di lettura (es. solo quelle non lette:
+        // read = false)
+        List<Notification> findByUserAndReadOrderByCreatedAtDesc(User user, Boolean read);
 
-    // Segna come lette tutte le notifiche di un determinato utente in un'unica operazione
-    @Transactional
-    @Modifying
-    @Query("UPDATE Notification n SET n.read = true WHERE n.user = :user AND n.read = false")
-    int markAllAsReadForUser(User user);
+        List<Notification> findByUserAndReadOrderByCreatedAtDesc(User user, Boolean read, Pageable page);
+
+        // Conta quante notifiche NON lette ha un utente
+        long countByUserAndReadFalse(User user);
+
+        // Trova le notifiche di un utente per una categoria specifica (es. solo quelle
+        // di PAYMENTS)
+        List<Notification> findByUserAndTypeOrderByCreatedAtDesc(User user, NotificationType type);
+
+        // Segna come lette tutte le notifiche di un determinato utente in un'unica
+        // operazione
+        @Transactional
+        @Modifying
+        @Query("UPDATE Notification n SET n.read = true WHERE n.user = :user AND n.read = false")
+        int markAllAsReadForUser(User user);
 }

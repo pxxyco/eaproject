@@ -26,6 +26,7 @@ public class RecommendationService {
     }
 
     private final UserRepository users;
+    private final it.unical.ea_project.account.AccountSettingsRepository preferences;
     private final TripRepository trips;
     private final ActivityRepository activities;
     private final BookingRepository bookings;
@@ -85,6 +86,9 @@ public class RecommendationService {
                         r.getActivity().getCategory() == null ? null : r.getActivity().getCategory().name(), weight);
             }
         }
+        if (!preferences.findById(userId).map(it.unical.ea_project.account.AccountSettings::isPersonalized)
+                .orElse(true))
+            affinity.clear();
         List<Candidate<Trip>> tripCandidates = new ArrayList<>();
         for (var t : trips.recommendationCandidates(LocalDate.now(), userId, PageRequest.of(0, 200))) {
             if (bookedTrips.contains(t.getTripId()))

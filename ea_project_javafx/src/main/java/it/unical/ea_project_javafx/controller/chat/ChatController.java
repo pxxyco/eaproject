@@ -16,6 +16,8 @@ import java.util.*;
 
 public class ChatController implements AutoCloseable {
     @FXML
+    private javafx.scene.image.ImageView bgImageView;
+    @FXML
     private StackPane pageRoot, navbarContainer;
     @FXML
     private ListView<JsonObject> conversations;
@@ -29,12 +31,24 @@ public class ChatController implements AutoCloseable {
     private Label connectionLabel, statusLabel, conversationTitle, conversationSubtitle, characterCount;
     @FXML
     private Button sendButton, olderButton, latestButton, moreConversations;
-    private ChatStream stream;
+    private AutoCloseable stream;
     private JsonObject selected;
     private boolean closed, updatingInbox, inboxBusy, messagesBusy, sending, messagesPending, inboxPending;
+    private final javafx.animation.PauseTransition settleScroll = new javafx.animation.PauseTransition(
+            javafx.util.Duration.millis(60));
     private int inboxPage;
+    private boolean compactMode;
+
+    public ChatController() {
+    }
+
+    public ChatController(boolean compact) {
+        compactMode = compact;
+    }
+
     private long selectedId, requestGeneration, lastRead;
     private boolean latest = true;
+    private boolean followLatest = true;
     private Long oldest, maximum;
     private String pendingBody, pendingId;
     private final Map<Long, String> drafts = new HashMap<>();
@@ -46,10 +60,14 @@ public class ChatController implements AutoCloseable {
 
     @FXML
     public void initialize() {
+        if (!compactMode)
+            it.unical.ea_project_javafx.util.BackgroundHelper.setupBackground(bgImageView);
         try {
-            Parent nav = FXMLLoader
-                    .load(getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml"));
-            navbarContainer.getChildren().setAll(nav);
+            if (!compactMode) {
+                Parent nav = FXMLLoader
+                        .load(getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml"));
+                navbarContainer.getChildren().setAll(nav);
+            }
         } catch (Exception ex) {
             show("Barra di navigazione non disponibile.");
         }
@@ -82,9 +100,24 @@ public class ChatController implements AutoCloseable {
                 e.consume();
             }
         });
+        messagesBox.layoutBoundsProperty().addListener((o, a, b) -> {
+            if (latest && followLatest && Math.abs(a.getHeight() - b.getHeight()) > 1)
+                javafx.application.Platform.runLater(() -> {
+                    if (!closed && latest && followLatest) {
+                        messagesScroll.setVvalue(1);
+                        markRead();
+                    }
+                });
+        });
+        messagesScroll.addEventFilter(javafx.scene.input.ScrollEvent.SCROLL, e -> {
+            if (e.getDeltaY() > 0)
+                followLatest = false;
+        });
         messagesScroll.vvalueProperty().addListener((o, a, b) -> {
-            if (b.doubleValue() > .98)
+            if (b.doubleValue() > .98) {
+                followLatest = true;
                 markRead();
+            }
         });
         pageRoot.sceneProperty().addListener((o, old, scene) -> {
             if (scene != null)
@@ -98,15 +131,48 @@ public class ChatController implements AutoCloseable {
         });
         updateSend();
         loadInbox(false);
-        stream = new ChatStream(id -> {
+        stream = it.unical.ea_project_javafx.service.ChatEventHub.subscribe(id -> {
             loadInbox(false);
             if (selectedId != 0 && (id == -1 || id == selectedId)) {
-                if (latest)
+                if (latest && followLatest)
                     loadMessages(null);
                 else
                     show("Nuovi aggiornamenti. Premi “Più recenti” per tornare alla conversazione.");
             }
         }, connectionLabel::setText);
+    }
+
+    public void openConversation(long id) {
+        ApiService.callDetailed(API + "/conversations/" + id, null, ApiService.Method.GET, r -> {
+            if (!closed)
+                select(JsonParser.parseString(r.body()).getAsJsonObject());
+        }, this::show, null);
+    }
+
+    public void compact() {
+        compactMode = true;
+        bgImageView.setVisible(false);
+        bgImageView.setManaged(false);
+        pageRoot.getChildren().stream().filter(n -> n.getStyleClass().contains("app-background-shade"))
+                .forEach(n -> {
+                    n.setVisible(false);
+                    n.setManaged(false);
+                });
+        pageRoot.setStyle("-fx-background-color: transparent;");
+        navbarContainer.getChildren().clear();
+        if (connectionLabel.getParent() instanceof javafx.scene.layout.Pane old)
+            old.getChildren().remove(connectionLabel);
+        if (conversationTitle.getParent() instanceof VBox header)
+            header.getChildren().add(2, connectionLabel);
+        navbarContainer.setVisible(false);
+        navbarContainer.setManaged(false);
+        var sidebar = conversations.getParent();
+        sidebar.setVisible(false);
+        sidebar.setManaged(false);
+        pageRoot.setPrefSize(660, 570);
+        pageRoot.setMinSize(0, 0);
+        pageRoot.setMaxSize(660, 610);
+        pageRoot.getStyleClass().add("chat-compact");
     }
 
     public void openOrganizer(Long organizer) {
@@ -135,6 +201,8 @@ public class ChatController implements AutoCloseable {
     }
 
     private void loadInbox(boolean append) {
+        if (compactMode)
+            return;
         if (closed)
             return;
         if (inboxBusy) {
@@ -190,6 +258,7 @@ public class ChatController implements AutoCloseable {
         if (selectedId != 0)
             drafts.put(selectedId, composer.getText());
         selected = conversation;
+        followLatest = true;
         selectedId = conversation.get("id").getAsLong();
         requestGeneration++;
         lastRead = 0;
@@ -214,6 +283,7 @@ public class ChatController implements AutoCloseable {
 
     @FXML
     private void handleLatest() {
+        followLatest = true;
         loadMessages(null);
     }
 
@@ -248,10 +318,18 @@ public class ChatController implements AutoCloseable {
                             messagesBox.getChildren().add(bubble(message));
                         if (ordered.isEmpty())
                             messagesBox.getChildren().add(new Label("Scrivi il primo messaggio."));
-                        if (latest)
+                        if (latest && followLatest)
                             javafx.application.Platform.runLater(() -> {
+                                messagesScroll.applyCss();
+                                messagesScroll.layout();
                                 messagesScroll.setVvalue(1);
-                                markRead();
+                                settleScroll.setOnFinished(e -> {
+                                    if (!closed && selectedId == conversation) {
+                                        messagesScroll.setVvalue(1);
+                                        markRead();
+                                    }
+                                });
+                                settleScroll.playFromStart();
                             });
                         if (messagesPending) {
                             messagesPending = false;
@@ -353,7 +431,11 @@ public class ChatController implements AutoCloseable {
     @Override
     public void close() {
         closed = true;
+        settleScroll.stop();
         if (stream != null)
-            stream.close();
+            try {
+                stream.close();
+            } catch (Exception ignored) {
+            }
     }
 }

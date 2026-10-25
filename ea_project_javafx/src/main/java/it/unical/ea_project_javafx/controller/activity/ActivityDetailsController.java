@@ -238,10 +238,29 @@ public class ActivityDetailsController {
         Long organizer = trip != null ? trip.getCreatedByUserId()
                 : activity != null ? activity.getCreatedByUserId() : null;
         if (organizer != null)
-            SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/chat/chat.fxml", controller -> {
-                if (controller instanceof it.unical.ea_project_javafx.controller.chat.ChatController chat)
-                    chat.openOrganizer(organizer);
-            });
+            try {
+                FXMLLoader loader = new FXMLLoader(
+                        getClass().getResource("/it/unical/ea_project_javafx/fxml/chat/chat.fxml"));
+                loader.setControllerFactory(type -> {
+                    if (type == it.unical.ea_project_javafx.controller.chat.ChatController.class)
+                        return new it.unical.ea_project_javafx.controller.chat.ChatController(true);
+                    try {
+                        return type.getDeclaredConstructor().newInstance();
+                    } catch (Exception ex) {
+                        throw new IllegalStateException(ex);
+                    }
+                });
+                Parent view = loader.load();
+                var chat = (it.unical.ea_project_javafx.controller.chat.ChatController) loader.getController();
+                chat.compact();
+                var popup = PopupFactory.show(PopupFactory.resolveRoot(root), view, PopupFactory.Size.MEDIUM);
+                popup.onClosed(chat::close);
+                chat.openOrganizer(organizer);
+            } catch (IOException ex) {
+                PopupFactory.showMessage(PopupFactory.resolveRoot(root), "Messaggi",
+                        "Non è stato possibile aprire la chat.", PopupFactory.Size.COMPACT);
+            }
+
     }
 
     private void setActivityData() {

@@ -104,3 +104,78 @@
 .itinerary-editor .table-view .placeholder .label {
     -fx-text-fill: #a8a29e;
 }
+
+.itinerary-title {
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #fafaf9;
+}
+
+.itinerary-panel-title {
+    -fx-font-size: 21px;
+    -fx-font-weight: bold;
+}
+
+.itinerary-panel {
+    -fx-background-color: rgba(41, 37, 36, 0.96);
+    -fx-background-radius: 22;
+    -fx-border-radius: 22;
+    -fx-border-color: #57534e;
+    -fx-padding: 22;
+}
+
+.itinerary-editor .table-view {
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-color: #57534e;
+    -fx-padding: 8;
+    -fx-fixed-cell-size: 52;
+}
+
+.itinerary-editor .column-header-background {
+    -fx-background-radius: 12 12 0 0;
+}
+
+.itinerary-editor .table-cell {
+    -fx-border-color: transparent transparent #38332f transparent;
+}
+
+.itinerary-editor .table-row-cell:selected {
+    -fx-background-color: #5b4d3d;
+}
+
+.itinerary-form .text-field,
+.itinerary-form .text-area,
+.itinerary-editor .combo-box,
+.itinerary-editor .spinner {
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+}
+
+.itinerary-form .button {
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-min-height: 40;
+    -fx-padding: 9 13;
+}
+
+.itinerary-editor .spinner .increment-arrow-button {
+    -fx-background-radius: 0 10 0 0;
+}
+
+.itinerary-editor .spinner .decrement-arrow-button {
+    -fx-background-radius: 0 0 10 0;
+}
+
+.itinerary-editor .text-field:focused,
+.itinerary-editor .text-area:focused {}
+
+.itinerary-editor .combo-box>.list-cell {
+    -fx-background-color: transparent;
+    -fx-background-radius: 12;
+}
+
+.itinerary-editor .spinner>.text-field {
+    -fx-background-radius: 12 0 0 12;
+    -fx-border-radius: 12 0 0 12;
+}

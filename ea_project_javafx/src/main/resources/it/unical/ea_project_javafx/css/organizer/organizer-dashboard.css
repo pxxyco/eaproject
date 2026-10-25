@@ -26,9 +26,7 @@
 }
 
 .btn-new-activity:hover,
-.btn-card-action:hover {
-    -fx-background-color: #fafaf9;
-}
+.btn-card-action:hover {}
 
 /* KPI Cards */
 .kpi-card {
@@ -46,7 +44,7 @@
     -fx-text-fill: rgba(255, 255, 255, 0.6);
 }
 
-.kpi-value, 
+.kpi-value,
 .kpi-value-green {
     -fx-font-size: 26px;
     -fx-font-weight: bold;

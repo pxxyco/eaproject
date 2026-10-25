@@ -137,10 +137,42 @@
     -fx-padding: 8 12;
 }
 
-.chat-root .btn-primary:hover {
-    -fx-background-color: #fafaf9;
+.chat-root .btn-primary:hover {}
+
+.chat-root .btn-secondary:hover {}
+
+.chat-compact .chat-panel {
+    -fx-padding: 0;
+    -fx-background-color: #24211f;
+    -fx-border-color: transparent;
 }
 
-.chat-root .btn-secondary:hover {
-    -fx-background-color: rgba(231, 229, 228, .20);
+.chat-compact .chat-thread {
+    -fx-padding: 12;
+}
+
+.chat-compact .chat-title {
+    -fx-font-size: 20;
+}
+
+.chat-root .scroll-bar,
+.chat-root .scroll-bar .track,
+.chat-root .scroll-bar .increment-button,
+.chat-root .scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.chat-root .scroll-bar .thumb {
+    -fx-background-color: #57534e;
+    -fx-background-radius: 8;
+}
+
+.chat-root .scroll-bar:vertical {
+    -fx-pref-width: 10;
+}
+
+.chat-root .scroll-bar .increment-arrow,
+.chat-root .scroll-bar .decrement-arrow {
+    -fx-background-color: #a8a29e;
 }
