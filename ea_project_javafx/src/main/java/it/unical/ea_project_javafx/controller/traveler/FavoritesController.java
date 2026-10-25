@@ -74,6 +74,9 @@ public class FavoritesController {
     private PopupFactory.Handle activeSharingPopup;
     private PopupFactory.Handle activeDeletePopup;
 
+    private static final String FAVORITES_ITEM = "♥ Preferiti";
+    private boolean favoritesSelected;
+
     @FXML
     public void initialize() {
     
@@ -99,6 +102,7 @@ public class FavoritesController {
 
             selectedListId = extractId(value);
             if (value == null) {
+                favoritesSelected = false;
                 selectedListNameLabel.setText("Seleziona una lista");
                 selectedListVisibilityLabel.setText("-");
                 editListNameField.clear();
@@ -112,6 +116,25 @@ public class FavoritesController {
                 setContentControlsEnabled(false);
                 return;
             }
+
+            favoritesSelected = FAVORITES_ITEM.equals(value);
+            if (favoritesSelected) {
+                selectedListNameLabel.setText("Preferiti");
+                selectedListVisibilityLabel.setText("Privata · lista predefinita, non modificabile");
+                editListNameField.setText("Preferiti");
+                editListNameField.setDisable(true);
+                editListVisibilityCombo.setValue("PRIVATE");
+                editListVisibilityCombo.setDisable(true);
+                saveListChangesButton.setDisable(true);
+                if (deleteListButton != null) deleteListButton.setDisable(true);
+                shareListButton.setVisible(false);
+                shareListButton.setManaged(false);
+                setContentControlsEnabled(true);
+                loadFavorites();
+                return;
+            }
+            editListNameField.setDisable(false);
+            editListVisibilityCombo.setDisable(false);
 
             selectedListNameLabel.setText(displayName(value));
             String visibility = extractVisibility(value);
@@ -175,6 +198,7 @@ public class FavoritesController {
 
                         JsonArray arr = JsonParser.parseString(response.body()).getAsJsonArray();
                         listsListView.getItems().clear();
+                        listsListView.getItems().add(FAVORITES_ITEM);
                         for (JsonElement el : arr) {
                             JsonObject obj = el.getAsJsonObject();
                             String id = obj.get("id").getAsString();
@@ -350,6 +374,8 @@ public class FavoritesController {
 
     private void loadListsAndSelect(Long idToSelect) {
 
+        listsListView.getItems().add(FAVORITES_ITEM);
+
         ApiService.call(ApiService.BASE_URL + "/api/favorite-lists/mine", null, ApiService.Method.GET,
                 response -> Platform.runLater(() -> {
 
@@ -506,6 +532,16 @@ public class FavoritesController {
 
     @FXML private void handleAddTrip() {
 
+        if (favoritesSelected) {
+            Long tripId = extractId(tripSearchResults.getSelectionModel().getSelectedItem());
+            if (tripId == null) { showError("Seleziona un viaggio dai risultati."); return; }
+            ApiService.callDetailed(ApiService.BASE_URL + "/api/favorites/trips/" + tripId,
+                    null, ApiService.Method.POST,
+                    response -> { showSuccess("Viaggio aggiunto ai preferiti."); loadFavorites(); },
+                    this::showError, null);
+            return;
+        }
+
         Long tripId = extractId(tripSearchResults.getSelectionModel().getSelectedItem());
         if (selectedListId == null) { 
             showError("Seleziona prima una lista.");
@@ -528,6 +564,16 @@ public class FavoritesController {
     }
 
     @FXML private void handleRemoveTrip() {
+
+        if (favoritesSelected) {
+            Long tripId = extractId(savedTripsListView.getSelectionModel().getSelectedItem());
+            if (tripId == null) { showError("Seleziona un viaggio da rimuovere."); return; }
+            ApiService.callDetailed(ApiService.BASE_URL + "/api/favorites/trips/" + tripId,
+                    null, ApiService.Method.DELETE,
+                    response -> { showSuccess("Viaggio rimosso dai preferiti."); loadFavorites(); },
+                    this::showError, null);
+            return;
+        }
 
         Long tripId = extractId(savedTripsListView.getSelectionModel().getSelectedItem());
         if (selectedListId == null || tripId == null) { 
@@ -579,6 +625,16 @@ public class FavoritesController {
 
     @FXML private void handleAddActivity() {
 
+        if (favoritesSelected) {
+            Long activityId = extractId(activitySearchResults.getSelectionModel().getSelectedItem());
+            if (activityId == null) { showError("Seleziona un'attività dai risultati."); return; }
+            ApiService.callDetailed(ApiService.BASE_URL + "/api/favorites/activities/" + activityId,
+                    null, ApiService.Method.POST,
+                    response -> { showSuccess("Attività aggiunta ai preferiti."); loadFavorites(); },
+                    this::showError, null);
+            return;
+        }
+
         Long activityId = extractId(activitySearchResults.getSelectionModel().getSelectedItem());
         if (selectedListId == null) { 
             showError("Seleziona prima una lista.");
@@ -602,6 +658,16 @@ public class FavoritesController {
     }
 
     @FXML private void handleRemoveActivity() {
+
+        if (favoritesSelected) {
+            Long activityId = extractId(savedActivitiesListView.getSelectionModel().getSelectedItem());
+            if (activityId == null) { showError("Seleziona un'attività da rimuovere."); return; }
+            ApiService.callDetailed(ApiService.BASE_URL + "/api/favorites/activities/" + activityId,
+                    null, ApiService.Method.DELETE,
+                    response -> { showSuccess("Attività rimossa dai preferiti."); loadFavorites(); },
+                    this::showError, null);
+            return;
+        }
 
         Long activityId = extractId(savedActivitiesListView.getSelectionModel().getSelectedItem());
         if (selectedListId == null || activityId == null) { 
@@ -656,6 +722,26 @@ public class FavoritesController {
                 () -> Platform.runLater(() -> showError("Impossibile caricare le attività della lista.")),
                 null);
 
+    }
+
+    private void loadFavorites() {
+        ApiService.call(ApiService.BASE_URL + "/api/favorites", null, ApiService.Method.GET,
+                response -> Platform.runLater(() -> {
+                    try {
+                        savedTripsListView.getItems().clear();
+                        savedActivitiesListView.getItems().clear();
+                        JsonArray array = JsonParser.parseString(response.body()).getAsJsonArray();
+                        for (JsonElement el : array) {
+                            JsonObject o = el.getAsJsonObject();
+                            String row = stringValue(o, "title", "")
+                                    + " — " + stringValue(o, "city", "") + " #" + o.get("itemId").getAsString();
+                            if ("TRIP".equals(stringValue(o, "type", ""))) savedTripsListView.getItems().add(row);
+                            else savedActivitiesListView.getItems().add(row);
+                        }
+                    } catch (Exception ex) { showError("Impossibile leggere i preferiti."); }
+                }),
+                () -> Platform.runLater(() -> showError("Impossibile caricare i preferiti.")),
+                null);
     }
 
     @FXML
