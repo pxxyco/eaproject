@@ -91,6 +91,10 @@
                             <Label text="Titolo del Viaggio *" styleClass="form-label" />
                             <TextField fx:id="tripTitleField" promptText="Es. Gran Tour della Sila e Costa Tirrenica" styleClass="custom-input" />
                         </VBox>
+                        <VBox spacing="4.0">
+                            <Label text="Stato dell'offerta" styleClass="form-label" />
+                            <ComboBox fx:id="tripStatusCombo" maxWidth="Infinity" styleClass="custom-combo" />
+                        </VBox>
 
                         <HBox spacing="14.0">
                             <VBox spacing="4.0" HBox.hgrow="ALWAYS">
@@ -172,6 +176,10 @@
                         <VBox spacing="4.0">
                             <Label text="Titolo Attività *" styleClass="form-label" />
                             <TextField fx:id="actTitleField" promptText="Es. Tour Guidato in Quad nei Pini della Sila" styleClass="custom-input" />
+                        </VBox>
+                        <VBox spacing="4.0">
+                            <Label text="Stato dell'offerta" styleClass="form-label" />
+                            <ComboBox fx:id="actStatusCombo" maxWidth="Infinity" styleClass="custom-combo" />
                         </VBox>
 
                         <HBox spacing="14.0">

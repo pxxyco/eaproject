@@ -46,6 +46,8 @@ public class OrganizerDashboardController implements ProfileDashboardController 
 
     @FXML private javafx.scene.layout.StackPane rootStackPane;
 
+    @FXML private TextField offerSearchField;
+    @FXML private ComboBox<String> offerStatusFilter;
     @FXML private Label dashboardErrorLabel;
     @FXML private Label publishedCountLabel;
     @FXML private Label totalSubscribersLabel;
@@ -161,6 +163,10 @@ public class OrganizerDashboardController implements ProfileDashboardController 
 
     @FXML
     public void initialize() {
+        offerStatusFilter.getItems().setAll("Tutti gli stati", "Pubblicata", "Bozza", "Annullata", "Conclusa");
+        offerStatusFilter.getSelectionModel().selectFirst();
+        offerSearchField.textProperty().addListener((observable, before, after) -> refreshFilteredOffers());
+        offerStatusFilter.valueProperty().addListener((observable, before, after) -> refreshFilteredOffers());
         setupTableColumns();
         subscribersTable.setItems(FXCollections.observableArrayList());
         subscribersTable.setPlaceholder(new Label("Non ci sono ancora prenotazioni."));
@@ -290,9 +296,32 @@ public class OrganizerDashboardController implements ProfileDashboardController 
         publishedCountLabel.setText(String.valueOf(publishedTrips + publishedActivities));
     }
 
+    private void refreshFilteredOffers() {
+        renderActivityCards();
+        renderTripCards();
+    }
+
+    private boolean matchesOffer(String title, String city, String status) {
+        String query = offerSearchField.getText() == null ? "" : offerSearchField.getText().trim().toLowerCase(java.util.Locale.ROOT);
+        String selected = offerStatusFilter.getValue();
+        String expected = selected == null ? "" : switch (selected) {
+            case "Pubblicata" -> "PUBLISHED";
+            case "Bozza" -> "DRAFT";
+            case "Annullata" -> "CANCELLED";
+            case "Conclusa" -> "COMPLETED";
+            default -> "";
+        };
+        return (expected.isEmpty() || expected.equalsIgnoreCase(status))
+                && (query.isEmpty() || (title != null && title.toLowerCase(java.util.Locale.ROOT).contains(query))
+                    || (city != null && city.toLowerCase(java.util.Locale.ROOT).contains(query)));
+    }
+
     private void renderActivityCards() {
         activityCardsContainer.getChildren().clear();
-        List<ActivityDTO> safeActivities = activities == null ? List.of() : activities;
+        List<ActivityDTO> safeActivities = activities == null ? List.of() : activities.stream()
+                .filter(activity -> matchesOffer(activity.getTitle(), activity.getCity(), activity.getStatus())).toList();
+        activitiesPlaceholderLabel.setText(activities == null || activities.isEmpty()
+                ? "Non hai ancora creato attività." : "Nessuna attività corrisponde ai filtri.");
         activitiesPlaceholderLabel.setVisible(safeActivities.isEmpty());
         activitiesPlaceholderLabel.setManaged(safeActivities.isEmpty());
         for (ActivityDTO activity : safeActivities) {
@@ -335,7 +364,10 @@ public class OrganizerDashboardController implements ProfileDashboardController 
 
     private void renderTripCards() {
         tripCardsContainer.getChildren().clear();
-        List<TripDTO> safeTrips = trips == null ? List.of() : trips;
+        List<TripDTO> safeTrips = trips == null ? List.of() : trips.stream()
+                .filter(trip -> matchesOffer(trip.getTitle(), trip.getDestinationCity(), trip.getStatus())).toList();
+        tripsPlaceholderLabel.setText(trips == null || trips.isEmpty()
+                ? "Non hai ancora creato viaggi." : "Nessun viaggio corrisponde ai filtri.");
         tripsPlaceholderLabel.setVisible(safeTrips.isEmpty());
         tripsPlaceholderLabel.setManaged(safeTrips.isEmpty());
         for (TripDTO trip : safeTrips) {

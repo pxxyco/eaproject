@@ -1,6 +1,7 @@
 package com.example.application.screens.organizer
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -10,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -33,7 +35,9 @@ private fun Dashboard(userId: Long, modifier: Modifier) {
     var offers by remember { mutableStateOf<List<OrganizerOffer>>(emptyList()) }
     var bookings by remember { mutableStateOf<List<JsonObject>>(emptyList()) }
     var revenue by remember { mutableStateOf<String?>(null) }
-    var offersLoaded by remember { mutableStateOf(false) }
+    var activitiesLoaded by remember { mutableStateOf(false) }
+    var tripsLoaded by remember { mutableStateOf(false) }
+    val offersLoaded = activitiesLoaded && tripsLoaded
     var bookingsLoaded by remember { mutableStateOf(false) }
     var loading by remember { mutableStateOf(true) }
     var busy by remember { mutableStateOf(false) }
@@ -42,6 +46,13 @@ private fun Dashboard(userId: Long, modifier: Modifier) {
     var editor by remember { mutableStateOf<OrganizerOffer?>(null) }
     var deleting by remember { mutableStateOf<OrganizerOffer?>(null) }
     var choosing by remember { mutableStateOf(false) }
+    var photoOffer by remember { mutableStateOf<OrganizerOffer?>(null) }
+    var query by rememberSaveable { mutableStateOf("") }
+    var statusFilter by rememberSaveable { mutableStateOf("ALL") }
+    var bookingQuery by rememberSaveable { mutableStateOf("") }
+    val filteredBookings = bookings.filter { booking ->
+        listOf("participantName", "participantEmail", "itemTitle").any { booking.text(it).contains(bookingQuery.trim(), true) }
+    }
     LaunchedEffect(refresh) {
         loading = true
         try {
@@ -52,10 +63,14 @@ private fun Dashboard(userId: Long, modifier: Modifier) {
                 val payments = async { ApiService.get("/api/payments/organizer/revenue", java.math.BigDecimal::class.java) }
                 val a = activities.await(); val t = trips.await(); val b = subscribers.await(); val p = payments.await()
                 val errors = mutableListOf<String>()
-                if (a is ApiResult.Success && t is ApiResult.Success) {
-                    offers = a.data.map { OrganizerOffer(false, it) } + t.data.map { OrganizerOffer(true, it) }
-                    offersLoaded = true
-                } else errors += "Offerte: ${a.errorMessage() ?: t.errorMessage()}"
+                if (a is ApiResult.Success) {
+                    offers = offers.filter { it.trip } + a.data.map { OrganizerOffer(false, it) }
+                    activitiesLoaded = true
+                } else errors += "Attività: ${a.errorMessage()}"
+                if (t is ApiResult.Success) {
+                    offers = offers.filter { !it.trip } + t.data.map { OrganizerOffer(true, it) }
+                    tripsLoaded = true
+                } else errors += "Viaggi: ${t.errorMessage()}"
                 if (b is ApiResult.Success) {
                     bookings = b.data.filter { !it.text("bookingStatus").equals("CANCELLED", true) }.sortedByDescending { it.text("createdAt") }
                     bookingsLoaded = true
@@ -85,10 +100,20 @@ private fun Dashboard(userId: Long, modifier: Modifier) {
             Spacer(Modifier.height(12.dp))
             Metric("Incassi da pagamenti", revenue?.let(::money) ?: "—", Modifier.fillMaxWidth(), Color(0xFF34D399))
         }
+        item {
+            OutlinedTextField(query, { query = it }, label = { Text("Cerca offerte per titolo o città") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+            Row(Modifier.horizontalScroll(rememberScrollState()), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                (listOf("ALL" to "Tutte") + offerStatuses(true)).forEach { (value, label) ->
+                    FilterChip(selected = statusFilter == value, onClick = { statusFilter = value }, label = { Text(label) })
+                }
+            }
+        }
         listOf(false, true).forEach { trip ->
-            val filtered = offers.filter { it.trip == trip }
+            val filtered = offers.filter { it.trip == trip && it.matches(query, statusFilter) }.sortedByDescending { it.data.text("createdAt") }
             item { Text(if (trip) "I tuoi viaggi" else "Le tue attività", style = MaterialTheme.typography.titleLarge) }
-            if (offersLoaded && filtered.isEmpty()) item { Text("Non hai ancora ${if (trip) "viaggi" else "attività"}. Crea la tua prima offerta.", color = Stone400) }
+            if ((if (trip) tripsLoaded else activitiesLoaded) && filtered.isEmpty()) item {
+                Text(if (query.isNotBlank() || statusFilter != "ALL") "Nessuna offerta corrisponde ai filtri." else "Non hai ancora ${if (trip) "viaggi" else "attività"}. Crea la tua prima offerta.", color = Stone400)
+            }
             items(filtered, key = { "${it.trip}:${it.id}" }) { offer ->
                 DashboardCard {
                     OfferImage(offer)
@@ -98,6 +123,8 @@ private fun Dashboard(userId: Long, modifier: Modifier) {
                     Text("${dateLabel(offer.data.text("startDate"))} – ${dateLabel(offer.data.text("endDate"))}", style = MaterialTheme.typography.bodySmall)
                     Text("${offer.data.number("availableSeats")} / ${offer.data.number("maxSeats")} posti disponibili", color = Stone400)
                     Text(money(offer.price), style = MaterialTheme.typography.titleMedium)
+                    if (offer.trip) Text("${offer.data.get("stages")?.takeIf { it.isJsonArray }?.asJsonArray?.size() ?: 0} tappe nell'itinerario")
+                    TextButton(onClick = { photoOffer = offer }, enabled = !busy && !loading) { Text("Gestisci foto") }
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                         OutlinedButton(onClick = { editor = offer }, enabled = !busy && !loading, modifier = Modifier.weight(1f)) { Text("Modifica") }
                         TextButton(onClick = { deleting = offer }, enabled = !busy && !loading, modifier = Modifier.weight(1f)) { Text("Elimina", color = MaterialTheme.colorScheme.error) }
@@ -106,12 +133,15 @@ private fun Dashboard(userId: Long, modifier: Modifier) {
             }
         }
         item { Text("Ultimi iscritti ai tuoi eventi", style = MaterialTheme.typography.titleLarge) }
+        item { OutlinedTextField(bookingQuery, { bookingQuery = it }, label = { Text("Cerca iscritti o prenotazioni") }, singleLine = true, modifier = Modifier.fillMaxWidth()) }
         if (bookingsLoaded && bookings.isEmpty()) item { Text("Non hai ancora ricevuto prenotazioni.", color = Stone400) }
-        items(bookings, key = { "booking:${it.text("bookingId")}" }) { booking ->
+        if (bookingsLoaded && bookings.isNotEmpty() && filteredBookings.isEmpty()) item { Text("Nessuna prenotazione corrisponde alla ricerca.", color = Stone400) }
+        items(filteredBookings, key = { "booking:${it.text("bookingId")}" }) { booking ->
             DashboardCard {
                 Text(booking.text("participantName").ifBlank { "Partecipante" }, style = MaterialTheme.typography.titleMedium)
                 Text(booking.text("participantEmail"), color = Stone400)
                 Text(booking.text("itemTitle"))
+                Text(when (booking.text("bookingStatus")) { "PENDING" -> "In attesa"; "CONFIRMED" -> "Confermata"; "COMPLETED" -> "Completata"; else -> booking.text("bookingStatus") })
                 Text("${dateLabel(booking.text("createdAt"))} · ${booking.number("seats")} posti", color = Stone400)
             }
         }
@@ -119,7 +149,11 @@ private fun Dashboard(userId: Long, modifier: Modifier) {
     if (choosing) AlertDialog(onDismissRequest = { choosing = false }, title = { Text("Nuova offerta") }, text = { Text("Che cosa vuoi organizzare?") },
         confirmButton = { TextButton(onClick = { choosing = false; editor = OrganizerOffer(false, JsonObject()) }) { Text("Attività") } },
         dismissButton = { TextButton(onClick = { choosing = false; editor = OrganizerOffer(true, JsonObject()) }) { Text("Viaggio") } })
-    editor?.let { offer -> OfferEditor(offer, { editor = null }, { editor = null; refresh++ }) }
+    editor?.let { offer -> OfferEditor(offer, { editor = null }, { saved ->
+        editor = null; refresh++
+        if (offer.id.isBlank()) photoOffer = saved
+    }) }
+    photoOffer?.let { offer -> OfferPhotosDialog(offer, onDismiss = { photoOffer = null; refresh++ }, onChanged = { refresh++ }) }
     deleting?.let { offer ->
         AlertDialog(onDismissRequest = { if (!busy) deleting = null }, title = { Text("Elimina offerta") }, text = { Text("Vuoi eliminare «${offer.title}»?") },
             confirmButton = { TextButton(enabled = !busy, onClick = {
@@ -154,18 +188,23 @@ private fun Metric(label: String, value: String, modifier: Modifier, color: Colo
 }
 
 @Composable
-private fun OfferEditor(offer: OrganizerOffer, onDismiss: () -> Unit, onSaved: () -> Unit) {
+internal fun OfferEditor(offer: OrganizerOffer, onDismiss: () -> Unit, onSaved: (OrganizerOffer) -> Unit) {
     val scope = rememberCoroutineScope()
     val labels = remember(offer) { linkedMapOf(
         "title" to "Titolo", "description" to "Descrizione",
         (if (offer.trip) "destinationCity" else "city") to "Città",
         (if (offer.trip) "destinationCountry" else "placeName") to (if (offer.trip) "Paese" else "Luogo"),
-        "startDate" to (if (offer.trip) "Inizio (AAAA-MM-GG)" else "Inizio (AAAA-MM-GGTHH:MM)"),
-        "endDate" to (if (offer.trip) "Fine (AAAA-MM-GG)" else "Fine (AAAA-MM-GGTHH:MM)"),
+        "startDate" to (if (offer.trip) "Data di inizio" else "Data e ora di inizio"),
+        "endDate" to (if (offer.trip) "Data di fine" else "Data e ora di fine"),
         (if (offer.trip) "totalPrice" else "price") to "Prezzo (€)", "maxSeats" to "Posti totali"
     ).apply { if (!offer.trip) { put("durationMinutes", "Durata (minuti)"); put("notes", "Note (facoltative)") } } }
     val fields = remember(offer) { mutableStateMapOf<String, String>().apply { labels.keys.forEach { put(it, offer.data.text(it)) } } }
     var category by remember { mutableStateOf(offer.data.text("category").ifBlank { "EXCURSION" }) }
+    var status by remember { mutableStateOf(offer.data.text("status").ifBlank { "PUBLISHED" }) }
+    val stages = remember(offer) { mutableStateListOf<JsonObject>().apply {
+        offer.data.get("stages")?.takeIf { it.isJsonArray }?.asJsonArray?.forEach { if (it.isJsonObject) add(it.asJsonObject.deepCopy()) }
+    } }
+    var persisted by remember { mutableStateOf<OrganizerOffer?>(null) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     Dialog(onDismissRequest = { if (!busy) onDismiss() }, properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnBackPress = !busy, dismissOnClickOutside = false)) {
@@ -175,15 +214,19 @@ private fun OfferEditor(offer: OrganizerOffer, onDismiss: () -> Unit, onSaved: (
                 Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Spacer(Modifier.height(4.dp))
                     labels.forEach { (key, label) ->
-                        OutlinedTextField(fields[key].orEmpty(), { fields[key] = it }, label = { Text(label) }, enabled = !busy,
+                        if (key == "startDate" || key == "endDate") {
+                            OfferDateField(label, fields[key].orEmpty(), !offer.trip, !busy) { fields[key] = it }
+                        } else OutlinedTextField(fields[key].orEmpty(), { fields[key] = it }, label = { Text(label) }, enabled = !busy,
                             singleLine = key != "description" && key != "notes", modifier = Modifier.fillMaxWidth())
                     }
-                    if (!offer.trip) {
-                        Text("Categoria")
-                        listOf("EXCURSION" to "Escursione", "VISIT" to "Visita", "TRANSPORT" to "Trasporto", "HOTEL" to "Hotel", "MEAL" to "Ristorazione", "OTHER" to "Altro").forEach { (value, label) ->
-                            FilterChip(selected = category == value, onClick = { category = value }, enabled = !busy, label = { Text(label) })
-                        }
+                    if (!offer.trip) CategorySelector(category, { category = it }, !busy)
+                    Text("Stato dell'offerta", style = MaterialTheme.typography.titleMedium)
+                    offerStatuses(offer.trip).forEach { (value, label) ->
+                        FilterChip(selected = status == value, onClick = { status = value }, enabled = !busy, label = { Text(label) })
                     }
+                    if (status == "CANCELLED") Text("L'offerta non sarà prenotabile. Le prenotazioni ricevute restano nello storico.")
+                    if (offer.trip) ItineraryEditor(stages, !busy)
+                    if (offer.id.isBlank()) Text("Dopo il salvataggio potrai aggiungere le foto.")
                     error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                     Spacer(Modifier.height(8.dp))
                 }
@@ -191,15 +234,24 @@ private fun OfferEditor(offer: OrganizerOffer, onDismiss: () -> Unit, onSaved: (
                 Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     OutlinedButton(onClick = onDismiss, enabled = !busy, modifier = Modifier.weight(1f)) { Text("Annulla") }
                     Button(enabled = !busy, modifier = Modifier.weight(1f), onClick = {
-                        val payload = try { offerPayload(offer, fields.toMap()).apply { if (!offer.trip) addProperty("category", category) } }
+                        val payload = try { offerPayload(persisted ?: offer, fields.toMap()).apply {
+                            addProperty("status", status)
+                            if (!offer.trip) addProperty("category", category)
+                            else add("stages", itineraryPayload(stages, fields.getValue("startDate"), fields.getValue("endDate")))
+                        } }
                         catch (exception: IllegalArgumentException) { error = exception.message; return@Button }
                         busy = true
                         error = null
                         scope.launch {
                             try {
-                                val result = if (offer.id.isBlank()) ApiService.post(offer.path, payload, JsonObject::class.java)
-                                    else ApiService.put("${offer.path}/${offer.id}", payload, JsonObject::class.java)
-                                if (result is ApiResult.Success) onSaved() else error = result.errorMessage()
+                                val current = persisted ?: offer
+                                val result = if (current.id.isBlank()) ApiService.post(current.path, payload, JsonObject::class.java)
+                                    else ApiService.put("${current.path}/${current.id}", payload, JsonObject::class.java)
+                                if (result is ApiResult.Success) {
+                                    val saved = OrganizerOffer(offer.trip, result.data)
+                                    persisted = saved
+                                    onSaved(saved)
+                                } else error = result.errorMessage()
                             } finally { busy = false }
                         }
                     }) { Text(if (busy) "Salvataggio…" else "Salva") }

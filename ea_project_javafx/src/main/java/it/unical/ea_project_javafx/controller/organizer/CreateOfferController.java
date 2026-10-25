@@ -43,6 +43,8 @@ public class CreateOfferController {
     @FXML private VBox stagesContainer;
     @FXML private Label offerErrorLabel;
 
+    @FXML private ComboBox<String> tripStatusCombo;
+    @FXML private ComboBox<String> actStatusCombo;
     @FXML private TextField tripTitleField;
     @FXML private TextField tripCountryField;
     @FXML private TextField tripCityField;
@@ -88,6 +90,10 @@ public class CreateOfferController {
     public void initialize() {
 
         BackgroundHelper.setupBackground(bgImageView);
+        tripStatusCombo.getItems().setAll("Pubblicata", "Bozza", "Annullata", "Conclusa");
+        actStatusCombo.getItems().setAll("Pubblicata", "Annullata", "Conclusa");
+        tripStatusCombo.setValue("Pubblicata");
+        actStatusCombo.setValue("Pubblicata");
 
         Rectangle rootClip = new Rectangle();
         rootClip.setArcWidth(36);
@@ -311,6 +317,7 @@ public class CreateOfferController {
 
     public void setTripToEdit(TripDTO trip) {
         tripToEdit = trip;
+        tripStatusCombo.setValue(statusLabel(trip.getStatus()));
         tripBackButton.setVisible(false);
         tripBackButton.setManaged(false);
         stagesContainer.getChildren().clear();
@@ -354,6 +361,7 @@ public class CreateOfferController {
 
     public void setActivityToEdit(ActivityDTO activity) {
         activityToEdit = activity;
+        actStatusCombo.setValue(statusLabel(activity.getStatus()));
         activityBackButton.setVisible(false);
         activityBackButton.setManaged(false);
         stepChoose.setVisible(false);
@@ -417,9 +425,7 @@ public class CreateOfferController {
             payload.put("availableSeats", availableSeatsAfterResize(maxSeats,
                     tripToEdit == null ? null : tripToEdit.getMaxSeats(),
                     tripToEdit == null ? null : tripToEdit.getAvailableSeats()));
-            payload.put("status", tripToEdit != null && tripToEdit.getStatus() != null
-                    ? tripToEdit.getStatus()
-                    : "PUBLISHED");
+            payload.put("status", statusValue(tripStatusCombo.getValue()));
             payload.put("description", emptyToNull(tripDescriptionArea.getText()));
             payload.put("stages", collectStages());
 
@@ -481,9 +487,7 @@ public class CreateOfferController {
             payload.put("availableSeats", availableSeatsAfterResize(maxSeats,
                     activityToEdit == null ? null : activityToEdit.getMaxSeats(),
                     activityToEdit == null ? null : activityToEdit.getAvailableSeats()));
-            payload.put("status", activityToEdit != null && activityToEdit.getStatus() != null
-                    ? activityToEdit.getStatus()
-                    : "PUBLISHED");
+            payload.put("status", statusValue(actStatusCombo.getValue()));
             if (saveActivityButton != null) saveActivityButton.setDisable(true);
             ApiService.call(
                     ApiService.BASE_URL + (activityToEdit == null
@@ -665,6 +669,26 @@ public class CreateOfferController {
             stages.add(stage);
         }
         return stages;
+    }
+
+    private String statusValue(String label) {
+        if (label == null) return "PUBLISHED";
+        return switch (label) {
+            case "Bozza" -> "DRAFT";
+            case "Annullata" -> "CANCELLED";
+            case "Conclusa" -> "COMPLETED";
+            default -> "PUBLISHED";
+        };
+    }
+
+    private String statusLabel(String value) {
+        if (value == null) return "Pubblicata";
+        return switch (value) {
+            case "DRAFT" -> "Bozza";
+            case "CANCELLED" -> "Annullata";
+            case "COMPLETED" -> "Conclusa";
+            default -> "Pubblicata";
+        };
     }
 
     private String activityCategoryValue(String label) {

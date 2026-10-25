@@ -68,7 +68,7 @@ internal suspend fun loadOrganizerList(path: String): ApiResult<List<JsonObject>
 internal fun offerPayload(offer: OrganizerOffer, fields: Map<String, String>): JsonObject {
     val payload = offer.data.deepCopy()
     listOf("createdAt", "updatedAt", "deletedAt", "createdByUserId", "images", "averageRating", "icsUid").forEach(payload::remove)
-    // Mobile edits offer details only; itinerary changes belong to the desktop form.
+    // Details-only updates preserve the itinerary; the editor attaches an explicit list when editing stages.
     if (offer.trip) payload.remove("stages")
     fields.forEach { (key, value) -> payload.addProperty(key, value.trim()) }
     val priceKey = if (offer.trip) "totalPrice" else "price"
@@ -100,3 +100,14 @@ internal fun offerPayload(offer: OrganizerOffer, fields: Map<String, String>): J
     if (offer.id.isBlank()) payload.addProperty("status", "PUBLISHED")
     return payload
 }
+
+internal fun offerStatuses(trip: Boolean): List<Pair<String, String>> = buildList {
+    add("PUBLISHED" to "Pubblicata")
+    if (trip) add("DRAFT" to "Bozza")
+    add("CANCELLED" to "Annullata")
+    add("COMPLETED" to "Conclusa")
+}
+
+internal fun OrganizerOffer.matches(query: String, status: String): Boolean =
+    (status == "ALL" || data.text("status").equals(status, true)) &&
+        (title.contains(query.trim(), true) || city.contains(query.trim(), true))

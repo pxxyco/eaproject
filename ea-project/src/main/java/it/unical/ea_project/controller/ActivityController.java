@@ -43,7 +43,7 @@ public class ActivityController {
         activity.setPrice(request.getPrice());
         activity.setMaxSeats(request.getMaxSeats());
         activity.setAvailableSeats(request.getMaxSeats());
-        activity.setStatus(Activity.Status.PUBLISHED);
+        activity.setStatus(request.getStatus() == null ? Activity.Status.PUBLISHED : Activity.Status.valueOf(request.getStatus()));
         activity.setNotes(request.getNotes());
 
         Activity created = activityService.createActivity(activity, user.id());

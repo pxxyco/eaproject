@@ -87,6 +87,20 @@ object ApiService {
     suspend fun <T> put(path: String, body: Any?, type: Class<T>) = call("PUT", path, body, type)
     suspend fun <T> delete(path: String, type: Class<T>) = call("DELETE", path, null, type)
 
+    /** Uses the same authenticated client and token refresh as ordinary API calls. */
+    suspend fun uploadPhoto(path: String, field: String, bytes: ByteArray, mimeType: String): ApiResult<Unit> =
+        withContext(Dispatchers.IO) {
+            try {
+                val body = okhttp3.MultipartBody.Builder().setType(okhttp3.MultipartBody.FORM)
+                    .addFormDataPart(field, "photo", bytes.toRequestBody(mimeType.toMediaType())).build()
+                val request = Request.Builder().url(resolveUrl(path)).post(body).build()
+                client.newCall(request).execute().use { mapResponse(it, Unit::class.java) }
+            } catch (exception: IOException) {
+                reportNetworkFailure()
+                ApiResult.NetworkError(exception)
+            }
+        }
+
     fun resolveUrl(path: String?): String {
         if (path.isNullOrBlank()) return ""
         if (path.startsWith("http://") || path.startsWith("https://")) return path

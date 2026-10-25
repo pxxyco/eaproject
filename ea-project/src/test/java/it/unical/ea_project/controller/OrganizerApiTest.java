@@ -96,6 +96,46 @@ class OrganizerApiTest {
         mvc.perform(get(url)).andExpect(status().isOk()).andExpect(content().contentType("image/jpeg"));
         mvc.perform(get("/api/trips/" + id)).andExpect(status().isOk()).andExpect(jsonPath("$.coverPhotoUrl").value(url));
     }
+    @Test void activityPhotosSupportCoverGalleryAndDeletion() throws Exception {
+        User owner = user("api-owner", User.Role.ORGANIZER);
+        String activity = """
+            {"title":"Visita","city":"Roma","category":"VISIT","startDate":"2027-06-01T10:00:00",
+             "endDate":"2027-06-01T12:00:00","durationMinutes":120,"price":10,"maxSeats":10}
+            """;
+        var created = mvc.perform(post("/api/activities").header("Authorization", token(owner)).contentType(MediaType.APPLICATION_JSON)
+                .content(activity)).andExpect(status().isCreated()).andReturn();
+        long id = json.readTree(created.getResponse().getContentAsString()).get("activityId").asLong();
+        var output = new java.io.ByteArrayOutputStream();
+        javax.imageio.ImageIO.write(new java.awt.image.BufferedImage(2, 2, java.awt.image.BufferedImage.TYPE_INT_RGB), "png", output);
+        var cover = new org.springframework.mock.web.MockMultipartFile("file", "photo", "image/png", output.toByteArray());
+        var gallery = new org.springframework.mock.web.MockMultipartFile("files", "photo", "image/png", output.toByteArray());
+        var first = mvc.perform(multipart("/api/activity-images/activity/" + id + "/cover").file(cover).header("Authorization", token(owner)))
+                .andExpect(status().isOk()).andReturn();
+        long coverId = json.readTree(first.getResponse().getContentAsString()).get("imageId").asLong();
+        mvc.perform(multipart("/api/activity-images/activity/" + id + "/photos").file(gallery).header("Authorization", token(owner)))
+                .andExpect(status().isOk());
+        mvc.perform(get("/api/activity-images/activity/" + id)).andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(2));
+        mvc.perform(delete("/api/activity-images/" + coverId).header("Authorization", token(owner))).andExpect(status().isNoContent());
+        mvc.perform(get("/api/activities/" + id)).andExpect(status().isOk()).andExpect(jsonPath("$.images.length()").value(1));
+    }
+    @Test void activityStatusIsRespectedAndControlsBooking() throws Exception {
+        User owner = user("api-owner", User.Role.ORGANIZER);
+        User traveler = user("api-traveler", User.Role.TRAVELER);
+        String activity = """
+            {"title":"Visita","city":"Roma","placeName":"Museo","category":"VISIT",
+             "startDate":"2027-06-01T10:00:00","endDate":"2027-06-01T12:00:00",
+             "durationMinutes":120,"price":10,"maxSeats":10,"status":"CANCELLED"}
+            """;
+        var created = mvc.perform(post("/api/activities").header("Authorization", token(owner)).contentType(MediaType.APPLICATION_JSON)
+                .content(activity)).andExpect(status().isCreated()).andExpect(jsonPath("$.status").value("CANCELLED")).andReturn();
+        long id = json.readTree(created.getResponse().getContentAsString()).get("activityId").asLong();
+        mvc.perform(post("/api/bookings/activities/" + id).param("seats", "1").header("Authorization", token(traveler))).andExpect(status().isBadRequest());
+        mvc.perform(put("/api/activities/" + id).header("Authorization", token(owner)).contentType(MediaType.APPLICATION_JSON)
+                .content(activity.replace("CANCELLED", "PUBLISHED"))).andExpect(status().isOk()).andExpect(jsonPath("$.status").value("PUBLISHED"));
+        mvc.perform(post("/api/bookings/activities/" + id).param("seats", "1").header("Authorization", token(traveler))).andExpect(status().isOk());
+        mvc.perform(post("/api/activities").header("Authorization", token(owner)).contentType(MediaType.APPLICATION_JSON)
+                .content(activity.replace("VISIT", "INVALID_CATEGORY"))).andExpect(status().isBadRequest());
+    }
     @Test void malformedOfferIsRejectedBeforePersistence() throws Exception {
         User owner = user("api-owner", User.Role.ORGANIZER);
         mvc.perform(post("/api/trips").header("Authorization", token(owner)).contentType(MediaType.APPLICATION_JSON)

@@ -23,8 +23,13 @@ internal fun OfferImage(offer: OrganizerOffer) {
     val path = if (offer.trip) offer.data.text("coverPhotoUrl") else
         offer.data.get("images")?.takeIf { it.isJsonArray }?.asJsonArray
             ?.firstOrNull { it.isJsonObject }?.asJsonObject?.text("imageUrl").orEmpty()
+    RemoteOfferImage(path, if (offer.trip) "Viaggio" else "Attività")
+}
+
+@Composable
+internal fun RemoteOfferImage(path: String, fallback: String, revision: Int = 0) {
     val url = ApiService.resolveUrl(path.ifBlank { "/photo/default/experience.jpg" })
-    val bitmap by produceState<android.graphics.Bitmap?>(null, url) {
+    val bitmap by produceState<android.graphics.Bitmap?>(null, url, revision) {
         value = withContext(Dispatchers.IO) {
             runCatching {
                 val connection = URL(url).openConnection() as HttpURLConnection
@@ -41,6 +46,6 @@ internal fun OfferImage(offer: OrganizerOffer) {
     Box(Modifier.fillMaxWidth().height(160.dp).background(Stone600), contentAlignment = Alignment.Center) {
         val image = bitmap
         if (image != null) Image(image.asImageBitmap(), contentDescription = null, contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())
-        else Text(if (offer.trip) "Viaggio" else "Attività")
+        else Text(fallback)
     }
 }
