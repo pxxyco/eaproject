@@ -81,52 +81,42 @@ public class LoginStepController {
         body.addProperty("identifier", identifier);
         body.addProperty("password", password);
 
-        ApiService.post(
+        ApiService.callDetailed(
                 ApiService.BASE_URL + "/api/users/login",
                 body.toString(),
+                ApiService.Method.POST,
                 res -> Platform.runLater(() -> {
-                    if (res.statusCode() == 200) {
-                        try {
-                            String authHeader = res.headers().firstValue("Authorization").orElse("");
-                            String accessToken = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : null;
-                            String refreshToken = res.headers().firstValue("X-Refresh-Token").orElse(null);
+                    try {
+                        String authHeader = res.headers().firstValue("Authorization").orElse("");
+                        String accessToken = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : null;
+                        String refreshToken = res.headers().firstValue("X-Refresh-Token").orElse(null);
 
-                            Gson gson = new GsonBuilder()
-                                    .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, typeOfT, context) -> LocalDateTime.parse(json.getAsString()))
-                                    .registerTypeAdapter(LocalDate.class, (JsonDeserializer<LocalDate>) (json, typeOfT, context) -> LocalDate.parse(json.getAsString()))
-                                    .create();
+                        Gson gson = new GsonBuilder()
+                                .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, typeOfT, context) -> LocalDateTime.parse(json.getAsString()))
+                                .registerTypeAdapter(LocalDate.class, (JsonDeserializer<LocalDate>) (json, typeOfT, context) -> LocalDate.parse(json.getAsString()))
+                                .create();
 
-                            UserDTO user = gson.fromJson(res.body(), UserDTO.class);
+                        UserDTO user = gson.fromJson(res.body(), UserDTO.class);
 
-                            if (user != null) {
-                                UserSession.getInstance().setSession(user);
-                                UserSession.getInstance().setTokens(accessToken, refreshToken);
+                        if (user != null) {
+                            UserSession.getInstance().setSession(user);
+                            UserSession.getInstance().setTokens(accessToken, refreshToken);
 
-                                if (rememberMeCheckBox != null && rememberMeCheckBox.isSelected()) {
-                                    TokenStorage.saveRefreshToken(refreshToken);
-                                } else {
-                                    TokenStorage.clear();
-                                }
-
-                                navigator.goToHome();
+                            if (rememberMeCheckBox != null && rememberMeCheckBox.isSelected()) {
+                                TokenStorage.saveRefreshToken(refreshToken);
                             } else {
-                                showError("Errore il profilo utente è vuoto.");
+                                TokenStorage.clear();
                             }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            showError("Errore nella lettura della risposta del server.");
-                        }
-                    } else {
-                        if (res.statusCode() == 401) {
-                            showError("Credenziali non valide.");
-                        } else if (res.statusCode() >= 500) {
-                            showError("Errore interno del server.");
+
+                            navigator.goToHome();
                         } else {
-                            showError("Impossibile effettuare il login.");
+                            showError("Errore: il profilo utente è vuoto.");
                         }
+                    } catch (Exception e) {
+                        showError("Errore nella lettura della risposta del server.");
                     }
                 }),
-                () -> Platform.runLater(() -> showError("Errore di connessione al server.")),
+                message -> showError(message),
                 navigator::setLoading
         );
 

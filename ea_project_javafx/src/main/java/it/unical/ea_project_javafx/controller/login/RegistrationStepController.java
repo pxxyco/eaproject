@@ -130,34 +130,21 @@ public class RegistrationStepController {
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>) (src, typeOfSrc, context) ->
                         src == null ? null : new JsonPrimitive(src.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
-                .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, typeOfT, context) ->
-                        LocalDateTime.parse(json.getAsString()))
                 .registerTypeAdapter(LocalDate.class, (JsonSerializer<LocalDate>) (src, typeOfSrc, context) ->
                         src == null ? null : new JsonPrimitive(src.format(DateTimeFormatter.ISO_LOCAL_DATE)))
-                .registerTypeAdapter(LocalDate.class, (JsonDeserializer<LocalDate>) (json, typeOfT, context) ->
-                        LocalDate.parse(json.getAsString()))
                 .create();
 
         String jsonBody = gson.toJson(requestDto);
 
-        ApiService.post(
+        ApiService.callDetailed(
                 ApiService.BASE_URL + "/api/users",
                 jsonBody,
+                ApiService.Method.POST,
                 res -> Platform.runLater(() -> {
-                    if (res.statusCode() == 200 || res.statusCode() == 201) {
-                        clearFields();
-                        navigator.showSuccessMessage("Puoi accedere al tuo account.");
-                    } else if (res.statusCode() == 409) {
-                        showError("Username o Email già registrati.");
-                    } else if (res.statusCode() == 400) {
-                        showError("La password non rispetta i requisiti minimi.");
-                    } else {
-                        showError("Impossibile completare la registrazione.");
-                    }
+                    clearFields();
+                    navigator.showSuccessMessage("Puoi accedere al tuo account.");
                 }),
-                () -> Platform.runLater(() -> {
-                    SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/common/splash-screen.fxml", null);
-                }),
+                message -> showError(message),
                 navigator::setLoading
         );
 

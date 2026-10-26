@@ -275,7 +275,7 @@ public class ApiService {
     public static String extractErrorMessage(String responseBody, int statusCode) {
         String fallback = switch (statusCode) {
             case 400 -> "I dati inseriti non sono validi.";
-            case 401 -> "Sessione scaduta o credenziali non corrette.";
+            case 401 -> "Credenziali non corrette.";
             case 403 -> "Non hai i permessi per eseguire questa operazione.";
             case 404 -> "Risorsa non trovata.";
             case 409 -> "I dati inseriti sono già utilizzati da un altro account.";
