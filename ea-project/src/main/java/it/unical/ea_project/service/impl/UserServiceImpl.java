@@ -6,6 +6,7 @@ import it.unical.ea_project.security.PasswordPolicy;
 import it.unical.ea_project.service.LoginAttemptService;
 import it.unical.ea_project.service.PhotoStorageService;
 import it.unical.ea_project.service.UserService;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,6 +30,12 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final LoginAttemptService loginAttemptService;
     private final PhotoStorageService photoStorageService;
+    private String dummyHash;
+
+    @PostConstruct
+    void initDummyHash() {
+        this.dummyHash = passwordEncoder.encode("dummy-password-for-timing");
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -49,6 +56,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<User> login(String identifier, String password) {
         String normalizedIdentifier = identifier == null ? "" : identifier.trim();
         Optional<User> userOpt = userRepository.findByEmailIgnoreCase(normalizedIdentifier);
@@ -56,15 +64,18 @@ public class UserServiceImpl implements UserService {
             userOpt = userRepository.findByUsernameIgnoreCase(normalizedIdentifier);
         }
 
-        if (userOpt.isPresent() && userOpt.get().getHashedPassword() != null
-                && password != null && passwordEncoder.matches(password, userOpt.get().getHashedPassword())
-                && userOpt.get().getDeletedAt() == null) {
-            loginAttemptService.loginSucceeded(normalizedIdentifier);
-            return userOpt;
-        } else {
-            loginAttemptService.loginFailed(normalizedIdentifier);
+        String candidate = password == null ? "" : password;
+
+        if (userOpt.isEmpty()
+                || userOpt.get().getDeletedAt() != null
+                || userOpt.get().getHashedPassword() == null) {
+            passwordEncoder.matches(candidate, dummyHash);
             return Optional.empty();
         }
+
+        return passwordEncoder.matches(candidate, userOpt.get().getHashedPassword())
+                ? userOpt
+                : Optional.empty();
     }
 
     @Override

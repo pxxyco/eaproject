@@ -6,15 +6,18 @@ import it.unical.ea_project.domain.User;
 import it.unical.ea_project.dto.UserDTO;
 import it.unical.ea_project.security.AuthUser;
 import it.unical.ea_project.service.JwtService;
+import it.unical.ea_project.service.LoginAttemptService;
 import it.unical.ea_project.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -24,6 +27,7 @@ public class UserController {
 
     private final UserService userService;
     private final JwtService jwtService;
+    private final LoginAttemptService loginAttemptService;
 
     @com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
     public record RegistrationRequest(String username, String email, String fullName, String password, String role) {}
@@ -61,14 +65,29 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserDTO> login(@RequestBody LoginRequest req) {
+    public ResponseEntity<?> login(@RequestBody LoginRequest req) {
         if (req == null || req.identifier() == null || req.password() == null) {
             return ResponseEntity.badRequest().build();
         }
-        Optional<User> userOpt = userService.login(req.identifier(), req.password());
+
+        String identifier = req.identifier().trim();
+
+        if (loginAttemptService.isBlocked(identifier)) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .header(HttpHeaders.RETRY_AFTER, "900")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(Map.of(
+                            "code", "ERR-105",
+                            "message", "Troppi tentativi di accesso falliti. Riprova tra qualche minuto."));
+        }
+
+        Optional<User> userOpt = userService.login(identifier, req.password());
         if (userOpt.isEmpty()) {
+            loginAttemptService.loginFailed(identifier);
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+
+        loginAttemptService.loginSucceeded(identifier);
         User user = userOpt.get();
         return ResponseEntity.ok()
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.generateAccessToken(user))

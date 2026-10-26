@@ -16,63 +16,35 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class LoginAttemptServiceImpl implements LoginAttemptService {
 
-    private final UserRepository userRepository;
-    private final Cache<String, Integer> attemptsCache;
+    private static final int MAX_ATTEMPTS = 5;
 
-    private static final int WARNING_THRESHOLD = 5;
+    private final Cache<String, Integer> attemptsCache = Caffeine.newBuilder()
+            .expireAfterWrite(1, TimeUnit.MINUTES)
+            .maximumSize(10_000)
+            .build();
 
-    public LoginAttemptServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
-        this.attemptsCache = Caffeine.newBuilder()
-                .expireAfterWrite(15, TimeUnit.MINUTES)
-                .maximumSize(10000)
-                .build();
+    @Override
+    public boolean isBlocked(String identifier) {
+        Integer attempts = attemptsCache.getIfPresent(normalize(identifier));
+        return attempts != null && attempts >= MAX_ATTEMPTS;
     }
 
     @Override
     public void loginFailed(String identifier) {
-        String cacheKey = resolveToCanonicalKey(identifier);
-        Integer currentAttempts = attemptsCache.getIfPresent(cacheKey);
-        int attempts = (currentAttempts == null ? 0 : currentAttempts) + 1;
-        attemptsCache.put(cacheKey, attempts);
-        log.warn("Tentativo di login fallito per l'identificatore: {} (Tentativo {})", cacheKey, attempts);
-        long randomDelayMs = ThreadLocalRandom.current().nextLong(1000, 2500);
-        log.info("Applicato ritardo di {}ms per: {}", randomDelayMs, cacheKey);
-        applyDelayMs(randomDelayMs);
-        if (attempts >= WARNING_THRESHOLD) {
-            sendSecurityAlert(cacheKey, attempts);
+        String key = normalize(identifier);
+        int attempts = attemptsCache.asMap().merge(key, 1, Integer::sum);
+        log.warn("Login fallito (tentativo {}) per chiave hash={}", attempts, key.hashCode());
+        if (attempts == MAX_ATTEMPTS) {
+            log.error("AVVISO DI SICUREZZA: account bloccato per 1 minuto dopo {} tentativi", attempts);
         }
     }
 
     @Override
     public void loginSucceeded(String identifier) {
-        String cacheKey = resolveToCanonicalKey(identifier);
-        attemptsCache.invalidate(cacheKey);
+        attemptsCache.invalidate(normalize(identifier));
     }
 
-    private String resolveToCanonicalKey(String identifier) {
-        if (identifier == null || identifier.trim().isEmpty()) {
-            return "unknown";
-        }
-        String cleaned = identifier.trim().toLowerCase();
-        Optional<User> user = userRepository.findByEmailIgnoreCase(cleaned);
-        if (user.isEmpty()) {
-            user = userRepository.findByUsernameIgnoreCase(cleaned);
-        }
-        return user.map(User::getEmail).orElse(cleaned);
-    }
-
-    private void applyDelayMs(long milliseconds) {
-        try {
-            Thread.sleep(milliseconds);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-    }
-
-    private void sendSecurityAlert(String key, int attempts) {
-        log.error("=======================================================================");
-        log.error("AVVISO DI SICUREZZA: Rilevati {} tentativi falliti per: {}", attempts, key);
-        log.error("=======================================================================");
+    private String normalize(String identifier) {
+        return identifier == null ? "unknown" : identifier.trim().toLowerCase();
     }
 }

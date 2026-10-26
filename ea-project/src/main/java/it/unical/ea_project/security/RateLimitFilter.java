@@ -51,8 +51,6 @@ public class RateLimitFilter extends OncePerRequestFilter {
             bucket = "photo";
             limit = PHOTO_LIMIT;
         } else if (path.startsWith("/api/notifications")) {
-            // Le notifiche hanno un bucket separato: un burst sull'inbox non deve
-            // consumare il limite generale e bloccare prenotazioni, profilo o ricerca.
             bucket = "notifications";
             limit = NOTIFICATION_LIMIT;
         } else {
