@@ -30,7 +30,6 @@ public class ReviewItemController {
     @FXML
     private TextArea txtRisposta;
 
-    // TODO: implement button's action
     @FXML
     private MenuButton btnActions;
     @FXML
@@ -56,7 +55,7 @@ public class ReviewItemController {
     List<Button> stars;
     final private String FULL_STAR = "★";
     final private String EMPTY_STAR = "☆";
-    final private String RISPOSTA_FXML = "/it/unical/ea_project_javafx/fxml/activity/reviews/review-response-item.fxml";
+    final private String RESPONSE_FXML = "/it/unical/ea_project_javafx/fxml/activity/reviews/review-response-item.fxml";
 
     private ReviewDTO review;
     private boolean isPlaceOwner;
@@ -143,7 +142,7 @@ public class ReviewItemController {
         containerRisposta.getChildren().clear();
         if (hasResponse) {
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getResource(RISPOSTA_FXML));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource(RESPONSE_FXML));
                 Node node = loader.load();
 
                 ResponseItemController controller = loader.getController();

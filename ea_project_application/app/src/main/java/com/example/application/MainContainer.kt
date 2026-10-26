@@ -1,9 +1,11 @@
 package com.example.application
 
 import android.app.Activity
-import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -11,11 +13,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
-import com.example.application.dto.UserDTO
-import com.example.application.network.*
-import com.example.application.screens.*
-import com.example.application.screens.organizer.OrganizerDashboardScreen
+import com.example.application.network.ApiService
+import com.example.application.network.AppStatus
+import com.example.application.network.AuthRepository
+import com.example.application.network.UserSession
+import com.example.application.screens.AppErrorDialog
+import com.example.application.screens.home.HomeScreen
+import com.example.application.screens.favorite.MyTrip
+import com.example.application.screens.ProfileScreen
 
 @Composable
 fun MainContainer() {
@@ -55,55 +60,29 @@ internal fun MainNavigation(
                 }
             )
         }
-    }) {
-        Scaffold(Modifier.fillMaxSize()) { padding ->
-            val contentModifier = Modifier.padding(padding).fillMaxSize()
-            // A different account must never reuse the previous user's screen state.
-            key(user?.id, user?.role) {
-                when (current) {
-                    AppDestinations.HOME -> homeContent(contentModifier)
-                    AppDestinations.`MY-TRIP` -> {
-                        if (user == null) LoginRequiredScreen(
-                            onLogin = { returnToPersonalTab = true; destination = AppDestinations.PROFILE },
-                            onExplore = { destination = AppDestinations.HOME }, modifier = contentModifier
-                        ) else tripsContent(contentModifier)
-                    }
-                    AppDestinations.DASHBOARD -> {
-                        val id = user?.id
-                        if (id != null && user.isOrganizer()) dashboardContent(id, contentModifier)
-                        else LoginRequiredScreen(
-                            onLogin = { destination = AppDestinations.PROFILE },
-                            onExplore = { destination = AppDestinations.HOME }, modifier = contentModifier
-                        )
-                    }
-                    AppDestinations.PROFILE -> ProfileScreen(
-                        user = user,
-                        onLoginSuccess = {
-                            if (returnToPersonalTab) destination = AppDestinations.`MY-TRIP`
-                            returnToPersonalTab = false
-                        },
-                        onLogoutClick = {
-                            returnToPersonalTab = false
-                            destination = AppDestinations.PROFILE
-                            onLogout()
-                        },
-                        modifier = contentModifier
-                    )
-                }
+    ) {
+        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            key(UserSession.user?.id, UserSession.role) {
+            when (currentDestination) {
+                AppDestinations.HOME -> HomeScreen(modifier = Modifier.padding(innerPadding))
+                AppDestinations.`MY-TRIP` -> MyTrip(modifier = Modifier.padding(innerPadding), onLoginClick = { currentDestination = AppDestinations.PROFILE })
+                AppDestinations.PROFILE -> ProfileScreen(
+                    user = UserSession.user,
+                    onLoginSuccess = { },
+                    onLogoutClick = { AuthRepository.logout() },
+                    modifier = Modifier.padding(innerPadding)
+                )
+            }
             }
         }
     }
 }
 
-@Composable
-private fun LoginRequiredScreen(onLogin: () -> Unit, onExplore: () -> Unit, modifier: Modifier) {
-    Column(modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center) {
-        Text("I tuoi viaggi, in un unico posto", style = MaterialTheme.typography.headlineMedium)
-        Spacer(Modifier.height(12.dp))
-        Text("Accedi o crea un account per aprire la tua area personale.", color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(Modifier.height(24.dp))
-        Button(onClick = onLogin, modifier = Modifier.fillMaxWidth()) { Text("Accedi o registrati") }
-        TextButton(onClick = onExplore) { Text("Continua a esplorare") }
-    }
+enum class AppDestinations(
+    val label: String,
+    val icon: Int,
+) {
+    HOME("Esplora", R.drawable.ic_home),
+    `MY-TRIP`("Preferiti", R.drawable.ic_favorite), //TODO Sostituire con Preferiti e non Trip (Trip è gestito dalla home inseme ad Activity)
+    PROFILE("Account", R.drawable.ic_account_box),
 }

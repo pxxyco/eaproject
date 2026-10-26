@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import it.unical.ea_project_javafx.service.api.ApiService;
+import it.unical.ea_project_javafx.service.favorites.FavoriteService;
 import it.unical.ea_project_javafx.ui.ViewSupport;
 import it.unical.ea_project_javafx.ui.background.BackgroundHelper;
 import it.unical.ea_project_javafx.ui.dialog.PopupFactory;
@@ -111,6 +112,10 @@ public class FavoritesController {
     private PopupFactory.Handle activeSharingPopup;
     private PopupFactory.Handle activeDeletePopup;
 
+    private static final String FAVORITES_ITEM = "♥ Preferiti";
+    private boolean favoritesSelected;
+    private long selectionVersion;
+
     @FXML
     public void initialize() {
 
@@ -146,8 +151,10 @@ public class FavoritesController {
                 .addListener((obs, oldRow, newRow) -> showSharedListDetails(newRow));
         listsListView.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, value) -> {
 
+            selectionVersion++;
             selectedListId = extractId(value);
             if (value == null) {
+                favoritesSelected = false;
                 selectedListNameLabel.setText("Seleziona una lista");
                 selectedListVisibilityLabel.setText("-");
                 editListNameField.clear();
@@ -162,6 +169,25 @@ public class FavoritesController {
                 setContentControlsEnabled(false);
                 return;
             }
+
+            favoritesSelected = FAVORITES_ITEM.equals(value);
+            if (favoritesSelected) {
+                selectedListNameLabel.setText("Preferiti");
+                selectedListVisibilityLabel.setText("Privata · lista predefinita, non modificabile");
+                editListNameField.setText("Preferiti");
+                editListNameField.setDisable(true);
+                editListVisibilityCombo.setValue("PRIVATE");
+                editListVisibilityCombo.setDisable(true);
+                saveListChangesButton.setDisable(true);
+                if (deleteListButton != null) deleteListButton.setDisable(true);
+                shareListButton.setVisible(false);
+                shareListButton.setManaged(false);
+                setContentControlsEnabled(true);
+                loadFavorites();
+                return;
+            }
+            editListNameField.setDisable(false);
+            editListVisibilityCombo.setDisable(false);
 
             selectedListNameLabel.setText(displayName(value));
             String visibility = extractVisibility(value);
@@ -213,6 +239,7 @@ public class FavoritesController {
 
                         JsonArray arr = JsonParser.parseString(response.body()).getAsJsonArray();
                         listsListView.getItems().clear();
+                        listsListView.getItems().add(FAVORITES_ITEM);
                         for (JsonElement el : arr) {
                             JsonObject obj = el.getAsJsonObject();
                             String id = obj.get("id").getAsString();
@@ -418,6 +445,8 @@ public class FavoritesController {
 
     private void loadListsAndSelect(Long idToSelect) {
 
+        listsListView.getItems().add(FAVORITES_ITEM);
+
         ApiService.call(ApiService.BASE_URL + "/api/favorite-lists/mine", null, ApiService.Method.GET,
                 response -> Platform.runLater(() -> {
 
@@ -581,6 +610,11 @@ public class FavoritesController {
     @FXML
     private void handleAddTrip() {
 
+        if (favoritesSelected) {
+            changeFavorite(tripSearchResults, FavoriteService.Target.TRIP, true);
+            return;
+        }
+
         Long tripId = extractId(tripSearchResults.getSelectionModel().getSelectedItem());
         if (selectedListId == null) {
             ViewSupport.error(statusMessageLabel, "Seleziona prima una lista.");
@@ -606,6 +640,11 @@ public class FavoritesController {
 
     @FXML
     private void handleRemoveTrip() {
+
+        if (favoritesSelected) {
+            changeFavorite(savedTripsListView, FavoriteService.Target.TRIP, false);
+            return;
+        }
 
         Long tripId = extractId(savedTripsListView.getSelectionModel().getSelectedItem());
         if (selectedListId == null || tripId == null) {
@@ -665,6 +704,11 @@ public class FavoritesController {
     @FXML
     private void handleAddActivity() {
 
+        if (favoritesSelected) {
+            changeFavorite(activitySearchResults, FavoriteService.Target.ACTIVITY, true);
+            return;
+        }
+
         Long activityId = extractId(activitySearchResults.getSelectionModel().getSelectedItem());
         if (selectedListId == null) {
             ViewSupport.error(statusMessageLabel, "Seleziona prima una lista.");
@@ -692,6 +736,11 @@ public class FavoritesController {
     @FXML
     private void handleRemoveActivity() {
 
+        if (favoritesSelected) {
+            changeFavorite(savedActivitiesListView, FavoriteService.Target.ACTIVITY, false);
+            return;
+        }
+
         Long activityId = extractId(savedActivitiesListView.getSelectionModel().getSelectedItem());
         if (selectedListId == null || activityId == null) {
             ViewSupport.error(statusMessageLabel, "Seleziona un'attività salvata da rimuovere.");
@@ -718,8 +767,10 @@ public class FavoritesController {
         }
 
         Long listId = selectedListId;
+        long requestSelection = selectionVersion;
         ApiService.call(ApiService.BASE_URL + "/api/list-trips/list/" + listId, null, ApiService.Method.GET,
                 response -> Platform.runLater(() -> {
+                    if (requestSelection != selectionVersion || favoritesSelected) return;
                     try {
                         savedTripsListView.getItems().clear();
                         JsonArray array = JsonParser.parseString(response.body()).getAsJsonArray();
@@ -739,6 +790,7 @@ public class FavoritesController {
                 null);
         ApiService.call(ApiService.BASE_URL + "/api/list-activities/list/" + listId, null, ApiService.Method.GET,
                 response -> Platform.runLater(() -> {
+                    if (requestSelection != selectionVersion || favoritesSelected) return;
                     try {
                         savedActivitiesListView.getItems().clear();
                         JsonArray array = JsonParser.parseString(response.body()).getAsJsonArray();
@@ -757,6 +809,36 @@ public class FavoritesController {
                         () -> ViewSupport.error(statusMessageLabel, "Impossibile caricare le attività della lista.")),
                 null);
 
+    }
+
+    private void changeFavorite(ListView<String> source, FavoriteService.Target target, boolean save) {
+        Long id = extractId(source.getSelectionModel().getSelectedItem());
+        if (id == null) {
+            ViewSupport.error(statusMessageLabel, save ? "Seleziona un'esperienza dai risultati." : "Seleziona un preferito da rimuovere.");
+            return;
+        }
+        long requestSelection = selectionVersion;
+        FavoriteService.set(target, id.toString(), save, favorite -> {
+            if (requestSelection != selectionVersion) return;
+            ViewSupport.success(statusMessageLabel, favorite ? "Esperienza aggiunta ai preferiti." : "Esperienza rimossa dai preferiti.");
+            loadFavorites();
+        }, message -> ViewSupport.error(statusMessageLabel, message), null);
+    }
+
+    private void loadFavorites() {
+        long requestSelection = selectionVersion;
+        FavoriteService.list(favorites -> {
+            if (requestSelection != selectionVersion || !favoritesSelected) return;
+            savedTripsListView.getItems().clear();
+            savedActivitiesListView.getItems().clear();
+            for (var favorite : favorites) {
+                String row = favorite.getTitle() + " — " + favorite.getCity() + " #" + favorite.getItemId();
+                if ("TRIP".equals(favorite.getType())) savedTripsListView.getItems().add(row);
+                else savedActivitiesListView.getItems().add(row);
+            }
+        }, message -> {
+            if (requestSelection == selectionVersion) ViewSupport.error(statusMessageLabel, message);
+        });
     }
 
     @FXML

@@ -12,6 +12,7 @@ import it.unical.ea_project_javafx.dto.trip.TripDTO;
 import it.unical.ea_project_javafx.navigation.SceneNavigator;
 import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.service.api.ApiService;
+import it.unical.ea_project_javafx.service.favorites.FavoriteService;
 import it.unical.ea_project_javafx.ui.ViewSupport;
 import it.unical.ea_project_javafx.ui.animation.PageTransitions;
 import it.unical.ea_project_javafx.ui.background.BackgroundHelper;
@@ -117,14 +118,15 @@ public class ActivityDetailsController {
     @FXML
     private ReviewController newRecCardController;
 
-    @FXML
-    private ScrollPane contentScroll;
+    @FXML private ScrollPane contentScroll;
+    @FXML private Button btnFavorite;
 
     private ReviewsContainerController recensioniController;
     private PopupFactory.Handle activeInAppModal;
 
     private List<Button> sectionButtons;
 
+    private boolean isFavorite;
     private Node itinerarioNode;
     private Node descrizioneNode;
     private Node fotoNode;
@@ -175,6 +177,7 @@ public class ActivityDetailsController {
                             activity = ApiService.fromJson(response.body(), ActivityDTO.class);
 
                             setActivityData();
+                            setupFavorite();
                             handleDescrizione(null);
                             contentScroll.setManaged(true);
                             contentScroll.setVisible(true);
@@ -197,6 +200,7 @@ public class ActivityDetailsController {
                             trip = ApiService.fromJson(response.body(), TripDTO.class);
 
                             setTripData();
+                            setupFavorite();
                             handleDescrizione(null);
                             loadingOverlay.setVisible(false);
                             contentScroll.setManaged(true);
@@ -718,6 +722,30 @@ public class ActivityDetailsController {
         }
         active.getStyleClass().remove("section-button");
         active.getStyleClass().add("section-button-active");
+    }
+
+    private void setupFavorite() {
+        boolean traveler = UserSession.getInstance().isLoggedIn()
+                && "TRAVELER".equalsIgnoreCase(UserSession.getInstance().getRole());
+        btnFavorite.setVisible(traveler);
+        btnFavorite.setManaged(traveler);
+        if (!traveler) return;
+        FavoriteService.state(FavoriteService.Target.valueOf(myType.name()), id, this::updateFavoriteButton,
+                message -> updateFavoriteButton(false), btnFavorite::setDisable);
+    }
+
+    @FXML
+    private void handleFavorite() {
+        FavoriteService.set(FavoriteService.Target.valueOf(myType.name()), id, !isFavorite,
+                this::updateFavoriteButton,
+                message -> showAlert(Alert.AlertType.ERROR, "Preferiti", message), btnFavorite::setDisable);
+    }
+
+    private void updateFavoriteButton(boolean favorite) {
+        isFavorite = favorite;
+        btnFavorite.setText(favorite ? "♥" : "♡");
+        btnFavorite.getStyleClass().remove("active");
+        if (favorite) btnFavorite.getStyleClass().add("active");
     }
 
 }

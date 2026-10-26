@@ -244,5 +244,11 @@ application-local.yml
 *.pem
 *.key
 
+###keystore
+/ea-project/src/main/resources/keystore.p12
+
 # Configurazione locale Docker
 /.env
+
+# Runtime photo storage; default images are initialized from backend resources.
+/photo/

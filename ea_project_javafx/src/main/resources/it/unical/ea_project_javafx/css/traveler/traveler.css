@@ -154,6 +154,34 @@
     -fx-border-color: transparent transparent rgba(255, 255, 255, 0.07) transparent;
 }
 
+.profile-table .table-row-cell:filled:selected {
+    -fx-background-color: rgba(255, 255, 255, 0.15);
+}
+
+.profile-table .placeholder .label {
+    -fx-text-fill: rgba(255, 255, 255, 0.6);
+}
+
+.profile-table .corner {
+    -fx-background-color: transparent;
+}
+
+.profile-table .scroll-bar:horizontal,
+.profile-table .scroll-bar:vertical {
+    -fx-background-color: transparent;
+}
+
+.profile-table .scroll-bar .thumb {
+    -fx-background-color: rgba(231, 229, 228, 0.25);
+    -fx-background-radius: 4px;
+}
+
+.profile-table .scroll-bar .increment-button,
+.profile-table .scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-padding: 3px;
+}
+
 .danger-action-button {
     -fx-background-color: rgba(239, 68, 68, 0.3);
     -fx-text-fill: #fca5a5;

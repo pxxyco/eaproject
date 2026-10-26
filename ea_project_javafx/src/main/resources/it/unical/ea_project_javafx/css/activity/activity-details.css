@@ -4,9 +4,16 @@
 .content-scroll,
 .content-scroll>.viewport {
     -fx-background-color: transparent;
+    -fx-background: transparent;
 }
 
-/* Navigation Bar (la .navbar globale è in common/style.css) */
+/* ScrollBar Customization (usato anche da photo-gallery.fxml) */
+.content-scroll .scroll-bar:vertical,
+.content-scroll .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+    -fx-opacity: 0.3;
+}
+
 .logo {
     -fx-text-fill: #ffffff;
     -fx-font-size: 16px;
@@ -19,7 +26,6 @@
     -fx-font-size: 13px;
     -fx-cursor: hand;
     -fx-padding: 0;
-    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.6), 4, 0, 0, 1);
 }
 
 .back-link:hover {
@@ -37,55 +43,55 @@
     -fx-cursor: hand;
 }
 
-/* ScrollBar Customization */
-.content-scroll .scroll-bar:vertical,
-.content-scroll .scroll-bar:horizontal {
-    -fx-background-color: transparent;
-    -fx-opacity: 0.3;
+.btn-login-pill:hover {
+    -fx-background-color: #e7e5e4;
+    -fx-text-fill: #1c1917;
 }
 
-.content-rows {
-    -fx-spacing: 10px;
+.section-tabs {
+    -fx-padding: 0;
 }
 
-/* Sezioni & Pulsanti Tab */
-.section-button {
-    -fx-background-color: rgba(255, 255, 255, 0.12);
-    -fx-border-color: rgba(255, 255, 255, 0.2);
-    -fx-border-radius: 12px;
-    -fx-background-radius: 12px;
-    -fx-font-size: 11px;
-    -fx-text-fill: #ffffff;
-    -fx-cursor: hand;
-}
-
+.section-button,
 .section-button-active {
-    -fx-background-color: rgba(231, 229, 228, 0.22);
-    -fx-text-fill: #ffffff;
-    -fx-border-color: #e7e5e4;
-    -fx-border-radius: 12px;
-    -fx-background-radius: 12px;
-    -fx-padding: 3px 10px;
-    -fx-font-size: 11px;
+    -fx-background-radius: 20px;
+    -fx-border-radius: 20px;
+    -fx-padding: 7px 18px;
+    -fx-font-size: 13px;
     -fx-font-weight: bold;
     -fx-cursor: hand;
 }
 
-.section-button:hover,
-.section-button-active:hover {
-    -fx-translate-y: -3px;
-
+.section-button {
+    -fx-background-color: rgba(255, 255, 255, 0.10);
+    -fx-border-color: rgba(255, 255, 255, 0.22);
+    -fx-text-fill: rgba(255, 255, 255, 0.85);
 }
 
-/* Hero Header (scoped: home.css definisce .hero-title/.hero-subtitle per la home) */
+.section-button:hover {
+    -fx-background-color: rgba(231, 229, 228, 0.22);
+    -fx-border-color: #e7e5e4;
+    -fx-text-fill: #ffffff;
+}
+
+.section-button-active {
+    -fx-background-color: #e7e5e4;
+    -fx-border-color: #e7e5e4;
+    -fx-text-fill: #1c1917;
+}
+
+.section-button-active:hover {
+    -fx-background-color: #fafaf9;
+}
+
 .hero {
-    -fx-background-radius: 14px;
+    -fx-background-radius: 16px;
     -fx-background-insets: 0;
 }
 
 .hero-content {
     -fx-background-color: linear-gradient(to top, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.1) 65%);
-    -fx-background-radius: 14px;
+    -fx-background-radius: 16px;
 }
 
 .hero .hero-title {
@@ -101,10 +107,9 @@
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.7), 6, 0, 0, 1);
 }
 
-/* Badges */
 .badge-category,
 .badge-rating {
-    -fx-background-color: rgba(0, 0, 0, 0.65);
+    -fx-background-color: rgba(0, 0, 0, 0.55);
     -fx-border-radius: 12px;
     -fx-background-radius: 12px;
     -fx-padding: 3px 10px;
@@ -122,34 +127,50 @@
     -fx-border-color: rgba(245, 166, 35, 0.4);
 }
 
-/* Card Prenotazione */
 .booking-card {
-    -fx-background-color: rgba(28, 28, 27, 0.88);
-    -fx-background-radius: 14px;
-    -fx-border-color: rgba(231, 229, 228, 0.2);
-    -fx-border-radius: 14px;
+    -fx-background-color: rgba(255, 255, 255, 0.08);
+    -fx-border-color: rgba(255, 255, 255, 0.16);
+    -fx-border-radius: 16px;
+    -fx-background-radius: 16px;
+}
+
+.booking-title {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.booking-subtitle {
+    -fx-text-fill: rgba(255, 255, 255, 0.6);
+    -fx-font-size: 12px;
+}
+
+.booking-card .separator .line {
+    -fx-border-color: rgba(255, 255, 255, 0.16);
+    -fx-border-width: 1 0 0 0;
 }
 
 .price-big {
     -fx-text-fill: #ffffff;
-    -fx-font-size: 24px;
+    -fx-font-size: 26px;
     -fx-font-weight: bold;
 }
 
 .price-suffix {
-    -fx-text-fill: rgba(255, 255, 255, 0.65);
+    -fx-text-fill: rgba(255, 255, 255, 0.6);
     -fx-font-size: 12px;
 }
 
 .price-total {
     -fx-text-fill: #e7e5e4;
-    -fx-font-size: 16px;
+    -fx-font-size: 18px;
     -fx-font-weight: bold;
 }
 
 .booking-card .field-label {
-    -fx-text-fill: rgba(255, 255, 255, 0.7);
+    -fx-text-fill: rgba(255, 255, 255, 0.85);
     -fx-font-size: 12px;
+    -fx-font-weight: bold;
 }
 
 .hint {
@@ -157,24 +178,27 @@
     -fx-font-size: 11px;
 }
 
-/* .btn-primary è in common/style.css: qui solo l'override del padding a tutta larghezza */
 .booking-card .btn-primary {
     -fx-padding: 10px 0;
 }
 
-/* Controlli del modulo di prenotazione */
-.booking-card .text-field {
-    -fx-background-color: rgba(231, 229, 228, 0.08);
-    -fx-text-fill: #ffffff;
+.booking-card .date-picker,
+.booking-card .booking-spinner {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
     -fx-border-color: rgba(255, 255, 255, 0.2);
-    -fx-border-radius: 6px;
-    -fx-background-radius: 6px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 2px 6px;
 }
 
-.booking-card .booking-spinner {
-    -fx-background-color: rgba(231, 229, 228, 0.08);
-    -fx-border-color: rgba(255, 255, 255, 0.2);
-    -fx-border-radius: 6px;
+.booking-card .date-picker:showing,
+.booking-card .booking-spinner:focused {
+    -fx-background-color: rgba(255, 255, 255, 0.12);
+    -fx-border-color: #d6d3d1;
+}
+
+.booking-card .date-picker > .arrow-button:hover {
+    -fx-background-color: rgba(231, 229, 228, 0.18);
     -fx-background-radius: 6px;
 }
 
@@ -186,10 +210,11 @@
     -fx-alignment: center;
 }
 
-.booking-card .booking-spinner>.increment-arrow-button,
-.booking-card .booking-spinner>.decrement-arrow-button {
+.booking-card .booking-spinner > .increment-arrow-button,
+.booking-card .booking-spinner > .decrement-arrow-button {
     -fx-background-color: transparent;
     -fx-background-insets: 0;
+    -fx-background-radius: 6px;
     -fx-border-color: transparent;
     -fx-cursor: hand;
 }
@@ -199,34 +224,31 @@
     -fx-background-color: rgba(231, 229, 228, 0.18);
 }
 
-.booking-card .booking-spinner>.increment-arrow-button:pressed,
-.booking-card .booking-spinner>.decrement-arrow-button:pressed {
-    -fx-background-color: rgba(231, 229, 228, 0.28);
-}
-
-.booking-card .booking-spinner>.increment-arrow-button>.increment-arrow,
-.booking-card .booking-spinner>.decrement-arrow-button>.decrement-arrow {
+.booking-card .booking-spinner > .increment-arrow-button > .increment-arrow,
+.booking-card .booking-spinner > .decrement-arrow-button > .decrement-arrow {
     -fx-background-color: #d6d3d1;
 }
 
-.date-picker {
-    -fx-background-color: rgba(231, 229, 228, 0.08);
-    -fx-border-color: rgba(255, 255, 255, 0.2);
-    -fx-border-radius: 6px;
-    -fx-background-radius: 6px;
-}
-
-.date-picker>.text-field {
-    -fx-background-color: transparent;
+.btn-favorite {
+    -fx-background-color: rgba(0, 0, 0, 0.55);
+    -fx-border-color: rgba(255, 255, 255, 0.35);
+    -fx-background-radius: 50%;
+    -fx-border-radius: 50%;
+    -fx-min-width: 40px;
+    -fx-min-height: 40px;
+    -fx-max-width: 40px;
+    -fx-max-height: 40px;
+    -fx-padding: 0;
     -fx-text-fill: #ffffff;
-    -fx-prompt-text-fill: rgba(255, 255, 255, 0.5);
-}
-
-.date-picker>.arrow-button {
-    -fx-background-color: transparent;
+    -fx-font-size: 20px;
     -fx-cursor: hand;
 }
 
-.date-picker>.arrow-button>.arrow {
-    -fx-background-color: #d6d3d1;
+.btn-favorite:hover {
+    -fx-background-color: rgba(0, 0, 0, 0.75);
+}
+
+.btn-favorite.active {
+    -fx-text-fill: #ef4444;
+    -fx-border-color: rgba(239, 68, 68, 0.6);
 }

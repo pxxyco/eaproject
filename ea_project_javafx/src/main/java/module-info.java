@@ -20,6 +20,7 @@ module it.unical.ea_project_javafx {
 
     opens it.unical.ea_project_javafx.dto.activity to com.google.gson;
     opens it.unical.ea_project_javafx.dto.booking to com.google.gson;
+    opens it.unical.ea_project_javafx.dto.favorites to com.google.gson;
     opens it.unical.ea_project_javafx.dto.home to com.google.gson;
     opens it.unical.ea_project_javafx.dto.review to com.google.gson;
     opens it.unical.ea_project_javafx.dto.trip to com.google.gson;

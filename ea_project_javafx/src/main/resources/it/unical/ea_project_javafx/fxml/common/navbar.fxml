@@ -24,7 +24,7 @@
                 <ImageView fitHeight="32.0" fitWidth="32.0" preserveRatio="true"
                     styleClass="nav-logo">
                     <image>
-                        <Image url="@../../images/logo_448x448.png" />
+                        <Image url="@../../images/monogram_render.png" />
                     </image>
                 </ImageView>
                 <Separator orientation="VERTICAL" styleClass="nav-divider" />

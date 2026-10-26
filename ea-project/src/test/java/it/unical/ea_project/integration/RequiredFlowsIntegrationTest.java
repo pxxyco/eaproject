@@ -203,4 +203,59 @@ class RequiredFlowsIntegrationTest {
         assertEquals(204, call("DELETE", "/api/activities/" + id(createdActivity, "activityId"), null, owner).statusCode());
     }
 
+    @Test void quickFavoritesArePrivateAndConcurrentAddsAreIdempotent() throws Exception {
+        Trip trip = trip(3);
+        String target = "/api/favorites/trips/" + trip.getTripId();
+        assertEquals(401, call("GET", "/api/favorites", null, null).statusCode());
+        try (var pool = Executors.newFixedThreadPool(2)) {
+            var first = pool.submit(() -> call("POST", target, null, traveler));
+            var second = pool.submit(() -> call("POST", target, null, traveler));
+            assertEquals(200, first.get().statusCode());
+            assertEquals(200, second.get().statusCode());
+        }
+        String saved = call("GET", "/api/favorites", null, traveler).body();
+        assertEquals(1, Pattern.compile("\"itemId\"").matcher(saved).results().count());
+        assertTrue(saved.contains("Viaggio di prova"));
+        assertEquals(200, call("POST", target, null, traveler).statusCode());
+        assertEquals(saved, call("GET", "/api/favorites", null, traveler).body());
+        assertEquals("[]", call("GET", "/api/favorites", null, secondTraveler).body());
+        assertEquals(200, call("DELETE", target, null, secondTraveler).statusCode());
+        assertTrue(call("GET", target, null, traveler).body().contains("true"));
+        assertEquals(200, call("DELETE", target, null, traveler).statusCode());
+        assertEquals(200, call("DELETE", target, null, traveler).statusCode());
+        assertEquals("[]", call("GET", "/api/favorites", null, traveler).body());
+    }
+
+    @Test void quickFavoritesRejectUnavailableOffersAndMapActivities() throws Exception {
+        Trip unpublished = trip(2);
+        unpublished.setStatus(Trip.TripStatus.DRAFT);
+        trips.save(unpublished);
+        assertEquals(400, call("POST", "/api/favorites/trips/" + unpublished.getTripId(), null, traveler).statusCode());
+        assertEquals(400, call("POST", "/api/favorites/trips/999999999", null, traveler).statusCode());
+        Activity activity = new Activity();
+        activity.setCreatedBy(owner); activity.setTitle("Visita preferita"); activity.setCity("Roma");
+        activity.setCategory(Activity.Category.VISIT); activity.setPrice(10.0); activity.setStatus(Activity.Status.PUBLISHED);
+        activity = activities.save(activity);
+        String path = "/api/favorites/activities/" + activity.getActivityId();
+        assertEquals(200, call("POST", path, null, traveler).statusCode());
+        String saved = call("GET", "/api/favorites", null, traveler).body();
+        assertTrue(saved.contains("Visita preferita"));
+        assertTrue(saved.contains("ACTIVITY"));
+        activity.setDeletedAt(LocalDateTime.now()); activities.save(activity);
+        assertTrue(call("GET", "/api/favorites", null, traveler).body().contains("Attività non più disponibile"));
+        assertEquals(200, call("DELETE", path, null, traveler).statusCode());
+    }
+
+    @Test void removingQuickFavoriteKeepsNamedCollectionsIntact() throws Exception {
+        Trip trip = trip(3);
+        String path = "/api/favorites/trips/" + trip.getTripId();
+        assertEquals(200, call("POST", path, null, traveler).statusCode());
+        var collection = call("POST", "/api/favorite-lists", "{\"name\":\"Raccolta indipendente\",\"visibility\":\"PRIVATE\"}", traveler);
+        assertEquals(201, collection.statusCode());
+        long list = id(collection, "id");
+        assertEquals("[]", call("GET", "/api/list-trips/list/" + list, null, traveler).body());
+        assertEquals(201, call("POST", "/api/list-trips", "{\"listId\":" + list + ",\"tripId\":" + trip.getTripId() + "}", traveler).statusCode());
+        assertEquals(200, call("DELETE", path, null, traveler).statusCode());
+        assertTrue(call("GET", "/api/list-trips/list/" + list, null, traveler).body().contains("Viaggio di prova"));
+    }
 }

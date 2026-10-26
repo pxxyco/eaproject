@@ -3,6 +3,7 @@ package it.unical.ea_project_javafx.service.api;
 import com.google.gson.JsonObject;
 import it.unical.ea_project_javafx.dto.user.UserDTO;
 import it.unical.ea_project_javafx.navigation.SceneNavigator;
+import it.unical.ea_project_javafx.security.TlsSupport;
 import it.unical.ea_project_javafx.security.TokenStorage;
 import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.service.notification.NotificationPollingService;
@@ -30,16 +31,21 @@ import lombok.Setter;
 
 public class ApiService {
 
+    public static void init() {
+        TlsSupport.installAsDefault();
+    }
+
     public enum Method {
         GET, POST, PUT, DELETE
     }
 
     public static final String BASE_URL = System
-            .getProperty("itinera.api.url", System.getenv().getOrDefault("ITINERA_API_URL", "http://localhost:8080"))
+            .getProperty("itinera.api.url", System.getenv().getOrDefault("ITINERA_API_URL", "https://localhost:8443"))
             .replaceAll("/+$", "");
 
     private static final HttpClient CLIENT = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(5))
+            .sslContext(TlsSupport.context())
             .build();
 
     private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(4, r -> {

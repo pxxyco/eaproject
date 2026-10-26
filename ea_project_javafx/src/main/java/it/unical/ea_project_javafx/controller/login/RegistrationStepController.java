@@ -1,12 +1,10 @@
 package it.unical.ea_project_javafx.controller.login;
 
 import it.unical.ea_project_javafx.dto.user.UserDTO;
-import it.unical.ea_project_javafx.navigation.SceneNavigator;
 import it.unical.ea_project_javafx.navigation.StepNavigator;
 import it.unical.ea_project_javafx.security.PasswordPolicy;
 import it.unical.ea_project_javafx.service.api.ApiService;
 import it.unical.ea_project_javafx.ui.ViewSupport;
-import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -113,10 +111,11 @@ public class RegistrationStepController {
 
         String jsonBody = ApiService.toJson(requestDto);
 
-        ApiService.post(
+        ApiService.callDetailed(
                 ApiService.BASE_URL + "/api/users",
                 jsonBody,
-                res -> Platform.runLater(() -> {
+                ApiService.Method.POST,
+                res -> {
                     if (res.statusCode() == 200 || res.statusCode() == 201) {
                         clearFields();
                         navigator.showSuccessMessage("Puoi accedere al tuo account.");
@@ -127,11 +126,8 @@ public class RegistrationStepController {
                     } else {
                         showError("Impossibile completare la registrazione.");
                     }
-                }),
-                () -> Platform.runLater(() -> {
-                    SceneNavigator.getInstance()
-                            .loadScene("/it/unical/ea_project_javafx/fxml/common/splash-screen.fxml", null);
-                }),
+                },
+                this::showError,
                 navigator::setLoading);
 
     }

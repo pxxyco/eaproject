@@ -22,13 +22,14 @@ public class ItineraryController implements ActivitySectionController, TripSecti
     @FXML
     public StackPane mapContainer;
     @FXML
-    private VBox itinerarioContainer;
+    private VBox itinerarioItemsContainer;
 
     private MapPoint standard = new MapPoint(41.8719, 12.5674);
     private MapView mapView;
 
     @Override
     public void setData(ActivityDTO activity) {
+        itinerarioItemsContainer.getChildren().clear();
 
         setMap(activity);
         setItinerario(activity);
@@ -37,6 +38,7 @@ public class ItineraryController implements ActivitySectionController, TripSecti
 
     @Override
     public void setData(TripDTO trip) {
+        itinerarioItemsContainer.getChildren().clear();
 
         setMap(trip);
         setItinerario(trip);
@@ -58,7 +60,7 @@ public class ItineraryController implements ActivitySectionController, TripSecti
             mapView.setZoom(15);
         });
 
-        itinerarioContainer.getChildren().add(location);
+        itinerarioItemsContainer.getChildren().add(location);
 
     }
 
@@ -82,12 +84,12 @@ public class ItineraryController implements ActivitySectionController, TripSecti
                     mapView.setCenter(stage.getLatitude(), stage.getLongitude());
                     mapView.setZoom(15);
                 });
-                itinerarioContainer.getChildren().add(location);
+                itinerarioItemsContainer.getChildren().add(location);
             }
         } else {
             Label lbl = new Label("Nessun itinerario disponibile!");
             lbl.setStyle("-fx-text-fill: white");
-            itinerarioContainer.getChildren().add(lbl);
+            itinerarioItemsContainer.getChildren().add(lbl);
         }
 
     }
