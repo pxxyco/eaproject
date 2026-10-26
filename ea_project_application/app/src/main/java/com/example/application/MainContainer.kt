@@ -1,6 +1,7 @@
 package com.example.application
 
 import android.app.Activity
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -12,6 +13,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import com.example.application.dto.ExperienceRef
 import com.example.application.network.ApiService
 import com.example.application.network.AppStatus
 import com.example.application.network.AuthRepository
@@ -20,6 +22,7 @@ import com.example.application.screens.AppErrorDialog
 import com.example.application.screens.home.HomeScreen
 import com.example.application.screens.favorite.MyTrip
 import com.example.application.screens.ProfileScreen
+import com.example.application.screens.activity.ExperienceDetailScreen
 
 @Composable
 fun MainContainer() {
@@ -36,6 +39,10 @@ fun MainContainer() {
     }
 
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
+    var openExperience by rememberSaveable(stateSaver = ExperienceRef.Saver) {
+        mutableStateOf<ExperienceRef?>(null)
+    }
+    BackHandler(enabled = openExperience != null) { openExperience = null }
     AppErrorDialog(onExit = { (context as? Activity)?.finishAffinity() })
 
     NavigationSuiteScaffold(
@@ -50,15 +57,31 @@ fun MainContainer() {
                     },
                     label = { Text(destination.label) },
                     selected = destination == currentDestination,
-                    onClick = { currentDestination = destination }
+                    onClick = {
+                        openExperience = null
+                        currentDestination = destination
+                    }
                 )
             }
         }
     ) {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            when (currentDestination) {
-                AppDestinations.HOME -> HomeScreen(modifier = Modifier.padding(innerPadding))
-                AppDestinations.`MY-TRIP` -> MyTrip(modifier = Modifier.padding(innerPadding))
+            val experience = openExperience
+            if (experience != null) {
+                ExperienceDetailScreen(
+                    experience = experience,
+                    onBack = { openExperience = null },
+                    modifier = Modifier.padding(innerPadding)
+                )
+            } else when (currentDestination) {
+                AppDestinations.HOME -> HomeScreen(
+                    onExperienceClick = {openExperience = it },
+                    modifier = Modifier.padding(innerPadding)
+                )
+                AppDestinations.`MY-TRIP` -> MyTrip(
+                    onExperienceClick = {openExperience = it },
+                    modifier = Modifier.padding(innerPadding)
+                )
                 AppDestinations.PROFILE -> ProfileScreen(
                     user = UserSession.user,
                     onLoginSuccess = { },

@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.example.application.dto.SearchSuggestion
 import com.example.application.dto.ActivityHomeDTO
 import com.example.application.dto.TripHomeDTO
+import com.example.application.dto.ExperienceRef
 import kotlinx.coroutines.launch
 
 @Composable
@@ -39,7 +40,8 @@ internal fun HomeScreenContent(
     searchActivityResults: List<ActivityHomeDTO>,
     searchTripResults: List<TripHomeDTO>,
     searchError: String?,
-    onResetSearch: () -> Unit
+    onResetSearch: () -> Unit,
+    onExperienceClick: (ExperienceRef) -> Unit
 ) {
     val scrollState = rememberScrollState()
     val scope = rememberCoroutineScope()
@@ -95,7 +97,7 @@ internal fun HomeScreenContent(
 
                 SectionTitle("Risultati viaggi")
                 Spacer(Modifier.height(12.dp))
-                TripRow(searchTripResults)
+                TripRow(searchTripResults, onExperienceClick)
 
                 Spacer(Modifier.height(28.dp))
 
@@ -109,20 +111,20 @@ internal fun HomeScreenContent(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 } else {
-                    ActivityGrid(searchActivityResults)
+                    ActivityGrid(searchActivityResults, onExperienceClick)
                 }
 
             } else if (homeError == null) {
 
                 SectionTitle("Le Migliori Attività")
                 Spacer(Modifier.height(12.dp))
-                ActivityRow(activities)
+                ActivityRow(activities, onExperienceClick)
 
                 Spacer(Modifier.height(28.dp))
 
                 SectionTitle("I Migliori Viaggi in Primo Piano")
                 Spacer(Modifier.height(12.dp))
-                TripRow(trips)
+                TripRow(trips, onExperienceClick)
 
                 activityCategories.forEach { category ->
                     val categoryActivities =
@@ -132,7 +134,7 @@ internal fun HomeScreenContent(
                         Spacer(Modifier.height(28.dp))
                         SectionTitle(category.title)
                         Spacer(Modifier.height(12.dp))
-                        ActivityRow(categoryActivities)
+                        ActivityRow(categoryActivities, onExperienceClick)
                     }
                 }
             }

@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.application.dto.ActivityHomeDTO
+import com.example.application.dto.ExperienceRef
 import com.example.application.dto.TripHomeDTO
 import com.example.application.network.MyTripRepository
 import com.example.application.screens.common.LoadingOverlay
@@ -26,6 +27,7 @@ import kotlinx.coroutines.CancellationException
 fun CollectionScreen(
     target: MyTripRepository.HubTarget,
     onBack: () -> Unit,
+    onExperienceClick: (ExperienceRef) -> Unit,
     modifier: Modifier = Modifier
 ) {
     BackHandler(onBack = onBack)
@@ -95,14 +97,14 @@ fun CollectionScreen(
                     SectionTitle("Viaggi")
                     Spacer(Modifier.height(12.dp))
                     if (trips.isEmpty()) EmptyMessage("Nessun viaggio qui.")
-                    else TripRow(trips)
+                    else TripRow(trips, onExperienceClick)
 
                     Spacer(Modifier.height(28.dp))
 
                     SectionTitle("Attività")
                     Spacer(Modifier.height(12.dp))
                     if (activities.isEmpty()) EmptyMessage("Nessuna attività qui.")
-                    else ActivityGrid(activities)
+                    else ActivityGrid(activities, onExperienceClick)
                 }
 
                 Spacer(Modifier.height(32.dp))

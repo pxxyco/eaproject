@@ -12,6 +12,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.application.dto.ActivityHomeDTO
+import com.example.application.dto.ExperienceRef
+import com.example.application.dto.ExperienceType
 import com.example.application.dto.TripHomeDTO
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -41,6 +43,7 @@ private fun formatTripPrice(price: BigDecimal?): String =
 @Composable
 private fun ActivityCardItem(
     item: ActivityHomeDTO,
+    onExperienceClick: (ExperienceRef) -> Unit,
     modifier: Modifier = Modifier.width(180.dp)
 ) {
     ExperienceCard(
@@ -51,13 +54,17 @@ private fun ActivityCardItem(
         rating = item.averageRating?.let { "%.1f".format(Locale.ITALY, it) } ?: "-",
         imageUrl = item.imageUrl.orEmpty(),
         dateInfo = formatDateRange(item.startDate, item.endDate),
-        onClick = { /* TODO: navigazione attività */ },
+        onClick = {  item.activityId?.let { onExperienceClick(ExperienceRef(ExperienceType.ACTIVITY, it)) }
+        },
         modifier = modifier
     )
 }
 
 @Composable
-private fun TripCardItem(item: TripHomeDTO) {
+private fun TripCardItem(
+    item: TripHomeDTO,
+    onExperienceClick: (ExperienceRef) -> Unit
+) {
     TripCard(
         title = item.title ?: "Senza titolo",
         location = item.location.orEmpty(),
@@ -65,30 +72,41 @@ private fun TripCardItem(item: TripHomeDTO) {
         rating = item.averageRating?.toPlainString() ?: "-",
         dateRange = formatDateRange(item.startDate, item.endDate),
         imageUrl = item.coverPhotoUrl.orEmpty(),
-        onClick = { /* TODO: navigazione viaggio */ }
+        onClick = {
+            item.tripId?.let { onExperienceClick(ExperienceRef(ExperienceType.TRIP, it)) }
+        }
     )
 }
 
 @Composable
-internal fun ActivityRow(itemsList: List<ActivityHomeDTO>) {
+internal fun ActivityRow(
+    itemsList: List<ActivityHomeDTO>,
+    onExperienceClick: (ExperienceRef) -> Unit
+) {
     LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
         items(items = itemsList, key = { it.activityId ?: it.hashCode().toLong() }) { item ->
-            ActivityCardItem(item)
+            ActivityCardItem(item, onExperienceClick)
         }
     }
 }
 
 @Composable
-internal fun TripRow(itemsList: List<TripHomeDTO>) {
+internal fun TripRow(
+    itemsList: List<TripHomeDTO>,
+    onExperienceClick: (ExperienceRef) -> Unit
+) {
     LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         items(items = itemsList, key = { it.tripId ?: it.hashCode().toLong() }) { item ->
-            TripCardItem(item)
+            TripCardItem(item,onExperienceClick)
         }
     }
 }
 
 @Composable
-internal fun ActivityGrid(itemsList: List<ActivityHomeDTO>) {
+internal fun ActivityGrid(
+    itemsList: List<ActivityHomeDTO>,
+    onExperienceClick: (ExperienceRef) -> Unit
+) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -103,6 +121,7 @@ internal fun ActivityGrid(itemsList: List<ActivityHomeDTO>) {
                 pair.forEach { item ->
                     ActivityCardItem(
                         item = item,
+                        onExperienceClick = onExperienceClick,
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight()
