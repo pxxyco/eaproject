@@ -40,7 +40,7 @@ public class ApiService {
     }
 
     public static final String BASE_URL = System
-            .getProperty("itinera.api.url", System.getenv().getOrDefault("ITINERA_API_URL", "https://localhost:8443"))
+            .getProperty("eaproject.api.url", System.getenv().getOrDefault("EA_PROJECT_API_URL", "https://localhost:8443"))
             .replaceAll("/+$", "");
 
     private static final HttpClient CLIENT = HttpClient.newBuilder()

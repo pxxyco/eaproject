@@ -25,7 +25,7 @@ public class JwtServiceImpl implements JwtService {
 
     @Value("${jwt.secret}")
     private String secret;
-    @Value("${app.security.jwt-issuer:itinera}")
+    @Value("${app.security.jwt-issuer:eaproject}")
     private String issuer;
     private final UserRepository users;
     private SecretKey signingKey;

@@ -80,7 +80,7 @@
                                     <Label text="Scegli cosa ricevere" styleClass="section-header"
                                         wrapText="true" />
                                     <Label
-                                        text="Queste preferenze regolano gli avvisi nel vassoio di Itinera."
+                                        text="Queste preferenze regolano gli avvisi nel vassoio di EA Project."
                                         styleClass="section-subtitle" wrapText="true" />
                                     <CheckBox fx:id="emailBookingNotificationCheck"
                                         text="Conferme e avvisi sulle prenotazioni" wrapText="true" />

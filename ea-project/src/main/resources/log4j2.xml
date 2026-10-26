@@ -6,7 +6,7 @@
             %-5level %logger{1.} - %encode{%msg}{CRLF}%n</Property>
         <Property name="AUDIT_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [request=%X{requestId}] %-5level
             %encode{%msg}{CRLF}%n</Property>
-        <Property name="LOG_DIR">${sys:itinera.log.dir:-${env:LOG_DIR:-logs}}</Property>
+        <Property name="LOG_DIR">${sys:eaproject.log.dir:-${env:LOG_DIR:-logs}}</Property>
     </Properties>
 
     <Appenders>

@@ -14,10 +14,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class OpenApiConfig {
         @Bean
-        OpenAPI itineraApi() {
-                return new OpenAPI().info(new Info().title("Itinera API").version("1.0")
+        OpenAPI eaProjectApi() {
+                return new OpenAPI().info(new Info().title("EA Project API").version("1.0")
                                 .description(
-                                                "API di Itinera. Gli endpoint protetti richiedono un access token JWT; il refresh si invia nell'header X-Refresh-Token."))
+                                                "API di EA Project. Gli endpoint protetti richiedono un access token JWT; il refresh si invia nell'header X-Refresh-Token."))
                                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
                                 .components(new Components().addSecuritySchemes("bearerAuth", new SecurityScheme()
                                                 .type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")));

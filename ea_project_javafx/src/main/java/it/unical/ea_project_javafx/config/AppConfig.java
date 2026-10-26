@@ -12,7 +12,7 @@ public final class AppConfig {
 
     public static final Image APP_ICON = new Image(
             Objects.requireNonNull(
-                    AppConfig.class.getResourceAsStream("/it/unical/ea_project_javafx/images/monogram.png")));
+                    AppConfig.class.getResourceAsStream("/it/unical/ea_project_javafx/images/monogram_icon.png")));
 
     public static final double WINDOW_WIDTH = 1280.0;
     public static final double WINDOW_HEIGHT = 768.0;

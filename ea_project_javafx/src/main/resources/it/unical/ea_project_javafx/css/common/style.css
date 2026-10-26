@@ -36,8 +36,8 @@
 }
 
 .nav-logo {
-    -fx-fit-width: 32px;
-    -fx-fit-height: 32px;
+    -fx-fit-width: 56px;
+    -fx-fit-height: 56px;
     -fx-preserve-ratio: true;
 }
 
