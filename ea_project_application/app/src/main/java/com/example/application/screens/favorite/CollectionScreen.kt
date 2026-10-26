@@ -1,123 +1,110 @@
 package com.example.application.screens.favorite
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.application.dto.ActivityHomeDTO
-import com.example.application.dto.TripHomeDTO
+import com.example.application.dto.CollectionItemsDTO
+import com.example.application.dto.canCancel
 import com.example.application.network.MyTripRepository
-import com.example.application.screens.common.LoadingOverlay
-import com.example.application.screens.home.ActivityGrid
-import com.example.application.screens.home.SectionTitle
-import com.example.application.screens.home.TripRow
-import com.example.application.ui.theme.ScreenBackground
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.launch
+
+private data class CollectionAction(val title: String, val run: suspend () -> Unit, val leave: Boolean = false)
 
 @Composable
-fun CollectionScreen(
-    target: MyTripRepository.HubTarget,
-    onBack: () -> Unit,
-    modifier: Modifier = Modifier
+fun CollectionScreen(target: MyTripRepository.HubTarget, onBack: () -> Unit, modifier: Modifier = Modifier,
+    load: suspend (MyTripRepository.HubTarget) -> CollectionItemsDTO = { MyTripRepository.loadItems(it) },
+    deleteList: suspend (Long) -> Unit = { MyTripRepository.deleteList(it) },
+    remove: suspend (MyTripRepository.HubTarget, Long, Boolean) -> Unit = { targetItem, id, trip -> MyTripRepository.removeItem(targetItem, id, trip) }
 ) {
-    BackHandler(onBack = onBack)
-
-    var trips by remember(target) { mutableStateOf<List<TripHomeDTO>>(emptyList()) }
-    var activities by remember(target) { mutableStateOf<List<ActivityHomeDTO>>(emptyList()) }
-    var loading by remember(target) { mutableStateOf(true) }
+    var busy by remember(target) { mutableStateOf(false) }
+    BackHandler(enabled = !busy, onBack = onBack)
+    var data by remember(target) { mutableStateOf(CollectionItemsDTO()) }
     var error by remember(target) { mutableStateOf<String?>(null) }
-
-    LaunchedEffect(target) {
-        loading = true
-        error = null
+    var loaded by remember(target) { mutableStateOf(false) }
+    var pending by remember(target) { mutableStateOf<CollectionAction?>(null) }
+    var reload by remember(target) { mutableIntStateOf(0) }
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(target, reload) {
+        busy = true
         try {
-            val items = MyTripRepository.loadItems(target)
-            trips = items.trips.orEmpty()
-            activities = items.activities.orEmpty()
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            error = e.message?.takeIf { it.isNotBlank() } ?: "Impossibile caricare gli elementi."
-        } finally {
-            loading = false
+            data = load(target)
+            loaded = true
+            error = null
+        } catch (e: CancellationException) { throw e
+        } catch (e: Exception) { error = e.message ?: "Impossibile caricare la lista."
+        } finally { busy = false }
+    }
+    Column(modifier.fillMaxSize().padding(16.dp)) {
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            TextButton(onClick = onBack, enabled = !busy) { Text("Indietro") }
+            if (target is MyTripRepository.HubTarget.Custom) TextButton(enabled = !busy, onClick = {
+                pending = CollectionAction("Eliminare la lista?", { deleteList(target.list.id) }, true)
+            }) { Text("Elimina lista") }
+        }
+        Text(target.title, style = MaterialTheme.typography.headlineSmall)
+        if (busy) LinearProgressIndicator(Modifier.fillMaxWidth())
+        error?.let { Text(it, color = MaterialTheme.colorScheme.error)
+            TextButton(onClick = { reload++ }, enabled = !busy) { Text("Riprova") }
+        }
+        LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            if (target == MyTripRepository.HubTarget.Bookings) {
+                items(data.bookings) { booking ->
+                    CollectionEntry(booking.itemTitle ?: "Prenotazione", listOfNotNull(booking.itemLocation, booking.itemDate, booking.bookingStatus).joinToString(" · "), "Annulla prenotazione", !busy && booking.canCancel()) {
+                        pending = CollectionAction("Annullare la prenotazione?", {
+                            remove(target, requireNotNull(booking.bookingId), false)
+                        })
+                    }
+                }
+            } else {
+                items(data.trips.orEmpty()) { trip ->
+                    CollectionEntry(trip.title ?: "Viaggio", trip.location.orEmpty(), "Rimuovi dalla lista", !busy && trip.tripId != null) {
+                        pending = CollectionAction("Rimuovere il viaggio dalla lista?", { remove(target, requireNotNull(trip.tripId), true) })
+                    }
+                }
+                items(data.activities.orEmpty()) { activity ->
+                    CollectionEntry(activity.title ?: "Attività", activity.city.orEmpty(), "Rimuovi dalla lista", !busy && activity.activityId != null) {
+                        pending = CollectionAction("Rimuovere l’attività dalla lista?", { remove(target, requireNotNull(activity.activityId), false) })
+                    }
+                }
+            }
+            if (loaded && error == null && !busy && data.bookings.isEmpty() && data.trips.isNullOrEmpty() && data.activities.isNullOrEmpty()) {
+                item { Text("Nessun elemento in questa lista.") }
+            }
         }
     }
-
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(ScreenBackground)
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onBack) {
-                    Icon(
-                        Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Indietro",
-                        tint = androidx.compose.ui.graphics.Color.White
-                    )
+    pending?.let { action ->
+        AlertDialog(onDismissRequest = { if (!busy) pending = null },
+            title = { Text(action.title) },
+            text = { Text(if (action.leave) "La lista verrà eliminata. Le offerte resteranno disponibili." else "Conferma l’operazione per continuare.") },
+            confirmButton = { TextButton(enabled = !busy, onClick = {
+                scope.launch {
+                    busy = true
+                    try {
+                        action.run()
+                        pending = null
+                        if (action.leave) onBack() else reload++
+                    } catch (e: CancellationException) { throw e
+                    } catch (e: Exception) { pending = null; error = e.message ?: "Operazione non riuscita."
+                    } finally { busy = false }
                 }
-                SectionTitle(target.title)
-            }
-
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp)
-            ) {
-                Spacer(Modifier.height(8.dp))
-
-                error?.let {
-                    Text(
-                        text = it,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Spacer(Modifier.height(8.dp))
-                }
-
-                if (error == null && !loading) {
-                    SectionTitle("Viaggi")
-                    Spacer(Modifier.height(12.dp))
-                    if (trips.isEmpty()) EmptyMessage("Nessun viaggio qui.")
-                    else TripRow(trips)
-
-                    Spacer(Modifier.height(28.dp))
-
-                    SectionTitle("Attività")
-                    Spacer(Modifier.height(12.dp))
-                    if (activities.isEmpty()) EmptyMessage("Nessuna attività qui.")
-                    else ActivityGrid(activities)
-                }
-
-                Spacer(Modifier.height(32.dp))
-            }
-        }
-
-        if (loading) LoadingOverlay(message = "Caricamento in corso...")
+            }) { Text("Conferma") } },
+            dismissButton = { TextButton(enabled = !busy, onClick = { pending = null }) { Text("Annulla") } })
     }
 }
 
 @Composable
-private fun EmptyMessage(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.bodyLarge,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
-    )
+private fun CollectionEntry(title: String, location: String, action: String, enabled: Boolean, onAction: () -> Unit) {
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp)) {
+            Text(title, style = MaterialTheme.typography.titleMedium)
+            if (location.isNotBlank()) Text(location)
+            TextButton(onClick = onAction, enabled = enabled) { Text(action) }
+        }
+    }
 }

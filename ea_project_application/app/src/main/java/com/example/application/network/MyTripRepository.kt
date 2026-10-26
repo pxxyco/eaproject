@@ -1,69 +1,33 @@
 package com.example.application.network
 
-import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.*
+import kotlinx.coroutines.CancellationException
+import com.example.application.dto.*
 import com.example.application.dto.ActivityHomeDTO
 import com.example.application.dto.TripHomeDTO
 import java.io.IOException
 
-enum class ListVisibility(val label: String) {
-    PRIVATE("Privata"), SHARED("Condivisa"), PUBLIC("Pubblica")
-}
-
-/** Solo i campi che servono. Niente LocalDateTime: il Gson di ApiService non lo sa leggere. */
-data class BookingItemDTO(
-    val bookingId: Long? = null,
-    val tripId: Long? = null,
-    val activityId: Long? = null,
-    val itemTitle: String? = null,
-    val itemDate: String? = null,
-    val itemEndDate: String? = null,
-    val itemLocation: String? = null,
-    val bookingType: String? = null,
-    val bookingStatus: String? = null,
-    val price: Double? = null
-)
-
-data class FavoriteItemDTO(
-    val id: Long? = null,
-    val type: String? = null,
-    val itemId: Long? = null,
-    val title: String? = null,
-    val city: String? = null
-)
-
-data class FavoriteList(
-    val id: Long,
-    val name: String,
-    val visibility: ListVisibility = ListVisibility.PRIVATE,
-    val itemCount: Int = 0
-)
-
-data class FavoriteListItemDTO(
-    val id: Long? = null,
-    val name: String? = null,
-    val visibility: String? = null,
-    val deleted: Boolean? = null
-)
-
 private data class CreateListRequest(val name: String, val visibility: String)
 
-/** Modelli solo UI per i contatori dell'hub, ancora dati locali. */
+/** Riepiloghi delle risposte del server. */
 data class BookingSummary(val id: Long, val upcoming: Boolean)
 data class FavoriteSummary(val id: Long, val type: String, val itemId: Long)
 
 object MyTripRepository {
 
-    // ---------- Hub (ancora dati locali di prova) ----------
+    // ---------- Hub ----------
 
 
-    private val _bookings = mutableStateListOf(
-        BookingSummary(1, upcoming = false), // CANCELLED
-        BookingSummary(2, upcoming = true),  // PENDING
-        BookingSummary(3, upcoming = true)   // PENDING
-    )
-    private val _favorites = mutableStateListOf(FavoriteSummary(1, "ACTIVITY", 7))
+    private val _bookings = mutableStateListOf<BookingSummary>()
+    private val _favorites = mutableStateListOf<FavoriteSummary>()
     private val _lists = mutableStateListOf<FavoriteList>()
 
+    var bookingsLoaded by mutableStateOf(false)
+        private set
+    var favoritesLoaded by mutableStateOf(false)
+        private set
+    var hubErrors by mutableStateOf<List<String>>(emptyList())
+        private set
     val lists: List<FavoriteList> get() = _lists
     val upcomingBookings: Int get() = _bookings.count { it.upcoming }
     val favoritesCount: Int get() = _favorites.size
@@ -77,9 +41,31 @@ object MyTripRepository {
 
     /** Ricarica le liste dell'utente dal server. */
     suspend fun refreshLists() {
-        val remote = fetch("/api/favorite-lists/mine", Array<FavoriteListItemDTO>::class.java)
         _lists.clear()
-        _lists.addAll(remote.mapNotNull { it.toUi() })
+        _bookings.clear()
+        _favorites.clear()
+        bookingsLoaded = false
+        favoritesLoaded = false
+        hubErrors = emptyList()
+        suspend fun section(label: String, load: suspend () -> Unit) {
+            try { load() }
+            catch (e: CancellationException) { throw e }
+            catch (e: Exception) { hubErrors = hubErrors + "$label: ${e.message ?: "dati non disponibili"}" }
+        }
+        section("Liste") {
+            val remote = fetch("/api/favorite-lists/mine", Array<FavoriteListItemDTO>::class.java)
+            _lists.addAll(remote.mapNotNull { it.toUi() })
+        }
+        if (UserSession.role.equals("TRAVELER", true)) section("Prenotazioni") {
+            val bookings = fetch("/api/bookings/mine", Array<BookingItemDTO>::class.java)
+            _bookings.addAll(bookings.mapNotNull { b -> b.bookingId?.let { BookingSummary(it, b.bookingStatus in listOf("PENDING", "CONFIRMED")) } })
+            bookingsLoaded = true
+        }
+        section("Preferiti") {
+            val favorites = fetch("/api/favorites", Array<FavoriteItemDTO>::class.java)
+            _favorites.addAll(favorites.mapNotNull { f -> f.id?.let { FavoriteSummary(it, f.type.orEmpty(), f.itemId ?: 0) } })
+            favoritesLoaded = true
+        }
     }
 
     /** Crea la lista sul server; aggiunge all'hub solo se il salvataggio riesce. */
@@ -89,7 +75,7 @@ object MyTripRepository {
         val request = CreateListRequest(clean, ListVisibility.PRIVATE.name)
         when (val result = ApiService.post("/api/favorite-lists", request, FavoriteListItemDTO::class.java)) {
             is ApiResult.Success -> result.data.toUi()?.let { _lists.add(it) }
-            is ApiResult.HttpError -> throw IOException("Errore ${result.code} nel salvataggio della lista.")
+            is ApiResult.HttpError -> throw IOException(myTripHttpError(result.code))
             is ApiResult.RateLimited -> throw IOException("Troppe richieste, riprova tra poco.")
             is ApiResult.NetworkError -> throw IOException("Impossibile raggiungere il server.")
         }
@@ -104,16 +90,12 @@ object MyTripRepository {
             HubTarget(list.name, "/api/favorite-lists/${list.id}")
     }
 
-    data class CollectionItemsDTO(
-        val trips: List<TripHomeDTO>? = null,
-        val activities: List<ActivityHomeDTO>? = null
-    )
-
     suspend fun loadItems(target: HubTarget): CollectionItemsDTO = when (target) {
         HubTarget.Bookings -> {
             val bookings = fetch(target.path, Array<BookingItemDTO>::class.java)
-                .filter { it.bookingStatus != "CANCELLED" } // togli questa riga per mostrarle
+                .filter { !it.bookingStatus.equals("CANCELLED", true) }
             CollectionItemsDTO(
+                bookings = bookings,
                 trips = bookings
                     .filter { it.bookingType.equals("TRIP", ignoreCase = true) }
                     .map { bookingToTrip(it) },
@@ -135,14 +117,40 @@ object MyTripRepository {
             )
         }
 
-        is HubTarget.Custom ->
-            throw IOException("Il contenuto delle liste personalizzate non è ancora disponibile.")
+        is HubTarget.Custom -> CollectionItemsDTO(
+            trips = fetch("/api/list-trips/list/${target.list.id}", Array<TripHomeDTO>::class.java),
+            activities = fetch("/api/list-activities/list/${target.list.id}", Array<ActivityHomeDTO>::class.java)
+        )
+    }
+
+    suspend fun deleteList(id: Long) {
+        delete("/api/favorite-lists/$id")
+        _lists.removeAll { it.id == id }
+    }
+
+    suspend fun removeItem(target: HubTarget, id: Long, trip: Boolean) {
+        val kind = if (trip) "trips" else "activities"
+        val path = when (target) {
+            HubTarget.Favorites -> "/api/favorites/$kind/$id"
+            is HubTarget.Custom -> "/api/list-$kind/list/${target.list.id}/${if (trip) "trip" else "activity"}/$id"
+            HubTarget.Bookings -> "/api/bookings/$id"
+        }
+        delete(path)
+    }
+
+    private suspend fun delete(path: String) {
+        when (val result = ApiService.delete(path, Unit::class.java)) {
+            is ApiResult.Success -> Unit
+            is ApiResult.HttpError -> throw IOException(myTripHttpError(result.code))
+            is ApiResult.RateLimited -> throw IOException("Troppe richieste, riprova tra poco.")
+            is ApiResult.NetworkError -> throw IOException("Impossibile raggiungere il server.")
+        }
     }
 
     private suspend fun <T> fetch(path: String, type: Class<Array<T>>): List<T> =
         when (val result = ApiService.get(path, type)) {
             is ApiResult.Success -> result.data.toList()
-            is ApiResult.HttpError -> throw IOException("Errore ${result.code} su $path")
+            is ApiResult.HttpError -> throw IOException(myTripHttpError(result.code))
             is ApiResult.RateLimited -> throw IOException("Troppe richieste, riprova tra poco.")
             is ApiResult.NetworkError -> throw IOException("Impossibile raggiungere il server.")
         }

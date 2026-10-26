@@ -56,15 +56,17 @@ fun MainContainer() {
         }
     ) {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            key(UserSession.user?.id, UserSession.role) {
             when (currentDestination) {
                 AppDestinations.HOME -> HomeScreen(modifier = Modifier.padding(innerPadding))
-                AppDestinations.`MY-TRIP` -> MyTrip(modifier = Modifier.padding(innerPadding))
+                AppDestinations.`MY-TRIP` -> MyTrip(modifier = Modifier.padding(innerPadding), onLoginClick = { currentDestination = AppDestinations.PROFILE })
                 AppDestinations.PROFILE -> ProfileScreen(
                     user = UserSession.user,
                     onLoginSuccess = { },
                     onLogoutClick = { AuthRepository.logout() },
                     modifier = Modifier.padding(innerPadding)
                 )
+            }
             }
         }
     }
