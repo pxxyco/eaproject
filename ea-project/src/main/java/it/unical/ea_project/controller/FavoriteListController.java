@@ -2,8 +2,8 @@ package it.unical.ea_project.controller;
 
 import it.unical.ea_project.domain.FavoriteList;
 import it.unical.ea_project.dto.FavoriteListDTO;
-import it.unical.ea_project.repository.ListSharingRepository;
 import it.unical.ea_project.security.AuthUser;
+import it.unical.ea_project.service.FavoriteListAccess;
 import it.unical.ea_project.service.FavoriteListService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,7 @@ import java.util.List;
 public class FavoriteListController {
 
     private final FavoriteListService favoriteListService;
-    private final ListSharingRepository sharingRepository;
+    private final FavoriteListAccess access;
 
     public record FavoriteListRequest(String name, FavoriteList.Visibility visibility) {}
 
@@ -103,7 +103,7 @@ public class FavoriteListController {
 
         FavoriteList list = favoriteListService.getListById(id);
 
-        if (!canView(list, user.id())) {
+        if (!access.canView(list, user.id())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -121,10 +121,10 @@ public class FavoriteListController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        if (request == null 
-            || request.name() == null 
-            || request.name().isBlank()        
-            || request.name().trim().length() > 80 
+        if (request == null
+            || request.name() == null
+            || request.name().isBlank()
+            || request.name().trim().length() > 80
             || request.visibility() == null) {
             return ResponseEntity.badRequest().build();
         }
@@ -189,17 +189,4 @@ public class FavoriteListController {
 
     }
 
-    private boolean canView(FavoriteList list, Long userId) {
-
-        if (list.getUser().getId().equals(userId)) {
-            return true;
-        }
-
-        return list.getVisibility() == FavoriteList.Visibility.SHARED
-                && sharingRepository.existsByFavoriteList_IdAndUser_Id(
-                list.getId(),
-                userId
-        );
-
-    }
 }

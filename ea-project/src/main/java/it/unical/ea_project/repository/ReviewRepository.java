@@ -1,35 +1,44 @@
 package it.unical.ea_project.repository;
 
 import it.unical.ea_project.domain.Review;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Repository
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "trip", "activity" })
-    @Query("select r from Review r where r.user.id=:user and r.deleted=false order by r.createdAt desc")
-    List<Review> preferenceReviews(@org.springframework.data.repository.query.Param("user") Long user,
-            org.springframework.data.domain.Pageable page);
+        @EntityGraph(attributePaths = { "trip", "activity" })
+        @Query("select r from Review r where r.user.id=:user and r.deleted=false order by r.createdAt desc")
+        List<Review> preferenceReviews(@Param("user") Long user, Pageable page);
 
-    List<Review> findAllByUserId(Long userId);
+        @EntityGraph(attributePaths = { "user", "trip", "activity" })
+        @Query("""
+                        SELECT DISTINCT r FROM Review r, Booking b
+                        WHERE r.user.id=:user AND b.user.id=:user AND r.deleted=false
+                          AND b.bookingId IN :ids AND (r.trip=b.trip OR r.activity=b.activity)
+                        """)
+        List<Review> findForBookings(@Param("user") Long user, @Param("ids") List<Long> ids);
 
-    List<Review> findAllByTripTripIdOrderByCreatedAtDesc(Long tripId);
+        List<Review> findAllByUserId(Long userId);
 
-    List<Review> findAllByActivityActivityIdOrderByCreatedAtDesc(Long activityId);
+        List<Review> findAllByTripTripIdOrderByCreatedAtDesc(Long tripId);
 
-    @Modifying
-    @Transactional
-    @Query("UPDATE Review r SET r.deleted = true WHERE r.reviewId = :id")
-    void softDeleteById(Long id);
+        List<Review> findAllByActivityActivityIdOrderByCreatedAtDesc(Long activityId);
 
-    @Query("SELECT AVG(r.rating) FROM Review r WHERE r.activity.activityId = :activityId and r.deleted = false")
-    Double averageRatingByActivity(Long activityId);
+        @Modifying
+        @Transactional
+        @Query("UPDATE Review r SET r.deleted = true WHERE r.reviewId = :id")
+        void softDeleteById(Long id);
 
-    @Query("SELECT AVG(r.rating) FROM Review r WHERE r.trip.tripId = :tripId and r.deleted = false")
-    Double averageRatingByTrip(Long tripId);
+        @Query("SELECT AVG(r.rating) FROM Review r WHERE r.activity.activityId = :activityId and r.deleted = false")
+        Double averageRatingByActivity(Long activityId);
+
+        @Query("SELECT AVG(r.rating) FROM Review r WHERE r.trip.tripId = :tripId and r.deleted = false")
+        Double averageRatingByTrip(Long tripId);
 }

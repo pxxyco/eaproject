@@ -1,5 +1,6 @@
 package it.unical.ea_project_javafx.controller.traveler;
 
+import it.unical.ea_project_javafx.util.ViewSupport;
 import com.google.gson.*;
 import javafx.fxml.*;
 import javafx.scene.*;
@@ -21,12 +22,7 @@ public class RecommendationsController {
 
     @FXML
     public void initialize() {
-        try {
-            navbarContainer.getChildren().setAll((Parent) FXMLLoader
-                    .load(getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml")));
-        } catch (Exception ex) {
-            statusLabel.setText("Navigazione non disponibile.");
-        }
+        ViewSupport.loadNavbar(navbarContainer, message -> ViewSupport.show(statusLabel, message));
         handleRefresh();
     }
 

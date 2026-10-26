@@ -13,7 +13,6 @@ import it.unical.ea_project.repository.UserRepository;
 import it.unical.ea_project.service.ActivityService;
 import it.unical.ea_project.util.PageUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

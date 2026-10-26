@@ -1,5 +1,6 @@
 package it.unical.ea_project_javafx.controller.common;
 
+import it.unical.ea_project_javafx.util.JsonCodec;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -40,8 +41,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Popup;
 import javafx.stage.Window;
 import javafx.util.Duration;
-
-import java.io.IOException;
 
 public class NavbarController {
 
@@ -515,9 +514,9 @@ public class NavbarController {
         if (notification.has("read") && !notification.get("read").isJsonNull()
                 && notification.get("read").getAsBoolean())
             card.getStyleClass().add("notification-card-read");
-        String titleText = jsonString(notification, "title", "Notifica");
-        String messageText = jsonString(notification, "message", "");
-        String type = jsonString(notification, "type", "NOTICE");
+        String titleText = JsonCodec.string(notification, "title", "Notifica");
+        String messageText = JsonCodec.string(notification, "message", "");
+        String type = JsonCodec.string(notification, "type", "NOTICE");
         long id = notification.has("notificationId") ? notification.get("notificationId").getAsLong() : -1;
         Label title = new Label(titleText);
         title.getStyleClass().add("notification-card-title");
@@ -526,7 +525,7 @@ public class NavbarController {
         message.getStyleClass().add("notification-card-message");
         message.setWrapText(true);
         card.getChildren().addAll(title, message);
-        if ("CHAT".equals(jsonString(notification, "relatedEntityType", ""))) {
+        if ("CHAT".equals(JsonCodec.string(notification, "relatedEntityType", ""))) {
             Button open = new Button("Apri conversazione →");
             open.getStyleClass().add("notification-mark-all");
             open.setOnAction(e -> {
@@ -584,10 +583,11 @@ public class NavbarController {
                     try {
                         JsonObject list = JsonParser.parseString(response.body()).getAsJsonObject();
                         StringBuilder details = new StringBuilder();
-                        details.append("Lista: ").append(jsonString(list, "listName", "Lista condivisa")).append('\n');
+                        details.append("Lista: ").append(JsonCodec.string(list, "listName", "Lista condivisa"))
+                                .append('\n');
                         details.append("Organizzatore della lista: @")
-                                .append(jsonString(list, "organizerUsername", "non disponibile")).append('\n');
-                        details.append("Permesso previsto: ").append(jsonString(list, "permission", "VIEW"))
+                                .append(JsonCodec.string(list, "organizerUsername", "non disponibile")).append('\n');
+                        details.append("Permesso previsto: ").append(JsonCodec.string(list, "permission", "VIEW"))
                                 .append("\n\n");
                         JsonArray trips = list.has("trips") && list.get("trips").isJsonArray()
                                 ? list.getAsJsonArray("trips")
@@ -598,16 +598,17 @@ public class NavbarController {
                             if (!tripElement.isJsonObject())
                                 continue;
                             JsonObject trip = tripElement.getAsJsonObject();
-                            details.append("✈ ").append(jsonString(trip, "title", "Viaggio senza titolo"));
-                            String city = jsonString(trip, "destinationCity", "");
-                            String country = jsonString(trip, "destinationCountry", "");
+                            details.append("✈ ").append(JsonCodec.string(trip, "title", "Viaggio senza titolo"));
+                            String city = JsonCodec.string(trip, "destinationCity", "");
+                            String country = JsonCodec.string(trip, "destinationCountry", "");
                             String destination = city + (city.isBlank() || country.isBlank() ? "" : ", ") + country;
                             if (!destination.isBlank())
                                 details.append(" — ").append(destination);
                             details.append('\n').append("  Organizzatore del viaggio: @")
-                                    .append(jsonString(trip, "organizerUsername", "non disponibile")).append('\n');
-                            String start = jsonString(trip, "startDate", "");
-                            String end = jsonString(trip, "endDate", "");
+                                    .append(JsonCodec.string(trip, "organizerUsername", "non disponibile"))
+                                    .append('\n');
+                            String start = JsonCodec.string(trip, "startDate", "");
+                            String end = JsonCodec.string(trip, "endDate", "");
                             if (!start.isBlank() || !end.isBlank())
                                 details.append("  Date: ").append(start.isBlank() ? "?" : start)
                                         .append(" → ").append(end.isBlank() ? "?" : end).append('\n');
@@ -620,25 +621,25 @@ public class NavbarController {
                                 if (!stageElement.isJsonObject())
                                     continue;
                                 JsonObject stage = stageElement.getAsJsonObject();
-                                details.append("    Giorno ").append(jsonString(stage, "day", "?"))
-                                        .append(" · tappa ").append(jsonString(stage, "orderInDay", "?"))
-                                        .append(": ").append(jsonString(stage, "title", "Tappa"));
-                                String location = jsonString(stage, "locationName", "");
+                                details.append("    Giorno ").append(JsonCodec.string(stage, "day", "?"))
+                                        .append(" · tappa ").append(JsonCodec.string(stage, "orderInDay", "?"))
+                                        .append(": ").append(JsonCodec.string(stage, "title", "Tappa"));
+                                String location = JsonCodec.string(stage, "locationName", "");
                                 if (location.isBlank())
-                                    location = jsonString(stage, "city", "");
-                                String stageCountry = jsonString(stage, "country", "");
+                                    location = JsonCodec.string(stage, "city", "");
+                                String stageCountry = JsonCodec.string(stage, "country", "");
                                 if (!location.isBlank())
                                     details.append(" — ").append(location);
                                 if (!stageCountry.isBlank() && !stageCountry.equals(location))
                                     details.append(", ").append(stageCountry);
-                                String timeStart = jsonString(stage, "startTime", "");
-                                String timeEnd = jsonString(stage, "endTime", "");
+                                String timeStart = JsonCodec.string(stage, "startTime", "");
+                                String timeEnd = JsonCodec.string(stage, "endTime", "");
                                 if (!timeStart.isBlank() || !timeEnd.isBlank())
                                     details.append(" ( ")
                                             .append(timeStart.isBlank() ? "--:--" : timeStart).append("–")
                                             .append(timeEnd.isBlank() ? "--:--" : timeEnd).append(" )");
                                 details.append('\n');
-                                String description = jsonString(stage, "description", "");
+                                String description = JsonCodec.string(stage, "description", "");
                                 if (!description.isBlank())
                                     details.append("      ").append(description).append('\n');
                             }
@@ -649,7 +650,7 @@ public class NavbarController {
                         panel.setMaxHeight(700);
                         Label heading = new Label("Anteprima della lista condivisa");
                         heading.getStyleClass().add("app-modal-title");
-                        Label subtitle = new Label(jsonString(list, "listName", "Lista condivisa"));
+                        Label subtitle = new Label(JsonCodec.string(list, "listName", "Lista condivisa"));
                         subtitle.getStyleClass().add("app-modal-subtitle");
                         TextArea previewText = new TextArea(details.toString());
                         previewText.setEditable(false);
@@ -692,8 +693,8 @@ public class NavbarController {
     }
 
     private void showToast(JsonObject notification) {
-        showToast(jsonString(notification, "title", "Nuova notifica"),
-                jsonString(notification, "message", "Hai ricevuto una nuova notifica."));
+        showToast(JsonCodec.string(notification, "title", "Nuova notifica"),
+                JsonCodec.string(notification, "message", "Hai ricevuto una nuova notifica."));
     }
 
     private void showToast(String titleText, String messageText) {
@@ -797,10 +798,6 @@ public class NavbarController {
             if (!popup.getScene().getStylesheets().contains(css))
                 popup.getScene().getStylesheets().add(css);
         }
-    }
-
-    private String jsonString(JsonObject obj, String key, String fallback) {
-        return obj.has(key) && !obj.get(key).isJsonNull() ? obj.get(key).getAsString() : fallback;
     }
 
     @FXML

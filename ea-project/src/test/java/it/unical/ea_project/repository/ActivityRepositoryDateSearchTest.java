@@ -38,11 +38,11 @@ class ActivityRepositoryDateSearchTest {
         saveActivity(organizer, "ended-yesterday", dayStart.minusDays(1), dayStart.minusSeconds(1), false);
         saveActivity(organizer, "deleted", dayStart, nextDayStart, true);
 
-        List<String> matching = repository.search("", null, dayStart, nextDayStart, PageRequest.of(0, 9))
+        List<String> matching = repository.search("", null, dayStart, nextDayStart, dayStart.minusDays(2), PageRequest.of(0, 9))
                 .stream().map(Activity::getTitle).sorted().toList();
         assertEquals(List.of("ends-at-midnight", "spans-day", "starts-at-midnight"), matching);
 
-        assertEquals(5, repository.search("", null, null, null, PageRequest.of(0, 9)).size());
+        assertEquals(5, repository.search("", null, null, null, dayStart.minusDays(2), PageRequest.of(0, 9)).size());
     }
 
     private void saveActivity(User organizer, String title, LocalDateTime start, LocalDateTime end, boolean deleted) {
@@ -50,6 +50,7 @@ class ActivityRepositoryDateSearchTest {
         activity.setCreatedBy(organizer);
         activity.setTitle(title);
         activity.setCategory(Activity.Category.EXCURSION);
+        activity.setMaxSeats(5); activity.setAvailableSeats(5);
         activity.setStatus(Activity.Status.PUBLISHED);
         activity.setStartDate(start);
         activity.setEndDate(end);

@@ -4,7 +4,6 @@ import it.unical.ea_project.security.AuthUser;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.access.AccessDeniedException;
 import it.unical.ea_project.domain.Stage;
-import it.unical.ea_project.domain.Trip;
 import it.unical.ea_project.dto.StageDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,12 +30,8 @@ public class StageController {
                     if (trip.getCreatedBy() == null || !trip.getCreatedBy().getId().equals(user.id())) {
                         throw new AccessDeniedException("Puoi modificare solo le tappe dei tuoi viaggi.");
                     }
-                    if (stageDTO.getCategory() == null || stageDTO.getTitle() == null || stageDTO.getTitle().isBlank()
-                            || stageDTO.getDay() == null || stageDTO.getDay() < 1
-                            || stageDTO.getOrderInDay() == null || stageDTO.getOrderInDay() < 1) {
-                        throw new IllegalArgumentException("Titolo, giorno e ordine della tappa sono obbligatori e validi.");
-                    }
                     Stage stage = toEntity(stageDTO);
+                    it.unical.ea_project.util.ExperienceValidation.stage(trip, stage);
                     Stage saved = stageService.addStageToTrip(trip, stage);
                     return ResponseEntity.ok(StageDTO.toDto(saved));
                 })

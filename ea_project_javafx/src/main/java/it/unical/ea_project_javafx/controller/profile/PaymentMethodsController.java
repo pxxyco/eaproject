@@ -1,5 +1,8 @@
 package it.unical.ea_project_javafx.controller.profile;
 
+import it.unical.ea_project_javafx.util.JsonCodec;
+import it.unical.ea_project_javafx.util.UiText;
+import it.unical.ea_project_javafx.util.ViewSupport;
 import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.util.BackgroundHelper;
 import javafx.beans.property.SimpleStringProperty;
@@ -7,14 +10,11 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
-import java.io.IOException;
 import it.unical.ea_project_javafx.util.ApiService;
 import com.google.gson.*;
 import java.time.YearMonth;
@@ -74,29 +74,18 @@ public class PaymentMethodsController {
     @FXML
     public void initialize() {
         BackgroundHelper.setupBackground(bgImageView);
-        loadNavbar();
+        ViewSupport.loadNavbar(navbarContainer);
         setupViewByRole();
         setupCardsTable();
         if ("ORGANIZER".equals(userSession.getRole())) {
             ApiService.callDetailed(ApiService.BASE_URL + "/api/account/settings", null, ApiService.Method.GET, r -> {
                 var d = JsonParser.parseString(r.body()).getAsJsonObject();
-                payoutHolderField.setText(value(d, "payoutHolder"));
-                ibanField.setText(value(d, "iban"));
-                bicField.setText(value(d, "bic"));
-            }, this::showError, null);
+                payoutHolderField.setText(JsonCodec.string(d, "payoutHolder", ""));
+                ibanField.setText(JsonCodec.string(d, "iban", ""));
+                bicField.setText(JsonCodec.string(d, "bic", ""));
+            }, message -> ViewSupport.error(statusMessageLabel, message), null);
         } else
             loadCards();
-    }
-
-    private void loadNavbar() {
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml"));
-            Parent navbar = loader.load();
-            navbarContainer.getChildren().setAll(navbar);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     private void setupViewByRole() {
@@ -138,8 +127,9 @@ public class PaymentMethodsController {
                             () -> ApiService.callDetailed(ApiService.BASE_URL + "/api/account/cards/" + row.id, null,
                                     ApiService.Method.DELETE, r -> {
                                         mockCards.remove(row);
-                                        showSuccess("Carta rimossa.");
-                                    }, PaymentMethodsController.this::showError, deleteBtn::setDisable));
+                                        ViewSupport.success(statusMessageLabel, "Carta rimossa.");
+                                    }, message -> ViewSupport.error(statusMessageLabel, message),
+                                    deleteBtn::setDisable));
                 });
             }
 
@@ -159,30 +149,30 @@ public class PaymentMethodsController {
 
     @FXML
     private void handleAddCard(ActionEvent event) {
-        clearMessage();
+        ViewSupport.clear(statusMessageLabel);
         String holder = cardHolderField.getText();
         String number = cardNumberField.getText();
         String expiry = expiryField.getText();
         String cvv = cvvField.getText();
 
-        if (blank(holder) || blank(number) || blank(expiry) || blank(cvv)) {
-            showError("Compila tutti i campi della carta.");
+        if (UiText.isBlank(holder) || UiText.isBlank(number) || UiText.isBlank(expiry) || UiText.isBlank(cvv)) {
+            ViewSupport.error(statusMessageLabel, "Compila tutti i campi della carta.");
             return;
         }
 
         String digits = number.replaceAll("\\s", "");
         if (!digits.matches("[0-9]{13,19}") || !luhn(digits)) {
-            showError("Inserisci un numero di carta di prova valido.");
+            ViewSupport.error(statusMessageLabel, "Inserisci un numero di carta di prova valido.");
             return;
         }
         if (!cvv.matches("[0-9]{3,4}") || !expiry.matches("(0[1-9]|1[0-2])/[0-9]{2}")) {
-            showError("Controlla CVV e scadenza MM/AA.");
+            ViewSupport.error(statusMessageLabel, "Controlla CVV e scadenza MM/AA.");
             return;
         }
         YearMonth date = YearMonth.of(2000 + Integer.parseInt(expiry.substring(3)),
                 Integer.parseInt(expiry.substring(0, 2)));
         if (date.isBefore(YearMonth.now())) {
-            showError("La carta è scaduta.");
+            ViewSupport.error(statusMessageLabel, "La carta è scaduta.");
             return;
         }
         String brand = digits.startsWith("4") ? "Visa"
@@ -196,9 +186,9 @@ public class PaymentMethodsController {
                     cardNumberField.clear();
                     expiryField.clear();
                     cvvField.clear();
-                    showSuccess("Carta di prova salvata.");
+                    ViewSupport.success(statusMessageLabel, "Carta di prova salvata.");
                     loadCards();
-                }, this::showError, addCardButton::setDisable);
+                }, message -> ViewSupport.error(statusMessageLabel, message), addCardButton::setDisable);
     }
 
     private void loadCards() {
@@ -206,12 +196,14 @@ public class PaymentMethodsController {
             mockCards.clear();
             for (var e : JsonParser.parseString(r.body()).getAsJsonArray()) {
                 var c = e.getAsJsonObject();
-                CardRow row = new CardRow(value(c, "brand"), "•••• " + value(c, "last4"), value(c, "holder"), String
-                        .format("%02d/%02d", c.get("expiryMonth").getAsInt(), c.get("expiryYear").getAsInt() % 100));
+                CardRow row = new CardRow(JsonCodec.string(c, "brand", ""), "•••• " + JsonCodec.string(c, "last4", ""),
+                        JsonCodec.string(c, "holder", ""), String
+                                .format("%02d/%02d", c.get("expiryMonth").getAsInt(),
+                                        c.get("expiryYear").getAsInt() % 100));
                 row.id = c.get("id").getAsLong();
                 mockCards.add(row);
             }
-        }, this::showError, null);
+        }, message -> ViewSupport.error(statusMessageLabel, message), null);
     }
 
     @FXML
@@ -219,12 +211,9 @@ public class PaymentMethodsController {
         var payload = Map.of("holder", payoutHolderField.getText(), "iban", ibanField.getText(), "bic",
                 bicField.getText());
         ApiService.callDetailed(ApiService.BASE_URL + "/api/account/payout", ApiService.toJson(payload),
-                ApiService.Method.PUT, r -> showSuccess("Coordinate salvate nell'account dimostrativo."),
-                this::showError, payoutButton::setDisable);
-    }
-
-    private static String value(JsonObject object, String key) {
-        return object.has(key) && !object.get(key).isJsonNull() ? object.get(key).getAsString() : "";
+                ApiService.Method.PUT,
+                r -> ViewSupport.success(statusMessageLabel, "Coordinate salvate nell'account dimostrativo."),
+                message -> ViewSupport.error(statusMessageLabel, message), payoutButton::setDisable);
     }
 
     private boolean luhn(String digits) {
@@ -241,30 +230,6 @@ public class PaymentMethodsController {
             twice = !twice;
         }
         return total % 10 == 0;
-    }
-
-    private boolean blank(String s) {
-        return s == null || s.isBlank();
-    }
-
-    private void showError(String msg) {
-        statusMessageLabel.setText(msg);
-        statusMessageLabel.getStyleClass().setAll("status-message", "status-error");
-        statusMessageLabel.setVisible(true);
-        statusMessageLabel.setManaged(true);
-    }
-
-    private void showSuccess(String msg) {
-        statusMessageLabel.setText(msg);
-        statusMessageLabel.getStyleClass().setAll("status-message", "status-success");
-        statusMessageLabel.setVisible(true);
-        statusMessageLabel.setManaged(true);
-    }
-
-    private void clearMessage() {
-        statusMessageLabel.setText("");
-        statusMessageLabel.setVisible(false);
-        statusMessageLabel.setManaged(false);
     }
 
     public static class CardRow {

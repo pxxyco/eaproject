@@ -13,16 +13,7 @@ public class ImageUtils {
             rawUrl = DEFAULT_IMAGE_PATH;
         }
 
-        if (rawUrl.startsWith("http://") || rawUrl.startsWith("https://")) {
-            return rawUrl;
-        }
-
-        String baseUrl = ApiService.BASE_URL;
-        if (baseUrl.endsWith("/")) {
-            baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
-        }
-
-        String formattedPath = rawUrl.startsWith("/") ? rawUrl : "/" + rawUrl;
-        return baseUrl + formattedPath;
+        if (rawUrl.startsWith("file:")) return rawUrl;
+        return ApiService.resolveUrl(rawUrl);
     }
 }

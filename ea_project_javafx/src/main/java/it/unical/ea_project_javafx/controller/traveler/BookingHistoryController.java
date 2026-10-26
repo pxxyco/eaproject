@@ -1,5 +1,8 @@
 package it.unical.ea_project_javafx.controller.traveler;
 
+import it.unical.ea_project_javafx.util.BookingPresentation;
+import it.unical.ea_project_javafx.util.UiText;
+import it.unical.ea_project_javafx.util.ViewSupport;
 import com.google.gson.reflect.TypeToken;
 import it.unical.ea_project_javafx.dto.BookingDTO;
 import it.unical.ea_project_javafx.dto.ReviewDTO;
@@ -9,7 +12,6 @@ import it.unical.ea_project_javafx.util.SceneNavigator;
 import it.unical.ea_project_javafx.util.PopupFactory;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
-import javafx.scene.Parent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -26,16 +28,9 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.control.Tooltip;
 
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -86,10 +81,6 @@ public class BookingHistoryController implements AutoCloseable {
     private boolean reviewsLoaded;
     private LocalDateTime evaluationTime = LocalDateTime.now();
     private PopupFactory.Handle activeModal;
-    private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ITALY);
-    private static final DateTimeFormatter DATE_TIME = DateTimeFormatter.ofPattern("dd/MM/yyyy 'alle' HH:mm",
-            Locale.ITALY);
-    private static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm", Locale.ITALY);
 
     @FXML
     public void initialize() {
@@ -130,14 +121,7 @@ public class BookingHistoryController implements AutoCloseable {
     }
 
     private void loadNavbar() {
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml"));
-            Parent navbar = loader.load();
-            navbarContainer.getChildren().setAll(navbar);
-        } catch (IOException exception) {
-            showMessage("Impossibile caricare la barra di navigazione.", true);
-        }
+        ViewSupport.loadNavbar(navbarContainer, message -> showMessage(message, true));
     }
 
     private void loadHistory() {
@@ -258,28 +242,28 @@ public class BookingHistoryController implements AutoCloseable {
         top.setAlignment(Pos.TOP_LEFT);
         VBox identity = new VBox(5);
         HBox.setHgrow(identity, Priority.ALWAYS);
-        Label title = new Label(safe(booking.getItemTitle(), "Esperienza non disponibile"));
+        Label title = new Label(UiText.orDefault(booking.getItemTitle(), "Esperienza non disponibile"));
         title.getStyleClass().add("history-card-title");
         title.setWrapText(true);
         Label type = new Label(typeLabel(booking));
         type.getStyleClass().add("history-card-meta");
-        Label date = new Label("Periodo: " + eventPeriod(booking));
+        Label date = new Label("Periodo: " + BookingPresentation.formatEventPeriod(booking));
         date.getStyleClass().add("history-card-date");
-        Label place = new Label("Luogo: " + safe(booking.getItemLocation(), "Non disponibile"));
+        Label place = new Label("Luogo: " + UiText.orDefault(booking.getItemLocation(), "Non disponibile"));
         place.getStyleClass().add("history-card-meta");
         place.setWrapText(true);
-        Label booked = new Label("Prenotata il: " + bookedAt(booking));
+        Label booked = new Label("Prenotata il: " + BookingPresentation.formatBookedAt(booking));
         booked.getStyleClass().add("history-card-meta");
         identity.getChildren().addAll(title, type, date, place, booked);
 
-        Label status = new Label(displayStatus(booking));
+        Label status = new Label(BookingPresentation.displayStatus(booking, evaluationTime));
         status.getStyleClass().setAll("history-status-pill", statusClass(booking));
         top.getChildren().addAll(identity, status);
 
         HBox lower = new HBox(14);
         lower.setAlignment(Pos.CENTER_LEFT);
         VBox financial = new VBox(4);
-        Label price = new Label(formatPrice(booking.getPrice()));
+        Label price = new Label(UiText.money(booking.getPrice()));
         price.getStyleClass().add("history-card-price");
         Label seats = new Label((booking.getSeats() == null ? "—" : booking.getSeats()) + " post"
                 + (Objects.equals(booking.getSeats(), 1) ? "o" : "i"));
@@ -310,23 +294,24 @@ public class BookingHistoryController implements AutoCloseable {
     }
 
     private void showDetails(BookingDTO booking) {
-        VBox panel = modalShell("Dettaglio prenotazione", safe(booking.getItemTitle(), "Esperienza prenotata"));
+        VBox panel = modalShell("Dettaglio prenotazione",
+                UiText.orDefault(booking.getItemTitle(), "Esperienza prenotata"));
         VBox content = new VBox(11);
         content.getStyleClass().add("history-dialog-content");
         content.getChildren().addAll(
                 detailRow("Tipo", typeLabel(booking)),
-                detailRow("Esperienza", safe(booking.getItemTitle(), "Non disponibile")),
-                detailRow("Periodo", eventPeriod(booking)),
-                detailRow("Luogo", safe(booking.getItemLocation(), "Non disponibile")),
-                detailRow("Prenotata il", bookedAt(booking)),
-                detailRow("Partecipante principale", safe(booking.getParticipantName(), "Non disponibile")),
-                detailRow("Email partecipante", safe(booking.getParticipantEmail(), "Non disponibile")),
+                detailRow("Esperienza", UiText.orDefault(booking.getItemTitle(), "Non disponibile")),
+                detailRow("Periodo", BookingPresentation.formatEventPeriod(booking)),
+                detailRow("Luogo", UiText.orDefault(booking.getItemLocation(), "Non disponibile")),
+                detailRow("Prenotata il", BookingPresentation.formatBookedAt(booking)),
+                detailRow("Partecipante principale", UiText.orDefault(booking.getParticipantName(), "Non disponibile")),
+                detailRow("Email partecipante", UiText.orDefault(booking.getParticipantEmail(), "Non disponibile")),
                 detailRow("Posti / partecipanti",
                         booking.getSeats() == null ? "Non specificati" : String.valueOf(booking.getSeats())),
-                detailRow("Importo prenotazione", formatPrice(booking.getPrice())),
+                detailRow("Importo prenotazione", UiText.money(booking.getPrice())),
                 detailRow("Stato prenotazione", bookingStatus(booking)),
                 detailRow("Stato esperienza", itemStatus(booking)),
-                detailRow("Stato mostrato", displayStatus(booking)),
+                detailRow("Stato mostrato", BookingPresentation.displayStatus(booking, evaluationTime)),
                 detailRow("Stato pagamento", paymentStatus(booking)),
                 detailRow("Recensione", reviewSummary(reviewFor(booking))));
         if (isCancelledEntry(booking)) {
@@ -413,7 +398,7 @@ public class BookingHistoryController implements AutoCloseable {
             return;
         }
         VBox panel = modalShell(existing == null ? "Lascia una recensione" : "Modifica recensione",
-                safe(booking.getItemTitle(), "La tua esperienza"));
+                UiText.orDefault(booking.getItemTitle(), "La tua esperienza"));
         panel.setMaxWidth(560);
         panel.setMaxHeight(590);
         VBox body = new VBox(12);
@@ -446,7 +431,7 @@ public class BookingHistoryController implements AutoCloseable {
                 for (ToggleButton item : starButtons)
                     item.setText((Integer) item.getUserData() <= rating ? "★" : "☆");
             });
-        TextArea comment = new TextArea(existing == null ? "" : safe(existing.getComment(), ""));
+        TextArea comment = new TextArea(existing == null ? "" : UiText.orDefault(existing.getComment(), ""));
         comment.setPromptText("Racconta com'è andata (facoltativo)...");
         comment.setWrapText(true);
         comment.setPrefRowCount(4);
@@ -542,27 +527,14 @@ public class BookingHistoryController implements AutoCloseable {
         showInAppModal(panel);
     }
 
-    private boolean isEndedOrCompleted(BookingDTO booking) {
-        return booking != null && ("COMPLETED".equalsIgnoreCase(booking.getBookingStatus())
-                || "COMPLETED".equalsIgnoreCase(booking.getItemStatus())
-                || (eventEndDateTime(booking) != null && !eventEndDateTime(booking).isAfter(evaluationTime)));
-    }
-
     private boolean canReview(BookingDTO booking) {
         if (booking == null || isCancelledEntry(booking) || !("CONFIRMED".equalsIgnoreCase(booking.getBookingStatus())
                 || "COMPLETED".equalsIgnoreCase(booking.getBookingStatus())))
             return false;
         return "COMPLETED".equalsIgnoreCase(booking.getBookingStatus())
                 || "COMPLETED".equalsIgnoreCase(booking.getItemStatus())
-                || (eventEndDateTime(booking) != null && !eventEndDateTime(booking).isAfter(LocalDateTime.now()));
-    }
-
-    private String reviewTargetKey(BookingDTO booking) {
-        if (booking != null && booking.getTripId() != null)
-            return "TRIP:" + booking.getTripId();
-        if (booking != null && booking.getActivityId() != null)
-            return "ACTIVITY:" + booking.getActivityId();
-        return "BOOKING:" + safeId(booking);
+                || (BookingPresentation.eventEndDateTime(booking) != null
+                        && !BookingPresentation.eventEndDateTime(booking).isAfter(LocalDateTime.now()));
     }
 
     private ReviewDTO reviewFor(BookingDTO booking) {
@@ -610,82 +582,8 @@ public class BookingHistoryController implements AutoCloseable {
         };
     }
 
-    private LocalDateTime eventStartDateTime(BookingDTO booking) {
-        return parseEventDate(booking == null ? null : booking.getItemDate(), booking);
-    }
-
-    private LocalDateTime eventEndDateTime(BookingDTO booking) {
-        if (booking == null)
-            return null;
-        String end = booking.getItemEndDate();
-        if (end == null || end.isBlank())
-            end = booking.getItemDate();
-        return parseEventDate(end, booking);
-    }
-
-    private LocalDateTime parseEventDate(String value, BookingDTO booking) {
-        if (value == null || value.isBlank())
-            return null;
-        try {
-            if (isTrip(booking) || !value.contains("T"))
-                return LocalDate.parse(value).atTime(LocalTime.MAX);
-            return LocalDateTime.parse(value);
-        } catch (RuntimeException ignored) {
-            return null;
-        }
-    }
-
-    private boolean isTrip(BookingDTO booking) {
-        return booking != null && "TRIP".equalsIgnoreCase(booking.getBookingType());
-    }
-
-    private String eventPeriod(BookingDTO booking) {
-        LocalDateTime start = eventStartDateTime(booking);
-        LocalDateTime end = eventEndDateTime(booking);
-        if (start == null)
-            return "Data non disponibile";
-        if (isTrip(booking)) {
-            String first = start.toLocalDate().format(DATE);
-            if (end == null || end.toLocalDate().equals(start.toLocalDate()))
-                return first;
-            return first + " – " + end.toLocalDate().format(DATE);
-        }
-        String first = start.format(DATE_TIME);
-        if (end == null || end.equals(start))
-            return first;
-        if (end.toLocalDate().equals(start.toLocalDate()))
-            return first + " – " + end.format(TIME);
-        return first + " – " + end.format(DATE_TIME);
-    }
-
-    private String bookedAt(BookingDTO booking) {
-        return booking == null || booking.getCreatedAt() == null ? "Non disponibile"
-                : booking.getCreatedAt().format(DATE_TIME);
-    }
-
-    private String displayStatus(BookingDTO booking) {
-        if (booking == null)
-            return "Non disponibile";
-        String status = booking.getBookingStatus() == null ? "" : booking.getBookingStatus().toUpperCase(Locale.ROOT);
-        if ("CANCELLED".equals(status))
-            return "Prenotazione cancellata";
-        if (isExperienceCancelled(booking))
-            return "Esperienza annullata";
-        if ("COMPLETED".equals(status) || "COMPLETED".equalsIgnoreCase(booking.getItemStatus()))
-            return "Completata";
-        if ("CONFIRMED".equals(status) && isEndedOrCompleted(booking))
-            return "Terminata";
-        if ("PENDING".equals(status) && isEndedOrCompleted(booking))
-            return "Terminata · in attesa";
-        if ("CONFIRMED".equals(status))
-            return "Confermata";
-        if ("PENDING".equals(status))
-            return "In attesa";
-        return status.isBlank() ? "Stato non disponibile" : status;
-    }
-
     private String statusClass(BookingDTO booking) {
-        String status = displayStatus(booking);
+        String status = BookingPresentation.displayStatus(booking, evaluationTime);
         if (status.startsWith("Prenotazione cancellata") || status.startsWith("Esperienza annullata"))
             return "history-status-cancelled";
         if ("Completata".equals(status) || "Terminata".equals(status))
@@ -718,23 +616,7 @@ public class BookingHistoryController implements AutoCloseable {
     }
 
     private String typeLabel(BookingDTO booking) {
-        return isTrip(booking) ? "Viaggio" : "Attività";
-    }
-
-    private String safeId(BookingDTO booking) {
-        return booking == null || booking.getBookingId() == null ? "—" : String.valueOf(booking.getBookingId());
-    }
-
-    private String safe(String text, String fallback) {
-        return text == null || text.isBlank() ? fallback : text;
-    }
-
-    private boolean contains(String value, String query) {
-        return value != null && value.toLowerCase(Locale.ITALY).contains(query);
-    }
-
-    private String formatPrice(BigDecimal price) {
-        return price == null ? "Importo non disponibile" : "€ " + String.format(Locale.ITALY, "%,.2f", price);
+        return BookingPresentation.isTrip(booking) ? "Viaggio" : "Attività";
     }
 
     private void showMessage(String message, boolean error) {

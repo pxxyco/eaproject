@@ -17,7 +17,7 @@ public class NotificationDTO {
 
     private Long userId;
 
-    private String type;    // Notification.NotificationType: CONFIRMATION, BOOKING, NOTICE, PAYMENT
+    private String type; // Notification.NotificationType: CONFIRMATION, BOOKING, NOTICE, PAYMENT
 
     private String title;
 
@@ -26,5 +26,11 @@ public class NotificationDTO {
     private Boolean read;
 
     private LocalDateTime createdAt;
+
+    private Long relatedEntityId;
+    
+    private String relatedEntityType;
+    
+    private String actionData;
 
 }

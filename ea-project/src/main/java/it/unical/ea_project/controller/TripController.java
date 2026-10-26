@@ -1,8 +1,6 @@
 package it.unical.ea_project.controller;
 
-import it.unical.ea_project.domain.Stage;
 import it.unical.ea_project.domain.Trip;
-import it.unical.ea_project.dto.StageDTO;
 import it.unical.ea_project.dto.TripDTO;
 import it.unical.ea_project.dto.home.TripHomeDTO;
 import it.unical.ea_project.dto.home.TripSuggestionDTO;
@@ -17,9 +15,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/trips")
@@ -132,46 +128,6 @@ public class TripController {
 
     private boolean isOwner(Trip trip, AuthUser user) {
         return trip.getCreatedBy() != null && trip.getCreatedBy().getId().equals(user.id());
-    }
-
-    private TripDTO toDtoDetail(Trip trip) {
-        TripDTO dto = toDto(trip);
-        dto.setStages(toStageDtoList(trip.getStages()));
-
-        return dto;
-    }
-
-    private List<StageDTO> toStageDtoList(List<Stage> stages) {
-        return stages.stream()
-                .map(StageDTO::toDto)
-                .collect(Collectors.toList());
-    }
-
-    // DEBUG
-    private TripDTO toDto(Trip trip) {
-        Long creatorId = trip.getCreatedBy() != null ? trip.getCreatedBy().getId() : null;
-
-        return TripDTO.builder()
-                .tripId(trip.getTripId())
-                .createdByUserId(creatorId)
-                .title(trip.getTitle())
-                .description(trip.getDescription())
-                .destinationCountry(trip.getDestinationCountry())
-                .destinationCity(trip.getDestinationCity())
-                .startDate(trip.getStartDate())
-                .endDate(trip.getEndDate())
-                .totalPrice(trip.getTotalPrice())
-                .maxSeats(trip.getMaxSeats())
-                .availableSeats(trip.getAvailableSeats())
-                .status(trip.getStatus() != null ? trip.getStatus().name() : null)
-                .icsUid(trip.getIcsUid())
-                .averageRating(trip.getAverageRating())
-                .coverPhotoUrl(trip.getCoverPhotoUrl())
-                .createdAt(trip.getCreatedAt())
-                .updatedAt(trip.getUpdatedAt())
-                .deletedAt(trip.getDeletedAt())
-                .stages(Collections.emptyList())
-                .build();
     }
 
 }

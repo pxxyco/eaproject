@@ -1,29 +1,33 @@
 package it.unical.ea_project_javafx.controller.home;
 
+import it.unical.ea_project_javafx.util.ViewSupport;
 import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.util.ApiService;
 import it.unical.ea_project_javafx.util.BackgroundHelper;
 import it.unical.ea_project_javafx.util.TokenStorage;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
-import java.io.IOException;
-
 public class MainViewController implements AutoCloseable {
-    @FXML private javafx.scene.control.ScrollPane homeScroll;
-    @FXML private VBox stickySearchDock;
+    @FXML
+    private javafx.scene.control.ScrollPane homeScroll;
+    @FXML
+    private VBox stickySearchDock;
     private StickySearch stickySearch;
     private boolean closed;
 
-    @FXML private ImageView bgImageView;
-    @FXML private VBox cardsContainer;
-    @FXML private StackPane navbarContainer;
-    @FXML private SearchBarController searchBarController;
-    @FXML private ExperienceListController experienceListController;
+    @FXML
+    private ImageView bgImageView;
+    @FXML
+    private VBox cardsContainer;
+    @FXML
+    private StackPane navbarContainer;
+    @FXML
+    private SearchBarController searchBarController;
+    @FXML
+    private ExperienceListController experienceListController;
 
     @FXML
     public void initialize() {
@@ -41,7 +45,10 @@ public class MainViewController implements AutoCloseable {
 
     private void restoreSession() {
 
-        if (UserSession.getInstance().isLoggedIn()) { loadNavbar(); return; }
+        if (UserSession.getInstance().isLoggedIn()) {
+            loadNavbar();
+            return;
+        }
         String refreshToken = TokenStorage.getRefreshToken();
 
         if (refreshToken == null || refreshToken.isBlank()) {
@@ -56,36 +63,26 @@ public class MainViewController implements AutoCloseable {
                     TokenStorage.clear();
                     loadNavbar();
                 },
-                this::loadNavbar
-        );
+                this::loadNavbar);
 
     }
 
     private void loadNavbar() {
-
-        if (closed || navbarContainer == null) {
+        if (closed || navbarContainer == null)
             return;
+        if (ViewSupport.loadNavbar(navbarContainer) != null && experienceListController != null) {
+            experienceListController.loadHomeForCurrentUser();
         }
-
-        try {
-
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml"));
-            Parent navbarView = loader.load();
-
-            navbarContainer.getChildren().setAll(navbarView);
-            if (experienceListController != null) {
-                experienceListController.loadHomeForCurrentUser();
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
     }
-    @Override public void close() {
+
+    @Override
+    public void close() {
         closed = true;
-        if (stickySearch != null) stickySearch.close();
-        if (searchBarController != null) searchBarController.close();
-        if (experienceListController != null) experienceListController.close();
+        if (stickySearch != null)
+            stickySearch.close();
+        if (searchBarController != null)
+            searchBarController.close();
+        if (experienceListController != null)
+            experienceListController.close();
     }
 }

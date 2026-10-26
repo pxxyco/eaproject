@@ -1,5 +1,8 @@
 package it.unical.ea_project_javafx.controller.traveler;
 
+import static it.unical.ea_project_javafx.util.BookingPresentation.*;
+import it.unical.ea_project_javafx.util.UiText;
+import it.unical.ea_project_javafx.util.ViewSupport;
 import com.google.gson.reflect.TypeToken;
 import it.unical.ea_project_javafx.dto.BookingDTO;
 import it.unical.ea_project_javafx.util.ApiService;
@@ -10,8 +13,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -24,13 +25,9 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
-import java.io.IOException;
 import java.lang.reflect.Type;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Locale;
 
@@ -83,29 +80,14 @@ public class BookingsController {
     private TextField exportFileNameField;
     private BookingDTO pendingExportBooking;
     private LocalDateTime evaluationTime = LocalDateTime.now();
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ITALY);
-    private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm",
-            Locale.ITALY);
-    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm", Locale.ITALY);
 
     @FXML
     public void initialize() {
         BackgroundHelper.setupBackground(bgImageView);
-        loadNavbar();
+        ViewSupport.loadNavbar(navbarContainer);
         setupFilters();
         setupTableColumns();
         loadBookings();
-    }
-
-    private void loadNavbar() {
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml"));
-            Parent navbar = loader.load();
-            navbarContainer.getChildren().setAll(navbar);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     private void setupFilters() {
@@ -122,47 +104,22 @@ public class BookingsController {
 
     private void setupTableColumns() {
         itemTitleColumn.setCellValueFactory(cell -> new SimpleStringProperty(
-                safeText(cell.getValue().getItemTitle(), "Esperienza non disponibile")));
+                UiText.orDefault(cell.getValue().getItemTitle(), "Esperienza non disponibile")));
         dateColumn.setCellValueFactory(cell -> new SimpleStringProperty(formatEventPeriod(cell.getValue())));
         bookedAtColumn.setCellValueFactory(cell -> new SimpleStringProperty(formatBookedAt(cell.getValue())));
         locationColumn.setCellValueFactory(cell -> new SimpleStringProperty(
-                safeText(cell.getValue().getItemLocation(), "—")));
+                UiText.orDefault(cell.getValue().getItemLocation(), "—")));
         seatsColumn.setCellValueFactory(cell -> new SimpleStringProperty(
                 cell.getValue().getSeats() == null ? "—" : String.valueOf(cell.getValue().getSeats())));
-        priceColumn.setCellValueFactory(cell -> new SimpleStringProperty(formatPrice(cell.getValue().getPrice())));
-        statusColumn.setCellValueFactory(cell -> new SimpleStringProperty(displayStatus(cell.getValue())));
-        statusColumn.setCellFactory(column -> new TableCell<>() {
-            private final Label badge = new Label();
-
-            @Override
-            protected void updateItem(String status, boolean empty) {
-                super.updateItem(status, empty);
-                setText(null);
-                setGraphic(null);
-                if (empty || status == null || status.isBlank())
-                    return;
-                badge.setText(status);
-                badge.getStyleClass().setAll("label", "booking-status-pill", statusStyleClass(status));
-                setGraphic(badge);
-            }
-        });
+        priceColumn.setCellValueFactory(cell -> new SimpleStringProperty(UiText.money(cell.getValue().getPrice())));
+        statusColumn
+                .setCellValueFactory(cell -> new SimpleStringProperty(displayStatus(cell.getValue(), evaluationTime)));
+        statusColumn.setCellFactory(column -> statusCell());
 
         bookingsTableView.setPlaceholder(new Label("Non hai ancora effettuato prenotazioni."));
         // Le prenotazioni future vengono mostrate prima dello storico; le cancellate
         // restano in fondo.
-        bookingsTableView.setRowFactory(table -> new TableRow<>() {
-            @Override
-            protected void updateItem(BookingDTO booking, boolean empty) {
-                super.updateItem(booking, empty);
-                getStyleClass().removeAll("cancelled-booking-row", "historical-booking-row");
-                if (empty || booking == null)
-                    return;
-                if (isCancelled(booking))
-                    getStyleClass().add("cancelled-booking-row");
-                else if (isHistorical(booking, evaluationTime))
-                    getStyleClass().add("historical-booking-row");
-            }
-        });
+        bookingsTableView.setRowFactory(table -> bookingRow(() -> evaluationTime));
 
         actionsColumn.setCellFactory(col -> new TableCell<>() {
             private final Button exportIcsBtn = new Button("📅 .ics");
@@ -225,11 +182,13 @@ public class BookingsController {
                         });
                     } catch (Exception exception) {
                         Platform.runLater(
-                                () -> showError("Il server ha restituito uno storico prenotazioni non valido."));
+                                () -> ViewSupport.error(statusMessageLabel,
+                                        "Il server ha restituito uno storico prenotazioni non valido."));
                     }
                 },
                 () -> Platform.runLater(
-                        () -> showError("Impossibile caricare le prenotazioni. Verifica la connessione e riprova.")),
+                        () -> ViewSupport.error(statusMessageLabel,
+                                "Impossibile caricare le prenotazioni. Verifica la connessione e riprova.")),
                 null);
     }
 
@@ -246,7 +205,7 @@ public class BookingsController {
                 .filter(b -> !isCancelled(b) && b.getPrice() != null)
                 .map(BookingDTO::getPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        spentTotalLabel.setText(formatPrice(total));
+        spentTotalLabel.setText(UiText.money(total));
     }
 
     private void filterTable() {
@@ -261,7 +220,7 @@ public class BookingsController {
                 .filter(b -> matchesQuery(b, query))
                 .filter(b -> matchesPeriod(b, selectedPeriod))
                 .filter(b -> matchesStatus(b, selectedStatus))
-                .sorted(this::compareBookings)
+                .sorted((left, right) -> compareBookings(left, right, evaluationTime))
                 .toList();
 
         bookingsTableView.setItems(FXCollections.observableArrayList(filtered));
@@ -275,10 +234,10 @@ public class BookingsController {
     private boolean matchesQuery(BookingDTO booking, String query) {
         if (query.isBlank())
             return true;
-        return contains(booking.getItemTitle(), query)
-                || contains(booking.getItemLocation(), query)
-                || contains(formatEventPeriod(booking), query)
-                || contains(booking.getBookingType(), query);
+        return UiText.contains(booking.getItemTitle(), query)
+                || UiText.contains(booking.getItemLocation(), query)
+                || UiText.contains(formatEventPeriod(booking), query)
+                || UiText.contains(booking.getBookingType(), query);
     }
 
     private boolean matchesPeriod(BookingDTO booking, String period) {
@@ -314,181 +273,14 @@ public class BookingsController {
      * Upcoming first (nearest date first), then the most recent historical items;
      * cancelled last.
      */
-    private int compareBookings(BookingDTO left, BookingDTO right) {
-        boolean leftCancelled = isCancelled(left);
-        boolean rightCancelled = isCancelled(right);
-        if (leftCancelled != rightCancelled)
-            return leftCancelled ? 1 : -1;
-
-        boolean leftHistory = isHistorical(left, evaluationTime);
-        boolean rightHistory = isHistorical(right, evaluationTime);
-        if (leftHistory != rightHistory)
-            return leftHistory ? 1 : -1;
-
-        LocalDateTime leftDate = leftHistory ? eventEndDateTime(left) : eventStartDateTime(left);
-        LocalDateTime rightDate = rightHistory ? eventEndDateTime(right) : eventStartDateTime(right);
-        if (leftDate != null && rightDate != null) {
-            int dateComparison = leftHistory ? rightDate.compareTo(leftDate) : leftDate.compareTo(rightDate);
-            if (dateComparison != 0)
-                return dateComparison;
-        } else if (leftDate != null) {
-            return -1;
-        } else if (rightDate != null) {
-            return 1;
-        }
-
-        LocalDateTime leftCreated = left.getCreatedAt();
-        LocalDateTime rightCreated = right.getCreatedAt();
-        if (leftCreated != null && rightCreated != null)
-            return rightCreated.compareTo(leftCreated);
-        if (leftCreated != null)
-            return -1;
-        if (rightCreated != null)
-            return 1;
-        Long leftId = left.getBookingId();
-        Long rightId = right.getBookingId();
-        return Long.compare(rightId == null ? 0 : rightId, leftId == null ? 0 : leftId);
-    }
-
-    private boolean isHistorical(BookingDTO booking, LocalDateTime now) {
-        if (booking == null)
-            return false;
-        return isCancelled(booking)
-                || "COMPLETED".equalsIgnoreCase(booking.getBookingStatus())
-                || "COMPLETED".equalsIgnoreCase(booking.getItemStatus())
-                || isEventEnded(booking, now);
-    }
-
-    private boolean isEventEnded(BookingDTO booking, LocalDateTime now) {
-        LocalDateTime end = eventEndDateTime(booking);
-        return end != null && !end.isAfter(now);
-    }
-
-    private boolean hasEventStarted(BookingDTO booking, LocalDateTime now) {
-        LocalDateTime start = eventStartDateTime(booking);
-        return start != null && !start.isAfter(now);
-    }
-
-    private boolean isCancelled(BookingDTO booking) {
-        return booking != null && ("CANCELLED".equalsIgnoreCase(booking.getBookingStatus())
-                || "CANCELLED".equalsIgnoreCase(booking.getItemStatus()));
-    }
-
-    private LocalDateTime eventStartDateTime(BookingDTO booking) {
-        if (booking == null || booking.getItemDate() == null || booking.getItemDate().isBlank())
-            return null;
-        String value = booking.getItemDate().trim();
-        try {
-            if (isTrip(booking) || !value.contains("T"))
-                return LocalDate.parse(value).atStartOfDay();
-            return LocalDateTime.parse(value);
-        } catch (RuntimeException ignored) {
-            return null;
-        }
-    }
-
-    private LocalDateTime eventEndDateTime(BookingDTO booking) {
-        if (booking == null)
-            return null;
-        String value = booking.getItemEndDate();
-        if (value == null || value.isBlank()) {
-            // Graceful fallback for older backend responses without itemEndDate.
-            LocalDateTime start = eventStartDateTime(booking);
-            if (start == null)
-                return null;
-            return isTrip(booking) ? start.toLocalDate().atTime(LocalTime.MAX) : start.plusHours(1);
-        }
-        try {
-            if (isTrip(booking) || !value.contains("T"))
-                return LocalDate.parse(value).atTime(LocalTime.MAX);
-            return LocalDateTime.parse(value);
-        } catch (RuntimeException ignored) {
-            LocalDateTime start = eventStartDateTime(booking);
-            return start == null ? null
-                    : (isTrip(booking)
-                            ? start.toLocalDate().atTime(LocalTime.MAX)
-                            : start.plusHours(1));
-        }
-    }
-
-    private boolean isTrip(BookingDTO booking) {
-        return booking != null && "TRIP".equalsIgnoreCase(booking.getBookingType());
-    }
-
-    private String formatEventPeriod(BookingDTO booking) {
-        LocalDateTime start = eventStartDateTime(booking);
-        LocalDateTime end = eventEndDateTime(booking);
-        if (start == null)
-            return "Data non disponibile";
-        if (isTrip(booking)) {
-            String formattedStart = start.toLocalDate().format(DATE_FORMAT);
-            if (end == null || end.toLocalDate().equals(start.toLocalDate()))
-                return formattedStart;
-            return formattedStart + " – " + end.toLocalDate().format(DATE_FORMAT);
-        }
-        String formattedStart = start.format(DATE_TIME_FORMAT);
-        if (end == null || end.equals(start))
-            return formattedStart;
-        if (end.toLocalDate().equals(start.toLocalDate())) {
-            return formattedStart + " – " + end.format(TIME_FORMAT);
-        }
-        return formattedStart + " – " + end.format(DATE_TIME_FORMAT);
-    }
-
-    private String formatBookedAt(BookingDTO booking) {
-        return booking == null || booking.getCreatedAt() == null
-                ? "—"
-                : booking.getCreatedAt().format(DATE_TIME_FORMAT);
-    }
-
-    private String displayStatus(BookingDTO booking) {
-        if (booking == null)
-            return "—";
-        String status = booking.getBookingStatus() == null ? "" : booking.getBookingStatus().toUpperCase(Locale.ROOT);
-        if ("CANCELLED".equals(status))
-            return "Prenotazione cancellata";
-        if ("CANCELLED".equalsIgnoreCase(booking.getItemStatus()))
-            return "Esperienza annullata";
-        if ("COMPLETED".equals(status) || "COMPLETED".equalsIgnoreCase(booking.getItemStatus()))
-            return "Completata";
-        if (isEventEnded(booking, evaluationTime))
-            return "Terminata";
-        if ("CONFIRMED".equals(status))
-            return "Confermata";
-        if ("PENDING".equals(status))
-            return "In attesa";
-        return status.isBlank() ? "Stato non disponibile" : status;
-    }
-
-    private String statusStyleClass(String status) {
-        return switch (status) {
-            case "Cancellata", "Prenotazione cancellata", "Esperienza annullata" -> "booking-status-cancelled";
-            case "Completata", "Terminata" -> "booking-status-completed";
-            case "Confermata" -> "booking-status-confirmed";
-            case "In attesa" -> "booking-status-pending";
-            default -> "booking-status-neutral";
-        };
-    }
-
-    private String formatPrice(BigDecimal amount) {
-        return amount == null ? "€ 0,00" : "€ " + String.format(Locale.ITALY, "%,.2f", amount);
-    }
-
-    private String safeText(String value, String fallback) {
-        return value == null || value.isBlank() ? fallback : value;
-    }
-
-    private boolean contains(String value, String query) {
-        return value != null && value.toLowerCase(Locale.ITALY).contains(query);
-    }
 
     private void exportIcs(BookingDTO dto) {
         if (dto == null || dto.getBookingId() == null) {
-            showError("Seleziona una prenotazione valida da esportare.");
+            ViewSupport.error(statusMessageLabel, "Seleziona una prenotazione valida da esportare.");
             return;
         }
         if (isCancelled(dto)) {
-            showError("Non puoi esportare una prenotazione o un'esperienza cancellata.");
+            ViewSupport.error(statusMessageLabel, "Non puoi esportare una prenotazione o un'esperienza cancellata.");
             return;
         }
         pendingExportBooking = dto;
@@ -552,7 +344,7 @@ public class BookingsController {
         if (sceneRoot instanceof StackPane root) {
             root.getChildren().add(exportPopupOverlay);
         } else {
-            showError("Impossibile aprire il popup di esportazione.");
+            ViewSupport.error(statusMessageLabel, "Impossibile aprire il popup di esportazione.");
             exportPopupOverlay = null;
         }
     }
@@ -583,17 +375,17 @@ public class BookingsController {
                             : statusMessageLabel.getScene().getWindow();
                     File file = chooser.showSaveDialog(owner);
                     if (file == null) {
-                        showSuccess("Esportazione annullata: nessun file salvato.");
+                        ViewSupport.success(statusMessageLabel, "Esportazione annullata: nessun file salvato.");
                         return;
                     }
                     try {
                         Files.writeString(file.toPath(), response.body(), StandardCharsets.UTF_8);
-                        showSuccess("File .ics salvato in: " + file.getAbsolutePath());
+                        ViewSupport.success(statusMessageLabel, "File .ics salvato in: " + file.getAbsolutePath());
                     } catch (Exception ex) {
-                        showError("Non è stato possibile salvare il file .ics.");
+                        ViewSupport.error(statusMessageLabel, "Non è stato possibile salvare il file .ics.");
                     }
                 }),
-                () -> Platform.runLater(() -> showError(
+                () -> Platform.runLater(() -> ViewSupport.error(statusMessageLabel,
                         "Esportazione non riuscita. Verifica di essere loggato e che la prenotazione sia ancora attiva.")),
                 null);
     }
@@ -608,19 +400,19 @@ public class BookingsController {
 
     private void cancelBooking(BookingDTO dto) {
         if (dto == null || dto.getBookingId() == null) {
-            showError("Seleziona una prenotazione valida da cancellare.");
+            ViewSupport.error(statusMessageLabel, "Seleziona una prenotazione valida da cancellare.");
             return;
         }
         LocalDateTime now = LocalDateTime.now();
         if (isCancelled(dto) || isHistorical(dto, now) || hasEventStarted(dto, now)
                 || "COMPLETED".equalsIgnoreCase(dto.getBookingStatus())) {
-            showError(
+            ViewSupport.error(statusMessageLabel,
                     "Questa prenotazione non può più essere cancellata perché è già iniziata, terminata o annullata.");
             return;
         }
         StackPane popupRoot = PopupFactory.resolveRoot(statusMessageLabel);
         if (popupRoot == null) {
-            showError("Impossibile aprire la conferma in questo momento.");
+            ViewSupport.error(statusMessageLabel, "Impossibile aprire la conferma in questo momento.");
             return;
         }
         PopupFactory.showConfirmation(popupRoot,
@@ -631,25 +423,12 @@ public class BookingsController {
                     ApiService.callDetailed(ApiService.BASE_URL + "/api/bookings/" + dto.getBookingId(), null,
                             ApiService.Method.DELETE,
                             response -> Platform.runLater(() -> {
-                                showSuccess("Prenotazione cancellata correttamente.");
+                                ViewSupport.success(statusMessageLabel, "Prenotazione cancellata correttamente.");
                                 loadBookings();
                             }),
-                            message -> Platform.runLater(() -> showError(message)),
+                            message -> Platform.runLater(() -> ViewSupport.error(statusMessageLabel, message)),
                             null);
                 });
     }
 
-    private void showError(String msg) {
-        statusMessageLabel.setText(msg);
-        statusMessageLabel.getStyleClass().setAll("status-message", "status-error");
-        statusMessageLabel.setVisible(true);
-        statusMessageLabel.setManaged(true);
-    }
-
-    private void showSuccess(String msg) {
-        statusMessageLabel.setText(msg);
-        statusMessageLabel.getStyleClass().setAll("status-message", "status-success");
-        statusMessageLabel.setVisible(true);
-        statusMessageLabel.setManaged(true);
-    }
 }

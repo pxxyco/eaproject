@@ -53,7 +53,7 @@ public class ActivityImageServiceImpl implements ActivityImageService {
         if (creator == null || !Objects.equals(creator.getId(), organizerId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Non puoi modificare le foto di questa attività.");
         }
-        validateFiles(files);
+        photoStorageService.validatePhotos(files);
 
         List<ActivityImage> existingImages = activityImageRepository.findByActivityOrderByOrderIndexAsc(activity);
         for (int index = 0; index < existingImages.size(); index++) {
@@ -76,21 +76,17 @@ public class ActivityImageServiceImpl implements ActivityImageService {
     @Override
     @Transactional
     public void deleteImage(Long imageId, Long organizerId) {
-        var image = activityImageRepository.findById(imageId)
+        ActivityImage image = activityImageRepository.findById(imageId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Foto non trovata."));
-        var experience = image.getActivity();
-        if (experience == null || experience.getDeletedAt() != null
-                || experience.getCreatedBy() == null
-                || !Objects.equals(experience.getCreatedBy().getId(), organizerId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Non puoi eliminare questa foto.");
+        Activity offer = image.getActivity();
+        if (offer == null
+            || offer.getDeletedAt() != null
+            || offer.getCreatedBy() == null
+            || !Objects.equals(offer.getCreatedBy().getId(), organizerId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Non puoi eliminare le foto di un'altra offerta.");
         }
         activityImageRepository.delete(image);
     }
 
-    private void validateFiles(List<MultipartFile> files) {
-        if (files == null || files.isEmpty() || files.stream().anyMatch(file -> file == null || file.isEmpty())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Seleziona almeno una foto valida.");
-        }
-        files.forEach(photoStorageService::validatePhoto);
-    }
+
 }

@@ -1,10 +1,6 @@
 package it.unical.ea_project_javafx.controller.login;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializer;
+import it.unical.ea_project_javafx.util.ViewSupport;
 import it.unical.ea_project_javafx.dto.UserDTO;
 import it.unical.ea_project_javafx.navigation.StepNavigator;
 import it.unical.ea_project_javafx.util.ApiService;
@@ -20,18 +16,19 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import lombok.Setter;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 //registrazione
 public class RegistrationStepController {
 
-    @FXML private Label wizardTitle;
-    @FXML private Label errorLabel;
-    @FXML private TextField regFirstNameField, regLastNameField, regUsernameField, regEmailField;
-    @FXML private PasswordField regPasswordField, regConfirmPasswordField;
-    @FXML private Button btnRegister;
+    @FXML
+    private Label wizardTitle;
+    @FXML
+    private Label errorLabel;
+    @FXML
+    private TextField regFirstNameField, regLastNameField, regUsernameField, regEmailField;
+    @FXML
+    private PasswordField regPasswordField, regConfirmPasswordField;
+    @FXML
+    private Button btnRegister;
 
     @Setter
     private StepNavigator navigator;
@@ -40,7 +37,8 @@ public class RegistrationStepController {
     @FXML
     public void initialize() {
 
-        TextField[] fields = {regFirstNameField, regLastNameField, regUsernameField, regEmailField, regPasswordField, regConfirmPasswordField};
+        TextField[] fields = { regFirstNameField, regLastNameField, regUsernameField, regEmailField, regPasswordField,
+                regConfirmPasswordField };
         for (TextField field : fields) {
             if (field != null) {
                 field.setOnKeyPressed(event -> {
@@ -62,25 +60,11 @@ public class RegistrationStepController {
     }
 
     public void showError(String message) {
-
-        Platform.runLater(() -> {
-            if (errorLabel != null) {
-                errorLabel.setText(message);
-                errorLabel.setVisible(true);
-                errorLabel.setManaged(true);
-            }
-        });
-
+        ViewSupport.show(errorLabel, message);
     }
 
     public void clearError() {
-
-        if (errorLabel != null) {
-            errorLabel.setText("");
-            errorLabel.setVisible(false);
-            errorLabel.setManaged(false);
-        }
-
+        ViewSupport.clear(errorLabel);
     }
 
     @FXML
@@ -127,18 +111,7 @@ public class RegistrationStepController {
                 .oauthProvider(false)
                 .build();
 
-        Gson gson = new GsonBuilder()
-                .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>) (src, typeOfSrc, context) ->
-                        src == null ? null : new JsonPrimitive(src.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
-                .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, typeOfT, context) ->
-                        LocalDateTime.parse(json.getAsString()))
-                .registerTypeAdapter(LocalDate.class, (JsonSerializer<LocalDate>) (src, typeOfSrc, context) ->
-                        src == null ? null : new JsonPrimitive(src.format(DateTimeFormatter.ISO_LOCAL_DATE)))
-                .registerTypeAdapter(LocalDate.class, (JsonDeserializer<LocalDate>) (json, typeOfT, context) ->
-                        LocalDate.parse(json.getAsString()))
-                .create();
-
-        String jsonBody = gson.toJson(requestDto);
+        String jsonBody = ApiService.toJson(requestDto);
 
         ApiService.post(
                 ApiService.BASE_URL + "/api/users",
@@ -156,10 +129,10 @@ public class RegistrationStepController {
                     }
                 }),
                 () -> Platform.runLater(() -> {
-                    SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/common/splash-screen.fxml", null);
+                    SceneNavigator.getInstance()
+                            .loadScene("/it/unical/ea_project_javafx/fxml/common/splash-screen.fxml", null);
                 }),
-                navigator::setLoading
-        );
+                navigator::setLoading);
 
     }
 

@@ -165,6 +165,12 @@ public class PhotoStorageService {
 
     }
 
+    public void validatePhotos(java.util.List<MultipartFile> files) {
+        if (files == null || files.isEmpty() || files.stream().anyMatch(file -> file == null || file.isEmpty()))
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Seleziona almeno una foto valida.");
+        files.forEach(this::validatePhoto);
+    }
+
     public void validatePhoto(MultipartFile file) {
 
         if (file == null || file.isEmpty()) {

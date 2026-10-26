@@ -1,8 +1,9 @@
 package it.unical.ea_project_javafx.controller.traveler;
 
+import it.unical.ea_project_javafx.util.JsonCodec;
+import it.unical.ea_project_javafx.util.ViewSupport;
 import com.google.gson.*;
 import javafx.fxml.*;
-import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.StackPane;
 import javafx.beans.property.SimpleStringProperty;
@@ -46,18 +47,14 @@ public class CollaborativeItineraryController {
     @FXML
     public void initialize() {
         it.unical.ea_project_javafx.util.BackgroundHelper.setupBackground(bgImageView);
-        try {
-            navbarContainer.getChildren().setAll((Parent) FXMLLoader
-                    .load(getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml")));
-        } catch (Exception ex) {
-            statusLabel.setText("Navigazione non disponibile.");
-        }
+        ViewSupport.loadNavbar(navbarContainer, message -> ViewSupport.show(statusLabel, message));
         daySpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 365, 1));
         positionSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 500, 1));
-        dayColumn.setCellValueFactory(c -> new SimpleStringProperty(text(c.getValue(), "day")));
-        positionColumn.setCellValueFactory(c -> new SimpleStringProperty(text(c.getValue(), "position")));
-        titleColumn.setCellValueFactory(c -> new SimpleStringProperty(text(c.getValue(), "title")));
-        cityColumn.setCellValueFactory(c -> new SimpleStringProperty(text(c.getValue(), "city")));
+        dayColumn.setCellValueFactory(c -> new SimpleStringProperty(JsonCodec.string(c.getValue(), "day", "")));
+        positionColumn
+                .setCellValueFactory(c -> new SimpleStringProperty(JsonCodec.string(c.getValue(), "position", "")));
+        titleColumn.setCellValueFactory(c -> new SimpleStringProperty(JsonCodec.string(c.getValue(), "title", "")));
+        cityColumn.setCellValueFactory(c -> new SimpleStringProperty(JsonCodec.string(c.getValue(), "city", "")));
         listPicker.valueProperty().addListener((o, a, b) -> {
             generation++;
             load();
@@ -70,24 +67,21 @@ public class CollaborativeItineraryController {
         loadLists();
     }
 
-    private static String text(JsonObject j, String k) {
-        return j.has(k) && !j.get(k).isJsonNull() ? j.get(k).getAsString() : "";
-    }
-
     private void loadLists() {
         ApiService.callDetailed(ApiService.BASE_URL + "/api/favorite-lists/mine", null, ApiService.Method.GET, r -> {
             var choices = new LinkedHashMap<Long, ListChoice>();
             for (var e : JsonParser.parseString(r.body()).getAsJsonArray()) {
                 var j = e.getAsJsonObject();
                 long id = j.get("id").getAsLong();
-                choices.put(id, new ListChoice(id, text(j, "name")));
+                choices.put(id, new ListChoice(id, JsonCodec.string(j, "name", "")));
             }
             ApiService.callDetailed(ApiService.BASE_URL + "/api/list-sharings/mine", null, ApiService.Method.GET,
                     shared -> {
                         for (var e : JsonParser.parseString(shared.body()).getAsJsonArray()) {
                             var j = e.getAsJsonObject();
                             long id = j.get("listId").getAsLong();
-                            choices.putIfAbsent(id, new ListChoice(id, text(j, "listName") + " · condivisa"));
+                            choices.putIfAbsent(id,
+                                    new ListChoice(id, JsonCodec.string(j, "listName", "") + " · condivisa"));
                         }
                         listPicker.getItems().setAll(choices.values());
                         if (!choices.isEmpty())
@@ -133,13 +127,13 @@ public class CollaborativeItineraryController {
     private void edit(JsonObject j) {
         selectedId = j.get("id").getAsLong();
         version = j.get("version").getAsLong();
-        titleField.setText(text(j, "title"));
-        cityField.setText(text(j, "city"));
-        notesField.setText(text(j, "notes"));
+        titleField.setText(JsonCodec.string(j, "title", ""));
+        cityField.setText(JsonCodec.string(j, "city", ""));
+        notesField.setText(JsonCodec.string(j, "notes", ""));
         daySpinner.getValueFactory().setValue(j.get("day").getAsInt());
         positionSpinner.getValueFactory().setValue(j.get("position").getAsInt());
-        startField.setText(text(j, "startTime"));
-        endField.setText(text(j, "endTime"));
+        startField.setText(JsonCodec.string(j, "startTime", ""));
+        endField.setText(JsonCodec.string(j, "endTime", ""));
         setBusy(busy);
     }
 

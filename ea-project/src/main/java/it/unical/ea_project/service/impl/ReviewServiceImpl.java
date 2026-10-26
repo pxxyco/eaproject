@@ -34,11 +34,11 @@ public class ReviewServiceImpl implements ReviewService {
     private final BookingRepository bookingRepository;
 
     public ReviewServiceImpl(ReviewRepository reviewRepository,
-                             UserRepository userRepository,
-                             TripRepository tripRepository,
-                             ActivityRepository activityRepository,
-                             ResponseRepository responseRepository,
-                             BookingRepository bookingRepository) {
+            UserRepository userRepository,
+            TripRepository tripRepository,
+            ActivityRepository activityRepository,
+            ResponseRepository responseRepository,
+            BookingRepository bookingRepository) {
         this.reviewRepository = reviewRepository;
         this.userRepository = userRepository;
         this.tripRepository = tripRepository;
@@ -49,8 +49,10 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Transactional
     public ReviewDTO create(ReviewDTO review) {
-        if (review == null) throw new IllegalArgumentException("Dati della recensione mancanti.");
-        if (review.getUserId() == null) throw new IllegalArgumentException("Utente non autenticato.");
+        if (review == null)
+            throw new IllegalArgumentException("Dati della recensione mancanti.");
+        if (review.getUserId() == null)
+            throw new IllegalArgumentException("Utente non autenticato.");
         validateReviewContent(review.getRating(), review.getComment());
 
         boolean hasTrip = review.getTripId() != null;
@@ -60,23 +62,28 @@ public class ReviewServiceImpl implements ReviewService {
         }
 
         if (!hasEligibleCompletedBooking(review.getUserId(), review.getTripId(), review.getActivityId())) {
-            throw new IllegalArgumentException("Puoi recensire soltanto un'esperienza prenotata e terminata, non cancellata.");
+            throw new IllegalArgumentException(
+                    "Puoi recensire soltanto un'esperienza prenotata e terminata, non cancellata.");
         }
 
         boolean alreadyReviewed = reviewRepository.findAllByUserId(review.getUserId()).stream()
                 .anyMatch(existing -> hasTrip
                         ? existing.getTrip() != null && review.getTripId().equals(existing.getTrip().getTripId())
-                        : existing.getActivity() != null && review.getActivityId().equals(existing.getActivity().getActivityId()));
+                        : existing.getActivity() != null
+                                && review.getActivityId().equals(existing.getActivity().getActivityId()));
         if (alreadyReviewed) {
-            throw new IllegalArgumentException("Hai già recensito questa esperienza. Puoi modificare la recensione esistente.");
+            throw new IllegalArgumentException(
+                    "Hai già recensito questa esperienza. Puoi modificare la recensione esistente.");
         }
 
         Review reviewEntity = new Review();
         reviewEntity.setUser(userRepository.getReferenceById(review.getUserId()));
-        if (hasTrip) reviewEntity.setTrip(tripRepository.findById(review.getTripId())
-                .orElseThrow(() -> new IllegalArgumentException("Viaggio non trovato.")));
-        if (hasActivity) reviewEntity.setActivity(activityRepository.findById(review.getActivityId())
-                .orElseThrow(() -> new IllegalArgumentException("Attività non trovata.")));
+        if (hasTrip)
+            reviewEntity.setTrip(tripRepository.findById(review.getTripId())
+                    .orElseThrow(() -> new IllegalArgumentException("Viaggio non trovato.")));
+        if (hasActivity)
+            reviewEntity.setActivity(activityRepository.findById(review.getActivityId())
+                    .orElseThrow(() -> new IllegalArgumentException("Attività non trovata.")));
         reviewEntity.setRating(review.getRating());
         reviewEntity.setComment(normalizeComment(review.getComment()));
 
@@ -98,68 +105,52 @@ public class ReviewServiceImpl implements ReviewService {
 
     @Transactional(readOnly = true)
     public List<ReviewDTO> findByUserAsDto(Long userId) {
-        List<Review> reviews = reviewRepository.findAllByUserId(userId);
-        if (reviews.isEmpty()) return List.of();
-        List<Long> ids = reviews.stream().map(Review::getReviewId).toList();
-        List<Response> responses = responseRepository.findByReview_ReviewIdInAndDeletedFalse(ids);
-        Map<Long, Response> responseByReviewId = responses.stream()
-                .collect(Collectors.toMap(response -> response.getReview().getReviewId(), response -> response,
-                        (first, ignored) -> first));
-        return reviews.stream()
-                .map(review -> ReviewMapper.toReviewDTO(review, responseByReviewId.get(review.getReviewId())))
-                .toList();
+        return toDtos(reviewRepository.findAllByUserId(userId));
     }
-
 
     @Nullable
     @Transactional(readOnly = true)
     public List<ReviewDTO> findByTrip(Long tripId) {
-
-        List<Review> reviews = reviewRepository.findAllByTripTripIdOrderByCreatedAtDesc(tripId);
-
-        List<Long> ids = reviews.stream().map(Review::getReviewId).toList();
-
-        List<Response> responses = responseRepository.findByReview_ReviewIdInAndDeletedFalse(ids);
-
-        Map<Long, Response> responseIdMap = responses.stream().
-                collect(Collectors.toMap(r-> r.getReview().getReviewId(),
-                        response -> response));
-
-        return reviews.stream()
-                .map(review ->  ReviewMapper.toReviewDTO(review,
-                        responseIdMap.get(review.getReviewId())))
-                .collect(Collectors.toList());
+        return toDtos(reviewRepository.findAllByTripTripIdOrderByCreatedAtDesc(tripId));
     }
 
     @Nullable
     @Transactional(readOnly = true)
     public List<ReviewDTO> findByActivity(Long activityId) {
+        return toDtos(reviewRepository.findAllByActivityActivityIdOrderByCreatedAtDesc(activityId));
+    }
 
-        List<Review> reviews = reviewRepository.findAllByActivityActivityIdOrderByCreatedAtDesc(activityId);
+    @Override
+    @Transactional(readOnly = true)
+    public List<ReviewDTO> findByBookings(Long userId, List<Long> bookingIds) {
+        return bookingIds.isEmpty() ? List.of() : toDtos(reviewRepository.findForBookings(userId, bookingIds));
+    }
 
+    private List<ReviewDTO> toDtos(List<Review> reviews) {
+        if (reviews.isEmpty())
+            return List.of();
         List<Long> ids = reviews.stream().map(Review::getReviewId).toList();
-
-        List<Response> responses = responseRepository.findByReview_ReviewIdInAndDeletedFalse(ids);
-
-        Map<Long, Response> responseIdMap = responses.stream()
-                .collect(Collectors.toMap(r-> r.getReview().getReviewId(),
-                        response -> response));
-
-        return reviews.stream()
-                .map(review -> ReviewMapper.toReviewDTO(review,
-                        responseIdMap.get(review.getReviewId())))
-                .collect(Collectors.toList());
+        Map<Long, Response> responses = responseRepository.findByReview_ReviewIdInAndDeletedFalse(ids).stream()
+                .collect(Collectors.toMap(response -> response.getReview().getReviewId(), response -> response,
+                        (first, ignored) -> first));
+        return reviews.stream().map(review -> ReviewMapper.toReviewDTO(review, responses.get(review.getReviewId())))
+                .toList();
     }
 
     @Transactional
     public ReviewDTO update(Long id, ReviewDTO data, Long userId) {
         Review review = findOwnedReview(id, userId);
-        if (data == null) throw new IllegalArgumentException("Dati della recensione mancanti.");
-        if (data.getRating() != null) validateRating(data.getRating());
-        if (data.getComment() != null) validateComment(data.getComment());
+        if (data == null)
+            throw new IllegalArgumentException("Dati della recensione mancanti.");
+        if (data.getRating() != null)
+            validateRating(data.getRating());
+        if (data.getComment() != null)
+            validateComment(data.getComment());
 
-        if (data.getRating() != null) review.setRating(data.getRating());
-        // PUT represents the current review form: a null/blank comment means the author cleared it.
+        if (data.getRating() != null)
+            review.setRating(data.getRating());
+        // PUT represents the current review form: a null/blank comment means the author
+        // cleared it.
         review.setComment(normalizeComment(data.getComment()));
 
         Long tripId = review.getTrip() != null ? review.getTrip().getTripId() : null;
@@ -203,7 +194,8 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     private String normalizeComment(String comment) {
-        if (comment == null) return null;
+        if (comment == null)
+            return null;
         String normalized = comment.trim();
         return normalized.isEmpty() ? null : normalized;
     }
@@ -242,22 +234,26 @@ public class ReviewServiceImpl implements ReviewService {
     private LocalDateTime eventEndDateTime(Booking booking) {
         if (booking.getTrip() != null) {
             LocalDate end = booking.getTrip().getEndDate() != null
-                    ? booking.getTrip().getEndDate() : booking.getTrip().getStartDate();
+                    ? booking.getTrip().getEndDate()
+                    : booking.getTrip().getStartDate();
             return end == null ? null : end.atTime(LocalTime.MAX);
         }
         if (booking.getActivity() != null) {
             Activity activity = booking.getActivity();
-            if (activity.getEndDate() != null) return activity.getEndDate();
-            if (activity.getStartDate() == null) return null;
+            if (activity.getEndDate() != null)
+                return activity.getEndDate();
+            if (activity.getStartDate() == null)
+                return null;
             int minutes = activity.getDurationMinutes() == null || activity.getDurationMinutes() < 1
-                    ? 60 : activity.getDurationMinutes();
+                    ? 60
+                    : activity.getDurationMinutes();
             return activity.getStartDate().plusMinutes(minutes);
         }
         return null;
     }
 
     private void updateAverageRating(Long tripId, Long activityId) {
-        if(activityId != null){
+        if (activityId != null) {
             Activity activity = activityRepository.findById(activityId)
                     .orElseThrow(() -> new RuntimeException("Activity non trovata"));
 

@@ -1,17 +1,16 @@
 package it.unical.ea_project_javafx.controller.common;
 
+import it.unical.ea_project_javafx.util.UiText;
+import it.unical.ea_project_javafx.util.ViewSupport;
 import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.util.BackgroundHelper;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
-import java.io.IOException;
 import it.unical.ea_project_javafx.util.ApiService;
 import com.google.gson.*;
 import java.util.Map;
@@ -52,7 +51,7 @@ public class SupportController {
     @FXML
     public void initialize() {
         BackgroundHelper.setupBackground(bgImageView);
-        loadNavbar();
+        ViewSupport.loadNavbar(navbarContainer);
         setupSupportByRole();
         ticketsList.setPlaceholder(new Label("Le richieste registrate appariranno qui."));
         ticketsList.setCellFactory(list -> new ListCell<>() {
@@ -79,17 +78,6 @@ public class SupportController {
             }
         });
         loadTickets(false);
-    }
-
-    private void loadNavbar() {
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml"));
-            Parent navbar = loader.load();
-            navbarContainer.getChildren().setAll(navbar);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     private void setupSupportByRole() {
@@ -131,13 +119,13 @@ public class SupportController {
 
     @FXML
     private void handleSendMessage(ActionEvent event) {
-        clearMessage();
+        ViewSupport.clear(statusMessageLabel);
         String category = categoryCombo.getValue();
         String subject = subjectField.getText();
         String message = messageArea.getText();
 
-        if (blank(subject) || blank(message)) {
-            showError("Inserisci sia l'oggetto che il messaggio.");
+        if (UiText.isBlank(subject) || UiText.isBlank(message)) {
+            ViewSupport.error(statusMessageLabel, "Inserisci sia l'oggetto che il messaggio.");
             return;
         }
 
@@ -147,9 +135,10 @@ public class SupportController {
                     var ticket = JsonParser.parseString(r.body()).getAsJsonObject();
                     subjectField.clear();
                     messageArea.clear();
-                    showSuccess("Richiesta registrata: " + ticket.get("subject").getAsString() + ". Stato: aperto.");
+                    ViewSupport.success(statusMessageLabel,
+                            "Richiesta registrata: " + ticket.get("subject").getAsString() + ". Stato: aperto.");
                     loadTickets(false);
-                }, this::showError, sendTicketButton::setDisable);
+                }, errorMessage -> ViewSupport.error(statusMessageLabel, errorMessage), sendTicketButton::setDisable);
     }
 
     @FXML
@@ -170,31 +159,8 @@ public class SupportController {
                     moreTicketsButton.setDisable(rows.size() < 20);
                 }, message -> {
                     moreTicketsButton.setDisable(false);
-                    showError(message);
+                    ViewSupport.error(statusMessageLabel, message);
                 }, null);
     }
 
-    private boolean blank(String s) {
-        return s == null || s.isBlank();
-    }
-
-    private void showError(String msg) {
-        statusMessageLabel.setText(msg);
-        statusMessageLabel.getStyleClass().setAll("status-message", "status-error");
-        statusMessageLabel.setVisible(true);
-        statusMessageLabel.setManaged(true);
-    }
-
-    private void showSuccess(String msg) {
-        statusMessageLabel.setText(msg);
-        statusMessageLabel.getStyleClass().setAll("status-message", "status-success");
-        statusMessageLabel.setVisible(true);
-        statusMessageLabel.setManaged(true);
-    }
-
-    private void clearMessage() {
-        statusMessageLabel.setText("");
-        statusMessageLabel.setVisible(false);
-        statusMessageLabel.setManaged(false);
-    }
 }

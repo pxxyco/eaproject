@@ -1,5 +1,7 @@
 package it.unical.ea_project_javafx.controller.traveler;
 
+import it.unical.ea_project_javafx.util.JsonCodec;
+import it.unical.ea_project_javafx.util.ViewSupport;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -11,14 +13,11 @@ import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
-import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashMap;
@@ -109,7 +108,7 @@ public class FavoritesController {
     public void initialize() {
 
         BackgroundHelper.setupBackground(bgImageView);
-        loadNavbar();
+        ViewSupport.loadNavbar(navbarContainer);
         newListVisibilityCombo.getItems().setAll("PRIVATE", "SHARED", "PUBLIC");
         editListVisibilityCombo.getItems().setAll("PRIVATE", "SHARED", "PUBLIC");
         newListVisibilityCombo.getSelectionModel().selectFirst();
@@ -199,21 +198,6 @@ public class FavoritesController {
 
     }
 
-    private void loadNavbar() {
-
-        try {
-
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml"));
-            Parent navbar = loader.load();
-            navbarContainer.getChildren().setAll(navbar);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
-
     private void loadLists() {
 
         ApiService.call(ApiService.BASE_URL + "/api/favorite-lists/mine", null, ApiService.Method.GET,
@@ -225,8 +209,8 @@ public class FavoritesController {
                         for (JsonElement el : arr) {
                             JsonObject obj = el.getAsJsonObject();
                             String id = obj.get("id").getAsString();
-                            String name = stringValue(obj, "name", "Lista senza nome");
-                            String visibility = stringValue(obj, "visibility", "PRIVATE");
+                            String name = JsonCodec.string(obj, "name", "Lista senza nome");
+                            String visibility = JsonCodec.string(obj, "visibility", "PRIVATE");
                             listsListView.getItems().add(name + " [" + visibility + "] #" + id);
                         }
 
@@ -244,10 +228,13 @@ public class FavoritesController {
                         }
 
                     } catch (Exception ex) {
-                        showError("Risposta non valida dal server durante il caricamento delle liste.");
+                        ViewSupport.error(statusMessageLabel,
+                                "Risposta non valida dal server durante il caricamento delle liste.");
                     }
                 }),
-                () -> Platform.runLater(() -> showError("Impossibile caricare le liste preferite.")), null);
+                () -> Platform.runLater(
+                        () -> ViewSupport.error(statusMessageLabel, "Impossibile caricare le liste preferite.")),
+                null);
 
     }
 
@@ -267,10 +254,10 @@ public class FavoritesController {
                         sharedListDetailsListView.getItems().clear();
                         for (JsonElement element : array) {
                             JsonObject obj = element.getAsJsonObject();
-                            String listName = stringValue(obj, "listName", "Lista condivisa");
-                            String organizer = stringValue(obj, "organizerUsername", "Non disponibile");
-                            String permission = stringValue(obj, "permission", "VIEW");
-                            String sharedAt = stringValue(obj, "sharedAt", "");
+                            String listName = JsonCodec.string(obj, "listName", "Lista condivisa");
+                            String organizer = JsonCodec.string(obj, "organizerUsername", "Non disponibile");
+                            String permission = JsonCodec.string(obj, "permission", "VIEW");
+                            String sharedAt = JsonCodec.string(obj, "sharedAt", "");
                             if (sharedAt.length() >= 16)
                                 sharedAt = sharedAt.replace('T', ' ');
                             sharedListsTable.getItems()
@@ -311,15 +298,16 @@ public class FavoritesController {
             if (!tripElement.isJsonObject())
                 continue;
             JsonObject trip = tripElement.getAsJsonObject();
-            String title = stringValue(trip, "title", "Viaggio senza titolo");
-            String city = stringValue(trip, "destinationCity", "");
-            String country = stringValue(trip, "destinationCountry", "");
+            String title = JsonCodec.string(trip, "title", "Viaggio senza titolo");
+            String city = JsonCodec.string(trip, "destinationCity", "");
+            String country = JsonCodec.string(trip, "destinationCountry", "");
             String destination = (city + (city.isBlank() || country.isBlank() ? "" : ", ") + country).trim();
             sharedListDetailsListView.getItems().add("✈ " + title + (destination.isBlank() ? "" : " — " + destination));
             sharedListDetailsListView.getItems()
-                    .add("  Organizzatore del viaggio: @" + stringValue(trip, "organizerUsername", "non disponibile"));
-            String start = stringValue(trip, "startDate", "");
-            String end = stringValue(trip, "endDate", "");
+                    .add("  Organizzatore del viaggio: @"
+                            + JsonCodec.string(trip, "organizerUsername", "non disponibile"));
+            String start = JsonCodec.string(trip, "startDate", "");
+            String end = JsonCodec.string(trip, "endDate", "");
             if (!start.isBlank() || !end.isBlank())
                 sharedListDetailsListView.getItems()
                         .add("  Date: " + (start.isBlank() ? "?" : start) + " → " + (end.isBlank() ? "?" : end));
@@ -333,25 +321,25 @@ public class FavoritesController {
                     if (!stageElement.isJsonObject())
                         continue;
                     JsonObject stage = stageElement.getAsJsonObject();
-                    String day = stringValue(stage, "day", "?");
-                    String order = stringValue(stage, "orderInDay", "?");
-                    String stageTitle = stringValue(stage, "title", "Tappa");
-                    String location = firstNonBlank(stringValue(stage, "locationName", ""),
-                            stringValue(stage, "city", ""));
-                    String countryStage = stringValue(stage, "country", "");
+                    String day = JsonCodec.string(stage, "day", "?");
+                    String order = JsonCodec.string(stage, "orderInDay", "?");
+                    String stageTitle = JsonCodec.string(stage, "title", "Tappa");
+                    String location = firstNonBlank(JsonCodec.string(stage, "locationName", ""),
+                            JsonCodec.string(stage, "city", ""));
+                    String countryStage = JsonCodec.string(stage, "country", "");
                     if (!location.isBlank() && !countryStage.isBlank() && !location.equals(countryStage))
                         location += ", " + countryStage;
-                    String startTime = stringValue(stage, "startTime", "");
-                    String endTime = stringValue(stage, "endTime", "");
+                    String startTime = JsonCodec.string(stage, "startTime", "");
+                    String endTime = JsonCodec.string(stage, "endTime", "");
                     String time = startTime.isBlank() && endTime.isBlank() ? ""
                             : " · " + (startTime.isBlank() ? "--:--" : startTime) + "–"
                                     + (endTime.isBlank() ? "--:--" : endTime);
-                    String category = stringValue(stage, "category", "");
+                    String category = JsonCodec.string(stage, "category", "");
                     sharedListDetailsListView.getItems()
                             .add("    Giorno " + day + " · tappa " + order + ": " + stageTitle
                                     + (category.isBlank() ? "" : " [" + category + "]")
                                     + (location.isBlank() ? "" : " — " + location) + time);
-                    String description = stringValue(stage, "description", "");
+                    String description = JsonCodec.string(stage, "description", "");
                     if (!description.isBlank())
                         sharedListDetailsListView.getItems().add("      " + description);
                 }
@@ -387,19 +375,19 @@ public class FavoritesController {
     private void handleSaveListChanges() {
 
         if (selectedListId == null) {
-            showError("Seleziona prima una lista.");
+            ViewSupport.error(statusMessageLabel, "Seleziona prima una lista.");
             return;
         }
 
         String name = editListNameField.getText();
         String visibility = editListVisibilityCombo.getValue();
         if (name == null || name.isBlank() || name.trim().length() > 80) {
-            showError("Il nome deve contenere da 1 a 80 caratteri.");
+            ViewSupport.error(statusMessageLabel, "Il nome deve contenere da 1 a 80 caratteri.");
             return;
         }
 
         if (visibility == null) {
-            showError("Seleziona la visibilità della lista.");
+            ViewSupport.error(statusMessageLabel, "Seleziona la visibilità della lista.");
             return;
         }
 
@@ -411,12 +399,13 @@ public class FavoritesController {
         ApiService.call(ApiService.BASE_URL + "/api/favorite-lists/" + idToSelect,
                 ApiService.toJson(payload), ApiService.Method.PUT,
                 response -> Platform.runLater(() -> {
-                    showSuccess("Lista aggiornata correttamente.");
+                    ViewSupport.success(statusMessageLabel, "Lista aggiornata correttamente.");
                     loadListsAndSelect(idToSelect);
                 }),
                 () -> Platform.runLater(() -> {
                     saveListChangesButton.setDisable(false);
-                    showError("Modifica non riuscita. Verifica i dati e i permessi sulla lista.");
+                    ViewSupport.error(statusMessageLabel,
+                            "Modifica non riuscita. Verifica i dati e i permessi sulla lista.");
                 }), null);
     }
 
@@ -433,8 +422,8 @@ public class FavoritesController {
                         for (JsonElement el : arr) {
                             JsonObject obj = el.getAsJsonObject();
                             String id = obj.get("id").getAsString();
-                            String name = stringValue(obj, "name", "Lista senza nome");
-                            String visibility = stringValue(obj, "visibility", "PRIVATE");
+                            String name = JsonCodec.string(obj, "name", "Lista senza nome");
+                            String visibility = JsonCodec.string(obj, "visibility", "PRIVATE");
                             listsListView.getItems().add(name + " [" + visibility + "] #" + id);
                             if (Long.parseLong(id) == idToSelect) {
                                 targetIndex = listsListView.getItems().size() - 1;
@@ -449,13 +438,15 @@ public class FavoritesController {
                         }
 
                     } catch (Exception ex) {
-                        showError("Lista aggiornata, ma non è stato possibile ricaricare l'elenco.");
+                        ViewSupport.error(statusMessageLabel,
+                                "Lista aggiornata, ma non è stato possibile ricaricare l'elenco.");
                     }
 
                 }),
                 () -> Platform.runLater(() -> {
                     saveListChangesButton.setDisable(false);
-                    showError("Lista aggiornata, ma non è stato possibile ricaricare l'elenco.");
+                    ViewSupport.error(statusMessageLabel,
+                            "Lista aggiornata, ma non è stato possibile ricaricare l'elenco.");
                 }),
                 null);
 
@@ -464,12 +455,12 @@ public class FavoritesController {
     @FXML
     private void handleDeleteList() {
         if (selectedListId == null) {
-            showError("Seleziona prima una lista da eliminare.");
+            ViewSupport.error(statusMessageLabel, "Seleziona prima una lista da eliminare.");
             return;
         }
         StackPane root = PopupFactory.resolveRoot(deleteListButton);
         if (root == null) {
-            showError("Impossibile aprire la conferma. Riprova dalla schermata Preferiti.");
+            ViewSupport.error(statusMessageLabel, "Impossibile aprire la conferma. Riprova dalla schermata Preferiti.");
             return;
         }
         closeDeletePopup();
@@ -497,7 +488,7 @@ public class FavoritesController {
     private void confirmDeleteList() {
         if (selectedListId == null) {
             cancelDeleteList();
-            showError("Seleziona prima una lista da eliminare.");
+            ViewSupport.error(statusMessageLabel, "Seleziona prima una lista da eliminare.");
             return;
         }
         final Long idToDelete = selectedListId;
@@ -509,14 +500,15 @@ public class FavoritesController {
                 response -> Platform.runLater(() -> {
                     cancelDeleteList();
                     selectedListId = null;
-                    showSuccess("La lista \"" + listName + "\" è stata eliminata.");
+                    ViewSupport.success(statusMessageLabel, "La lista \"" + listName + "\" è stata eliminata.");
                     loadLists();
                     loadSharedLists();
                 }),
                 () -> Platform.runLater(() -> {
                     deleteListButton.setDisable(selectedListId == null);
                     saveListChangesButton.setDisable(selectedListId == null);
-                    showError("Impossibile eliminare la lista. Verifica di esserne il proprietario e riprova.");
+                    ViewSupport.error(statusMessageLabel,
+                            "Impossibile eliminare la lista. Verifica di esserne il proprietario e riprova.");
                 }), null);
     }
 
@@ -526,7 +518,7 @@ public class FavoritesController {
         String name = newListNameField.getText();
         String visibility = newListVisibilityCombo.getValue();
         if (name == null || name.isBlank()) {
-            showError("Inserisci un nome per la lista.");
+            ViewSupport.error(statusMessageLabel, "Inserisci un nome per la lista.");
             return;
         }
 
@@ -535,11 +527,11 @@ public class FavoritesController {
         payload.put("visibility", visibility);
         ApiService.call(ApiService.BASE_URL + "/api/favorite-lists", ApiService.toJson(payload), ApiService.Method.POST,
                 response -> Platform.runLater(() -> {
-                    showSuccess("Lista '" + name.trim() + "' creata.");
+                    ViewSupport.success(statusMessageLabel, "Lista '" + name.trim() + "' creata.");
                     newListNameField.clear();
                     loadLists();
                 }),
-                () -> Platform.runLater(() -> showError("Impossibile creare la lista.")),
+                () -> Platform.runLater(() -> ViewSupport.error(statusMessageLabel, "Impossibile creare la lista.")),
                 null);
 
     }
@@ -557,24 +549,24 @@ public class FavoritesController {
                         tripSearchResults.getItems().clear();
                         for (JsonElement el : array) {
                             JsonObject o = el.getAsJsonObject();
-                            String id = stringValue(o, "tripId", null);
+                            String id = JsonCodec.string(o, "tripId", null);
                             if (id != null) {
                                 tripSearchResults.getItems()
-                                        .add(stringValue(o, "title", "Viaggio") + " — "
-                                                + stringValue(o, "location", "") + " #" + id);
+                                        .add(JsonCodec.string(o, "title", "Viaggio") + " — "
+                                                + JsonCodec.string(o, "location", "") + " #" + id);
                             }
 
                         }
 
                         if (tripSearchResults.getItems().isEmpty()) {
-                            showError("Nessun viaggio trovato.");
+                            ViewSupport.error(statusMessageLabel, "Nessun viaggio trovato.");
                         }
 
                     } catch (Exception ex) {
-                        showError("Impossibile leggere i risultati dei viaggi.");
+                        ViewSupport.error(statusMessageLabel, "Impossibile leggere i risultati dei viaggi.");
                     }
                 }),
-                () -> Platform.runLater(() -> showError("Ricerca viaggi non riuscita.")),
+                () -> Platform.runLater(() -> ViewSupport.error(statusMessageLabel, "Ricerca viaggi non riuscita.")),
                 null);
 
     }
@@ -584,22 +576,22 @@ public class FavoritesController {
 
         Long tripId = extractId(tripSearchResults.getSelectionModel().getSelectedItem());
         if (selectedListId == null) {
-            showError("Seleziona prima una lista.");
+            ViewSupport.error(statusMessageLabel, "Seleziona prima una lista.");
             return;
         }
 
         if (tripId == null) {
-            showError("Seleziona un viaggio dai risultati.");
+            ViewSupport.error(statusMessageLabel, "Seleziona un viaggio dai risultati.");
             return;
         }
 
         Map<String, Long> payload = Map.of("listId", selectedListId, "tripId", tripId);
         ApiService.call(ApiService.BASE_URL + "/api/list-trips", ApiService.toJson(payload), ApiService.Method.POST,
                 response -> Platform.runLater(() -> {
-                    showSuccess("Viaggio aggiunto alla lista.");
+                    ViewSupport.success(statusMessageLabel, "Viaggio aggiunto alla lista.");
                     loadSavedContents();
                 }),
-                () -> Platform.runLater(() -> showError(
+                () -> Platform.runLater(() -> ViewSupport.error(statusMessageLabel,
                         "Impossibile aggiungere il viaggio. Potrebbe essere già presente o non essere pubblicato.")),
                 null);
 
@@ -610,18 +602,19 @@ public class FavoritesController {
 
         Long tripId = extractId(savedTripsListView.getSelectionModel().getSelectedItem());
         if (selectedListId == null || tripId == null) {
-            showError("Seleziona un viaggio salvato da rimuovere.");
+            ViewSupport.error(statusMessageLabel, "Seleziona un viaggio salvato da rimuovere.");
             return;
         }
 
         ApiService.call(ApiService.BASE_URL + "/api/list-trips/list/" + selectedListId + "/trip/" + tripId,
                 null, ApiService.Method.DELETE,
                 response -> Platform.runLater(() -> {
-                    showSuccess("Viaggio rimosso dalla lista.");
+                    ViewSupport.success(statusMessageLabel, "Viaggio rimosso dalla lista.");
                     loadSavedContents();
                 }),
                 () -> Platform
-                        .runLater(() -> showError("Non è stato possibile rimuovere il viaggio: verifica i permessi.")),
+                        .runLater(() -> ViewSupport.error(statusMessageLabel,
+                                "Non è stato possibile rimuovere il viaggio: verifica i permessi.")),
                 null);
 
     }
@@ -640,24 +633,25 @@ public class FavoritesController {
                         activitySearchResults.getItems().clear();
                         for (JsonElement el : array) {
                             JsonObject o = el.getAsJsonObject();
-                            String id = stringValue(o, "activityId", null);
+                            String id = JsonCodec.string(o, "activityId", null);
                             if (id != null) {
                                 activitySearchResults.getItems()
-                                        .add(stringValue(o, "title", "Attività") + " — "
-                                                + stringValue(o, "city", "") + " #" + id);
+                                        .add(JsonCodec.string(o, "title", "Attività") + " — "
+                                                + JsonCodec.string(o, "city", "") + " #" + id);
                             }
 
                         }
 
                         if (activitySearchResults.getItems().isEmpty()) {
-                            showError("Nessuna attività trovata.");
+                            ViewSupport.error(statusMessageLabel, "Nessuna attività trovata.");
                         }
 
                     } catch (Exception ex) {
-                        showError("Impossibile leggere i risultati delle attività.");
+                        ViewSupport.error(statusMessageLabel, "Impossibile leggere i risultati delle attività.");
                     }
                 }),
-                () -> Platform.runLater(() -> showError("Ricerca attività non riuscita.")), null);
+                () -> Platform.runLater(() -> ViewSupport.error(statusMessageLabel, "Ricerca attività non riuscita.")),
+                null);
 
     }
 
@@ -666,12 +660,12 @@ public class FavoritesController {
 
         Long activityId = extractId(activitySearchResults.getSelectionModel().getSelectedItem());
         if (selectedListId == null) {
-            showError("Seleziona prima una lista.");
+            ViewSupport.error(statusMessageLabel, "Seleziona prima una lista.");
             return;
         }
 
         if (activityId == null) {
-            showError("Seleziona un'attività dai risultati.");
+            ViewSupport.error(statusMessageLabel, "Seleziona un'attività dai risultati.");
             return;
         }
 
@@ -679,10 +673,10 @@ public class FavoritesController {
         ApiService.call(ApiService.BASE_URL + "/api/list-activities", ApiService.toJson(payload),
                 ApiService.Method.POST,
                 response -> Platform.runLater(() -> {
-                    showSuccess("Attività aggiunta alla lista.");
+                    ViewSupport.success(statusMessageLabel, "Attività aggiunta alla lista.");
                     loadSavedContents();
                 }),
-                () -> Platform.runLater(() -> showError(
+                () -> Platform.runLater(() -> ViewSupport.error(statusMessageLabel,
                         "Impossibile aggiungere l'attività. Potrebbe essere già presente o non pubblicata.")),
                 null);
 
@@ -693,18 +687,19 @@ public class FavoritesController {
 
         Long activityId = extractId(savedActivitiesListView.getSelectionModel().getSelectedItem());
         if (selectedListId == null || activityId == null) {
-            showError("Seleziona un'attività salvata da rimuovere.");
+            ViewSupport.error(statusMessageLabel, "Seleziona un'attività salvata da rimuovere.");
             return;
         }
 
         ApiService.call(ApiService.BASE_URL + "/api/list-activities/list/" + selectedListId + "/activity/" + activityId,
                 null, ApiService.Method.DELETE,
                 response -> Platform.runLater(() -> {
-                    showSuccess("Attività rimossa dalla lista.");
+                    ViewSupport.success(statusMessageLabel, "Attività rimossa dalla lista.");
                     loadSavedContents();
                 }),
                 () -> Platform
-                        .runLater(() -> showError("Non è stato possibile rimuovere l'attività: verifica i permessi.")),
+                        .runLater(() -> ViewSupport.error(statusMessageLabel,
+                                "Non è stato possibile rimuovere l'attività: verifica i permessi.")),
                 null);
 
     }
@@ -723,15 +718,17 @@ public class FavoritesController {
                         JsonArray array = JsonParser.parseString(response.body()).getAsJsonArray();
                         for (JsonElement el : array) {
                             JsonObject o = el.getAsJsonObject();
-                            savedTripsListView.getItems().add(stringValue(o, "title", "Viaggio")
-                                    + " — " + stringValue(o, "location", "") + " #" + o.get("tripId").getAsString());
+                            savedTripsListView.getItems().add(JsonCodec.string(o, "title", "Viaggio")
+                                    + " — " + JsonCodec.string(o, "location", "") + " #"
+                                    + o.get("tripId").getAsString());
                         }
 
                     } catch (Exception ex) {
-                        showError("Impossibile leggere i viaggi della lista.");
+                        ViewSupport.error(statusMessageLabel, "Impossibile leggere i viaggi della lista.");
                     }
                 }),
-                () -> Platform.runLater(() -> showError("Impossibile caricare i viaggi della lista.")),
+                () -> Platform.runLater(
+                        () -> ViewSupport.error(statusMessageLabel, "Impossibile caricare i viaggi della lista.")),
                 null);
         ApiService.call(ApiService.BASE_URL + "/api/list-activities/list/" + listId, null, ApiService.Method.GET,
                 response -> Platform.runLater(() -> {
@@ -740,15 +737,17 @@ public class FavoritesController {
                         JsonArray array = JsonParser.parseString(response.body()).getAsJsonArray();
                         for (JsonElement el : array) {
                             JsonObject o = el.getAsJsonObject();
-                            savedActivitiesListView.getItems().add(stringValue(o, "title", "Attività")
-                                    + " — " + stringValue(o, "city", "") + " #" + o.get("activityId").getAsString());
+                            savedActivitiesListView.getItems().add(JsonCodec.string(o, "title", "Attività")
+                                    + " — " + JsonCodec.string(o, "city", "") + " #"
+                                    + o.get("activityId").getAsString());
                         }
 
                     } catch (Exception ex) {
-                        showError("Impossibile leggere le attività della lista.");
+                        ViewSupport.error(statusMessageLabel, "Impossibile leggere le attività della lista.");
                     }
                 }),
-                () -> Platform.runLater(() -> showError("Impossibile caricare le attività della lista.")),
+                () -> Platform.runLater(
+                        () -> ViewSupport.error(statusMessageLabel, "Impossibile caricare le attività della lista.")),
                 null);
 
     }
@@ -756,16 +755,18 @@ public class FavoritesController {
     @FXML
     private void handleShareList() {
         if (selectedListId == null) {
-            showError("Seleziona prima una lista condivisa.");
+            ViewSupport.error(statusMessageLabel, "Seleziona prima una lista condivisa.");
             return;
         }
         if (sharingPopupPanel == null) {
-            showError("La finestra delle condivisioni non è disponibile. Riapri la schermata Preferiti.");
+            ViewSupport.error(statusMessageLabel,
+                    "La finestra delle condivisioni non è disponibile. Riapri la schermata Preferiti.");
             return;
         }
         StackPane root = PopupFactory.resolveRoot(shareListButton);
         if (root == null) {
-            showError("Impossibile aprire le condivisioni. Riprova dalla schermata Preferiti.");
+            ViewSupport.error(statusMessageLabel,
+                    "Impossibile aprire le condivisioni. Riprova dalla schermata Preferiti.");
             return;
         }
         closeSharingPopup();
@@ -777,7 +778,8 @@ public class FavoritesController {
         var sharingCssResource = getClass()
                 .getResource("/it/unical/ea_project_javafx/css/traveler/list-sharing-popup.css");
         if (sharingCssResource == null) {
-            showError("Non è stato possibile caricare lo stile della finestra di condivisione.");
+            ViewSupport.error(statusMessageLabel,
+                    "Non è stato possibile caricare lo stile della finestra di condivisione.");
             return;
         }
         String sharingCss = sharingCssResource.toExternalForm();
@@ -834,21 +836,4 @@ public class FavoritesController {
 
     }
 
-    private String stringValue(JsonObject obj, String key, String fallback) {
-        return obj.has(key) && !obj.get(key).isJsonNull() ? obj.get(key).getAsString() : fallback;
-    }
-
-    private void showError(String msg) {
-        statusMessageLabel.setText(msg);
-        statusMessageLabel.getStyleClass().setAll("status-message", "status-error");
-        statusMessageLabel.setVisible(true);
-        statusMessageLabel.setManaged(true);
-    }
-
-    private void showSuccess(String msg) {
-        statusMessageLabel.setText(msg);
-        statusMessageLabel.getStyleClass().setAll("status-message", "status-success");
-        statusMessageLabel.setVisible(true);
-        statusMessageLabel.setManaged(true);
-    }
 }

@@ -1,14 +1,11 @@
 package it.unical.ea_project.controller;
 
-import it.unical.ea_project.domain.FavoriteList;
-import it.unical.ea_project.domain.ListSharing;
 import it.unical.ea_project.domain.ListTrips;
 import it.unical.ea_project.domain.Trip;
 import it.unical.ea_project.dto.ListTripsDTO;
-import it.unical.ea_project.repository.FavoriteListRepository;
-import it.unical.ea_project.repository.ListSharingRepository;
 import it.unical.ea_project.repository.TripRepository;
 import it.unical.ea_project.security.AuthUser;
+import it.unical.ea_project.service.FavoriteListAccess;
 import it.unical.ea_project.service.ListTripsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,16 +13,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/list-trips")
 @RequiredArgsConstructor
 public class ListTripsController {
 
     private final ListTripsService listTripsService;
-    private final FavoriteListRepository lists;
-    private final ListSharingRepository sharings;
+    private final FavoriteListAccess access;
     private final TripRepository trips;
 
     public record AddTripRequest(Long listId, Long tripId) {}
@@ -43,12 +37,12 @@ public class ListTripsController {
             return ResponseEntity.badRequest()
                 .body("listId e tripId sono obbligatori.");
         }
-        
-        if (!canEdit(request.listId(), user.id())) {
+
+        if (!access.canEdit(request.listId(), user.id())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body("Non hai i permessi per modificare questa lista.");
         }
-        
+
         try {
 
             return ResponseEntity.status(HttpStatus.CREATED)
@@ -69,7 +63,7 @@ public class ListTripsController {
                 .build();
         }
 
-        if (!canView(listId, user.id())) {
+        if (!access.canView(listId, user.id())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body("Non hai accesso a questa lista.");
         }
@@ -79,7 +73,7 @@ public class ListTripsController {
     }
 
     @DeleteMapping("/list/{listId}/trip/{tripId}")
-    public ResponseEntity<?> removeTripFromList(@PathVariable Long listId, 
+    public ResponseEntity<?> removeTripFromList(@PathVariable Long listId,
                                                 @PathVariable Long tripId,
                                                 @AuthenticationPrincipal AuthUser user) {
 
@@ -88,7 +82,7 @@ public class ListTripsController {
                 .build();
         }
 
-        if (!canEdit(listId, user.id())) {
+        if (!access.canEdit(listId, user.id())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body("Non hai i permessi per modificare questa lista.");
         }
@@ -98,11 +92,11 @@ public class ListTripsController {
             listTripsService.removeTripFromList(listId, tripId);
             return ResponseEntity.noContent()
                 .build();
-        
+
         } catch (IllegalArgumentException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
         }
-    
+
     }
 
     private ListTripsDTO toDTO(ListTrips association) {
@@ -114,49 +108,11 @@ public class ListTripsController {
         return ListTripsDTO.builder()
                 .listId(association.getFavoriteList().getId())
                 .tripId(association.getTripId())
-                .title(trip == null ? "Viaggio #" + association.getTripId() : trip.getTitle())
+                .title(trip == null ? "Viaggio non disponibile" : trip.getTitle())
                 .location(location)
                 .addedAt(association.getAddedAt())
                 .build();
 
     }
 
-    private FavoriteList activeList(Long id) {
-
-        if (id == null) {
-            return null;
-        }
-
-        return lists.findById(id)
-            .filter(l -> !l.isDeleted()).orElse(null);
-
-    }
-
-    private boolean canView(Long listId, Long userId) {
-
-        FavoriteList list = activeList(listId);
-        return list != null && (list.getUser().getId().equals(userId)
-                || list.getVisibility() == FavoriteList.Visibility.SHARED
-                && sharings.existsByFavoriteList_IdAndUser_Id(listId, userId));
-
-    }
-
-    private boolean canEdit(Long listId, Long userId) {
-
-        FavoriteList list = activeList(listId);
-        if (list == null) {
-            return false;
-        }
-
-        if (list.getUser().getId().equals(userId)) {
-            return true;
-        }
-
-        if (list.getVisibility() != FavoriteList.Visibility.SHARED) return false;
-        return sharings.findByFavoriteListId(listId)
-            .stream().anyMatch(s ->
-                s.getUser().getId().equals(userId) && s.getPermission() == ListSharing.SharingPermission.EDIT
-            );
-
-    }
 }

@@ -1,5 +1,7 @@
 package it.unical.ea_project_javafx.controller.profile;
 
+import it.unical.ea_project_javafx.util.UiText;
+import it.unical.ea_project_javafx.util.ViewSupport;
 import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.util.ApiService;
 import it.unical.ea_project_javafx.util.PasswordPolicy;
@@ -7,14 +9,11 @@ import it.unical.ea_project_javafx.util.BackgroundHelper;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
-import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -62,7 +61,7 @@ public class SettingsController {
     public void initialize() {
 
         BackgroundHelper.setupBackground(bgImageView);
-        loadNavbar();
+        ViewSupport.loadNavbar(navbarContainer);
         setupRoleSpecificSections();
         newPasswordField.textProperty()
                 .addListener((o, a,
@@ -83,20 +82,7 @@ public class SettingsController {
                 organizerBioArea.setText(data.get("bio").getAsString());
             settingsLoaded = true;
             preferencesButton.setDisable(false);
-        }, this::showError, null);
-
-    }
-
-    private void loadNavbar() {
-
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml"));
-            Parent navbar = loader.load();
-            navbarContainer.getChildren().setAll(navbar);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        }, message -> ViewSupport.error(statusMessageLabel, message), null);
 
     }
 
@@ -119,24 +105,25 @@ public class SettingsController {
     @FXML
     private void handleChangePassword(ActionEvent event) {
 
-        clearMessage();
+        ViewSupport.clear(statusMessageLabel);
 
         String currentPassword = currentPasswordField.getText();
         String newPassword = newPasswordField.getText();
         String confirmPassword = confirmPasswordField.getText();
 
-        if (blank(currentPassword) || blank(newPassword) || blank(confirmPassword)) {
-            showError("Compila tutti i campi della password.");
+        if (UiText.isBlank(currentPassword) || UiText.isBlank(newPassword) || UiText.isBlank(confirmPassword)) {
+            ViewSupport.error(statusMessageLabel, "Compila tutti i campi della password.");
             return;
         }
 
         if (!PasswordPolicy.isValid(newPassword)) {
-            showError("La password deve contenere almeno 8 caratteri, una lettera, un numero e un carattere speciale.");
+            ViewSupport.error(statusMessageLabel,
+                    "La password deve contenere almeno 8 caratteri, una lettera, un numero e un carattere speciale.");
             return;
         }
 
         if (!newPassword.equals(confirmPassword)) {
-            showError("La nuova password e la conferma non coincidono.");
+            ViewSupport.error(statusMessageLabel, "La nuova password e la conferma non coincidono.");
             return;
         }
 
@@ -152,13 +139,14 @@ public class SettingsController {
                     userSession.clear();
                     it.unical.ea_project_javafx.util.TokenStorage.clear();
                     it.unical.ea_project_javafx.util.NotificationPollingService.getInstance().clearSessionState();
-                    showSuccess("Password aggiornata. Le sessioni sono state chiuse: accedi di nuovo dal menu.");
-                    loadNavbar();
+                    ViewSupport.success(statusMessageLabel,
+                            "Password aggiornata. Le sessioni sono state chiuse: accedi di nuovo dal menu.");
+                    ViewSupport.loadNavbar(navbarContainer);
                     currentPasswordField.clear();
                     newPasswordField.clear();
                     confirmPasswordField.clear();
                 }),
-                message -> Platform.runLater(() -> showError(message)),
+                message -> Platform.runLater(() -> ViewSupport.error(statusMessageLabel, message)),
                 passwordButton::setDisable);
 
     }
@@ -180,7 +168,8 @@ public class SettingsController {
         payload.put("brand", organizerBrandNameField.getText());
         payload.put("bio", organizerBioArea.getText());
         ApiService.callDetailed(ApiService.BASE_URL + "/api/account/settings", ApiService.toJson(payload),
-                ApiService.Method.PUT, r -> showSuccess("Preferenze salvate."), this::showError,
+                ApiService.Method.PUT, r -> ViewSupport.success(statusMessageLabel, "Preferenze salvate."),
+                message -> ViewSupport.error(statusMessageLabel, message),
                 preferencesButton::setDisable);
     }
 
@@ -197,36 +186,7 @@ public class SettingsController {
                                     .clearSessionState();
                             it.unical.ea_project_javafx.util.SceneNavigator.getInstance()
                                     .loadScene("/it/unical/ea_project_javafx/fxml/login/login.fxml", null);
-                        }, this::showError, null));
+                        }, message -> ViewSupport.error(statusMessageLabel, message), null));
     }
 
-    private boolean blank(String value) {
-        return value == null || value.isBlank();
-    }
-
-    private void showError(String message) {
-        if (statusMessageLabel != null) {
-            statusMessageLabel.setText(message);
-            statusMessageLabel.getStyleClass().setAll("status-message", "status-error");
-            statusMessageLabel.setVisible(true);
-            statusMessageLabel.setManaged(true);
-        }
-    }
-
-    private void showSuccess(String message) {
-        if (statusMessageLabel != null) {
-            statusMessageLabel.setText(message);
-            statusMessageLabel.getStyleClass().setAll("status-message", "status-success");
-            statusMessageLabel.setVisible(true);
-            statusMessageLabel.setManaged(true);
-        }
-    }
-
-    private void clearMessage() {
-        if (statusMessageLabel != null) {
-            statusMessageLabel.setText("");
-            statusMessageLabel.setVisible(false);
-            statusMessageLabel.setManaged(false);
-        }
-    }
 }

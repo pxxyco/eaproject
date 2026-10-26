@@ -1,11 +1,11 @@
 package it.unical.ea_project_javafx.controller.chat;
 
+import it.unical.ea_project_javafx.util.JsonCodec;
+import it.unical.ea_project_javafx.util.ViewSupport;
 import com.google.gson.*;
 import it.unical.ea_project_javafx.security.UserSession;
-import it.unical.ea_project_javafx.service.ChatStream;
 import it.unical.ea_project_javafx.util.*;
 import javafx.fxml.*;
-import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.geometry.Pos;
@@ -55,23 +55,12 @@ public class ChatController implements AutoCloseable {
     private final Map<Long, String> drafts = new HashMap<>();
     private static final String API = ApiService.BASE_URL + "/api/chat";
 
-    private static String text(JsonObject o, String k) {
-        return o.has(k) && !o.get(k).isJsonNull() ? o.get(k).getAsString() : "";
-    }
-
     @FXML
     public void initialize() {
         if (!compactMode)
             it.unical.ea_project_javafx.util.BackgroundHelper.setupBackground(bgImageView);
-        try {
-            if (!compactMode) {
-                Parent nav = FXMLLoader
-                        .load(getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml"));
-                navbarContainer.getChildren().setAll(nav);
-            }
-        } catch (Exception ex) {
-            show("Barra di navigazione non disponibile.");
-        }
+        if (!compactMode)
+            ViewSupport.loadNavbar(navbarContainer, this::show);
         conversations.setCellFactory(list -> new ListCell<>() {
             @Override
             protected void updateItem(JsonObject item, boolean empty) {
@@ -80,9 +69,9 @@ public class ChatController implements AutoCloseable {
                     setText(null);
                     return;
                 }
-                String unread = text(item, "unread");
-                setText(text(item, "name") + (unread.equals("0") ? "" : "  • " + unread) + "\n"
-                        + text(item, "preview"));
+                String unread = JsonCodec.string(item, "unread", "");
+                setText(JsonCodec.string(item, "name", "") + (unread.equals("0") ? "" : "  • " + unread) + "\n"
+                        + JsonCodec.string(item, "preview", ""));
             }
         });
         conversations.getSelectionModel().selectedItemProperty().addListener((o, old, value) -> {
@@ -265,8 +254,9 @@ public class ChatController implements AutoCloseable {
         lastRead = 0;
         messagesBusy = false;
         messagesPending = false;
-        conversationTitle.setText(text(conversation, "name"));
-        conversationSubtitle.setText(text(conversation, "role").equals("ORGANIZER") ? "Organizzatore" : "Viaggiatore");
+        conversationTitle.setText(JsonCodec.string(conversation, "name", ""));
+        conversationSubtitle.setText(
+                JsonCodec.string(conversation, "role", "").equals("ORGANIZER") ? "Organizzatore" : "Viaggiatore");
         composer.setText(drafts.getOrDefault(selectedId, ""));
         pendingBody = null;
         pendingId = null;
@@ -356,11 +346,11 @@ public class ChatController implements AutoCloseable {
 
     private HBox bubble(JsonObject message) {
         boolean mine = message.get("senderId").getAsLong() == UserSession.getInstance().getId();
-        Label body = new Label(text(message, "body"));
+        Label body = new Label(JsonCodec.string(message, "body", ""));
         body.setWrapText(true);
         body.getStyleClass().add("chat-message-text");
         Label timestamp = new Label(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm").withZone(ZoneId.systemDefault())
-                .format(Instant.parse(text(message, "sentAt"))));
+                .format(Instant.parse(JsonCodec.string(message, "sentAt", ""))));
         timestamp.getStyleClass().add("chat-message-time");
         VBox box = new VBox(6, body, timestamp);
         box.getStyleClass().add(mine ? "chat-message-own" : "chat-message-other");

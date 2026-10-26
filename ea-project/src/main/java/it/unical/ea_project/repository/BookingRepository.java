@@ -19,7 +19,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
   @Query("select b from Booking b where b.user.id=:user and b.deletedAt is null order by b.createdAt desc")
   List<Booking> recommendationHistory(@Param("user") Long user, org.springframework.data.domain.Pageable page);
 
-  List<Booking> findByUserId(Long userId);
+    List<Booking> findByUserId(Long userId);
 
   @org.springframework.data.jpa.repository.EntityGraph(attributePaths = { "trip", "activity", "user" })
   List<Booking> findByUserIdAndBookingIdInAndDeletedAtIsNull(Long userId, List<Long> ids);
@@ -44,8 +44,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
       LEFT JOIN b.trip t
       LEFT JOIN b.activity a
       WHERE b.deletedAt IS NULL
-      AND ((t.createdBy.id = :organizerId AND t.deletedAt IS NULL)
-        OR (a.createdBy.id = :organizerId AND a.deletedAt IS NULL))
+      AND ((t.createdBy.id = :organizerId)
+        OR (a.createdBy.id = :organizerId))
       ORDER BY b.createdAt DESC
       """)
   List<Booking> findActiveBookingsForOrganizer(@Param("organizerId") Long organizerId);

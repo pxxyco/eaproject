@@ -37,9 +37,9 @@ public interface PaymentRepository extends JpaRepository<Payment,Long> {
           AND b.deletedAt IS NULL
           AND p.status IN (:completed, :confirmed)
           AND (
-            (t IS NOT NULL AND t.createdBy.id = :organizerId AND t.deletedAt IS NULL)
+            (t IS NOT NULL AND t.createdBy.id = :organizerId)
             OR
-            (a IS NOT NULL AND a.createdBy.id = :organizerId AND a.deletedAt IS NULL)
+            (a IS NOT NULL AND a.createdBy.id = :organizerId)
           )
         """)
     BigDecimal sumPaidAmountForOrganizer(

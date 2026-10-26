@@ -2,6 +2,8 @@ package it.unical.ea_project.itinerary;
 
 import it.unical.ea_project.domain.*;
 import it.unical.ea_project.repository.*;
+import it.unical.ea_project.service.FavoriteListAccess;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
@@ -25,12 +27,12 @@ public class ItineraryService {
     }
 
     private final FavoriteListRepository lists;
-    private final ListSharingRepository shares;
+    private final FavoriteListAccess permissions;
     private final ItineraryStopRepository stops;
 
     public Plan get(Long list, Long user) {
         var l = access(list, user, false);
-        return new Plan(l.getId(), l.getName(), editable(l, user),
+        return new Plan(l.getId(), l.getName(), permissions.canEdit(l, user),
                 stops.findByListIdOrderByDayAscPositionAscIdAsc(list).stream().map(this::view).toList());
     }
 
@@ -77,19 +79,11 @@ public class ItineraryService {
     private FavoriteList access(Long id, Long user, boolean write) {
         var list = (write ? lists.lockActive(id) : lists.findById(id)).filter(l -> !l.isDeleted())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Lista non disponibile."));
-        boolean owner = list.getUser().getId().equals(user);
-        if (!owner && (list.getVisibility() != FavoriteList.Visibility.SHARED
-                || !shares.existsByFavoriteList_IdAndUser_Id(id, user)))
+        if (!permissions.canView(list, user))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Itinerario privato.");
-        if (write && !editable(list, user))
+        if (write && !permissions.canEdit(list, user))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Hai il permesso di sola lettura.");
         return list;
-    }
-
-    private boolean editable(FavoriteList l, Long user) {
-        return l.getUser().getId().equals(user) || l.getVisibility() == FavoriteList.Visibility.SHARED
-                && shares.findByFavoriteListId(l.getId()).stream().anyMatch(s -> s.getUser().getId().equals(user)
-                        && s.getPermission() == ListSharing.SharingPermission.EDIT);
     }
 
     private void validate(Stop s) {

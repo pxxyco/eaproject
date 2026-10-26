@@ -20,24 +20,29 @@ import com.example.application.screens.login.AuthWizardScreen
 import com.example.application.ui.theme.*
 
 @Composable
-fun ProfileScreen(
-    user: UserDTO?,
-    onLoginSuccess: () -> Unit,
-    onLogoutClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
+fun ProfileScreen(user: UserDTO?, onLoginSuccess: () -> Unit, onLogoutClick: () -> Unit, modifier: Modifier = Modifier) {
     Crossfade(targetState = user, modifier = modifier.fillMaxSize(), label = "profile_state") { current ->
         if (current == null) {
             AuthWizardScreen(onLoginSuccess = onLoginSuccess, onBackToHome = {})
-        } else {
-            ProfileContent(user = current, onLogoutClick = onLogoutClick)
+        } else key(current.id) {
+            var showLogoutDialog by remember { mutableStateOf(false) }
+            ProfileContent(current, { showLogoutDialog = true }, Modifier.fillMaxSize())
+            if (showLogoutDialog) {
+                AlertDialog(
+                    onDismissRequest = { showLogoutDialog = false },
+                    shape = RoundedCornerShape(28.dp),
+                    title = { Text("Disconnettersi?") },
+                    text = { Text("Dovrai rifare il login per accedere al tuo account.") },
+                    confirmButton = { TextButton(onClick = { showLogoutDialog = false; onLogoutClick() }) { Text("Disconnetti") } },
+                    dismissButton = { TextButton(onClick = { showLogoutDialog = false }) { Text("Annulla") } }
+                )
+            }
         }
     }
 }
 
 @Composable
-private fun ProfileContent(user: UserDTO, onLogoutClick: () -> Unit) {
-    var showLogoutDialog by remember { mutableStateOf(false) }
+private fun ProfileContent(user: UserDTO, onLogoutClick: () -> Unit, modifier: Modifier) {
 
     val displayName = user.fullName?.takeIf { it.isNotBlank() } ?: user.username ?: "Utente"
     val initials = displayName.split(" ")
@@ -51,7 +56,7 @@ private fun ProfileContent(user: UserDTO, onLogoutClick: () -> Unit) {
     }
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(ScreenBackground)
             .verticalScroll(rememberScrollState())
@@ -116,8 +121,9 @@ private fun ProfileContent(user: UserDTO, onLogoutClick: () -> Unit) {
 
         Spacer(modifier = Modifier.height(32.dp))
 
+
         Button(
-            onClick = { showLogoutDialog = true },
+            onClick = onLogoutClick,
             modifier = Modifier.fillMaxWidth().height(50.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.errorContainer,
@@ -128,20 +134,6 @@ private fun ProfileContent(user: UserDTO, onLogoutClick: () -> Unit) {
         }
     }
 
-    if (showLogoutDialog) {
-        AlertDialog(
-            onDismissRequest = { showLogoutDialog = false },
-            shape = RoundedCornerShape(28.dp),
-            title = { Text("Disconnettersi?") },
-            text = { Text("Dovrai rifare il login per accedere al tuo account.") },
-            confirmButton = {
-                TextButton(onClick = { showLogoutDialog = false; onLogoutClick() }) { Text("Disconnetti") }
-            },
-            dismissButton = {
-                TextButton(onClick = { showLogoutDialog = false }) { Text("Annulla") }
-            }
-        )
-    }
 }
 
 @Composable

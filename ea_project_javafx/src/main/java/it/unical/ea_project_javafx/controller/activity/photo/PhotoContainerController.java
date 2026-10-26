@@ -1,6 +1,5 @@
 package it.unical.ea_project_javafx.controller.activity.photo;
 
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import it.unical.ea_project_javafx.controller.activity.ActivitySectionController;
@@ -23,8 +22,8 @@ import java.util.function.Consumer;
 
 public class PhotoContainerController implements ActivitySectionController, TripSectionController {
 
-    private static final Gson GSON_TRIP = new Gson();
-    private static final Type TRIP_IMAGE_LIST_TYPE = new TypeToken<List<TripImageDTO>>(){}.getType();
+    private static final Type TRIP_IMAGE_LIST_TYPE = new TypeToken<List<TripImageDTO>>() {
+    }.getType();
     private final String path = "/it/unical/ea_project_javafx/fxml/activity/photo";
 
     @Setter
@@ -38,9 +37,8 @@ public class PhotoContainerController implements ActivitySectionController, Trip
     @FXML
     private FlowPane imgsContainer;
 
-
     @FXML
-    public void initialize(){
+    public void initialize() {
     }
 
     public void setData(ActivityDTO activity) {
@@ -52,12 +50,13 @@ public class PhotoContainerController implements ActivitySectionController, Trip
         ApiService.get(
                 ApiService.BASE_URL + "/api/trip-images/trip/" + trip.getTripId(),
                 response -> {
-                    List<TripImageDTO> images = GSON_TRIP.fromJson(response.body(), TRIP_IMAGE_LIST_TYPE);
+                    List<TripImageDTO> images = ApiService.fromJson(response.body(), TRIP_IMAGE_LIST_TYPE);
                     loadTripImages(images);
                 },
-                () -> {},
-                loading -> {}
-        );
+                () -> {
+                },
+                loading -> {
+                });
 
     }
 
@@ -101,21 +100,19 @@ public class PhotoContainerController implements ActivitySectionController, Trip
 
             PhotoItemController controller = loader.getController();
             controller.setFoto(url);
-            controller.setOnFotoClickedCallBack( u-> {
-                if(onFotoRequested != null){
+            controller.setOnFotoClickedCallBack(u -> {
+                if (onFotoRequested != null) {
                     onFotoRequested.accept(u);
                 }
             });
 
             imgsContainer.getChildren().add(foto);
 
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
     }
-
 
     private void addPlaceholder() {
 
@@ -123,11 +120,12 @@ public class PhotoContainerController implements ActivitySectionController, Trip
 
             FXMLLoader placeholderLoader = new FXMLLoader();
             placeholderLoader.setLocation(getClass().getResource(path + "/photo-placeholder.fxml"));
-            Node placeholder = placeholderLoader.load();               // load() PRIMA di getController()
+            Node placeholder = placeholderLoader.load(); // load() PRIMA di getController()
 
             PhotoPlaceholderController controller = placeholderLoader.getController();
             controller.setOnPlaceholderClickedCallBack(() -> {
-                if (onGalleryRequested != null) onGalleryRequested.accept(imageUrls);
+                if (onGalleryRequested != null)
+                    onGalleryRequested.accept(imageUrls);
             });
 
             imgsContainer.getChildren().add(placeholder);

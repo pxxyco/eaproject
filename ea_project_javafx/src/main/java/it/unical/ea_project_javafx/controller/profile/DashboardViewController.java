@@ -1,5 +1,6 @@
 package it.unical.ea_project_javafx.controller.profile;
 
+import it.unical.ea_project_javafx.util.ViewSupport;
 import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.util.BackgroundHelper;
 import javafx.fxml.FXML;
@@ -14,29 +15,20 @@ import java.io.IOException;
 
 public class DashboardViewController {
 
-    @FXML private ImageView bgImageView;
-    @FXML private StackPane navbarContainer;
-    @FXML private VBox dashboardContent;
+    @FXML
+    private ImageView bgImageView;
+    @FXML
+    private StackPane navbarContainer;
+    @FXML
+    private VBox dashboardContent;
 
     private final UserSession userSession = UserSession.getInstance();
 
     @FXML
     public void initialize() {
         BackgroundHelper.setupBackground(bgImageView);
-        loadNavbar();
+        ViewSupport.loadNavbar(navbarContainer);
         loadRoleDashboard();
-    }
-
-    private void loadNavbar() {
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml")
-            );
-            Parent navbar = loader.load();
-            navbarContainer.getChildren().setAll(navbar);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     private void loadRoleDashboard() {

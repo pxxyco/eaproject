@@ -1,8 +1,6 @@
 package it.unical.ea_project_javafx.controller.login;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializer;
+import it.unical.ea_project_javafx.util.ViewSupport;
 import com.google.gson.JsonObject;
 import it.unical.ea_project_javafx.dto.UserDTO;
 import it.unical.ea_project_javafx.navigation.StepNavigator;
@@ -14,9 +12,6 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 public class LoginStepController {
 
@@ -92,25 +87,11 @@ public class LoginStepController {
     }
 
     public void showError(String message) {
-
-        Platform.runLater(() -> {
-            if (errorLabel != null) {
-                errorLabel.setText(message);
-                errorLabel.setVisible(true);
-                errorLabel.setManaged(true);
-            }
-        });
-
+        ViewSupport.show(errorLabel, message);
     }
 
     public void clearError() {
-
-        if (errorLabel != null) {
-            errorLabel.setText("");
-            errorLabel.setVisible(false);
-            errorLabel.setManaged(false);
-        }
-
+        ViewSupport.clear(errorLabel);
     }
 
     @FXML
@@ -139,16 +120,7 @@ public class LoginStepController {
                             String accessToken = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : null;
                             String refreshToken = res.headers().firstValue("X-Refresh-Token").orElse(null);
 
-                            Gson gson = new GsonBuilder()
-                                    .registerTypeAdapter(LocalDateTime.class,
-                                            (JsonDeserializer<LocalDateTime>) (json, typeOfT, context) -> LocalDateTime
-                                                    .parse(json.getAsString()))
-                                    .registerTypeAdapter(LocalDate.class,
-                                            (JsonDeserializer<LocalDate>) (json, typeOfT, context) -> LocalDate
-                                                    .parse(json.getAsString()))
-                                    .create();
-
-                            UserDTO user = gson.fromJson(res.body(), UserDTO.class);
+                            UserDTO user = ApiService.fromJson(res.body(), UserDTO.class);
 
                             if (user != null) {
                                 UserSession.getInstance().setSession(user);

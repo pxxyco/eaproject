@@ -1,5 +1,7 @@
 package it.unical.ea_project_javafx.controller.traveler;
 
+import static it.unical.ea_project_javafx.util.BookingPresentation.*;
+import it.unical.ea_project_javafx.util.UiText;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
@@ -18,10 +20,8 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.Priority;
@@ -35,13 +35,11 @@ import javafx.util.Duration;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.net.URLEncoder;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -119,10 +117,6 @@ public class TravelerDashboardController implements ProfileDashboardController {
     private final List<BookingDTO> allBookings = new ArrayList<>();
     private LocalDateTime evaluationTime = LocalDateTime.now();
     private PopupFactory.Handle activeModal;
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ITALY);
-    private static final DateTimeFormatter DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm",
-            Locale.ITALY);
-    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm", Locale.ITALY);
 
     @FXML
     public void initialize() {
@@ -433,44 +427,21 @@ public class TravelerDashboardController implements ProfileDashboardController {
 
     private void setupBookingTable() {
         itemTitleColumn.setCellValueFactory(
-                cell -> new SimpleStringProperty(safe(cell.getValue().getItemTitle(), "Esperienza non disponibile")));
+                cell -> new SimpleStringProperty(
+                        UiText.orDefault(cell.getValue().getItemTitle(), "Esperienza non disponibile")));
         dateColumn.setCellValueFactory(cell -> new SimpleStringProperty(formatEventPeriod(cell.getValue())));
         bookedAtColumn.setCellValueFactory(cell -> new SimpleStringProperty(formatBookedAt(cell.getValue())));
         locationColumn
-                .setCellValueFactory(cell -> new SimpleStringProperty(safe(cell.getValue().getItemLocation(), "—")));
+                .setCellValueFactory(
+                        cell -> new SimpleStringProperty(UiText.orDefault(cell.getValue().getItemLocation(), "—")));
         seatsColumn.setCellValueFactory(cell -> new SimpleStringProperty(
                 cell.getValue().getSeats() == null ? "—" : String.valueOf(cell.getValue().getSeats())));
-        priceColumn.setCellValueFactory(cell -> new SimpleStringProperty(formatPrice(cell.getValue().getPrice())));
-        statusColumn.setCellValueFactory(cell -> new SimpleStringProperty(displayStatus(cell.getValue())));
-        statusColumn.setCellFactory(column -> new TableCell<>() {
-            private final Label badge = new Label();
-
-            @Override
-            protected void updateItem(String status, boolean empty) {
-                super.updateItem(status, empty);
-                setText(null);
-                setGraphic(null);
-                if (empty || status == null || status.isBlank())
-                    return;
-                badge.setText(status);
-                badge.getStyleClass().setAll("label", "booking-status-pill", statusStyleClass(status));
-                setGraphic(badge);
-            }
-        });
+        priceColumn.setCellValueFactory(cell -> new SimpleStringProperty(UiText.money(cell.getValue().getPrice())));
+        statusColumn
+                .setCellValueFactory(cell -> new SimpleStringProperty(displayStatus(cell.getValue(), evaluationTime)));
+        statusColumn.setCellFactory(column -> statusCell());
         bookingsTable.setPlaceholder(new Label("Non hai ancora effettuato prenotazioni."));
-        bookingsTable.setRowFactory(table -> new TableRow<>() {
-            @Override
-            protected void updateItem(BookingDTO booking, boolean empty) {
-                super.updateItem(booking, empty);
-                getStyleClass().removeAll("cancelled-booking-row", "historical-booking-row");
-                if (empty || booking == null)
-                    return;
-                if (isCancelled(booking))
-                    getStyleClass().add("cancelled-booking-row");
-                else if (isHistorical(booking))
-                    getStyleClass().add("historical-booking-row");
-            }
-        });
+        bookingsTable.setRowFactory(table -> bookingRow(() -> evaluationTime));
         actionColumn.setCellFactory(column -> new TableCell<>() {
             private final Button export = new Button("📅");
             private final Button cancel = new Button("Annulla");
@@ -498,7 +469,8 @@ public class TravelerDashboardController implements ProfileDashboardController {
                     return;
                 }
                 boolean cancelled = isCancelled(booking);
-                boolean canCancel = !cancelled && !isHistorical(booking) && !hasEventStarted(booking)
+                boolean canCancel = !cancelled && !isHistorical(booking, evaluationTime)
+                        && !hasEventStarted(booking, evaluationTime)
                         && !"COMPLETED".equalsIgnoreCase(booking.getBookingStatus());
                 export.setVisible(!cancelled);
                 export.setManaged(!cancelled);
@@ -562,14 +534,14 @@ public class TravelerDashboardController implements ProfileDashboardController {
         setLabelText(bookingValue, "bookingValue", String.valueOf(allBookings.size()));
         setLabelText(bookingDetail, "bookingDetail",
                 allBookings.size() == 1 ? "prenotazione totale" : "prenotazioni totali");
-        long upcoming = allBookings.stream().filter(b -> !isCancelled(b) && !isHistorical(b))
+        long upcoming = allBookings.stream().filter(b -> !isCancelled(b) && !isHistorical(b, evaluationTime))
                 .filter(b -> {
                     LocalDateTime start = eventStartDateTime(b);
                     return start != null && start.isAfter(evaluationTime);
                 }).count();
         setLabelText(upcomingBookingValue, "upcomingBookingValue", String.valueOf(upcoming));
         setLabelText(historicalBookingValue, "historicalBookingValue",
-                String.valueOf(allBookings.stream().filter(this::isHistorical).count()));
+                String.valueOf(allBookings.stream().filter(booking -> isHistorical(booking, evaluationTime)).count()));
         renderUpcomingExperiences();
     }
 
@@ -582,7 +554,7 @@ public class TravelerDashboardController implements ProfileDashboardController {
         upcomingExperienceContainer.getChildren().clear();
         List<BookingDTO> upcoming = allBookings.stream()
                 .filter(java.util.Objects::nonNull)
-                .filter(b -> b.getBookingId() != null && !isCancelled(b) && !isHistorical(b))
+                .filter(b -> b.getBookingId() != null && !isCancelled(b) && !isHistorical(b, evaluationTime))
                 .filter(b -> {
                     LocalDateTime start = eventStartDateTime(b);
                     return start != null && start.isAfter(evaluationTime);
@@ -614,12 +586,12 @@ public class TravelerDashboardController implements ProfileDashboardController {
             card.getStyleClass().add("dashboard-upcoming-card");
             Label type = new Label(isTrip(booking) ? "VIAGGIO" : "ATTIVITÀ");
             type.getStyleClass().add("dashboard-upcoming-type");
-            Label title = new Label(safe(booking.getItemTitle(), "Esperienza"));
+            Label title = new Label(UiText.orDefault(booking.getItemTitle(), "Esperienza"));
             title.getStyleClass().add("dashboard-upcoming-title");
             title.setWrapText(true);
             Label date = new Label(formatEventPeriod(booking));
             date.getStyleClass().add("dashboard-upcoming-date");
-            Label location = new Label(safe(booking.getItemLocation(), "Luogo da confermare"));
+            Label location = new Label(UiText.orDefault(booking.getItemLocation(), "Luogo da confermare"));
             location.getStyleClass().add("dashboard-upcoming-location");
             location.setWrapText(true);
             Region spacer = new Region();
@@ -639,12 +611,12 @@ public class TravelerDashboardController implements ProfileDashboardController {
             return;
         bookingsPeriodFilter.getSelectionModel().select("Tutte");
         bookingsStatusFilter.getSelectionModel().select("Tutti");
-        bookingsSearchField.setText(safe(booking.getItemTitle(), ""));
+        bookingsSearchField.setText(UiText.orDefault(booking.getItemTitle(), ""));
         filterBookings();
         bookingsTable.getSelectionModel().select(booking);
         bookingsTable.scrollTo(booking);
-        bookingFeedback("Prenotazione selezionata: " + safe(booking.getItemTitle(), "Esperienza")
-                + " · " + safe(booking.getItemLocation(), "") + " · " + formatEventPeriod(booking), false);
+        bookingFeedback("Prenotazione selezionata: " + UiText.orDefault(booking.getItemTitle(), "Esperienza")
+                + " · " + UiText.orDefault(booking.getItemLocation(), "") + " · " + formatEventPeriod(booking), false);
         it.unical.ea_project_javafx.util.ScrollSupport.reveal(bookingFeedbackLabel);
     }
 
@@ -658,7 +630,7 @@ public class TravelerDashboardController implements ProfileDashboardController {
                 .filter(b -> matchesQuery(b, query))
                 .filter(b -> matchesPeriod(b, selectedPeriod))
                 .filter(b -> matchesStatus(b, selectedStatus))
-                .sorted(this::compareBookings)
+                .sorted((left, right) -> compareBookings(left, right, evaluationTime))
                 .toList();
         bookingsTable.setItems(FXCollections.observableArrayList(filtered));
         bookingsTable.setPrefHeight(Math.max(160, Math.min(360, 56 + filtered.size() * 66)));
@@ -668,177 +640,40 @@ public class TravelerDashboardController implements ProfileDashboardController {
     }
 
     private boolean matchesQuery(BookingDTO b, String query) {
-        return query.isBlank() || contains(b.getItemTitle(), query) || contains(b.getItemLocation(), query)
-                || contains(formatEventPeriod(b), query) || contains(b.getBookingType(), query)
-                || contains(formatBookedAt(b), query);
+        return query.isBlank() || UiText.contains(b.getItemTitle(), query)
+                || UiText.contains(b.getItemLocation(), query)
+                || UiText.contains(formatEventPeriod(b), query) || UiText.contains(b.getBookingType(), query)
+                || UiText.contains(formatBookedAt(b), query);
     }
 
     private boolean matchesPeriod(BookingDTO b, String period) {
         if (period == null || "Tutte".equalsIgnoreCase(period))
             return true;
         if ("Storico".equalsIgnoreCase(period))
-            return isHistorical(b);
+            return isHistorical(b, evaluationTime);
         if ("In programma".equalsIgnoreCase(period))
-            return !isCancelled(b) && !isHistorical(b);
+            return !isCancelled(b) && !isHistorical(b, evaluationTime);
         return true;
     }
 
     private boolean matchesStatus(BookingDTO b, String selected) {
         if (selected == null || "Tutti".equalsIgnoreCase(selected))
             return true;
-        String status = safe(b.getBookingStatus(), "").toUpperCase(Locale.ROOT);
+        String status = UiText.orDefault(b.getBookingStatus(), "").toUpperCase(Locale.ROOT);
         return switch (selected) {
-            case "In attesa" -> "PENDING".equals(status) && !isCancelled(b) && !isHistorical(b);
-            case "Confermate" -> "CONFIRMED".equals(status) && !isCancelled(b) && !isHistorical(b);
+            case "In attesa" -> "PENDING".equals(status) && !isCancelled(b) && !isHistorical(b, evaluationTime);
+            case "Confermate" -> "CONFIRMED".equals(status) && !isCancelled(b) && !isHistorical(b, evaluationTime);
             case "Completate / terminate" -> !isCancelled(b) && ("COMPLETED".equals(status)
-                    || "COMPLETED".equalsIgnoreCase(b.getItemStatus()) || isEventEnded(b));
+                    || "COMPLETED".equalsIgnoreCase(b.getItemStatus()) || isEventEnded(b, evaluationTime));
             case "Cancellate" -> isCancelled(b);
             default -> true;
         };
     }
 
-    private int compareBookings(BookingDTO a, BookingDTO b) {
-        boolean ac = isCancelled(a), bc = isCancelled(b);
-        if (ac != bc)
-            return ac ? 1 : -1;
-        boolean ah = isHistorical(a), bh = isHistorical(b);
-        if (ah != bh)
-            return ah ? 1 : -1;
-        LocalDateTime ad = ah ? eventEndDateTime(a) : eventStartDateTime(a);
-        LocalDateTime bd = bh ? eventEndDateTime(b) : eventStartDateTime(b);
-        if (ad != null && bd != null) {
-            int compare = ah ? bd.compareTo(ad) : ad.compareTo(bd);
-            if (compare != 0)
-                return compare;
-        } else if (ad != null)
-            return -1;
-        else if (bd != null)
-            return 1;
-        LocalDateTime acd = a.getCreatedAt(), bcd = b.getCreatedAt();
-        if (acd != null && bcd != null)
-            return bcd.compareTo(acd);
-        if (acd != null)
-            return -1;
-        if (bcd != null)
-            return 1;
-        return Long.compare(b.getBookingId() == null ? 0 : b.getBookingId(),
-                a.getBookingId() == null ? 0 : a.getBookingId());
-    }
-
-    private boolean isHistorical(BookingDTO b) {
-        return b != null && (isCancelled(b) || "COMPLETED".equalsIgnoreCase(b.getBookingStatus())
-                || "COMPLETED".equalsIgnoreCase(b.getItemStatus()) || isEventEnded(b));
-    }
-
-    private boolean isEventEnded(BookingDTO b) {
-        LocalDateTime end = eventEndDateTime(b);
-        return end != null && !end.isAfter(evaluationTime);
-    }
-
-    private boolean hasEventStarted(BookingDTO b) {
-        LocalDateTime start = eventStartDateTime(b);
-        return start != null && !start.isAfter(evaluationTime);
-    }
-
-    private boolean isCancelled(BookingDTO b) {
-        return b != null && ("CANCELLED".equalsIgnoreCase(b.getBookingStatus())
-                || "CANCELLED".equalsIgnoreCase(b.getItemStatus()));
-    }
-
-    private boolean isTrip(BookingDTO b) {
-        return b != null && "TRIP".equalsIgnoreCase(b.getBookingType());
-    }
-
-    private LocalDateTime eventStartDateTime(BookingDTO b) {
-        return parseEventDate(b == null ? null : b.getItemDate(), b, false);
-    }
-
-    private LocalDateTime eventEndDateTime(BookingDTO b) {
-        if (b == null)
-            return null;
-        LocalDateTime end = parseEventDate(b.getItemEndDate(), b, true);
-        if (end != null)
-            return end;
-        LocalDateTime start = eventStartDateTime(b);
-        return start == null ? null : isTrip(b) ? start.toLocalDate().atTime(LocalTime.MAX) : start.plusHours(1);
-    }
-
-    private LocalDateTime parseEventDate(String value, BookingDTO b, boolean end) {
-        if (value == null || value.isBlank())
-            return null;
-        try {
-            if (isTrip(b) || !value.contains("T"))
-                return LocalDate.parse(value).atTime(end ? LocalTime.MAX : LocalTime.MIN);
-            return LocalDateTime.parse(value);
-        } catch (RuntimeException ignored) {
-            return null;
-        }
-    }
-
-    private String formatEventPeriod(BookingDTO b) {
-        LocalDateTime start = eventStartDateTime(b), end = eventEndDateTime(b);
-        if (start == null)
-            return "Data non disponibile";
-        if (isTrip(b))
-            return end == null || end.toLocalDate().equals(start.toLocalDate())
-                    ? start.toLocalDate().format(DATE_FORMAT)
-                    : start.toLocalDate().format(DATE_FORMAT) + " – " + end.toLocalDate().format(DATE_FORMAT);
-        String formatted = start.format(DATE_TIME_FORMAT);
-        if (end == null || end.equals(start))
-            return formatted;
-        return end.toLocalDate().equals(start.toLocalDate()) ? formatted + " – " + end.format(TIME_FORMAT)
-                : formatted + " – " + end.format(DATE_TIME_FORMAT);
-    }
-
-    private String formatBookedAt(BookingDTO b) {
-        return b == null || b.getCreatedAt() == null ? "—" : b.getCreatedAt().format(DATE_TIME_FORMAT);
-    }
-
-    private String displayStatus(BookingDTO b) {
-        if (b == null)
-            return "—";
-        String status = safe(b.getBookingStatus(), "").toUpperCase(Locale.ROOT);
-        if ("CANCELLED".equals(status))
-            return "Prenotazione cancellata";
-        if ("CANCELLED".equalsIgnoreCase(b.getItemStatus()))
-            return "Esperienza annullata";
-        if ("COMPLETED".equals(status) || "COMPLETED".equalsIgnoreCase(b.getItemStatus()))
-            return "Completata";
-        if (isEventEnded(b))
-            return "Terminata";
-        if ("CONFIRMED".equals(status))
-            return "Confermata";
-        if ("PENDING".equals(status))
-            return "In attesa";
-        return status.isBlank() ? "Stato non disponibile" : status;
-    }
-
-    private String statusStyleClass(String status) {
-        if (status.startsWith("Prenotazione cancellata") || status.startsWith("Esperienza annullata"))
-            return "booking-status-cancelled";
-        return switch (status) {
-            case "Completata", "Terminata" -> "booking-status-completed";
-            case "Confermata" -> "booking-status-confirmed";
-            case "In attesa" -> "booking-status-pending";
-            default -> "booking-status-neutral";
-        };
-    }
-
-    private String formatPrice(BigDecimal amount) {
-        return amount == null ? "€ 0,00" : "€ " + String.format(Locale.ITALY, "%,.2f", amount);
-    }
-
-    private boolean contains(String value, String query) {
-        return value != null && value.toLowerCase(Locale.ITALY).contains(query);
-    }
-
-    private String safe(String value, String fallback) {
-        return value == null || value.isBlank() ? fallback : value;
-    }
-
     private void requestCancel(BookingDTO booking) {
-        if (booking == null || booking.getBookingId() == null || isCancelled(booking) || isHistorical(booking)
-                || hasEventStarted(booking)) {
+        if (booking == null || booking.getBookingId() == null || isCancelled(booking)
+                || isHistorical(booking, evaluationTime)
+                || hasEventStarted(booking, evaluationTime)) {
             bookingFeedback("Questa prenotazione non può più essere cancellata.", true);
             return;
         }
@@ -851,7 +686,7 @@ public class TravelerDashboardController implements ProfileDashboardController {
         panel.setMaxWidth(470);
         Label title = new Label("Cancella prenotazione?");
         title.getStyleClass().add("app-modal-title");
-        Label message = new Label("Vuoi cancellare «" + safe(booking.getItemTitle(), "questa esperienza")
+        Label message = new Label("Vuoi cancellare «" + UiText.orDefault(booking.getItemTitle(), "questa esperienza")
                 + "»? L'operazione non può essere annullata e i posti torneranno disponibili.");
         message.setWrapText(true);
         HBox actions = new HBox(10);
@@ -891,7 +726,8 @@ public class TravelerDashboardController implements ProfileDashboardController {
                 response -> Platform.runLater(() -> {
                     FileChooser chooser = new FileChooser();
                     chooser.setTitle("Salva calendario della prenotazione");
-                    String name = safe(booking.getItemTitle(), "prenotazione").replaceAll("[\\\\/:*?\"<>|]", "_")
+                    String name = UiText.orDefault(booking.getItemTitle(), "prenotazione").replaceAll("[\\\\/:*?\"<>|]",
+                            "_")
                             + ".ics";
                     chooser.setInitialFileName(name);
                     chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("iCalendar (*.ics)", "*.ics"));

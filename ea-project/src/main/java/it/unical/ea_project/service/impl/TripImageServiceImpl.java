@@ -53,7 +53,7 @@ public class TripImageServiceImpl implements TripImageService {
         if (trip.getCreatedBy() == null || !Objects.equals(trip.getCreatedBy().getId(), organizerId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Non puoi modificare le foto di questo viaggio.");
         }
-        validateFiles(files);
+        photoStorageService.validatePhotos(files);
 
         List<TripImage> existingImages = tripImageRepository.findByTripOrderByOrderIndexAsc(trip);
         for (int index = 0; index < existingImages.size(); index++) {
@@ -80,27 +80,24 @@ public class TripImageServiceImpl implements TripImageService {
     @Override
     @Transactional
     public void deleteImage(Long imageId, Long organizerId) {
-        var image = tripImageRepository.findById(imageId)
+        TripImage image = tripImageRepository.findById(imageId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Foto non trovata."));
-        var experience = image.getTrip();
-        if (experience == null || experience.getDeletedAt() != null
-                || experience.getCreatedBy() == null
-                || !Objects.equals(experience.getCreatedBy().getId(), organizerId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Non puoi eliminare questa foto.");
+        Trip offer = image.getTrip();
+        if (offer == null
+            || offer.getDeletedAt() != null
+            || offer.getCreatedBy() == null
+            || !Objects.equals(offer.getCreatedBy().getId(), organizerId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Non puoi eliminare le foto di un'altra offerta.");
         }
 
-        if (Objects.equals(experience.getCoverPhotoUrl(), image.getImageUrl())) {
-            experience.setCoverPhotoUrl(tripImageRepository.findByTripOrderByOrderIndexAsc(experience).stream()
+        if (Objects.equals(offer.getCoverPhotoUrl(), image.getImageUrl())) {
+            offer.setCoverPhotoUrl(tripImageRepository.findByTripOrderByOrderIndexAsc(offer).stream()
                     .filter(candidate -> !Objects.equals(candidate.getImageId(), imageId))
                     .map(TripImage::getImageUrl).findFirst().orElse(null));
         }
+
         tripImageRepository.delete(image);
     }
 
-    private void validateFiles(List<MultipartFile> files) {
-        if (files == null || files.isEmpty() || files.stream().anyMatch(file -> file == null || file.isEmpty())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Seleziona almeno una foto valida.");
-        }
-        files.forEach(photoStorageService::validatePhoto);
-    }
+
 }

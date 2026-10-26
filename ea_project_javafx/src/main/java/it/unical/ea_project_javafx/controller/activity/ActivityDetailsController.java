@@ -1,8 +1,6 @@
 package it.unical.ea_project_javafx.controller.activity;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializer;
+import it.unical.ea_project_javafx.util.ViewSupport;
 
 import it.unical.ea_project_javafx.controller.activity.photo.PhotoContainerController;
 import it.unical.ea_project_javafx.controller.activity.photo.PhotoGalleryController;
@@ -30,7 +28,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.stage.Stage;
 import javafx.scene.layout.VBox;
@@ -39,8 +36,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 
 public class ActivityDetailsController {
@@ -68,7 +63,8 @@ public class ActivityDetailsController {
     private Button btnRecensioni;
     @FXML
     private Button btnPrenota;
-    @FXML private Label bookingAvailabilityLabel;
+    @FXML
+    private Label bookingAvailabilityLabel;
     @FXML
     private Button btnContactOrganizer;
 
@@ -126,15 +122,6 @@ public class ActivityDetailsController {
     private String id;
     private Type myType;
 
-    private final static Gson GSON = new GsonBuilder()
-            .registerTypeAdapter(LocalDateTime.class,
-                    (JsonDeserializer<LocalDateTime>) (json, type, ctx) -> LocalDateTime.parse(json.getAsString()))
-            .registerTypeAdapter(LocalDate.class,
-                    (JsonDeserializer<LocalDate>) (json, type, ctx) -> LocalDate.parse(json.getAsString()))
-            .registerTypeAdapter(LocalTime.class,
-                    (JsonDeserializer<LocalTime>) (json, type, ctx) -> LocalTime.parse(json.getAsString()))
-            .create();
-
     public enum Type {
         ACTIVITY, TRIP
     }
@@ -146,7 +133,7 @@ public class ActivityDetailsController {
 
         BackgroundHelper.setupBackground(bgImageView);
 
-        setupNavbar();
+        ViewSupport.loadNavbar(navbarContainer);
 
         loadingOverlay.setVisible(true);
         boolean isOrganizer = "ORGANIZER".equalsIgnoreCase(UserSession.getInstance().getRole());
@@ -163,22 +150,6 @@ public class ActivityDetailsController {
         // loadData(Type.ACTIVITY, "1");
     }
 
-    private void setupNavbar() {
-
-        try {
-
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml"));
-            Node navbar = loader.load();
-            navbarContainer.getChildren().setAll(navbar);
-
-        } catch (IOException e) {
-            System.err.println("Errore nel caricamento della navbar: " + e.getMessage());
-            e.printStackTrace();
-        }
-
-    }
-
     public void loadData(Type type, String id) {
 
         myType = type;
@@ -189,7 +160,7 @@ public class ActivityDetailsController {
                 ApiService.get(
                         ApiService.BASE_URL + "/api/activities/" + id,
                         response -> {
-                            activity = GSON.fromJson(response.body(), ActivityDTO.class);
+                            activity = ApiService.fromJson(response.body(), ActivityDTO.class);
 
                             setActivityData();
                             handleDescrizione(null);
@@ -211,7 +182,7 @@ public class ActivityDetailsController {
                 ApiService.get(
                         ApiService.BASE_URL + "/api/trips/" + id,
                         response -> {
-                            trip = GSON.fromJson(response.body(), TripDTO.class);
+                            trip = ApiService.fromJson(response.body(), TripDTO.class);
 
                             setTripData();
                             handleDescrizione(null);
@@ -365,10 +336,10 @@ public class ActivityDetailsController {
                 ApiService.BASE_URL + endpoint,
                 response -> {
                     if (myType == Type.TRIP) {
-                        trip = GSON.fromJson(response.body(), TripDTO.class);
+                        trip = ApiService.fromJson(response.body(), TripDTO.class);
                         lblRating.setText("★ " + formatRating(trip.getAverageRating()));
                     } else {
-                        activity = GSON.fromJson(response.body(), ActivityDTO.class);
+                        activity = ApiService.fromJson(response.body(), ActivityDTO.class);
                         lblRating.setText("★ " + formatRating(activity.getAverageRating()));
                     }
                 },
@@ -528,21 +499,27 @@ public class ActivityDetailsController {
     private String bookingUnavailableReason() {
         String status = myType == Type.TRIP ? (trip == null ? null : trip.getStatus())
                 : (activity == null ? null : activity.getStatus());
-        if ("CANCELLED".equals(status)) return "Questa esperienza è stata annullata.";
-        if ("COMPLETED".equals(status)) return "Questa esperienza si è già conclusa.";
-        if (!"PUBLISHED".equals(status)) return "Questa esperienza non è attualmente pubblicata.";
+        if ("CANCELLED".equals(status))
+            return "Questa esperienza è stata annullata.";
+        if ("COMPLETED".equals(status))
+            return "Questa esperienza si è già conclusa.";
+        if (!"PUBLISHED".equals(status))
+            return "Questa esperienza non è attualmente pubblicata.";
         boolean future = myType == Type.TRIP
                 ? trip.getStartDate() != null && trip.getStartDate().isAfter(LocalDate.now())
                 : activity.getStartDate() != null && activity.getStartDate().isAfter(java.time.LocalDateTime.now());
-        if (!future) return "Questa esperienza è già iniziata o terminata e non è più prenotabile.";
+        if (!future)
+            return "Questa esperienza è già iniziata o terminata e non è più prenotabile.";
         Integer available = myType == Type.TRIP ? trip.getAvailableSeats() : activity.getAvailableSeats();
-        if (available == null || available < 1) return "Non ci sono più posti disponibili per questa esperienza.";
+        if (available == null || available < 1)
+            return "Non ci sono più posti disponibili per questa esperienza.";
         return null;
     }
 
     private void updateBookingAvailability() {
         boolean organizer = "ORGANIZER".equalsIgnoreCase(UserSession.getInstance().getRole());
-        String reason = organizer ? "Le prenotazioni sono riservate agli account Traveler." : bookingUnavailableReason();
+        String reason = organizer ? "Le prenotazioni sono riservate agli account Traveler."
+                : bookingUnavailableReason();
         btnPrenota.setDisable(reason != null);
         btnPrenota.setText(reason == null ? "Prenota Ora" : "Non prenotabile");
         bookingAvailabilityLabel.setText(reason == null ? "Prenota per la data indicata nel programma." : reason);
@@ -550,7 +527,8 @@ public class ActivityDetailsController {
         if (reason == null) {
             int available = myType == Type.TRIP ? trip.getAvailableSeats() : activity.getAvailableSeats();
             int selected = spinnerPartecipanti.getValue() == null ? 1 : spinnerPartecipanti.getValue();
-            spinnerPartecipanti.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, available, Math.min(selected, available)));
+            spinnerPartecipanti.setValueFactory(
+                    new SpinnerValueFactory.IntegerSpinnerValueFactory(1, available, Math.min(selected, available)));
         }
         datePicker.setDisable(true);
         datePicker.setTooltip(new javafx.scene.control.Tooltip("La data è stabilita dal programma dell'esperienza."));
@@ -638,8 +616,10 @@ public class ActivityDetailsController {
                 : "/api/bookings/activities/" + activity.getActivityId();
         ApiService.callDetailed(ApiService.BASE_URL + endpoint + "?seats=" + seats, null, ApiService.Method.POST,
                 response -> javafx.application.Platform.runLater(() -> {
-                    if (myType == Type.TRIP) trip.setAvailableSeats(trip.getAvailableSeats() - seats);
-                    else activity.setAvailableSeats(activity.getAvailableSeats() - seats);
+                    if (myType == Type.TRIP)
+                        trip.setAvailableSeats(trip.getAvailableSeats() - seats);
+                    else
+                        activity.setAvailableSeats(activity.getAvailableSeats() - seats);
                     updateBookingAvailability();
                     closeInAppModal();
                     showAlert(Alert.AlertType.INFORMATION, "Prenotazione completata",

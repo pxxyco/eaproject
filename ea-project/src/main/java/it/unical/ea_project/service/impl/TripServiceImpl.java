@@ -5,6 +5,7 @@ import it.unical.ea_project.domain.Trip.TripStatus;
 import it.unical.ea_project.domain.TripImage;
 import it.unical.ea_project.domain.User;
 import it.unical.ea_project.dto.TripDTO;
+import it.unical.ea_project.dto.StageDTO;
 import it.unical.ea_project.dto.home.TripHomeDTO;
 import it.unical.ea_project.dto.home.TripSuggestionDTO;
 import it.unical.ea_project.repository.TripImageRepository;
@@ -107,9 +108,11 @@ public class TripServiceImpl implements TripService {
         Trip existing = tripRepository.findActiveForUpdate(id)
                 .orElseThrow(() -> new RuntimeException("Viaggio non trovato con ID: " + id));
 
+        if (details.isStagesProvided()) replaceStages(existing, details);
+        else for (var stage : existing.getStages()) it.unical.ea_project.util.ExperienceValidation.stage(details, stage);
         existing.setTitle(details.getTitle());
         existing.setDescription(details.getDescription());
-        existing.setDestinationCountry(details.getDestinationCountry());
+        if (details.getDestinationCountry() != null) existing.setDestinationCountry(details.getDestinationCountry());
         existing.setDestinationCity(details.getDestinationCity());
         existing.setStartDate(details.getStartDate());
         existing.setEndDate(details.getEndDate());
@@ -121,6 +124,41 @@ public class TripServiceImpl implements TripService {
         if (details.getStatus() != null)
             existing.setStatus(details.getStatus());
         return tripRepository.save(existing);
+    }
+
+    private void replaceStages(Trip trip, Trip details) {
+        List<it.unical.ea_project.domain.Stage> requested = details.getStages();
+        if (requested == null) return;
+        Map<Long, it.unical.ea_project.domain.Stage> current = trip.getStages().stream()
+                .collect(Collectors.toMap(it.unical.ea_project.domain.Stage::getStageId, stage -> stage));
+        java.util.Set<Long> seen = new java.util.HashSet<>();
+        List<it.unical.ea_project.domain.Stage> replacement = new java.util.ArrayList<>();
+        for (var source : requested) {
+            it.unical.ea_project.util.ExperienceValidation.stage(details, source);
+            var target = source.getStageId() == null ? new it.unical.ea_project.domain.Stage() : current.get(source.getStageId());
+            if (target == null || (source.getStageId() != null && !seen.add(source.getStageId()))) {
+                throw new org.springframework.web.server.ResponseStatusException(
+                        org.springframework.http.HttpStatus.BAD_REQUEST, "La tappa non appartiene al viaggio o è duplicata.");
+            }
+            target.setTitle(source.getTitle());
+            target.setDescription(source.getDescription());
+            target.setCategory(source.getCategory());
+            target.setLocationName(source.getLocationName());
+            target.setCity(source.getCity());
+            target.setCountry(source.getCountry());
+            target.setLatitude(source.getLatitude());
+            target.setLongitude(source.getLongitude());
+            target.setDay(source.getDay());
+            target.setOrderInDay(source.getOrderInDay());
+            target.setStartTime(source.getStartTime());
+            target.setEndTime(source.getEndTime());
+            target.setPhotoUrl(source.getPhotoUrl());
+            target.setNotes(source.getNotes());
+            target.setTrip(trip);
+            replacement.add(target);
+        }
+        trip.getStages().clear();
+        trip.getStages().addAll(replacement);
     }
 
     @Override
@@ -279,7 +317,10 @@ public class TripServiceImpl implements TripService {
                 .createdAt(trip.getCreatedAt())
                 .updatedAt(trip.getUpdatedAt())
                 .deletedAt(trip.getDeletedAt())
-                .stages(trip.getStages().stream().map(it.unical.ea_project.dto.StageDTO::toDto).toList())
+                .stages(trip.getStages() == null ? List.of() : trip.getStages().stream()
+                        .sorted(Comparator.comparing(it.unical.ea_project.domain.Stage::getDay, Comparator.nullsLast(Comparator.naturalOrder()))
+                                .thenComparing(it.unical.ea_project.domain.Stage::getOrderInDay, Comparator.nullsLast(Comparator.naturalOrder())))
+                        .map(StageDTO::toDto).toList())
                 .build();
     }
 
