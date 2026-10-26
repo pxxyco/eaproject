@@ -1,21 +1,30 @@
 package it.unical.ea_project_javafx.controller.profile;
 
-import it.unical.ea_project_javafx.util.UiText;
-import it.unical.ea_project_javafx.util.ViewSupport;
+import com.google.gson.JsonParser;
+import it.unical.ea_project_javafx.navigation.SceneNavigator;
+import it.unical.ea_project_javafx.security.PasswordPolicy;
+import it.unical.ea_project_javafx.security.TokenStorage;
 import it.unical.ea_project_javafx.security.UserSession;
-import it.unical.ea_project_javafx.util.ApiService;
-import it.unical.ea_project_javafx.util.PasswordPolicy;
-import it.unical.ea_project_javafx.util.BackgroundHelper;
+import it.unical.ea_project_javafx.service.api.ApiService;
+import it.unical.ea_project_javafx.service.notification.NotificationPollingService;
+import it.unical.ea_project_javafx.ui.UiText;
+import it.unical.ea_project_javafx.ui.ViewSupport;
+import it.unical.ea_project_javafx.ui.background.BackgroundHelper;
+import it.unical.ea_project_javafx.ui.dialog.PopupFactory;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 public class SettingsController {
 
@@ -72,7 +81,7 @@ public class SettingsController {
         passwordStrengthLabel.visibleProperty().bind(passwordStrengthLabel.managedProperty());
         preferencesButton.setDisable(true);
         ApiService.callDetailed(ApiService.BASE_URL + "/api/account/settings", null, ApiService.Method.GET, r -> {
-            var data = com.google.gson.JsonParser.parseString(r.body()).getAsJsonObject();
+            var data = JsonParser.parseString(r.body()).getAsJsonObject();
             emailBookingNotificationCheck.setSelected(data.get("bookingAlerts").getAsBoolean());
             emailMarketingCheck.setSelected(data.get("chatAlerts").getAsBoolean());
             publicProfileCheck.setSelected(data.get("personalized").getAsBoolean());
@@ -137,8 +146,8 @@ public class SettingsController {
                 ApiService.Method.POST,
                 response -> Platform.runLater(() -> {
                     userSession.clear();
-                    it.unical.ea_project_javafx.util.TokenStorage.clear();
-                    it.unical.ea_project_javafx.util.NotificationPollingService.getInstance().clearSessionState();
+                    TokenStorage.clear();
+                    NotificationPollingService.getInstance().clearSessionState();
                     ViewSupport.success(statusMessageLabel,
                             "Password aggiornata. Le sessioni sono state chiuse: accedi di nuovo dal menu.");
                     ViewSupport.loadNavbar(navbarContainer);
@@ -175,16 +184,16 @@ public class SettingsController {
 
     @FXML
     private void handleRevokeSessions() {
-        var root = it.unical.ea_project_javafx.util.PopupFactory.resolveRoot(navbarContainer);
-        it.unical.ea_project_javafx.util.PopupFactory.showConfirmation(root, "Chiudere tutte le sessioni?",
+        var root = PopupFactory.resolveRoot(navbarContainer);
+        PopupFactory.showConfirmation(root, "Chiudere tutte le sessioni?",
                 "Dovrai accedere nuovamente anche su questo dispositivo.",
-                it.unical.ea_project_javafx.util.PopupFactory.Size.COMPACT, () -> ApiService
+                PopupFactory.Size.COMPACT, () -> ApiService
                         .callDetailed(ApiService.BASE_URL + "/api/users/logout", null, ApiService.Method.POST, r -> {
                             userSession.clear();
-                            it.unical.ea_project_javafx.util.TokenStorage.clear();
-                            it.unical.ea_project_javafx.util.NotificationPollingService.getInstance()
+                            TokenStorage.clear();
+                            NotificationPollingService.getInstance()
                                     .clearSessionState();
-                            it.unical.ea_project_javafx.util.SceneNavigator.getInstance()
+                            SceneNavigator.getInstance()
                                     .loadScene("/it/unical/ea_project_javafx/fxml/login/login.fxml", null);
                         }, message -> ViewSupport.error(statusMessageLabel, message), null));
     }

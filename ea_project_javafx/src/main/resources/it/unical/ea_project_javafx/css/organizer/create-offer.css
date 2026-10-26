@@ -29,8 +29,6 @@
     -fx-cursor: hand;
 }
 
-.btn-icon-close:hover {}
-
 .transparent-scroll,
 .transparent-scroll>.viewport {
     -fx-background-color: transparent;
@@ -112,8 +110,6 @@
     -fx-cursor: hand;
 }
 
-.btn-remove-stage:hover {}
-
 /* Footer Modale */
 .form-footer {
     -fx-border-color: rgba(255, 255, 255, 0.1);
@@ -127,5 +123,3 @@
     -fx-font-weight: bold;
     -fx-cursor: hand;
 }
-
-.btn-link:hover {}

@@ -1,42 +1,54 @@
 package it.unical.ea_project_javafx.controller.activity;
 
-import it.unical.ea_project_javafx.util.ViewSupport;
-
 import it.unical.ea_project_javafx.controller.activity.photo.PhotoContainerController;
 import it.unical.ea_project_javafx.controller.activity.photo.PhotoGalleryController;
 import it.unical.ea_project_javafx.controller.activity.reviews.ReviewController;
 import it.unical.ea_project_javafx.controller.activity.reviews.ReviewsContainerController;
+import it.unical.ea_project_javafx.controller.chat.ChatController;
 import it.unical.ea_project_javafx.controller.common.LoadingOverlayController;
-import it.unical.ea_project_javafx.dto.ActivityDTO;
-import it.unical.ea_project_javafx.dto.ReviewDTO;
-import it.unical.ea_project_javafx.dto.TripDTO;
+import it.unical.ea_project_javafx.dto.activity.ActivityDTO;
+import it.unical.ea_project_javafx.dto.review.ReviewDTO;
+import it.unical.ea_project_javafx.dto.trip.TripDTO;
+import it.unical.ea_project_javafx.navigation.SceneNavigator;
 import it.unical.ea_project_javafx.security.UserSession;
-import it.unical.ea_project_javafx.util.ApiService;
-import it.unical.ea_project_javafx.util.SceneNavigator;
-import it.unical.ea_project_javafx.util.BackgroundHelper;
-import it.unical.ea_project_javafx.util.FullscreenPhotoViewer;
-import it.unical.ea_project_javafx.util.PopupFactory;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
-import javafx.geometry.Pos;
-import javafx.stage.Stage;
-import javafx.scene.layout.VBox;
-
+import it.unical.ea_project_javafx.service.api.ApiService;
+import it.unical.ea_project_javafx.ui.ViewSupport;
+import it.unical.ea_project_javafx.ui.animation.PageTransitions;
+import it.unical.ea_project_javafx.ui.background.BackgroundHelper;
+import it.unical.ea_project_javafx.ui.dialog.FullscreenPhotoViewer;
+import it.unical.ea_project_javafx.ui.dialog.PopupFactory;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
+import javafx.stage.Stage;
 
 public class ActivityDetailsController {
 
@@ -166,7 +178,7 @@ public class ActivityDetailsController {
                             handleDescrizione(null);
                             contentScroll.setManaged(true);
                             contentScroll.setVisible(true);
-                            it.unical.ea_project_javafx.util.PageTransitions.appear(contentScroll);
+                            PageTransitions.appear(contentScroll);
                             loadingOverlay.setVisible(false);
                         },
                         () -> {
@@ -189,7 +201,7 @@ public class ActivityDetailsController {
                             loadingOverlay.setVisible(false);
                             contentScroll.setManaged(true);
                             contentScroll.setVisible(true);
-                            it.unical.ea_project_javafx.util.PageTransitions.appear(contentScroll);
+                            PageTransitions.appear(contentScroll);
                         },
                         () -> {
                             loadingOverlay.setVisible(true);
@@ -216,8 +228,8 @@ public class ActivityDetailsController {
                 FXMLLoader loader = new FXMLLoader(
                         getClass().getResource("/it/unical/ea_project_javafx/fxml/chat/chat.fxml"));
                 loader.setControllerFactory(type -> {
-                    if (type == it.unical.ea_project_javafx.controller.chat.ChatController.class)
-                        return new it.unical.ea_project_javafx.controller.chat.ChatController(true);
+                    if (type == ChatController.class)
+                        return new ChatController(true);
                     try {
                         return type.getDeclaredConstructor().newInstance();
                     } catch (Exception ex) {
@@ -225,7 +237,7 @@ public class ActivityDetailsController {
                     }
                 });
                 Parent view = loader.load();
-                var chat = (it.unical.ea_project_javafx.controller.chat.ChatController) loader.getController();
+                var chat = (ChatController) loader.getController();
                 chat.compact();
                 var popup = PopupFactory.show(PopupFactory.resolveRoot(root), view, PopupFactory.Size.MEDIUM);
                 popup.onClosed(chat::close);
@@ -288,7 +300,7 @@ public class ActivityDetailsController {
         if (!heroImage.fitWidthProperty().isBound()) {
             heroImage.fitWidthProperty().bind(hero.widthProperty());
             heroImage.fitHeightProperty().bind(hero.heightProperty());
-            javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle();
+            Rectangle clip = new Rectangle();
             clip.widthProperty().bind(hero.widthProperty());
             clip.heightProperty().bind(hero.heightProperty());
             clip.setArcWidth(32);
@@ -453,7 +465,7 @@ public class ActivityDetailsController {
 
     private void showSection(Node node) {
         bodyContainer.getChildren().setAll(node);
-        it.unical.ea_project_javafx.util.PageTransitions.appear(node);
+        PageTransitions.appear(node);
     }
 
     @FXML
@@ -507,7 +519,7 @@ public class ActivityDetailsController {
             return "Questa esperienza non è attualmente pubblicata.";
         boolean future = myType == Type.TRIP
                 ? trip.getStartDate() != null && trip.getStartDate().isAfter(LocalDate.now())
-                : activity.getStartDate() != null && activity.getStartDate().isAfter(java.time.LocalDateTime.now());
+                : activity.getStartDate() != null && activity.getStartDate().isAfter(LocalDateTime.now());
         if (!future)
             return "Questa esperienza è già iniziata o terminata e non è più prenotabile.";
         Integer available = myType == Type.TRIP ? trip.getAvailableSeats() : activity.getAvailableSeats();
@@ -531,7 +543,7 @@ public class ActivityDetailsController {
                     new SpinnerValueFactory.IntegerSpinnerValueFactory(1, available, Math.min(selected, available)));
         }
         datePicker.setDisable(true);
-        datePicker.setTooltip(new javafx.scene.control.Tooltip("La data è stabilita dal programma dell'esperienza."));
+        datePicker.setTooltip(new Tooltip("La data è stabilita dal programma dell'esperienza."));
     }
 
     @FXML
@@ -566,7 +578,7 @@ public class ActivityDetailsController {
         HBox heading = new HBox(12);
         heading.setAlignment(Pos.CENTER_LEFT);
         VBox labels = new VBox(4);
-        HBox.setHgrow(labels, javafx.scene.layout.Priority.ALWAYS);
+        HBox.setHgrow(labels, Priority.ALWAYS);
         Label title = new Label("Conferma prenotazione");
         title.getStyleClass().add("app-modal-title");
         Label subtitle = new Label(myType == Type.TRIP ? "Riepilogo del viaggio" : "Riepilogo dell'attività");
@@ -581,14 +593,14 @@ public class ActivityDetailsController {
         Label experience = new Label(lblTitolo.getText() == null ? "Esperienza" : lblTitolo.getText());
         experience.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
         Label date = new Label("Data: " + (datePicker.getValue() == null ? "secondo il programma dell'esperienza"
-                : datePicker.getValue().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
+                : datePicker.getValue().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
         date.getStyleClass().add("app-modal-subtitle");
         HBox seatsRow = new HBox(8, new Label("Partecipanti"), new Region(), new Label(String.valueOf(seats)));
         seatsRow.setAlignment(Pos.CENTER_LEFT);
-        HBox.setHgrow(seatsRow.getChildren().get(1), javafx.scene.layout.Priority.ALWAYS);
+        HBox.setHgrow(seatsRow.getChildren().get(1), Priority.ALWAYS);
         HBox totalRow = new HBox(8, new Label("Totale stimato"), new Region(), new Label(setMoneyCurrency(total)));
         totalRow.setAlignment(Pos.CENTER_LEFT);
-        HBox.setHgrow(totalRow.getChildren().get(1), javafx.scene.layout.Priority.ALWAYS);
+        HBox.setHgrow(totalRow.getChildren().get(1), Priority.ALWAYS);
         totalRow.getChildren().get(2).setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #e7e5e4;");
         Label note = new Label(
                 "Controlla i dati prima di confermare. La prenotazione verrà registrata sul tuo account.");
@@ -615,7 +627,7 @@ public class ActivityDetailsController {
                 ? "/api/bookings/trips/" + trip.getTripId()
                 : "/api/bookings/activities/" + activity.getActivityId();
         ApiService.callDetailed(ApiService.BASE_URL + endpoint + "?seats=" + seats, null, ApiService.Method.POST,
-                response -> javafx.application.Platform.runLater(() -> {
+                response -> Platform.runLater(() -> {
                     if (myType == Type.TRIP)
                         trip.setAvailableSeats(trip.getAvailableSeats() - seats);
                     else
@@ -625,7 +637,7 @@ public class ActivityDetailsController {
                     showAlert(Alert.AlertType.INFORMATION, "Prenotazione completata",
                             "La prenotazione è stata registrata correttamente.");
                 }),
-                message -> javafx.application.Platform.runLater(() -> showBookingFailure(message)),
+                message -> Platform.runLater(() -> showBookingFailure(message)),
                 null);
     }
 

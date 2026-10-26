@@ -14,7 +14,6 @@
 }
 
 /* Action Buttons */
-.btn-new-activity,
 .btn-card-action {
     -fx-background-color: #e7e5e4;
     -fx-text-fill: #1c1917;
@@ -24,9 +23,6 @@
     -fx-padding: 8px 18px;
     -fx-cursor: hand;
 }
-
-.btn-new-activity:hover,
-.btn-card-action:hover {}
 
 /* KPI Cards */
 .kpi-card {
@@ -58,27 +54,6 @@
     -fx-text-fill: #34d399;
 }
 
-/* Horizontal ListView & Activity Card */
-.horizontal-list-view {
-    -fx-background-color: transparent;
-    -fx-background: transparent;
-    -fx-border-color: transparent;
-    -fx-padding: 0;
-}
-
-.horizontal-list-view .scroll-bar:horizontal {
-    -fx-opacity: 0.2;
-}
-
-.horizontal-list-view .list-cell,
-.horizontal-list-view .list-cell:empty {
-    -fx-background-color: transparent;
-}
-
-.horizontal-list-view .list-cell {
-    -fx-padding: 0 12px 0 0;
-}
-
 .activity-card {
     -fx-background-color: rgba(255, 255, 255, 0.08);
     -fx-border-color: rgba(255, 255, 255, 0.16);
@@ -87,46 +62,6 @@
     -fx-padding: 14px 16px;
     -fx-pref-width: 290px;
     -fx-min-width: 290px;
-}
-
-.activity-card-title {
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #ffffff;
-}
-
-.activity-card-type {
-    -fx-background-color: rgba(52, 211, 153, 0.18);
-    -fx-background-radius: 4px;
-    -fx-padding: 3px 6px;
-    -fx-text-fill: #6ee7b7;
-    -fx-font-size: 9px;
-    -fx-font-weight: bold;
-}
-
-.activity-card-details {
-    -fx-text-fill: rgba(255, 255, 255, 0.78);
-    -fx-font-size: 11px;
-}
-
-.badge-published {
-    -fx-background-color: rgba(255, 255, 255, 0.15);
-    -fx-text-fill: #ffffff;
-    -fx-font-size: 9px;
-    -fx-font-weight: bold;
-    -fx-background-radius: 4px;
-    -fx-padding: 2px 6px;
-}
-
-.activity-card-seats {
-    -fx-font-size: 12px;
-    -fx-text-fill: rgba(255, 255, 255, 0.6);
-}
-
-.activity-card-price {
-    -fx-font-size: 15px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #d6d3d1;
 }
 
 /* Custom Table View */

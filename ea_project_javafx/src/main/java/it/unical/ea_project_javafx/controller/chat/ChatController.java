@@ -1,22 +1,49 @@
 package it.unical.ea_project_javafx.controller.chat;
 
-import it.unical.ea_project_javafx.util.JsonCodec;
-import it.unical.ea_project_javafx.util.ViewSupport;
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import it.unical.ea_project_javafx.security.UserSession;
-import it.unical.ea_project_javafx.util.*;
-import javafx.fxml.*;
-import javafx.scene.control.*;
-import javafx.scene.layout.*;
-import javafx.geometry.Pos;
-import javafx.scene.input.*;
-import java.time.*;
+import it.unical.ea_project_javafx.service.api.ApiService;
+import it.unical.ea_project_javafx.service.chat.ChatEventHub;
+import it.unical.ea_project_javafx.ui.ViewSupport;
+import it.unical.ea_project_javafx.ui.animation.PageTransitions;
+import it.unical.ea_project_javafx.ui.background.BackgroundHelper;
+import it.unical.ea_project_javafx.util.JsonCodec;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import javafx.animation.PauseTransition;
+import javafx.application.Platform;
+import javafx.fxml.FXML;
+import javafx.geometry.Pos;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextFormatter;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 
 public class ChatController implements AutoCloseable {
     @FXML
-    private javafx.scene.image.ImageView bgImageView;
+    private ImageView bgImageView;
     @FXML
     private StackPane pageRoot, navbarContainer;
     @FXML
@@ -34,8 +61,8 @@ public class ChatController implements AutoCloseable {
     private AutoCloseable stream;
     private JsonObject selected;
     private boolean closed, updatingInbox, inboxBusy, messagesBusy, sending, messagesPending, inboxPending;
-    private final javafx.animation.PauseTransition settleScroll = new javafx.animation.PauseTransition(
-            javafx.util.Duration.millis(60));
+    private final PauseTransition settleScroll = new PauseTransition(
+            Duration.millis(60));
     private int inboxPage;
     private boolean compactMode;
 
@@ -58,7 +85,7 @@ public class ChatController implements AutoCloseable {
     @FXML
     public void initialize() {
         if (!compactMode)
-            it.unical.ea_project_javafx.util.BackgroundHelper.setupBackground(bgImageView);
+            BackgroundHelper.setupBackground(bgImageView);
         if (!compactMode)
             ViewSupport.loadNavbar(navbarContainer, this::show);
         conversations.setCellFactory(list -> new ListCell<>() {
@@ -92,14 +119,14 @@ public class ChatController implements AutoCloseable {
         });
         messagesBox.layoutBoundsProperty().addListener((o, a, b) -> {
             if (latest && followLatest && Math.abs(a.getHeight() - b.getHeight()) > 1)
-                javafx.application.Platform.runLater(() -> {
+                Platform.runLater(() -> {
                     if (!closed && latest && followLatest) {
                         messagesScroll.setVvalue(1);
                         markRead();
                     }
                 });
         });
-        messagesScroll.addEventFilter(javafx.scene.input.ScrollEvent.SCROLL, e -> {
+        messagesScroll.addEventFilter(ScrollEvent.SCROLL, e -> {
             if (e.getDeltaY() > 0)
                 followLatest = false;
         });
@@ -121,7 +148,7 @@ public class ChatController implements AutoCloseable {
         });
         updateSend();
         loadInbox(false);
-        stream = it.unical.ea_project_javafx.service.ChatEventHub.subscribe(id -> {
+        stream = ChatEventHub.subscribe(id -> {
             loadInbox(false);
             if (selectedId != 0 && (id == -1 || id == selectedId)) {
                 if (latest && followLatest)
@@ -150,7 +177,7 @@ public class ChatController implements AutoCloseable {
                 });
         pageRoot.setStyle("-fx-background-color: transparent;");
         navbarContainer.getChildren().clear();
-        if (connectionLabel.getParent() instanceof javafx.scene.layout.Pane old)
+        if (connectionLabel.getParent() instanceof Pane old)
             old.getChildren().remove(connectionLabel);
         if (conversationTitle.getParent() instanceof VBox header)
             header.getChildren().add(2, connectionLabel);
@@ -310,14 +337,14 @@ public class ChatController implements AutoCloseable {
                             messagesBox.getChildren().add(row);
                             if (before == null && renderedConversation == conversation
                                     && (renderedMaximum == null || message.get("id").getAsLong() > renderedMaximum))
-                                it.unical.ea_project_javafx.util.PageTransitions.appear(row);
+                                PageTransitions.appear(row);
                         }
                         renderedConversation = conversation;
                         renderedMaximum = maximum;
                         if (ordered.isEmpty())
                             messagesBox.getChildren().add(new Label("Scrivi il primo messaggio."));
                         if (latest && followLatest)
-                            javafx.application.Platform.runLater(() -> {
+                            Platform.runLater(() -> {
                                 messagesScroll.applyCss();
                                 messagesScroll.layout();
                                 messagesScroll.setVvalue(1);

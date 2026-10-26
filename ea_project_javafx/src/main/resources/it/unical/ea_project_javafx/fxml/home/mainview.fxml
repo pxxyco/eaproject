@@ -3,24 +3,22 @@
 <?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-
-<StackPane xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="it.unical.ea_project_javafx.controller.home.MainViewController">
+<StackPane xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="it.unical.ea_project_javafx.controller.home.MainViewController">
     <stylesheets>
         <URL value="@../../css/common/style.css" />
         <URL value="@../../css/home/home.css" />
     </stylesheets>
 
     <ImageView
-            fx:id="bgImageView"
-            pickOnBounds="true"
-            preserveRatio="false"/>
+        fx:id="bgImageView"
+        pickOnBounds="true"
+        preserveRatio="false" />
     <Region styleClass="bg-overlay" />
 
     <BorderPane>
@@ -29,20 +27,21 @@
         </top>
         <center>
             <StackPane>
-            <ScrollPane fx:id="homeScroll" fitToWidth="true" styleClass="main-scroll">
-                <content>
-                    <VBox alignment="TOP_CENTER" spacing="30.0">
-                        <padding>
-                            <Insets bottom="40.0" left="20.0" right="20.0" top="20.0" />
-                        </padding>
-                        <children>
-                            <fx:include fx:id="searchBar" source="search-bar.fxml" />
-                            <fx:include fx:id="experienceList" source="experience-list.fxml" />
-                        </children>
-                    </VBox>
-                </content>
-            </ScrollPane>
-            <VBox fx:id="stickySearchDock" alignment="TOP_CENTER" maxHeight="-Infinity" pickOnBounds="false" StackPane.alignment="TOP_CENTER" viewOrder="-1" />
+                <ScrollPane fx:id="homeScroll" fitToWidth="true" styleClass="main-scroll">
+                    <content>
+                        <VBox alignment="TOP_CENTER" spacing="30.0">
+                            <padding>
+                                <Insets bottom="40.0" left="20.0" right="20.0" top="20.0" />
+                            </padding>
+                            <children>
+                                <fx:include fx:id="searchBar" source="search-bar.fxml" />
+                                <fx:include fx:id="experienceList" source="experience-list.fxml" />
+                            </children>
+                        </VBox>
+                    </content>
+                </ScrollPane>
+                <VBox fx:id="stickySearchDock" alignment="TOP_CENTER" maxHeight="-Infinity"
+                    pickOnBounds="false" StackPane.alignment="TOP_CENTER" viewOrder="-1" />
             </StackPane>
         </center>
     </BorderPane>

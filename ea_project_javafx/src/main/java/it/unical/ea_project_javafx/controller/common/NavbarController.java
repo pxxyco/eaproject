@@ -1,19 +1,25 @@
 package it.unical.ea_project_javafx.controller.common;
 
-import it.unical.ea_project_javafx.util.JsonCodec;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import it.unical.ea_project_javafx.controller.chat.ChatController;
+import it.unical.ea_project_javafx.navigation.SceneNavigator;
+import it.unical.ea_project_javafx.security.TokenStorage;
 import it.unical.ea_project_javafx.security.UserSession;
-import it.unical.ea_project_javafx.util.ApiService;
-import it.unical.ea_project_javafx.util.SceneNavigator;
-import it.unical.ea_project_javafx.util.NotificationPollingService;
-import it.unical.ea_project_javafx.util.PopupFactory;
-import it.unical.ea_project_javafx.util.TokenStorage;
+import it.unical.ea_project_javafx.service.api.ApiService;
+import it.unical.ea_project_javafx.service.notification.NotificationPollingService;
+import it.unical.ea_project_javafx.ui.animation.NavIndicator;
+import it.unical.ea_project_javafx.ui.animation.UiEffects;
+import it.unical.ea_project_javafx.ui.dialog.PopupFactory;
+import it.unical.ea_project_javafx.util.JsonCodec;
+import java.util.Locale;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
@@ -23,21 +29,22 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
-import javafx.scene.input.MouseEvent;
+import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.shape.Circle;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.shape.Circle;
+import javafx.scene.transform.Transform;
 import javafx.stage.Popup;
 import javafx.stage.Window;
 import javafx.util.Duration;
@@ -60,10 +67,9 @@ public class NavbarController {
     private Label userAvatarInitialsLabel;
     @FXML
     private Label userMenuLabel;
+
     @FXML
-    private javafx.scene.layout.StackPane userAvatarContainer;
-    @FXML
-    private javafx.scene.layout.StackPane notificationBellContainer;
+    private StackPane notificationBellContainer;
     @FXML
     private Label notificationBadge;
 
@@ -78,7 +84,7 @@ public class NavbarController {
     @FXML
     private Label travelerFavoritesNavItem;
     @FXML
-    private javafx.scene.control.MenuItem chatMenuItem, recommendationsMenuItem, itineraryMenuItem;
+    private MenuItem chatMenuItem, recommendationsMenuItem, itineraryMenuItem;
     @FXML
     private Label organizerEventsNavItem;
     @FXML
@@ -96,8 +102,8 @@ public class NavbarController {
     private long trayRequest;
     private Scene watchedScene;
     private Window watchedWindow;
-    private final javafx.beans.value.ChangeListener<Window> notificationWindowListener = (o, a, b) -> watchWindow(b);
-    private final javafx.beans.value.ChangeListener<Boolean> notificationShowingListener = (o, a, b) -> {
+    private final ChangeListener<Window> notificationWindowListener = (o, a, b) -> watchWindow(b);
+    private final ChangeListener<Boolean> notificationShowingListener = (o, a, b) -> {
         if (b)
             startNotificationPolling();
         else
@@ -137,11 +143,11 @@ public class NavbarController {
     private void updateActiveSection(Scene scene) {
         if (scene == null)
             return;
-        javafx.application.Platform.runLater(() -> {
+        Platform.runLater(() -> {
             if (scene != watchedScene)
                 return;
             String path = String.valueOf(scene.getUserData());
-            var active = javafx.css.PseudoClass.getPseudoClass("active");
+            var active = PseudoClass.getPseudoClass("active");
             markActive(homeNavItem, path.endsWith("home/mainview.fxml"), active);
             markActive(dashboardNavItem, path.endsWith("profile/dashboard-view.fxml"), active);
             markActive(travelerHistoryNavItem,
@@ -156,11 +162,11 @@ public class NavbarController {
             markMenuActive(settingsMenuItem, path.endsWith("settings.fxml"));
             markMenuActive(paymentsMenuItem, path.endsWith("payment-methods.fxml"));
             markMenuActive(supportMenuItem, path.endsWith("support.fxml"));
-            it.unical.ea_project_javafx.util.NavIndicator.select(scene);
+            NavIndicator.select(scene);
         });
     }
 
-    private void markActive(Label label, boolean selected, javafx.css.PseudoClass active) {
+    private void markActive(Label label, boolean selected, PseudoClass active) {
         if (label == null)
             return;
         label.pseudoClassStateChanged(active, selected);
@@ -181,7 +187,7 @@ public class NavbarController {
         watchedWindow = window;
         stopNotificationPolling();
         if (window != null) {
-            javafx.application.Platform.runLater(() -> {
+            Platform.runLater(() -> {
                 Node node = notificationBellContainer;
                 while (node != null && !node.getStyleClass().contains("navbar"))
                     node = node.getParent();
@@ -352,10 +358,10 @@ public class NavbarController {
         if (name == null || name.isBlank())
             return "U";
         String[] parts = name.trim().split("\\s+");
-        String first = parts[0].substring(0, 1).toUpperCase(java.util.Locale.ROOT);
+        String first = parts[0].substring(0, 1).toUpperCase(Locale.ROOT);
         if (parts.length == 1)
             return first;
-        return first + parts[parts.length - 1].substring(0, 1).toUpperCase(java.util.Locale.ROOT);
+        return first + parts[parts.length - 1].substring(0, 1).toUpperCase(Locale.ROOT);
     }
 
     private void startNotificationPolling() {
@@ -500,7 +506,7 @@ public class NavbarController {
 
         notificationPopup = new Popup();
         notificationPopup.setOnShown(
-                e -> it.unical.ea_project_javafx.util.UiEffects.useWallpaper(notificationPopup.getScene(), null));
+                e -> UiEffects.useWallpaper(notificationPopup.getScene(), null));
         notificationPopup.setAutoHide(true);
         notificationPopup.setOnAutoHide(e -> lastTrayAutoHide = System.nanoTime());
         notificationPopup.setHideOnEscape(true);
@@ -533,7 +539,7 @@ public class NavbarController {
                     notificationPopup.hide();
                 long conversation = notification.get("relatedEntityId").getAsLong();
                 SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/chat/chat.fxml", c -> {
-                    if (c instanceof it.unical.ea_project_javafx.controller.chat.ChatController chat)
+                    if (c instanceof ChatController chat)
                         chat.openConversation(conversation);
                 });
             });
@@ -717,7 +723,7 @@ public class NavbarController {
         toast.getChildren().addAll(title, message);
         toastPopup = new Popup();
         toastPopup
-                .setOnShown(e -> it.unical.ea_project_javafx.util.UiEffects.useWallpaper(toastPopup.getScene(), null));
+                .setOnShown(e -> UiEffects.useWallpaper(toastPopup.getScene(), null));
         toastPopup.setAutoHide(false);
         toastPopup.getContent().add(toast);
         positionPopup(toastPopup, popupAnchor(), 330);
@@ -751,7 +757,7 @@ public class NavbarController {
             double w = Math.min(width, Math.max(180, viewport.getWidth() - 80));
             double h = popup.getHeight();
             if (!popup.getContent().isEmpty()
-                    && popup.getContent().getFirst() instanceof javafx.scene.layout.Region panel) {
+                    && popup.getContent().getFirst() instanceof Region panel) {
                 panel.setPrefWidth(w);
                 panel.setMaxHeight(Math.min(430, Math.max(160, viewport.getHeight() - 80)));
             }
@@ -765,20 +771,20 @@ public class NavbarController {
             return;
         popup.setAutoFix(false);
         popup.show(owner, bounds.getMinX(), bounds.getMaxY() + 12);
-        javafx.application.Platform.runLater(reposition);
+        Platform.runLater(reposition);
 
         // A Popup JavaFX is una finestra separata: seguiamo spostamento e
         // ridimensionamento
         // della finestra principale, così la tendina resta ancorata alla navbar.
-        javafx.beans.value.ChangeListener<Number> windowListener = (obs, oldValue, newValue) -> reposition.run();
+        ChangeListener<Number> windowListener = (obs, oldValue, newValue) -> reposition.run();
         owner.xProperty().addListener(windowListener);
         owner.yProperty().addListener(windowListener);
         owner.widthProperty().addListener(windowListener);
         owner.heightProperty().addListener(windowListener);
         popup.widthProperty().addListener(windowListener);
         popup.heightProperty().addListener(windowListener);
-        javafx.beans.value.ChangeListener<Bounds> boundsListener = (obs, oldValue, newValue) -> reposition.run();
-        javafx.beans.value.ChangeListener<javafx.scene.transform.Transform> transformListener = (obs, oldValue,
+        ChangeListener<Bounds> boundsListener = (obs, oldValue, newValue) -> reposition.run();
+        ChangeListener<Transform> transformListener = (obs, oldValue,
                 newValue) -> reposition.run();
         anchor.boundsInLocalProperty().addListener(boundsListener);
         anchor.localToSceneTransformProperty().addListener(transformListener);
@@ -858,11 +864,6 @@ public class NavbarController {
     @FXML
     private void handleChat(ActionEvent event) {
         SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/chat/chat.fxml", null);
-    }
-
-    @FXML
-    private void handleRecommendations(ActionEvent event) {
-        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/traveler/recommendations.fxml", null);
     }
 
     @FXML

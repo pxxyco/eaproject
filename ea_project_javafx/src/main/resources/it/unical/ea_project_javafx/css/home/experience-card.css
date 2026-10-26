@@ -8,8 +8,6 @@
     -fx-pref-width: 300px;
 }
 
-.experience-card:hover {}
-
 .card-image-container {
     -fx-background-color: rgba(0, 0, 0, 0.2);
     -fx-background-radius: 12px 12px 0 0;
@@ -44,9 +42,6 @@
     -fx-background-color: rgba(239, 68, 68, 0.3);
     -fx-text-fill: #fca5a5;
 }
-
-.card-image-container .btn-card-action:hover,
-.card-image-container .btn-card-delete:hover {}
 
 /* Testi */
 .card-category {

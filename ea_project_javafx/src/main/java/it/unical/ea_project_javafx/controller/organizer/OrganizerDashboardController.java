@@ -3,14 +3,26 @@ package it.unical.ea_project_javafx.controller.organizer;
 import com.google.gson.reflect.TypeToken;
 import it.unical.ea_project_javafx.controller.home.ExperienceCardController;
 import it.unical.ea_project_javafx.controller.profile.ProfileDashboardController;
-import it.unical.ea_project_javafx.dto.ActivityDTO;
-import it.unical.ea_project_javafx.dto.BookingDTO;
-import it.unical.ea_project_javafx.dto.TripDTO;
+import it.unical.ea_project_javafx.dto.activity.ActivityDTO;
+import it.unical.ea_project_javafx.dto.booking.BookingDTO;
 import it.unical.ea_project_javafx.dto.home.ActivityHomeDTO;
 import it.unical.ea_project_javafx.dto.home.TripHomeDTO;
+import it.unical.ea_project_javafx.dto.trip.TripDTO;
 import it.unical.ea_project_javafx.security.UserSession;
-import it.unical.ea_project_javafx.util.ApiService;
-import it.unical.ea_project_javafx.util.PopupFactory;
+import it.unical.ea_project_javafx.service.api.ApiService;
+import it.unical.ea_project_javafx.ui.dialog.PopupFactory;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
@@ -20,43 +32,53 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.control.*;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.FlowPane;
-
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import javafx.scene.layout.StackPane;
 
 public class OrganizerDashboardController implements ProfileDashboardController {
 
     private static final Logger LOGGER = Logger.getLogger(OrganizerDashboardController.class.getName());
 
-    @FXML private javafx.scene.layout.StackPane rootStackPane;
+    @FXML
+    private StackPane rootStackPane;
 
-    @FXML private TextField offerSearchField;
-    @FXML private ComboBox<String> offerStatusFilter;
-    @FXML private Label dashboardErrorLabel;
-    @FXML private Label publishedCountLabel;
-    @FXML private Label totalSubscribersLabel;
-    @FXML private Label totalRevenueLabel;
+    @FXML
+    private TextField offerSearchField;
+    @FXML
+    private ComboBox<String> offerStatusFilter;
+    @FXML
+    private Label dashboardErrorLabel;
+    @FXML
+    private Label publishedCountLabel;
+    @FXML
+    private Label totalSubscribersLabel;
+    @FXML
+    private Label totalRevenueLabel;
 
-    @FXML private FlowPane activityCardsContainer;
-    @FXML private Label activitiesPlaceholderLabel;
-    @FXML private FlowPane tripCardsContainer;
-    @FXML private Label tripsPlaceholderLabel;
+    @FXML
+    private FlowPane activityCardsContainer;
+    @FXML
+    private Label activitiesPlaceholderLabel;
+    @FXML
+    private FlowPane tripCardsContainer;
+    @FXML
+    private Label tripsPlaceholderLabel;
 
-    @FXML private TableView<SubscriberRow> subscribersTable;
-    @FXML private TableColumn<SubscriberRow, String> participantColumn;
-    @FXML private TableColumn<SubscriberRow, String> emailColumn;
-    @FXML private TableColumn<SubscriberRow, String> activityColumn;
-    @FXML private TableColumn<SubscriberRow, String> dateColumn;
+    @FXML
+    private TableView<SubscriberRow> subscribersTable;
+    @FXML
+    private TableColumn<SubscriberRow, String> participantColumn;
+    @FXML
+    private TableColumn<SubscriberRow, String> emailColumn;
+    @FXML
+    private TableColumn<SubscriberRow, String> activityColumn;
+    @FXML
+    private TableColumn<SubscriberRow, String> dateColumn;
 
     private UserSession userSession;
     private List<TripDTO> trips = List.of();
@@ -75,12 +97,13 @@ public class OrganizerDashboardController implements ProfileDashboardController 
             TripDTO trip,
             ActivityDTO activity,
             String location,
-            String dates
-    ) {}
+            String dates) {
+    }
 
     @FXML
     private void handleRefresh() {
-        if (userSession != null) setUser(userSession);
+        if (userSession != null)
+            setUser(userSession);
     }
 
     @FXML
@@ -95,15 +118,18 @@ public class OrganizerDashboardController implements ProfileDashboardController 
                     "/it/unical/ea_project_javafx/fxml/organizer/create-offer.fxml"));
             Parent popup = loader.load();
             CreateOfferController controller = loader.getController();
-            if (tripToEdit != null) controller.setTripToEdit(tripToEdit);
-            else if (activityToEdit != null) controller.setActivityToEdit(activityToEdit);
+            if (tripToEdit != null)
+                controller.setTripToEdit(tripToEdit);
+            else if (activityToEdit != null)
+                controller.setActivityToEdit(activityToEdit);
             controller.setCloseAction(() -> {
                 PopupFactory.Handle handle = activeOfferPopup;
                 activeOfferPopup = null;
-                if (handle != null) handle.close();
+                if (handle != null)
+                    handle.close();
                 refreshOrganizerDashboard();
             });
-            if (popup instanceof javafx.scene.layout.StackPane stackPane
+            if (popup instanceof StackPane stackPane
                     && !stackPane.getStyleClass().contains("popup-factory-transparent-surface")) {
                 stackPane.getStyleClass().add("popup-factory-transparent-surface");
             }
@@ -136,10 +162,21 @@ public class OrganizerDashboardController implements ProfileDashboardController 
             this.date = new SimpleStringProperty(date);
         }
 
-        public SimpleStringProperty participantProperty() { return participant; }
-        public SimpleStringProperty emailProperty() { return email; }
-        public SimpleStringProperty activityProperty() { return activity; }
-        public SimpleStringProperty dateProperty() { return date; }
+        public SimpleStringProperty participantProperty() {
+            return participant;
+        }
+
+        public SimpleStringProperty emailProperty() {
+            return email;
+        }
+
+        public SimpleStringProperty activityProperty() {
+            return activity;
+        }
+
+        public SimpleStringProperty dateProperty() {
+            return date;
+        }
     }
 
     @FXML
@@ -174,7 +211,8 @@ public class OrganizerDashboardController implements ProfileDashboardController 
         ApiService.get(
                 ApiService.BASE_URL + "/api/trips/organizer/" + session.getId(),
                 response -> {
-                    Type listType = new TypeToken<List<TripDTO>>() { }.getType();
+                    Type listType = new TypeToken<List<TripDTO>>() {
+                    }.getType();
                     try {
                         List<TripDTO> trips = ApiService.fromJson(response.body(), listType);
                         Platform.runLater(() -> {
@@ -188,21 +226,21 @@ public class OrganizerDashboardController implements ProfileDashboardController 
                     }
                 },
                 () -> showDashboardError("trips", "Impossibile caricare i viaggi. Verifica la connessione e riprova."),
-                null
-        );
+                null);
     }
 
     private void loadActivities(UserSession session) {
         ApiService.get(
                 ApiService.BASE_URL + "/api/activities/organizer/mine",
                 response -> {
-                    Type listType = new TypeToken<List<ActivityDTO>>() { }.getType();
+                    Type listType = new TypeToken<List<ActivityDTO>>() {
+                    }.getType();
                     try {
                         String body = response.body();
                         List<ActivityDTO> loadedActivities = body == null || body.isBlank()
                                 || "null".equalsIgnoreCase(body.trim())
-                                ? List.of()
-                                : ApiService.fromJson(body, listType);
+                                        ? List.of()
+                                        : ApiService.fromJson(body, listType);
                         Platform.runLater(() -> {
                             activities = loadedActivities == null ? List.of() : loadedActivities;
                             clearDashboardError("activities");
@@ -210,19 +248,21 @@ public class OrganizerDashboardController implements ProfileDashboardController 
                         });
                     } catch (RuntimeException exception) {
                         LOGGER.log(Level.WARNING, "Unable to deserialize organizer activities response", exception);
-                        showDashboardError("activities", "Non è stato possibile leggere le attività ricevute dal server.");
+                        showDashboardError("activities",
+                                "Non è stato possibile leggere le attività ricevute dal server.");
                     }
                 },
-                () -> showDashboardError("activities", "Impossibile caricare le attività. Verifica la connessione e riprova."),
-                null
-        );
+                () -> showDashboardError("activities",
+                        "Impossibile caricare le attività. Verifica la connessione e riprova."),
+                null);
     }
 
     private void loadSubscribers(UserSession session) {
         ApiService.get(
                 ApiService.BASE_URL + "/api/bookings/organizer/mine",
                 response -> {
-                    Type listType = new TypeToken<List<BookingDTO>>() { }.getType();
+                    Type listType = new TypeToken<List<BookingDTO>>() {
+                    }.getType();
                     try {
                         List<BookingDTO> bookings = ApiService.fromJson(response.body(), listType);
                         Platform.runLater(() -> {
@@ -231,12 +271,13 @@ public class OrganizerDashboardController implements ProfileDashboardController 
                         });
                     } catch (RuntimeException exception) {
                         LOGGER.log(Level.WARNING, "Unable to deserialize organizer bookings response", exception);
-                        showDashboardError("bookings", "Non è stato possibile leggere le prenotazioni ricevute dal server.");
+                        showDashboardError("bookings",
+                                "Non è stato possibile leggere le prenotazioni ricevute dal server.");
                     }
                 },
-                () -> showDashboardError("bookings", "Impossibile caricare le prenotazioni. Verifica la connessione e riprova."),
-                null
-        );
+                () -> showDashboardError("bookings",
+                        "Impossibile caricare le prenotazioni. Verifica la connessione e riprova."),
+                null);
     }
 
     private void loadPaidRevenue(UserSession session) {
@@ -252,12 +293,12 @@ public class OrganizerDashboardController implements ProfileDashboardController 
                         });
                     } catch (RuntimeException exception) {
                         LOGGER.log(Level.WARNING, "Unable to deserialize organizer paid revenue response", exception);
-                        showDashboardError("revenue", "Non è stato possibile leggere il totale dei pagamenti dal server.");
+                        showDashboardError("revenue",
+                                "Non è stato possibile leggere il totale dei pagamenti dal server.");
                     }
                 },
                 () -> showDashboardError("revenue", "Impossibile caricare il totale dei pagamenti."),
-                null
-        );
+                null);
     }
 
     private void updateOffers() {
@@ -283,7 +324,8 @@ public class OrganizerDashboardController implements ProfileDashboardController 
     }
 
     private boolean matchesOffer(String title, String city, String status) {
-        String query = offerSearchField.getText() == null ? "" : offerSearchField.getText().trim().toLowerCase(java.util.Locale.ROOT);
+        String query = offerSearchField.getText() == null ? ""
+                : offerSearchField.getText().trim().toLowerCase(Locale.ROOT);
         String selected = offerStatusFilter.getValue();
         String expected = selected == null ? "" : switch (selected) {
             case "Pubblicata" -> "PUBLISHED";
@@ -293,16 +335,19 @@ public class OrganizerDashboardController implements ProfileDashboardController 
             default -> "";
         };
         return (expected.isEmpty() || expected.equalsIgnoreCase(status))
-                && (query.isEmpty() || (title != null && title.toLowerCase(java.util.Locale.ROOT).contains(query))
-                    || (city != null && city.toLowerCase(java.util.Locale.ROOT).contains(query)));
+                && (query.isEmpty() || (title != null && title.toLowerCase(Locale.ROOT).contains(query))
+                        || (city != null && city.toLowerCase(Locale.ROOT).contains(query)));
     }
 
     private void renderActivityCards() {
         activityCardsContainer.getChildren().clear();
-        List<ActivityDTO> safeActivities = activities == null ? List.of() : activities.stream()
-                .filter(activity -> matchesOffer(activity.getTitle(), activity.getCity(), activity.getStatus())).toList();
+        List<ActivityDTO> safeActivities = activities == null ? List.of()
+                : activities.stream()
+                        .filter(activity -> matchesOffer(activity.getTitle(), activity.getCity(), activity.getStatus()))
+                        .toList();
         activitiesPlaceholderLabel.setText(activities == null || activities.isEmpty()
-                ? "Non hai ancora creato attività." : "Nessuna attività corrisponde ai filtri.");
+                ? "Non hai ancora creato attività."
+                : "Nessuna attività corrisponde ai filtri.");
         activitiesPlaceholderLabel.setVisible(safeActivities.isEmpty());
         activitiesPlaceholderLabel.setManaged(safeActivities.isEmpty());
         for (ActivityDTO activity : safeActivities) {
@@ -323,15 +368,13 @@ public class OrganizerDashboardController implements ProfileDashboardController 
                         activity.getAverageRating(),
                         imageUrl,
                         activity.getStartDate() == null ? null : activity.getStartDate().toString(),
-                        activity.getEndDate() == null ? null : activity.getEndDate().toString()
-                ));
+                        activity.getEndDate() == null ? null : activity.getEndDate().toString()));
                 controller.setEditAction(() -> openOfferDialog(rootStackPane, null, activity));
                 DashboardOffer activityOffer = new DashboardOffer(
                         "ACTIVITY", activity.getActivityId(), activity.getTitle(), activity.getStatus(),
                         activity.getMaxSeats(), activity.getAvailableSeats(),
                         activity.getPrice() == null ? null : BigDecimal.valueOf(activity.getPrice()),
-                        null, activity, activity.getCity(), ""
-                );
+                        null, activity, activity.getCity(), "");
                 controller.setDeleteAction(() -> handleDeleteOffer(activityOffer));
                 activityCardsContainer.getChildren().add(card);
             } catch (IOException exception) {
@@ -340,15 +383,19 @@ public class OrganizerDashboardController implements ProfileDashboardController 
                 return;
             }
         }
-        if (!safeActivities.isEmpty()) clearDashboardError("activity-cards");
+        if (!safeActivities.isEmpty())
+            clearDashboardError("activity-cards");
     }
 
     private void renderTripCards() {
         tripCardsContainer.getChildren().clear();
-        List<TripDTO> safeTrips = trips == null ? List.of() : trips.stream()
-                .filter(trip -> matchesOffer(trip.getTitle(), trip.getDestinationCity(), trip.getStatus())).toList();
+        List<TripDTO> safeTrips = trips == null ? List.of()
+                : trips.stream()
+                        .filter(trip -> matchesOffer(trip.getTitle(), trip.getDestinationCity(), trip.getStatus()))
+                        .toList();
         tripsPlaceholderLabel.setText(trips == null || trips.isEmpty()
-                ? "Non hai ancora creato viaggi." : "Nessun viaggio corrisponde ai filtri.");
+                ? "Non hai ancora creato viaggi."
+                : "Nessun viaggio corrisponde ai filtri.");
         tripsPlaceholderLabel.setVisible(safeTrips.isEmpty());
         tripsPlaceholderLabel.setManaged(safeTrips.isEmpty());
         for (TripDTO trip : safeTrips) {
@@ -365,14 +412,12 @@ public class OrganizerDashboardController implements ProfileDashboardController 
                         trip.getAverageRating(),
                         trip.getCoverPhotoUrl(),
                         trip.getStartDate() == null ? null : trip.getStartDate().toString(),
-                        trip.getEndDate() == null ? null : trip.getEndDate().toString()
-                ));
+                        trip.getEndDate() == null ? null : trip.getEndDate().toString()));
                 controller.setEditAction(() -> openOfferDialog(rootStackPane, trip, null));
                 DashboardOffer tripOffer = new DashboardOffer(
                         "TRIP", trip.getTripId(), trip.getTitle(), trip.getStatus(),
                         trip.getMaxSeats(), trip.getAvailableSeats(), trip.getTotalPrice(),
-                        trip, null, trip.getDestinationCity(), formatTripDates(trip)
-                );
+                        trip, null, trip.getDestinationCity(), formatTripDates(trip));
                 controller.setDeleteAction(() -> handleDeleteOffer(tripOffer));
                 tripCardsContainer.getChildren().add(card);
             } catch (IOException exception) {
@@ -381,17 +426,19 @@ public class OrganizerDashboardController implements ProfileDashboardController 
                 return;
             }
         }
-        if (!safeTrips.isEmpty()) clearDashboardError("trip-cards");
+        if (!safeTrips.isEmpty())
+            clearDashboardError("trip-cards");
     }
 
     private String formatTripDates(TripDTO trip) {
         LocalDate start = trip.getStartDate();
         LocalDate end = trip.getEndDate();
-        if (start == null) return "";
+        if (start == null)
+            return "";
         return end == null || start.equals(end)
                 ? start.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
                 : start.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + " - "
-                + end.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                        + end.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     }
 
     private void updateSubscribers(List<BookingDTO> bookings) {
@@ -402,14 +449,14 @@ public class OrganizerDashboardController implements ProfileDashboardController 
                         booking.getParticipantName(),
                         booking.getParticipantEmail(),
                         booking.getItemTitle(),
-                        booking.getCreatedAt() == null ? "" : booking.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-                ))
+                        booking.getCreatedAt() == null ? ""
+                                : booking.getCreatedAt().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))))
                 .toList();
         subscribersTable.setItems(FXCollections.observableArrayList(rows));
         int subscribers = safeBookings.stream()
                 .filter(booking -> !"CANCELLED".equalsIgnoreCase(booking.getBookingStatus()))
                 .map(BookingDTO::getSeats)
-                .filter(java.util.Objects::nonNull)
+                .filter(Objects::nonNull)
                 .mapToInt(Integer::intValue)
                 .sum();
         totalSubscribersLabel.setText(String.valueOf(subscribers));
@@ -430,7 +477,8 @@ public class OrganizerDashboardController implements ProfileDashboardController 
     }
 
     private void refreshDashboardError() {
-        if (dashboardErrorLabel == null) return;
+        if (dashboardErrorLabel == null)
+            return;
         boolean hasErrors = !dashboardErrors.isEmpty();
         dashboardErrorLabel.setText(String.join("\n", dashboardErrors.values()));
         dashboardErrorLabel.setVisible(hasErrors);
@@ -449,29 +497,25 @@ public class OrganizerDashboardController implements ProfileDashboardController 
         subscribersTable.prefHeightProperty().bind(
                 Bindings.size(subscribersTable.getItems())
                         .multiply(subscribersTable.fixedCellSizeProperty())
-                        .add(45)
-        );
-    }
-
-    @FXML
-    private void handleNewActivity(ActionEvent event) {
-        handleOpenCreateOffer(event);
+                        .add(45));
     }
 
     private void handleDeleteOffer(DashboardOffer offer) {
-        if (offer == null || offer.id() == null) return;
+        if (offer == null || offer.id() == null)
+            return;
         PopupFactory.showConfirmation(rootStackPane,
                 offer.type().equals("TRIP") ? "Cancella viaggio" : "Cancella attività",
                 "Vuoi davvero cancellare “" + offer.title() + "”? L'operazione potrebbe non essere reversibile.",
                 PopupFactory.Size.COMPACT,
                 () -> ApiService.delete(
-                        ApiService.BASE_URL + "/api/" + (offer.type().equals("TRIP") ? "trips/" : "activities/") + offer.id(),
+                        ApiService.BASE_URL + "/api/" + (offer.type().equals("TRIP") ? "trips/" : "activities/")
+                                + offer.id(),
                         response -> {
                             clearDashboardError("delete");
                             refreshOrganizerDashboard();
                         },
-                        () -> showDashboardError("delete", "Impossibile cancellare l'offerta. Verifica i permessi e riprova."),
-                        null
-                ));
+                        () -> showDashboardError("delete",
+                                "Impossibile cancellare l'offerta. Verifica i permessi e riprova."),
+                        null));
     }
 }

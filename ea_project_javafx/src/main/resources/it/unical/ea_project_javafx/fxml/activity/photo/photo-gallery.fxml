@@ -11,8 +11,10 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-
-<StackPane fx:id="rootStack" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="760.0" prefWidth="1300.0" styleClass="app-root" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.activity.photo.PhotoGalleryController">
+<StackPane fx:id="rootStack" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+   minWidth="-Infinity" prefHeight="760.0" prefWidth="1300.0" styleClass="app-root"
+   xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
+   fx:controller="it.unical.ea_project_javafx.controller.activity.photo.PhotoGalleryController">
    <stylesheets>
       <URL value="@../../../css/common/style.css" />
       <URL value="@../../../css/activity/activity-details.css" />
@@ -24,14 +26,14 @@
       <Region mouseTransparent="true" styleClass="bg-overlay" />
       <BorderPane styleClass="app-shell">
          <top>
-             <HBox alignment="CENTER_LEFT" spacing="24" styleClass="navbar">
-                 <padding>
-                     <Insets bottom="14" left="28" right="28" top="14" />
-                 </padding>
-                 <Label styleClass="logo" text="EA Project" />
-                 <Region HBox.hgrow="ALWAYS" />
-                 <Button styleClass="btn-login-pill" text="Login" />
-             </HBox>
+            <HBox alignment="CENTER_LEFT" spacing="24" styleClass="navbar">
+               <padding>
+                  <Insets bottom="14" left="28" right="28" top="14" />
+               </padding>
+               <Label styleClass="logo" text="EA Project" />
+               <Region HBox.hgrow="ALWAYS" />
+               <Button styleClass="btn-login-pill" text="Login" />
+            </HBox>
          </top>
          <center>
             <ScrollPane fitToWidth="true" styleClass="content-scroll">
@@ -42,7 +44,9 @@
                            <children>
                               <VBox minHeight="200" minWidth="200">
                                  <children>
-                                    <Button mnemonicParsing="false" onAction="#backButtonAction" styleClass="back-link" text="← Torna alla scheda del viaggio ">
+                                    <Button mnemonicParsing="false" onAction="#backButtonAction"
+                                       styleClass="back-link"
+                                       text="← Torna alla scheda del viaggio ">
                                        <VBox.margin>
                                           <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                                        </VBox.margin>
@@ -50,23 +54,30 @@
                                     <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0">
                                        <children>
                                           <Region minWidth="200.0" HBox.hgrow="ALWAYS" />
-                                          <Label alignment="TOP_CENTER" minWidth="100.0" styleClass="title" text="GALLERIA" />
-                                          <Region minWidth="200.0" prefHeight="200.0" HBox.hgrow="ALWAYS" />
+                                          <Label alignment="TOP_CENTER" minWidth="100.0"
+                                             styleClass="title" text="GALLERIA" />
+                                          <Region minWidth="200.0" prefHeight="200.0"
+                                             HBox.hgrow="ALWAYS" />
                                        </children>
                                     </HBox>
                                  </children>
                               </VBox>
-                              <FlowPane fx:id="imgsContainer" hgap="10.0" minHeight="200.0" minWidth="550.0" styleClass="photo-container" vgap="5.0" VBox.vgrow="ALWAYS">
+                              <FlowPane fx:id="imgsContainer" hgap="10.0" minHeight="200.0"
+                                 minWidth="550.0" styleClass="photo-container" vgap="5.0"
+                                 VBox.vgrow="ALWAYS">
                                  <padding>
                                     <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
                                  </padding>
                                  <VBox.margin>
                                     <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
-                                 </VBox.margin></FlowPane>
+                                 </VBox.margin>
+                              </FlowPane>
                               <HBox alignment="CENTER" minHeight="100.0" minWidth="200.0">
                                  <children>
                                     <Region minWidth="200.0" HBox.hgrow="ALWAYS" />
-                                    <Button fx:id="moreButton" minHeight="35.0" minWidth="150.0" mnemonicParsing="false" onAction="#handleAddMore" styleClass="more-button" text="MOSTRA ALTRE FOTO" />
+                                    <Button fx:id="moreButton" minHeight="35.0" minWidth="150.0"
+                                       mnemonicParsing="false" onAction="#handleAddMore"
+                                       styleClass="more-button" text="MOSTRA ALTRE FOTO" />
                                     <Region minWidth="200.0" HBox.hgrow="ALWAYS" />
                                  </children>
                               </HBox>

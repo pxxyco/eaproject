@@ -1,11 +1,18 @@
 package it.unical.ea_project_javafx.controller.common;
 
-import it.unical.ea_project_javafx.util.ApiService;
-import it.unical.ea_project_javafx.util.AppErrorCode;
-import it.unical.ea_project_javafx.util.SceneNavigator;
+import it.unical.ea_project_javafx.error.AppErrorCode;
+import it.unical.ea_project_javafx.navigation.SceneNavigator;
+import it.unical.ea_project_javafx.service.api.ApiService;
+import java.io.InputStream;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
@@ -14,13 +21,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-
-import java.io.InputStream;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class SplashScreenController {
 
@@ -31,16 +31,25 @@ public class SplashScreenController {
 
     private static final int RECOVERY_CHECK_INTERVAL_SECONDS = 3;
 
-    @FXML private VBox splashContent;
-    @FXML private Label iconLabel;
-    @FXML private ImageView errorImageView;
-    @FXML private ProgressIndicator progressIndicator;
-    @FXML private Label errorTitleLabel;
-    @FXML private Label statusLabel;
-    @FXML private Label errorMessageLabel;
-    @FXML private HBox buttonBox;
-    @FXML private Button retryButton;
-    @FXML private Button exitButton;
+    @FXML
+    private VBox splashContent;
+
+    @FXML
+    private ImageView errorImageView;
+    @FXML
+    private ProgressIndicator progressIndicator;
+    @FXML
+    private Label errorTitleLabel;
+    @FXML
+    private Label statusLabel;
+    @FXML
+    private Label errorMessageLabel;
+    @FXML
+    private HBox buttonBox;
+    @FXML
+    private Button retryButton;
+    @FXML
+    private Button exitButton;
 
     private ScheduledExecutorService recoveryScheduler;
 
@@ -63,7 +72,7 @@ public class SplashScreenController {
         setLoadingState();
 
         Task<Boolean> healthCheck = createHealthCheckTask();
-        
+
         Thread thread = new Thread(healthCheck);
         thread.setDaemon(true);
         thread.start();
@@ -152,9 +161,9 @@ public class SplashScreenController {
 
     private boolean isWindowFullScreen() {
 
-        return splashContent != null 
-                && splashContent.getScene() != null 
-                && splashContent.getScene().getWindow() instanceof Stage stage 
+        return splashContent != null
+                && splashContent.getScene() != null
+                && splashContent.getScene().getWindow() instanceof Stage stage
                 && stage.isFullScreen();
 
     }
@@ -215,9 +224,9 @@ public class SplashScreenController {
     }
 
     // Utility per ridurre il codice ripetitivo per i nodi JavaFX
-    private void setVisibleAndManaged(boolean value, javafx.scene.Node... nodes) {
+    private void setVisibleAndManaged(boolean value, Node... nodes) {
 
-        for (javafx.scene.Node node : nodes) {
+        for (Node node : nodes) {
             if (node != null) {
                 node.setVisible(value);
                 node.setManaged(value);

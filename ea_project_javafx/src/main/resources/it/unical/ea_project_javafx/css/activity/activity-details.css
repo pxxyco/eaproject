@@ -37,8 +37,6 @@
     -fx-cursor: hand;
 }
 
-.btn-login-pill:hover {}
-
 /* ScrollBar Customization */
 .content-scroll .scroll-bar:vertical,
 .content-scroll .scroll-bar:horizontal {
@@ -188,7 +186,6 @@
     -fx-alignment: center;
 }
 
-
 .booking-card .booking-spinner>.increment-arrow-button,
 .booking-card .booking-spinner>.decrement-arrow-button {
     -fx-background-color: transparent;
@@ -229,8 +226,6 @@
     -fx-background-color: transparent;
     -fx-cursor: hand;
 }
-
-.date-picker>.arrow-button:hover {}
 
 .date-picker>.arrow-button>.arrow {
     -fx-background-color: #d6d3d1;

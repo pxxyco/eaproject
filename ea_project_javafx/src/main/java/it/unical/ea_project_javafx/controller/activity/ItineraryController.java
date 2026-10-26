@@ -2,10 +2,10 @@ package it.unical.ea_project_javafx.controller.activity;
 
 import com.gluonhq.maps.MapPoint;
 import com.gluonhq.maps.MapView;
-import it.unical.ea_project_javafx.dto.ActivityDTO;
-import it.unical.ea_project_javafx.dto.StageDTO;
-import it.unical.ea_project_javafx.dto.TripDTO;
-import it.unical.ea_project_javafx.util.map.MarkerLayer;
+import it.unical.ea_project_javafx.dto.activity.ActivityDTO;
+import it.unical.ea_project_javafx.dto.trip.StageDTO;
+import it.unical.ea_project_javafx.dto.trip.TripDTO;
+import it.unical.ea_project_javafx.ui.map.MarkerLayer;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -19,9 +19,9 @@ import javafx.scene.shape.Circle;
 
 public class ItineraryController implements ActivitySectionController, TripSectionController {
 
-    @FXML  
+    @FXML
     public StackPane mapContainer;
-    @FXML  
+    @FXML
     private VBox itinerarioContainer;
 
     private MapPoint standard = new MapPoint(41.8719, 12.5674);
@@ -51,7 +51,8 @@ public class ItineraryController implements ActivitySectionController, TripSecti
         location.getStyleClass().add("itinerario-box");
 
         location.setOnMouseClicked(mouseEvent -> {
-            if (activity.getLatitude() == null || activity.getLongitude() == null) return;
+            if (activity.getLatitude() == null || activity.getLongitude() == null)
+                return;
             mapView.setZoom(mapView.getZoom() + 0.0001);
             mapView.setCenter(activity.getLatitude(), activity.getLongitude());
             mapView.setZoom(15);
@@ -66,16 +67,17 @@ public class ItineraryController implements ActivitySectionController, TripSecti
         int lenght = trip.getStages().size();
 
         if (lenght > 0) {
-            for(int i = 0; i < lenght; i++){
+            for (int i = 0; i < lenght; i++) {
 
                 StageDTO stage = trip.getStages().get(i);
                 String name = stage.getLocationName() + ", " + stage.getCity();
 
-                Node location = creaRigaTappa(String.valueOf(i+1), name);
+                Node location = creaRigaTappa(String.valueOf(i + 1), name);
                 location.getStyleClass().add("itinerario-box");
 
                 location.setOnMouseClicked(mouseEvent -> {
-                    if (stage.getLatitude() == null || stage.getLongitude() == null) return;
+                    if (stage.getLatitude() == null || stage.getLongitude() == null)
+                        return;
                     mapView.setZoom(mapView.getZoom() + 0.0001);
                     mapView.setCenter(stage.getLatitude(), stage.getLongitude());
                     mapView.setZoom(15);
@@ -94,7 +96,7 @@ public class ItineraryController implements ActivitySectionController, TripSecti
 
         mapView = new MapView();
 
-        if(activity.getLongitude() != null && activity.getLatitude() != null) {
+        if (activity.getLongitude() != null && activity.getLatitude() != null) {
             MapPoint centro = new MapPoint(activity.getLatitude(), activity.getLongitude());
             mapView.setCenter(centro);
 
@@ -119,15 +121,16 @@ public class ItineraryController implements ActivitySectionController, TripSecti
 
         var mappedStages = trip.getStages().stream()
                 .filter(stage -> stage.getLatitude() != null && stage.getLongitude() != null).toList();
-        if(!mappedStages.isEmpty()){
-            MapPoint centro = new MapPoint(mappedStages.getFirst().getLatitude(), mappedStages.getFirst().getLongitude());
+        if (!mappedStages.isEmpty()) {
+            MapPoint centro = new MapPoint(mappedStages.getFirst().getLatitude(),
+                    mappedStages.getFirst().getLongitude());
             mapView.setCenter(centro);
             mapView.setZoom(14);
 
             Integer number = 1;
-            for(StageDTO stage: mappedStages){
-                MapPoint point = new MapPoint(stage.getLatitude(),stage.getLongitude());
-                MarkerLayer markerLayer = new MarkerLayer(point,String.valueOf(number));
+            for (StageDTO stage : mappedStages) {
+                MapPoint point = new MapPoint(stage.getLatitude(), stage.getLongitude());
+                MarkerLayer markerLayer = new MarkerLayer(point, String.valueOf(number));
                 number++;
                 mapView.addLayer(markerLayer);
             }

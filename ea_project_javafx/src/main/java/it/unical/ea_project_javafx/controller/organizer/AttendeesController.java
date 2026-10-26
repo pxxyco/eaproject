@@ -1,23 +1,29 @@
 package it.unical.ea_project_javafx.controller.organizer;
 
-import it.unical.ea_project_javafx.util.ViewSupport;
 import com.google.gson.reflect.TypeToken;
-import it.unical.ea_project_javafx.dto.BookingDTO;
-import it.unical.ea_project_javafx.util.ApiService;
-import it.unical.ea_project_javafx.util.BackgroundHelper;
+import it.unical.ea_project_javafx.dto.booking.BookingDTO;
+import it.unical.ea_project_javafx.service.api.ApiService;
+import it.unical.ea_project_javafx.ui.ViewSupport;
+import it.unical.ea_project_javafx.ui.background.BackgroundHelper;
+import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.text.NumberFormat;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
-
-import java.lang.reflect.Type;
-import java.math.BigDecimal;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 public class AttendeesController {
 
@@ -87,7 +93,7 @@ public class AttendeesController {
                     Platform.runLater(() -> {
                         masterList.setAll(bookings == null ? List.of() : bookings);
                         eventFilterCombo.getItems().setAll("Tutti gli eventi");
-                        masterList.stream().map(BookingDTO::getItemTitle).filter(java.util.Objects::nonNull)
+                        masterList.stream().map(BookingDTO::getItemTitle).filter(Objects::nonNull)
                                 .distinct().sorted().forEach(title -> eventFilterCombo.getItems().add(title));
                         eventFilterCombo.getSelectionModel().selectFirst();
                         updateKPIs();
@@ -113,7 +119,7 @@ public class AttendeesController {
         ApiService.get(ApiService.BASE_URL + "/api/payments/organizer/revenue",
                 response -> {
                     BigDecimal revenue = ApiService.fromJson(response.body(), BigDecimal.class);
-                    confirmedRevenueLabel.setText(java.text.NumberFormat.getCurrencyInstance(java.util.Locale.ITALY)
+                    confirmedRevenueLabel.setText(NumberFormat.getCurrencyInstance(Locale.ITALY)
                             .format(revenue == null ? BigDecimal.ZERO : revenue));
                 }, () -> ViewSupport.error(statusMessageLabel, "Impossibile caricare gli incassi da pagamenti."), null);
     }

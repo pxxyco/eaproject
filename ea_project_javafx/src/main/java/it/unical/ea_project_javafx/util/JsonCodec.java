@@ -1,8 +1,21 @@
 package it.unical.ea_project_javafx.util;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import java.io.IOException;
-import java.time.*;
+import java.lang.reflect.Type;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.function.Function;
 
 /** Single JSON contract for all frontend consumers of backend data. */
 public final class JsonCodec {
@@ -16,21 +29,21 @@ public final class JsonCodec {
             .registerTypeAdapter(LocalTime.class, temporalAdapter(JsonCodec::deserializeLocalTime))
             .create();
 
-    private static <T> TypeAdapter<T> temporalAdapter(java.util.function.Function<JsonElement, T> reader) {
+    private static <T> TypeAdapter<T> temporalAdapter(Function<JsonElement, T> reader) {
         return new TypeAdapter<T>() {
             @Override
-            public void write(com.google.gson.stream.JsonWriter out, T value) throws IOException {
+            public void write(JsonWriter out, T value) throws IOException {
                 out.value(value.toString());
             }
 
             @Override
-            public T read(com.google.gson.stream.JsonReader in) throws IOException {
+            public T read(JsonReader in) throws IOException {
                 return reader.apply(JsonParser.parseReader(in));
             }
         }.nullSafe();
     }
 
-    public static <T> T read(String json, java.lang.reflect.Type type) {
+    public static <T> T read(String json, Type type) {
         return GSON.fromJson(json, type);
     }
 

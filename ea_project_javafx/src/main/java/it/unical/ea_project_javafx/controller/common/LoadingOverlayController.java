@@ -14,7 +14,6 @@ public class LoadingOverlayController {
     @FXML
     private ImageView errorImage;
 
-
     public void setMessage(String message) {
         label.getStyleClass().removeAll("loading-error");
         if (!label.getStyleClass().contains("loading-text")) {

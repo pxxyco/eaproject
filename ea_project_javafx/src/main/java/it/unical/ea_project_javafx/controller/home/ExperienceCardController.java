@@ -3,25 +3,28 @@ package it.unical.ea_project_javafx.controller.home;
 import it.unical.ea_project_javafx.controller.activity.ActivityDetailsController;
 import it.unical.ea_project_javafx.dto.home.ActivityHomeDTO;
 import it.unical.ea_project_javafx.dto.home.TripHomeDTO;
-import it.unical.ea_project_javafx.util.SceneNavigator;
+import it.unical.ea_project_javafx.navigation.SceneNavigator;
 import it.unical.ea_project_javafx.util.ImageUtils;
-import javafx.beans.value.ChangeListener;
-import javafx.fxml.FXML;
-import javafx.scene.control.Label;
-import javafx.scene.control.Button;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.VBox;
-import javafx.scene.shape.Rectangle;
-
-import static it.unical.ea_project_javafx.controller.activity.ActivityDetailsController.Type.ACTIVITY;
-
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
+import javafx.event.Event;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
+
+import static it.unical.ea_project_javafx.controller.activity.ActivityDetailsController.Type.ACTIVITY;
 
 public class ExperienceCardController {
 
@@ -73,8 +76,8 @@ public class ExperienceCardController {
         clip.setArcHeight(24);
         clip.heightProperty().bind(imageView.fitHeightProperty());
         imageView.setClip(clip);
-        editButton.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_CLICKED, javafx.event.Event::consume);
-        deleteButton.addEventFilter(javafx.scene.input.MouseEvent.MOUSE_CLICKED, javafx.event.Event::consume);
+        editButton.addEventFilter(MouseEvent.MOUSE_CLICKED, Event::consume);
+        deleteButton.addEventFilter(MouseEvent.MOUSE_CLICKED, Event::consume);
     }
 
     public void setCardWidth(double width) {
@@ -82,7 +85,7 @@ public class ExperienceCardController {
         cardRoot.setPrefWidth(width);
         cardRoot.setMaxWidth(width);
         imageView.setFitWidth(width - 12);
-        var container = (javafx.scene.layout.Region) imageView.getParent();
+        var container = (Region) imageView.getParent();
         container.setMinWidth(0);
         container.setPrefWidth(width - 12);
         container.setMaxWidth(width - 12);
@@ -244,7 +247,7 @@ public class ExperienceCardController {
 
         ChangeListener<Number> progressListener = new ChangeListener<>() {
             @Override
-            public void changed(javafx.beans.value.ObservableValue<? extends Number> obs, Number oldVal,
+            public void changed(ObservableValue<? extends Number> obs, Number oldVal,
                     Number newVal) {
                 if (newVal.doubleValue() >= 1.0) {
                     hideImageLoader();
@@ -256,7 +259,7 @@ public class ExperienceCardController {
 
         ChangeListener<Boolean> errorListener = new ChangeListener<>() {
             @Override
-            public void changed(javafx.beans.value.ObservableValue<? extends Boolean> obs, Boolean oldVal,
+            public void changed(ObservableValue<? extends Boolean> obs, Boolean oldVal,
                     Boolean isError) {
                 if (Boolean.TRUE.equals(isError)) {
                     targetImage.errorProperty().removeListener(this);

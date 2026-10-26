@@ -18,8 +18,12 @@ module it.unical.ea_project_javafx {
 
     opens it.unical.ea_project_javafx to javafx.fxml;
 
-    opens it.unical.ea_project_javafx.dto to com.google.gson;
+    opens it.unical.ea_project_javafx.dto.activity to com.google.gson;
+    opens it.unical.ea_project_javafx.dto.booking to com.google.gson;
     opens it.unical.ea_project_javafx.dto.home to com.google.gson;
+    opens it.unical.ea_project_javafx.dto.review to com.google.gson;
+    opens it.unical.ea_project_javafx.dto.trip to com.google.gson;
+    opens it.unical.ea_project_javafx.dto.user to com.google.gson;
 
     opens it.unical.ea_project_javafx.controller.activity to javafx.fxml;
     opens it.unical.ea_project_javafx.controller.activity.photo to javafx.fxml;

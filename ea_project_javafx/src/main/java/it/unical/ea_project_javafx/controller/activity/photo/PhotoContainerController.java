@@ -1,24 +1,22 @@
 package it.unical.ea_project_javafx.controller.activity.photo;
 
 import com.google.gson.reflect.TypeToken;
-
 import it.unical.ea_project_javafx.controller.activity.ActivitySectionController;
 import it.unical.ea_project_javafx.controller.activity.TripSectionController;
-import it.unical.ea_project_javafx.dto.ActivityDTO;
-import it.unical.ea_project_javafx.dto.ActivityImageDTO;
-import it.unical.ea_project_javafx.dto.TripDTO;
-import it.unical.ea_project_javafx.dto.TripImageDTO;
-import it.unical.ea_project_javafx.util.ApiService;
+import it.unical.ea_project_javafx.dto.activity.ActivityDTO;
+import it.unical.ea_project_javafx.dto.activity.ActivityImageDTO;
+import it.unical.ea_project_javafx.dto.trip.TripDTO;
+import it.unical.ea_project_javafx.dto.trip.TripImageDTO;
+import it.unical.ea_project_javafx.service.api.ApiService;
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.util.List;
+import java.util.function.Consumer;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.layout.FlowPane;
 import lombok.Setter;
-
-import java.io.IOException;
-import java.lang.reflect.Type;
-import java.util.List;
-import java.util.function.Consumer;
 
 public class PhotoContainerController implements ActivitySectionController, TripSectionController {
 

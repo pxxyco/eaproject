@@ -1,8 +1,8 @@
 package it.unical.ea_project_javafx.controller.login;
 
+import it.unical.ea_project_javafx.navigation.SceneNavigator;
 import it.unical.ea_project_javafx.navigation.StepNavigator;
-import it.unical.ea_project_javafx.util.BackgroundHelper;
-import it.unical.ea_project_javafx.util.SceneNavigator;
+import it.unical.ea_project_javafx.ui.background.BackgroundHelper;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.image.ImageView;
@@ -10,20 +10,27 @@ import javafx.scene.layout.VBox;
 
 public class AuthWizardController implements StepNavigator {
 
-    @FXML private ImageView bgImageView;
-    @FXML private VBox authCard;
-    @FXML private VBox stepLogin, stepForgotPassword, stepRole, stepDetails, loadingOverlay, feedbackOverlay;
+    @FXML
+    private ImageView bgImageView;
+    @FXML
+    private VBox authCard;
+    @FXML
+    private VBox stepLogin, stepForgotPassword, stepRole, stepDetails, loadingOverlay, feedbackOverlay;
 
-    @FXML private LoginStepController stepLoginController;
-    @FXML private ForgotPasswordController stepForgotPasswordController;
-    @FXML private RoleSelectionStepController stepRoleController;
-    @FXML private RegistrationStepController stepDetailsController;
-    @FXML private FeedbackOverlayController feedbackOverlayController;
-
+    @FXML
+    private LoginStepController stepLoginController;
+    @FXML
+    private ForgotPasswordController stepForgotPasswordController;
+    @FXML
+    private RoleSelectionStepController stepRoleController;
+    @FXML
+    private RegistrationStepController stepDetailsController;
+    @FXML
+    private FeedbackOverlayController feedbackOverlayController;
 
     @FXML
     public void initialize() {
-        
+
         BackgroundHelper.setupBackground(bgImageView);
 
         stepLoginController.setNavigator(this);
@@ -35,17 +42,20 @@ public class AuthWizardController implements StepNavigator {
         goToLoginStep();
     }
 
-    @Override public void goToLoginStep() {
+    @Override
+    public void goToLoginStep() {
         stepLoginController.clearError();
         showStep(stepLogin);
     }
 
-    @Override public void goToForgotPasswordStep() {
+    @Override
+    public void goToForgotPasswordStep() {
         stepForgotPasswordController.clearMessage();
         showStep(stepForgotPassword);
     }
 
-    @Override public void goToRoleStep() {
+    @Override
+    public void goToRoleStep() {
         showStep(stepRole);
     }
 
@@ -65,7 +75,6 @@ public class AuthWizardController implements StepNavigator {
     void goToHomeFromButton(ActionEvent event) {
         goToHome();
     }
-
 
     @Override
     public void setLoading(boolean loading) {
@@ -109,13 +118,20 @@ public class AuthWizardController implements StepNavigator {
 
         authCard.setVisible(true);
         authCard.setManaged(true);
-        stepLogin.setVisible(false);            stepLogin.setManaged(false);
-        stepForgotPassword.setVisible(false);   stepForgotPassword.setManaged(false);
-        stepRole.setVisible(false);             stepRole.setManaged(false);
-        stepDetails.setVisible(false);          stepDetails.setManaged(false);
-        loadingOverlay.setVisible(false);       loadingOverlay.setManaged(false);
-        feedbackOverlay.setVisible(false);      feedbackOverlay.setManaged(false);
-        stepToShow.setVisible(true);            stepToShow.setManaged(true);
+        stepLogin.setVisible(false);
+        stepLogin.setManaged(false);
+        stepForgotPassword.setVisible(false);
+        stepForgotPassword.setManaged(false);
+        stepRole.setVisible(false);
+        stepRole.setManaged(false);
+        stepDetails.setVisible(false);
+        stepDetails.setManaged(false);
+        loadingOverlay.setVisible(false);
+        loadingOverlay.setManaged(false);
+        feedbackOverlay.setVisible(false);
+        feedbackOverlay.setManaged(false);
+        stepToShow.setVisible(true);
+        stepToShow.setManaged(true);
 
     }
 

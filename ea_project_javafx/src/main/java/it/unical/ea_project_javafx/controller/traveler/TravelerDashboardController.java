@@ -1,49 +1,71 @@
 package it.unical.ea_project_javafx.controller.traveler;
 
-import static it.unical.ea_project_javafx.util.BookingPresentation.*;
-import it.unical.ea_project_javafx.util.UiText;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 import it.unical.ea_project_javafx.controller.home.ExperienceCardController;
 import it.unical.ea_project_javafx.controller.profile.ProfileDashboardController;
-import it.unical.ea_project_javafx.dto.BookingDTO;
+import it.unical.ea_project_javafx.dto.booking.BookingDTO;
 import it.unical.ea_project_javafx.dto.home.ActivityHomeDTO;
 import it.unical.ea_project_javafx.dto.home.TripHomeDTO;
+import it.unical.ea_project_javafx.navigation.SceneNavigator;
 import it.unical.ea_project_javafx.security.UserSession;
-import it.unical.ea_project_javafx.util.ApiService;
-import it.unical.ea_project_javafx.util.PopupFactory;
-import it.unical.ea_project_javafx.util.SceneNavigator;
-import javafx.animation.PauseTransition;
-import javafx.application.Platform;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.FXCollections;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.control.*;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-import javafx.geometry.Pos;
-import javafx.stage.FileChooser;
-import javafx.stage.Window;
-import javafx.util.Duration;
-
+import it.unical.ea_project_javafx.service.api.ApiService;
+import it.unical.ea_project_javafx.ui.UiText;
+import it.unical.ea_project_javafx.ui.dialog.PopupFactory;
+import it.unical.ea_project_javafx.ui.scroll.ScrollSupport;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.net.URLEncoder;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
+import javafx.animation.PauseTransition;
+import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
+import javafx.util.Duration;
+
+import static it.unical.ea_project_javafx.ui.BookingPresentation.bookingRow;
+import static it.unical.ea_project_javafx.ui.BookingPresentation.compareBookings;
+import static it.unical.ea_project_javafx.ui.BookingPresentation.displayStatus;
+import static it.unical.ea_project_javafx.ui.BookingPresentation.eventStartDateTime;
+import static it.unical.ea_project_javafx.ui.BookingPresentation.formatBookedAt;
+import static it.unical.ea_project_javafx.ui.BookingPresentation.formatEventPeriod;
+import static it.unical.ea_project_javafx.ui.BookingPresentation.hasEventStarted;
+import static it.unical.ea_project_javafx.ui.BookingPresentation.isCancelled;
+import static it.unical.ea_project_javafx.ui.BookingPresentation.isEventEnded;
+import static it.unical.ea_project_javafx.ui.BookingPresentation.isHistorical;
+import static it.unical.ea_project_javafx.ui.BookingPresentation.isTrip;
+import static it.unical.ea_project_javafx.ui.BookingPresentation.statusCell;
 
 /**
  * Traveler dashboard: data-backed discovery, booking summary and the same
@@ -64,9 +86,9 @@ public class TravelerDashboardController implements ProfileDashboardController {
     @FXML
     private Label welcomeSubtitleLabel;
     @FXML
-    private javafx.scene.control.ScrollPane recommendedScroll;
+    private ScrollPane recommendedScroll;
     @FXML
-    private javafx.scene.control.TextField searchField;
+    private TextField searchField;
     @FXML
     private ComboBox<String> searchTypeCombo;
     @FXML
@@ -284,7 +306,7 @@ public class TravelerDashboardController implements ProfileDashboardController {
     }
 
     @FXML
-    private void handleCategory(javafx.event.ActionEvent event) {
+    private void handleCategory(ActionEvent event) {
         Button selectedCategory = (Button) event.getSource();
         String category = selectedCategory.getUserData().toString();
         if (category.equals("RECOMMENDED")) {
@@ -330,7 +352,7 @@ public class TravelerDashboardController implements ProfileDashboardController {
     private void setDiscovery(List<?> items) {
         discoveryItems.clear();
         if (items != null)
-            items.stream().filter(java.util.Objects::nonNull).forEach(discoveryItems::add);
+            items.stream().filter(Objects::nonNull).forEach(discoveryItems::add);
         discoveryOffset = 0;
         renderDiscovery();
     }
@@ -396,22 +418,6 @@ public class TravelerDashboardController implements ProfileDashboardController {
     @FXML
     private void handleOpenHistory() {
         SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/traveler/booking-history.fxml", null);
-    }
-
-    @FXML
-    private void handleOpenFavorites() {
-        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/traveler/favorites.fxml", null);
-    }
-
-    @FXML
-    private void handleShowAllBookings() {
-        bookingsPeriodFilter.getSelectionModel().select("Tutte");
-        bookingsStatusFilter.getSelectionModel().select("Tutti");
-        bookingsSearchField.clear();
-        filterBookings();
-        if (!bookingsTable.getItems().isEmpty())
-            bookingsTable.scrollTo(0);
-        dashboardStatus("Tutte le prenotazioni sono mostrate nella tabella qui sotto.", false);
     }
 
     private void setupBookingFilters() {
@@ -553,7 +559,7 @@ public class TravelerDashboardController implements ProfileDashboardController {
             return;
         upcomingExperienceContainer.getChildren().clear();
         List<BookingDTO> upcoming = allBookings.stream()
-                .filter(java.util.Objects::nonNull)
+                .filter(Objects::nonNull)
                 .filter(b -> b.getBookingId() != null && !isCancelled(b) && !isHistorical(b, evaluationTime))
                 .filter(b -> {
                     LocalDateTime start = eventStartDateTime(b);
@@ -617,7 +623,7 @@ public class TravelerDashboardController implements ProfileDashboardController {
         bookingsTable.scrollTo(booking);
         bookingFeedback("Prenotazione selezionata: " + UiText.orDefault(booking.getItemTitle(), "Esperienza")
                 + " · " + UiText.orDefault(booking.getItemLocation(), "") + " · " + formatEventPeriod(booking), false);
-        it.unical.ea_project_javafx.util.ScrollSupport.reveal(bookingFeedbackLabel);
+        ScrollSupport.reveal(bookingFeedbackLabel);
     }
 
     private void filterBookings() {

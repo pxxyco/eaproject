@@ -59,32 +59,6 @@
 }
 
 /* ==========================================================================
-   2. CATEGORY CHIPS
-   ========================================================================== */
-.category-scroll,
-.category-scroll > .viewport {
-    -fx-background-color: transparent;
-    -fx-background: transparent;
-}
-
-.category-chip {
-    -fx-background-color: rgba(255, 255, 255, 0.1);
-    -fx-border-color: rgba(255, 255, 255, 0.2);
-    -fx-text-fill: #ffffff;
-    -fx-background-radius: 20px;
-    -fx-border-radius: 20px;
-    -fx-padding: 6px 14px;
-    -fx-cursor: hand;
-    -fx-font-size: 12px;
-}
-
-.category-chip:hover,
-.chip-active {
-    -fx-background-color: rgba(231, 229, 228, 0.22);
-    -fx-border-color: #d6d3d1;
-}
-
-/* ==========================================================================
    3. SECTIONS & BANNERS
    ========================================================================== */
 .section-title {
@@ -98,41 +72,38 @@
     -fx-text-fill: rgba(255, 255, 255, 0.75);
 }
 
-.public-banner {
-    -fx-background-color: rgba(255, 255, 255, 0.08);
-    -fx-border-color: rgba(255, 255, 255, 0.2);
-    -fx-background-radius: 16px;
-    -fx-border-radius: 16px;
-}
-
-.banner-title {
-    -fx-font-size: 16px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #ffffff;
-}
-
-.banner-sub {
-    -fx-font-size: 12px;
-    -fx-text-fill: rgba(255, 255, 255, 0.8);
-}
-
 .cards-row {
     -fx-alignment: center-left;
 }
 
 /* Pagination replaces the previous page rather than accumulating cards. */
-.home-pagination { -fx-padding: 18 0 24; }
-.home-page-button, .home-page-nav {
-    -fx-background-color: rgba(255,255,255,0.08);
+.home-pagination {
+    -fx-padding: 18 0 24;
+}
+
+.home-page-button,
+.home-page-nav {
+    -fx-background-color: rgba(255, 255, 255, 0.08);
     -fx-text-fill: #e7e5e4;
     -fx-background-radius: 14;
     -fx-border-radius: 14;
-    -fx-border-color: rgba(231,229,228,0.2);
+    -fx-border-color: rgba(231, 229, 228, 0.2);
     -fx-font-weight: bold;
     -fx-cursor: hand;
     -fx-min-height: 40;
     -fx-padding: 9 14;
 }
-.home-page-button { -fx-min-width: 40; }
-.home-page-button:selected { -fx-background-color: #e7e5e4; -fx-text-fill: #1c1917; }
-.home-page-button:disabled, .home-page-nav:disabled { -fx-opacity: 0.4; }
+
+.home-page-button {
+    -fx-min-width: 40;
+}
+
+.home-page-button:selected {
+    -fx-background-color: #e7e5e4;
+    -fx-text-fill: #1c1917;
+}
+
+.home-page-button:disabled,
+.home-page-nav:disabled {
+    -fx-opacity: 0.4;
+}

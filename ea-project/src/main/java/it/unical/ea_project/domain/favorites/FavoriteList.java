@@ -1,0 +1,59 @@
+package it.unical.ea_project.domain.favorites;
+
+import it.unical.ea_project.domain.user.User;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
+@Entity
+@Table(name = "\"FAVORITE_LIST\"")
+public class FavoriteList {
+
+    /**
+     * Visibility
+     */
+    public enum Visibility {
+
+        PRIVATE,
+        SHARED,
+        PUBLIC
+
+    }
+
+    @Column(name = "name", length = 80, nullable = false)
+    private String name;
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "list_id")
+    private Long id;
+
+    // FK user_id
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "visibility")
+    private Visibility visibility;
+
+    @Column(name = "deleted")
+    private boolean deleted;
+
+}

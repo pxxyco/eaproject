@@ -72,8 +72,6 @@
     -fx-padding: 10px 12px;
 }
 
-.export-popup-panel .custom-input:focused {}
-
 .export-popup-panel .btn-primary {
     -fx-background-color: #356ac3;
     -fx-text-fill: #ffffff;
@@ -82,8 +80,6 @@
     -fx-padding: 10px 16px;
     -fx-cursor: hand;
 }
-
-.export-popup-panel .btn-primary:hover {}
 
 .export-popup-panel .btn-secondary {
     -fx-background-color: #f5f7fb;
@@ -94,5 +90,3 @@
     -fx-padding: 10px 16px;
     -fx-cursor: hand;
 }
-
-.export-popup-panel .btn-secondary:hover {}

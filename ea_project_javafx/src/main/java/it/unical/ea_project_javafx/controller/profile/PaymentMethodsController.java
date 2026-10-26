@@ -1,24 +1,30 @@
 package it.unical.ea_project_javafx.controller.profile;
 
-import it.unical.ea_project_javafx.util.JsonCodec;
-import it.unical.ea_project_javafx.util.UiText;
-import it.unical.ea_project_javafx.util.ViewSupport;
+import com.google.gson.JsonParser;
 import it.unical.ea_project_javafx.security.UserSession;
-import it.unical.ea_project_javafx.util.BackgroundHelper;
+import it.unical.ea_project_javafx.service.api.ApiService;
+import it.unical.ea_project_javafx.ui.UiText;
+import it.unical.ea_project_javafx.ui.ViewSupport;
+import it.unical.ea_project_javafx.ui.background.BackgroundHelper;
+import it.unical.ea_project_javafx.ui.dialog.PopupFactory;
+import it.unical.ea_project_javafx.util.JsonCodec;
+import java.time.YearMonth;
+import java.util.Map;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-
-import it.unical.ea_project_javafx.util.ApiService;
-import com.google.gson.*;
-import java.time.YearMonth;
-import java.util.Map;
 
 public class PaymentMethodsController {
 
@@ -120,10 +126,10 @@ public class PaymentMethodsController {
                 deleteBtn.getStyleClass().add("danger-action-button");
                 deleteBtn.setOnAction(e -> {
                     CardRow row = getTableView().getItems().get(getIndex());
-                    it.unical.ea_project_javafx.util.PopupFactory.showConfirmation(
-                            it.unical.ea_project_javafx.util.PopupFactory.resolveRoot(cardsTable),
+                    PopupFactory.showConfirmation(
+                            PopupFactory.resolveRoot(cardsTable),
                             "Rimuovere questa carta?", "La carta di prova verrà rimossa dal tuo account.",
-                            it.unical.ea_project_javafx.util.PopupFactory.Size.COMPACT,
+                            PopupFactory.Size.COMPACT,
                             () -> ApiService.callDetailed(ApiService.BASE_URL + "/api/account/cards/" + row.id, null,
                                     ApiService.Method.DELETE, r -> {
                                         mockCards.remove(row);

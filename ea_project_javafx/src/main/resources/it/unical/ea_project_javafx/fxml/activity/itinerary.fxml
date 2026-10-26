@@ -5,24 +5,28 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<HBox maxHeight="Infinity" maxWidth="Infinity" spacing="20" styleClass="container"
+   xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
+   fx:controller="it.unical.ea_project_javafx.controller.activity.ItineraryController">
+   <stylesheets>
+      <URL value="@../../css/common/style.css" />
+      <URL value="@../../css/activity/activity-common.css" />
+      <URL value="@../../css/activity/itinerary.css" />
+   </stylesheets>
 
-<HBox maxHeight="Infinity" maxWidth="Infinity" spacing="20" styleClass="container" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.activity.ItineraryController">
-    <stylesheets>
-        <URL value="@../../css/common/style.css" />
-        <URL value="@../../css/activity/activity-common.css" />
-        <URL value="@../../css/activity/itinerary.css" />
-    </stylesheets>
-
-    <children>
-      <VBox fx:id="itinerarioContainer" minWidth="275.0" prefWidth="400.0" spacing="10.0" styleClass="itinerario">
+   <children>
+      <VBox fx:id="itinerarioContainer" minWidth="275.0" prefWidth="400.0" spacing="10.0"
+         styleClass="itinerario">
          <HBox.margin>
             <Insets />
          </HBox.margin>
          <padding>
             <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-         </padding></VBox>
-      <StackPane fx:id="mapContainer" maxHeight="400.0" minHeight="300.0" minWidth="200.0" prefHeight="300.0" prefWidth="500.0" />
+         </padding>
+      </VBox>
+      <StackPane fx:id="mapContainer" maxHeight="400.0" minHeight="300.0" minWidth="200.0"
+         prefHeight="300.0" prefWidth="500.0" />
 
-    </children>
+   </children>
 
 </HBox>

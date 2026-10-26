@@ -14,7 +14,6 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-
 <StackPane fx:id="root" prefHeight="760" prefWidth="1300" styleClass="app-root"
     xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
     fx:controller="it.unical.ea_project_javafx.controller.activity.ActivityDetailsController">
@@ -185,7 +184,8 @@
                                             <Button fx:id="btnPrenota" maxWidth="Infinity"
                                                 onAction="#handlePrenota" styleClass="btn-primary"
                                                 text="Prenota Ora" />
-                                            <Label fx:id="bookingAvailabilityLabel" wrapText="true" styleClass="section-subtitle" />
+                                            <Label fx:id="bookingAvailabilityLabel" wrapText="true"
+                                                styleClass="section-subtitle" />
                                             <Button fx:id="btnContactOrganizer" maxWidth="Infinity"
                                                 onAction="#handleContactOrganizer"
                                                 styleClass="btn-secondary"

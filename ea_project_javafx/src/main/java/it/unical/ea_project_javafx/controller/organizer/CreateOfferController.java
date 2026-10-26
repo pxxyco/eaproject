@@ -1,35 +1,46 @@
 package it.unical.ea_project_javafx.controller.organizer;
 
-import it.unical.ea_project_javafx.util.UiText;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-import javafx.scene.shape.Rectangle;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
-import it.unical.ea_project_javafx.util.ApiService;
-import it.unical.ea_project_javafx.util.BackgroundHelper;
-import it.unical.ea_project_javafx.dto.ActivityDTO;
-import it.unical.ea_project_javafx.dto.ActivityImageDTO;
-import it.unical.ea_project_javafx.dto.TripDTO;
-import it.unical.ea_project_javafx.dto.TripImageDTO;
+import it.unical.ea_project_javafx.dto.activity.ActivityDTO;
+import it.unical.ea_project_javafx.dto.activity.ActivityImageDTO;
+import it.unical.ea_project_javafx.dto.trip.StageDTO;
+import it.unical.ea_project_javafx.dto.trip.TripDTO;
+import it.unical.ea_project_javafx.dto.trip.TripImageDTO;
+import it.unical.ea_project_javafx.service.api.ApiService;
+import it.unical.ea_project_javafx.ui.UiText;
+import it.unical.ea_project_javafx.ui.background.BackgroundHelper;
 import it.unical.ea_project_javafx.util.ImageUtils;
-
-import java.math.BigDecimal;
 import java.io.File;
+import java.math.BigDecimal;
+import java.net.http.HttpResponse;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 
 public class CreateOfferController {
 
@@ -311,7 +322,7 @@ public class CreateOfferController {
                             .sorted(Comparator.comparing(TripImageDTO::getOrderIndex,
                                     Comparator.nullsLast(Comparator.naturalOrder())))
                             .toList();
-                    javafx.application.Platform.runLater(() -> {
+                    Platform.runLater(() -> {
                         if (tripCoverFile == null
                                 && (trip.getCoverPhotoUrl() == null || trip.getCoverPhotoUrl().isBlank())
                                 && !orderedImages.isEmpty()) {
@@ -322,7 +333,7 @@ public class CreateOfferController {
                                         "Foto attuale"));
                     });
                 },
-                () -> javafx.application.Platform.runLater(() -> showOfferError(
+                () -> Platform.runLater(() -> showOfferError(
                         "Anteprima delle foto del viaggio non disponibile; puoi comunque modificarlo.")),
                 null);
     }
@@ -383,9 +394,9 @@ public class CreateOfferController {
         remove.getStyleClass().add("btn-remove-stage");
         remove.setMinWidth(88);
         remove.setOnAction(event -> stagesContainer.getChildren().remove(row));
-        HBox.setHgrow(title, javafx.scene.layout.Priority.ALWAYS);
-        HBox.setHgrow(place, javafx.scene.layout.Priority.ALWAYS);
-        HBox.setHgrow(city, javafx.scene.layout.Priority.ALWAYS);
+        HBox.setHgrow(title, Priority.ALWAYS);
+        HBox.setHgrow(place, Priority.ALWAYS);
+        HBox.setHgrow(city, Priority.ALWAYS);
         fields.getChildren().addAll(title, place, city, day, category, remove);
         TextArea description = new TextArea();
         description.setPromptText("Descrizione tappa");
@@ -560,10 +571,10 @@ public class CreateOfferController {
             payload.put("city", actCityField.getText().trim());
             payload.put("startDate", start.atTime(activityToEdit != null && activityToEdit.getStartDate() != null
                     ? activityToEdit.getStartDate().toLocalTime()
-                    : java.time.LocalTime.MIDNIGHT).toString());
+                    : LocalTime.MIDNIGHT).toString());
             payload.put("endDate", end.atTime(activityToEdit != null && activityToEdit.getEndDate() != null
                     ? activityToEdit.getEndDate().toLocalTime()
-                    : java.time.LocalTime.MIDNIGHT).toString());
+                    : LocalTime.MIDNIGHT).toString());
             if (activityToEdit != null) {
                 payload.put("latitude", activityToEdit.getLatitude());
                 payload.put("longitude", activityToEdit.getLongitude());
@@ -600,7 +611,7 @@ public class CreateOfferController {
         }
     }
 
-    private void handleTripSaved(java.net.http.HttpResponse<String> response) {
+    private void handleTripSaved(HttpResponse<String> response) {
         if (tripCoverFile == null && tripSecondaryPhotoFiles.isEmpty()) {
             closeAfterSave();
             return;
@@ -618,7 +629,7 @@ public class CreateOfferController {
         uploadTripPhotos(savedTrip, isNewTrip);
     }
 
-    private void handleActivitySaved(java.net.http.HttpResponse<String> response) {
+    private void handleActivitySaved(HttpResponse<String> response) {
         if (activityCoverFile == null && activitySecondaryPhotoFiles.isEmpty()) {
             closeAfterSave();
             return;
@@ -742,7 +753,7 @@ public class CreateOfferController {
     private List<Map<String, Object>> collectStages() {
         List<Map<String, Object>> stages = new ArrayList<>();
         int order = 1;
-        for (javafx.scene.Node node : stagesContainer.getChildren()) {
+        for (Node node : stagesContainer.getChildren()) {
             StageFields fields = (StageFields) node.getUserData();
             if (UiText.isBlank(fields.title().getText())) {
                 throw new IllegalArgumentException("Ogni tappa deve avere un titolo.");
@@ -751,7 +762,7 @@ public class CreateOfferController {
             if (day < 1) {
                 throw new IllegalArgumentException("Il giorno della tappa deve essere positivo.");
             }
-            long days = java.time.temporal.ChronoUnit.DAYS.between(tripStartDatePicker.getValue(),
+            long days = ChronoUnit.DAYS.between(tripStartDatePicker.getValue(),
                     tripEndDatePicker.getValue()) + 1;
             if (day > days)
                 throw new IllegalArgumentException("Il giorno della tappa supera la durata del viaggio.");
@@ -876,6 +887,6 @@ public class CreateOfferController {
             TextField day,
             ComboBox<String> category,
             TextArea description,
-            it.unical.ea_project_javafx.dto.StageDTO original) {
+            StageDTO original) {
     }
 }

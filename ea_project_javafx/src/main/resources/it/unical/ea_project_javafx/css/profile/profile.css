@@ -1,24 +1,5 @@
-.profile-scroll,
-.profile-scroll>.viewport {
-    -fx-background-color: transparent;
-}
-
 .profile-overlay {
     -fx-background-color: rgba(12, 12, 12, 0.78);
-}
-
-.profile-content {
-    -fx-fill-width: true;
-}
-
-.profile-title {
-    -fx-font-size: 28px;
-    -fx-font-weight: bold;
-    -fx-text-fill: #ffffff;
-}
-
-.profile-subtitle {
-    -fx-text-fill: rgba(255, 255, 255, 0.68);
 }
 
 .glass-card {
@@ -70,19 +51,11 @@
     -fx-padding: 9px 12px;
 }
 
-.custom-input:focused,
-.custom-textarea:focused,
-.custom-combo:focused,
-.custom-combo:showing,
-.custom-datepicker:focused,
-.custom-datepicker:showing {}
-
 .custom-combo:showing,
 .custom-datepicker:showing {
     -fx-background-color: rgba(255, 255, 255, 0.12);
     -fx-border-color: #d6d3d1;
 }
-
 
 /* ComboBox e DatePicker: il riquadro è sul controllo, il contenuto interno resta trasparente */
 .custom-combo,
@@ -96,16 +69,6 @@
     -fx-background-color: transparent;
 }
 
-.custom-input-read {
-    -fx-background-color: rgba(255, 255, 255, 0.04);
-    -fx-border-color: rgba(255, 255, 255, 0.12);
-    -fx-border-radius: 8px;
-    -fx-background-radius: 8px;
-    -fx-text-fill: #e7e5e4;
-    -fx-padding: 9px 12px;
-    -fx-font-weight: bold;
-}
-
 .btn-secondary {
     -fx-background-color: rgba(255, 255, 255, 0.18);
     -fx-border-color: rgba(255, 255, 255, 0.25);
@@ -117,8 +80,6 @@
     -fx-padding: 8px 16px;
     -fx-cursor: hand;
 }
-
-.btn-secondary:hover {}
 
 /* Avatar del profilo: iniziali visibili finché non esiste una foto valida. */
 .profile-avatar {
@@ -139,9 +100,4 @@
 
 .profile-avatar .image-view {
     -fx-background-radius: 52px;
-}
-
-.profile-subtitle {
-    -fx-text-fill: rgba(255, 255, 255, 0.68);
-    -fx-font-size: 12px;
 }

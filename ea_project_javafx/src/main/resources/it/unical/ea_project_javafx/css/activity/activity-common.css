@@ -55,8 +55,6 @@
     -fx-padding: 0;
 }
 
-.add-button:hover {}
-
 .add-button:pressed {
     -fx-background-color: #d6d3d1;
 }

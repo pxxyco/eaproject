@@ -4,10 +4,8 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
-
 <StackPane xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="it.unical.ea_project_javafx.controller.organizer.EventsController">
+    fx:controller="it.unical.ea_project_javafx.controller.organizer.EventsController">
     <stylesheets>
         <URL value="@../../css/common/style.css" />
         <URL value="@../../css/profile/profile.css" />
@@ -15,7 +13,11 @@
     <ImageView fx:id="bgImageView" pickOnBounds="true" preserveRatio="false" />
     <Region styleClass="profile-overlay" />
     <BorderPane>
-        <top><StackPane fx:id="navbarContainer" /></top>
-        <center><StackPane fx:id="offersContainer" /></center>
+        <top>
+            <StackPane fx:id="navbarContainer" />
+        </top>
+        <center>
+            <StackPane fx:id="offersContainer" />
+        </center>
     </BorderPane>
 </StackPane>

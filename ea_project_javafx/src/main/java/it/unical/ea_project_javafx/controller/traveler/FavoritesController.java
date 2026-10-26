@@ -1,29 +1,36 @@
 package it.unical.ea_project_javafx.controller.traveler;
 
-import it.unical.ea_project_javafx.util.JsonCodec;
-import it.unical.ea_project_javafx.util.ViewSupport;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import it.unical.ea_project_javafx.util.ApiService;
-import it.unical.ea_project_javafx.util.BackgroundHelper;
-import it.unical.ea_project_javafx.util.PopupFactory;
+import it.unical.ea_project_javafx.service.api.ApiService;
+import it.unical.ea_project_javafx.ui.ViewSupport;
+import it.unical.ea_project_javafx.ui.background.BackgroundHelper;
+import it.unical.ea_project_javafx.ui.dialog.PopupFactory;
+import it.unical.ea_project_javafx.util.JsonCodec;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class FavoritesController {
 
@@ -86,7 +93,7 @@ public class FavoritesController {
     @FXML
     private Button shareListButton;
     @FXML
-    private javafx.scene.layout.StackPane sharingPopup;
+    private StackPane sharingPopup;
     @FXML
     private ListSharingPopupController sharingPopupController;
     @FXML
@@ -112,9 +119,9 @@ public class FavoritesController {
         newListVisibilityCombo.getItems().setAll("PRIVATE", "SHARED", "PUBLIC");
         editListVisibilityCombo.getItems().setAll("PRIVATE", "SHARED", "PUBLIC");
         newListVisibilityCombo.getSelectionModel().selectFirst();
-        for (var list : java.util.List.of(listsListView, tripSearchResults, savedTripsListView,
+        for (var list : List.of(listsListView, tripSearchResults, savedTripsListView,
                 activitySearchResults, savedActivitiesListView)) {
-            list.setCellFactory(view -> new javafx.scene.control.ListCell<>() {
+            list.setCellFactory(view -> new ListCell<>() {
                 @Override
                 protected void updateItem(String item, boolean empty) {
                     super.updateItem(item, empty);

@@ -50,8 +50,6 @@
     -fx-padding: 10px;
 }
 
-.custom-input:focused {}
-
 .date-picker.custom-input {
     -fx-padding: 0px;
 }
@@ -113,8 +111,6 @@
     -fx-cursor: hand;
 }
 
-.btn-submit:hover {}
-
 .btn-back {
     -fx-background-color: transparent;
     -fx-text-fill: rgba(255, 255, 255, 0.8);
@@ -122,8 +118,6 @@
     -fx-cursor: hand;
     -fx-padding: 0;
 }
-
-.btn-back:hover {}
 
 /* Selezione Ruolo */
 .role-card {
@@ -139,10 +133,6 @@
 .role-card:hover {
     -fx-background-color: rgba(231, 229, 228, 0.18);
     -fx-border-color: #e7e5e4;
-}
-
-.role-icon {
-    -fx-font-size: 28px;
 }
 
 .role-title {
@@ -222,8 +212,6 @@
     -fx-background-radius: 999px;
     -fx-cursor: hand;
 }
-
-.feedback-button:hover {}
 
 .password-input {
     -fx-padding: 12 48 12 14;

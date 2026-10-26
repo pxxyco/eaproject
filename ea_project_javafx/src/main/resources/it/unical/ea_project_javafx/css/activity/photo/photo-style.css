@@ -28,8 +28,6 @@
     -fx-cursor: hand;
 }
 
-.close-button:hover {}
-
 .close-button:pressed {
     -fx-background-color: rgba(255, 255, 255, 0.45);
 }

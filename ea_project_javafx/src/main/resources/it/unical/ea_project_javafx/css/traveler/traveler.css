@@ -9,10 +9,6 @@
     -fx-text-fill: rgba(255, 255, 255, 0.6);
 }
 
-.booking-dashboard-row {
-    -fx-alignment: top-left;
-}
-
 /* Correzione della card di creazione lista */
 .booking-count-card {
     -fx-background-color: rgba(255, 255, 255, 0.08);
@@ -77,8 +73,6 @@
     -fx-cursor: hand;
 }
 
-.search-icon-button:hover {}
-
 .traveler-search-type {
     -fx-background-color: rgba(255, 255, 255, 0.1);
     -fx-background-radius: 8px;
@@ -124,8 +118,6 @@
     -fx-cursor: hand;
 }
 
-.carousel-button:hover {}
-
 /* Tabella Prenotazioni Viaggiatore */
 .profile-table {
     -fx-background-color: rgba(255, 255, 255, 0.04);
@@ -168,8 +160,6 @@
     -fx-background-radius: 8px;
     -fx-cursor: hand;
 }
-
-.danger-action-button:hover {}
 
 /* Prenotazioni cancellate: visivamente secondarie e sempre in fondo alla lista. */
 .cancelled-booking-row {
@@ -490,9 +480,6 @@
     -fx-min-height: 42px;
 }
 
-.traveler-dashboard-content .dashboard-booking-filters .text-field:focused,
-.traveler-dashboard-content .dashboard-booking-filters .combo-box:focused {}
-
 .traveler-dashboard-content .dashboard-booking-filters .combo-box .list-cell {
     -fx-text-fill: #f5f5f4;
 }
@@ -587,8 +574,6 @@
     -fx-text-fill: #f5f5f4;
 }
 
-.traveler-dashboard-content .dashboard-bookings-table .btn-secondary:hover {}
-
 .traveler-dashboard-content .dashboard-bookings-table .danger-action-button {
     -fx-background-color: rgba(175, 75, 70, 0.22);
     -fx-border-color: rgba(220, 125, 120, 0.35);
@@ -596,13 +581,10 @@
     -fx-text-fill: #f3d7d5;
 }
 
-.traveler-dashboard-content .dashboard-bookings-table .danger-action-button:hover {}
-
 .traveler-dashboard-content .dashboard-bookings-table .booking-status-pill {
     -fx-padding: 5px 9px;
     -fx-font-size: 10px;
 }
-
 
 .traveler-dashboard-content .dashboard-welcome {
     -fx-background-color: transparent;

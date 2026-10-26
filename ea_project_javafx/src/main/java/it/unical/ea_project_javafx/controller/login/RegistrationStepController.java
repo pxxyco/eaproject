@@ -1,11 +1,11 @@
 package it.unical.ea_project_javafx.controller.login;
 
-import it.unical.ea_project_javafx.util.ViewSupport;
-import it.unical.ea_project_javafx.dto.UserDTO;
+import it.unical.ea_project_javafx.dto.user.UserDTO;
+import it.unical.ea_project_javafx.navigation.SceneNavigator;
 import it.unical.ea_project_javafx.navigation.StepNavigator;
-import it.unical.ea_project_javafx.util.ApiService;
-import it.unical.ea_project_javafx.util.PasswordPolicy;
-import it.unical.ea_project_javafx.util.SceneNavigator;
+import it.unical.ea_project_javafx.security.PasswordPolicy;
+import it.unical.ea_project_javafx.service.api.ApiService;
+import it.unical.ea_project_javafx.ui.ViewSupport;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;

@@ -127,8 +127,6 @@
     -fx-padding: 9px 14px;
 }
 
-.sharing-popup-card .btn-primary:hover {}
-
 .sharing-popup-card .btn-secondary {
     -fx-background-color: rgba(231, 229, 228, 0.09);
     -fx-text-fill: #f5f5f4;
@@ -137,8 +135,6 @@
     -fx-background-radius: 9px;
     -fx-padding: 8px 12px;
 }
-
-.sharing-popup-card .btn-secondary:hover {}
 
 .sharing-popup-card .button:disabled {
     -fx-opacity: 0.48;
@@ -154,20 +150,4 @@
     -fx-text-fill: #fecaca;
     -fx-font-size: 12px;
     -fx-font-weight: bold;
-}
-
-.delete-confirm-button {
-    -fx-background-color: rgba(120, 45, 45, 0.40);
-    -fx-text-fill: #fecaca;
-    -fx-border-color: rgba(248, 113, 113, 0.30);
-    -fx-border-radius: 9px;
-    -fx-background-radius: 9px;
-    -fx-padding: 10px 16px;
-    -fx-cursor: hand;
-}
-
-.delete-confirm-button:hover {}
-
-.delete-confirm-button:disabled {
-    -fx-opacity: 0.6;
 }

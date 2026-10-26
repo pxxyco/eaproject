@@ -1,35 +1,52 @@
 package it.unical.ea_project_javafx.controller.traveler;
 
-import static it.unical.ea_project_javafx.util.BookingPresentation.*;
-import it.unical.ea_project_javafx.util.UiText;
-import it.unical.ea_project_javafx.util.ViewSupport;
 import com.google.gson.reflect.TypeToken;
-import it.unical.ea_project_javafx.dto.BookingDTO;
-import it.unical.ea_project_javafx.util.ApiService;
-import it.unical.ea_project_javafx.util.BackgroundHelper;
-import it.unical.ea_project_javafx.util.PopupFactory;
+import it.unical.ea_project_javafx.dto.booking.BookingDTO;
+import it.unical.ea_project_javafx.service.api.ApiService;
+import it.unical.ea_project_javafx.ui.UiText;
+import it.unical.ea_project_javafx.ui.ViewSupport;
+import it.unical.ea_project_javafx.ui.background.BackgroundHelper;
+import it.unical.ea_project_javafx.ui.dialog.PopupFactory;
+import java.io.File;
+import java.lang.reflect.Type;
+import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Locale;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.geometry.Pos;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-import java.io.File;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 
-import java.lang.reflect.Type;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Locale;
+import static it.unical.ea_project_javafx.ui.BookingPresentation.bookingRow;
+import static it.unical.ea_project_javafx.ui.BookingPresentation.compareBookings;
+import static it.unical.ea_project_javafx.ui.BookingPresentation.displayStatus;
+import static it.unical.ea_project_javafx.ui.BookingPresentation.formatBookedAt;
+import static it.unical.ea_project_javafx.ui.BookingPresentation.formatEventPeriod;
+import static it.unical.ea_project_javafx.ui.BookingPresentation.hasEventStarted;
+import static it.unical.ea_project_javafx.ui.BookingPresentation.isCancelled;
+import static it.unical.ea_project_javafx.ui.BookingPresentation.isEventEnded;
+import static it.unical.ea_project_javafx.ui.BookingPresentation.isHistorical;
+import static it.unical.ea_project_javafx.ui.BookingPresentation.statusCell;
 
 public class BookingsController {
 
@@ -311,8 +328,8 @@ public class BookingsController {
         close.setAccessibleText("Chiudi finestra di esportazione");
         close.setOnAction(e -> closeExportPopup());
         HBox titleBar = new HBox(12, title, new Region(), close);
-        titleBar.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
-        HBox.setHgrow(titleBar.getChildren().get(1), javafx.scene.layout.Priority.ALWAYS);
+        titleBar.setAlignment(Pos.CENTER_LEFT);
+        HBox.setHgrow(titleBar.getChildren().get(1), Priority.ALWAYS);
         Label subtitle = new Label(
                 "Verrà creato un file .ics compatibile con Google Calendar, Apple Calendar e Outlook.");
         subtitle.getStyleClass().add("export-popup-description");
@@ -329,7 +346,7 @@ public class BookingsController {
         info.setWrapText(true);
 
         HBox actions = new HBox(10);
-        actions.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
+        actions.setAlignment(Pos.CENTER_RIGHT);
         Button cancel = new Button("Annulla");
         cancel.getStyleClass().add("btn-secondary");
         Button save = new Button("Scegli posizione e salva");

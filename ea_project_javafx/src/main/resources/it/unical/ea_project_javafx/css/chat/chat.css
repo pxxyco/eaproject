@@ -137,10 +137,6 @@
     -fx-padding: 8 12;
 }
 
-.chat-root .btn-primary:hover {}
-
-.chat-root .btn-secondary:hover {}
-
 .chat-compact .chat-panel {
     -fx-padding: 0;
     -fx-background-color: #24211f;

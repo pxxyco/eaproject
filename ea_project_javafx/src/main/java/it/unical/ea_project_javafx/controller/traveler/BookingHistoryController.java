@@ -1,46 +1,55 @@
 package it.unical.ea_project_javafx.controller.traveler;
 
-import it.unical.ea_project_javafx.util.BookingPresentation;
-import it.unical.ea_project_javafx.util.UiText;
-import it.unical.ea_project_javafx.util.ViewSupport;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
-import it.unical.ea_project_javafx.dto.BookingDTO;
-import it.unical.ea_project_javafx.dto.ReviewDTO;
-import it.unical.ea_project_javafx.util.ApiService;
-import it.unical.ea_project_javafx.util.BackgroundHelper;
-import it.unical.ea_project_javafx.util.SceneNavigator;
-import it.unical.ea_project_javafx.util.PopupFactory;
-import javafx.application.Platform;
-import javafx.geometry.Pos;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Separator;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-import javafx.fxml.FXML;
-import javafx.scene.control.Tooltip;
-
+import it.unical.ea_project_javafx.dto.booking.BookingDTO;
+import it.unical.ea_project_javafx.dto.review.ReviewDTO;
+import it.unical.ea_project_javafx.navigation.SceneNavigator;
+import it.unical.ea_project_javafx.service.api.ApiService;
+import it.unical.ea_project_javafx.ui.BookingPresentation;
+import it.unical.ea_project_javafx.ui.UiText;
+import it.unical.ea_project_javafx.ui.ViewSupport;
+import it.unical.ea_project_javafx.ui.background.BackgroundHelper;
+import it.unical.ea_project_javafx.ui.dialog.PopupFactory;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import javafx.animation.PauseTransition;
+import javafx.application.Platform;
+import javafx.fxml.FXML;
+import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.ScrollBar;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Separator;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.ToggleGroup;
+import javafx.scene.control.Tooltip;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.util.Duration;
 
 public class BookingHistoryController implements AutoCloseable {
     @FXML
     private StackPane pageRoot;
-    @FXML
-    private BorderPane mainContent;
+
     @FXML
     private ImageView bgImageView;
     @FXML
@@ -63,9 +72,9 @@ public class BookingHistoryController implements AutoCloseable {
     private VBox historyHeader;
     @FXML
     private StackPane historyHost;
-    private final javafx.scene.control.ListView<Object> historyList = new javafx.scene.control.ListView<>();
-    private final javafx.animation.PauseTransition searchDelay = new javafx.animation.PauseTransition(
-            javafx.util.Duration.millis(280));
+    private final ListView<Object> historyList = new ListView<>();
+    private final PauseTransition searchDelay = new PauseTransition(
+            Duration.millis(280));
     private boolean loading, hasMore = true, closed;
     private int page;
     private long generation;
@@ -73,8 +82,6 @@ public class BookingHistoryController implements AutoCloseable {
     private VBox emptyStateContainer;
     @FXML
     private Label emptyTitleLabel;
-    @FXML
-    private Label emptyDescriptionLabel;
 
     private final List<BookingDTO> allBookings = new ArrayList<>();
     private final List<ReviewDTO> myReviews = new ArrayList<>();
@@ -92,23 +99,23 @@ public class BookingHistoryController implements AutoCloseable {
         historyHost.getChildren().clear();
         historyHost.getChildren().add(historyList);
         historyList.getStyleClass().add("history-feed");
-        historyList.setCellFactory(list -> new javafx.scene.control.ListCell<>() {
+        historyList.setCellFactory(list -> new ListCell<>() {
             @Override
             protected void updateItem(Object item, boolean empty) {
                 super.updateItem(item, empty);
                 setText(null);
                 setGraphic(empty || item == null ? null
-                        : item instanceof BookingDTO booking ? createBookingCard(booking) : (javafx.scene.Node) item);
+                        : item instanceof BookingDTO booking ? createBookingCard(booking) : (Node) item);
             }
         });
-        historyList.addEventFilter(javafx.scene.input.ScrollEvent.SCROLL, event -> {
+        historyList.addEventFilter(ScrollEvent.SCROLL, event -> {
             if (event.getDeltaY() < 0)
                 Platform.runLater(this::loadNearEnd);
         });
         historyList.skinProperty().addListener((o, a, b) -> Platform.runLater(() -> {
-            for (javafx.scene.Node node : historyList.lookupAll(".scroll-bar"))
-                if (node instanceof javafx.scene.control.ScrollBar bar
-                        && bar.getOrientation() == javafx.geometry.Orientation.VERTICAL)
+            for (Node node : historyList.lookupAll(".scroll-bar"))
+                if (node instanceof ScrollBar bar
+                        && bar.getOrientation() == Orientation.VERTICAL)
                     bar.valueProperty().addListener((obs, old, value) -> {
                         if (value.doubleValue() > old.doubleValue())
                             loadNearEnd();
@@ -142,9 +149,9 @@ public class BookingHistoryController implements AutoCloseable {
         if (closed || loading || !hasMore)
             return;
         boolean near = historyList.lookupAll(".list-cell").stream()
-                .filter(node -> node instanceof javafx.scene.control.ListCell<?> cell && !cell.isEmpty()
+                .filter(node -> node instanceof ListCell<?> cell && !cell.isEmpty()
                         && cell.isVisible())
-                .anyMatch(node -> ((javafx.scene.control.ListCell<?>) node).getIndex() >= historyList.getItems().size()
+                .anyMatch(node -> ((ListCell<?>) node).getIndex() >= historyList.getItems().size()
                         - 2);
         if (near)
             loadPage();
@@ -155,8 +162,8 @@ public class BookingHistoryController implements AutoCloseable {
             return;
         loading = true;
         long request = generation;
-        String query = java.net.URLEncoder.encode(searchField.getText().strip(),
-                java.nio.charset.StandardCharsets.UTF_8);
+        String query = URLEncoder.encode(searchField.getText().strip(),
+                StandardCharsets.UTF_8);
         String filter = switch (historyFilterCombo.getValue()) {
             case "Terminate / completate" -> "COMPLETED";
             case "Cancellate" -> "CANCELLED";
@@ -172,7 +179,7 @@ public class BookingHistoryController implements AutoCloseable {
                     if (closed || request != generation)
                         return;
                     try {
-                        var data = com.google.gson.JsonParser.parseString(response.body()).getAsJsonObject();
+                        var data = JsonParser.parseString(response.body()).getAsJsonObject();
                         List<BookingDTO> items = ApiService.fromJson(data.get("items").toString(),
                                 new TypeToken<List<BookingDTO>>() {
                                 }.getType());
@@ -435,7 +442,7 @@ public class BookingHistoryController implements AutoCloseable {
         comment.setPromptText("Racconta com'è andata (facoltativo)...");
         comment.setWrapText(true);
         comment.setPrefRowCount(4);
-        comment.setTextFormatter(new javafx.scene.control.TextFormatter<String>(
+        comment.setTextFormatter(new TextFormatter<String>(
                 change -> change.getControlNewText().length() <= 200 ? change : null));
         Label counter = new Label(comment.getText().length() + " / 200 caratteri");
         counter.getStyleClass().add("history-form-counter");

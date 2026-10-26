@@ -1,8 +1,9 @@
 package it.unical.ea_project_javafx.controller.profile;
 
-import it.unical.ea_project_javafx.util.ViewSupport;
 import it.unical.ea_project_javafx.security.UserSession;
-import it.unical.ea_project_javafx.util.BackgroundHelper;
+import it.unical.ea_project_javafx.ui.ViewSupport;
+import it.unical.ea_project_javafx.ui.background.BackgroundHelper;
+import java.io.IOException;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -10,8 +11,6 @@ import javafx.scene.control.Label;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-
-import java.io.IOException;
 
 public class DashboardViewController {
 

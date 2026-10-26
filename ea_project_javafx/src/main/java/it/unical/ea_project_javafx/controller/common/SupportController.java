@@ -1,19 +1,26 @@
 package it.unical.ea_project_javafx.controller.common;
 
-import it.unical.ea_project_javafx.util.UiText;
-import it.unical.ea_project_javafx.util.ViewSupport;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import it.unical.ea_project_javafx.security.UserSession;
-import it.unical.ea_project_javafx.util.BackgroundHelper;
+import it.unical.ea_project_javafx.service.api.ApiService;
+import it.unical.ea_project_javafx.ui.UiText;
+import it.unical.ea_project_javafx.ui.ViewSupport;
+import it.unical.ea_project_javafx.ui.background.BackgroundHelper;
+import it.unical.ea_project_javafx.ui.dialog.PopupFactory;
+import java.util.Map;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-
-import it.unical.ea_project_javafx.util.ApiService;
-import com.google.gson.*;
-import java.util.Map;
 
 public class SupportController {
 
@@ -70,11 +77,11 @@ public class SupportController {
             if (e.getClickCount() == 2) {
                 var ticket = ticketsList.getSelectionModel().getSelectedItem();
                 if (ticket != null)
-                    it.unical.ea_project_javafx.util.PopupFactory.showMessage(
-                            it.unical.ea_project_javafx.util.PopupFactory.resolveRoot(ticketsList),
+                    PopupFactory.showMessage(
+                            PopupFactory.resolveRoot(ticketsList),
                             ticket.get("subject").getAsString(),
                             ticket.get("message").getAsString(),
-                            it.unical.ea_project_javafx.util.PopupFactory.Size.MEDIUM);
+                            PopupFactory.Size.MEDIUM);
             }
         });
         loadTickets(false);

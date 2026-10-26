@@ -3,7 +3,13 @@ package it.unical.ea_project_javafx.controller.home;
 import com.google.gson.reflect.TypeToken;
 import it.unical.ea_project_javafx.dto.home.ActivitySuggestionDTO;
 import it.unical.ea_project_javafx.dto.home.TripSuggestionDTO;
-import it.unical.ea_project_javafx.util.ApiService;
+import it.unical.ea_project_javafx.service.api.ApiService;
+import java.lang.reflect.Type;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -11,29 +17,29 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
-import javafx.scene.control.*;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 import lombok.Setter;
-
-import java.lang.reflect.Type;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
 
 public class SearchBarController {
 
     @FXML
-    private javafx.scene.layout.HBox searchControls;
+    private HBox searchControls;
     @FXML
-    private javafx.scene.layout.StackPane searchSlot;
+    private StackPane searchSlot;
 
-    public javafx.scene.layout.HBox controls() {
+    public HBox controls() {
         return searchControls;
     }
 
-    public javafx.scene.layout.StackPane slot() {
+    public StackPane slot() {
         return searchSlot;
     }
 

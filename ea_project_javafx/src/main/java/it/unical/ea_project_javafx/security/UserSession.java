@@ -1,6 +1,7 @@
 package it.unical.ea_project_javafx.security;
 
-import it.unical.ea_project_javafx.dto.UserDTO;
+import it.unical.ea_project_javafx.dto.user.UserDTO;
+import java.util.Objects;
 import lombok.Getter;
 
 @Getter
@@ -39,7 +40,7 @@ public class UserSession {
     public void setSession(UserDTO userDTO) {
 
         if (userDTO != null) {
-            if (!java.util.Objects.equals(this.id, userDTO.getId()))
+            if (!Objects.equals(this.id, userDTO.getId()))
                 generation++;
             this.id = userDTO.getId();
             this.username = userDTO.getUsername();

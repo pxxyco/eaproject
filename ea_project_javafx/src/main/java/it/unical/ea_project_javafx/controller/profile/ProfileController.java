@@ -1,39 +1,40 @@
 package it.unical.ea_project_javafx.controller.profile;
 
-import it.unical.ea_project_javafx.util.UiText;
-import it.unical.ea_project_javafx.util.ViewSupport;
-import it.unical.ea_project_javafx.dto.UserDTO;
-import it.unical.ea_project_javafx.security.UserSession;
-import it.unical.ea_project_javafx.util.ApiService;
-import it.unical.ea_project_javafx.util.BackgroundHelper;
-import it.unical.ea_project_javafx.util.SceneNavigator;
-import it.unical.ea_project_javafx.util.PopupFactory;
 import it.unical.ea_project_javafx.controller.common.NavbarController;
+import it.unical.ea_project_javafx.dto.user.UserDTO;
+import it.unical.ea_project_javafx.navigation.SceneNavigator;
+import it.unical.ea_project_javafx.security.UserSession;
+import it.unical.ea_project_javafx.service.api.ApiService;
+import it.unical.ea_project_javafx.ui.UiText;
+import it.unical.ea_project_javafx.ui.ViewSupport;
+import it.unical.ea_project_javafx.ui.background.BackgroundHelper;
+import it.unical.ea_project_javafx.ui.dialog.PopupFactory;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
-import javafx.geometry.Rectangle2D;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-import javafx.scene.layout.StackPane;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.regex.Pattern;
 
 public class ProfileController {
 
@@ -355,7 +356,7 @@ public class ProfileController {
                 ImageInputStream imageInput = ImageIO.createImageInputStream(stream)) {
             if (imageInput == null)
                 return null;
-            java.util.Iterator<ImageReader> readers = ImageIO.getImageReaders(imageInput);
+            Iterator<ImageReader> readers = ImageIO.getImageReaders(imageInput);
             if (!readers.hasNext())
                 return null;
             ImageReader reader = readers.next();
@@ -465,7 +466,7 @@ public class ProfileController {
         if (message == null || message.isBlank()) {
             return "Caricamento della foto non riuscito.";
         }
-        java.util.regex.Matcher matcher = Pattern.compile("Errore HTTP (\\d{3})(?::\\s*(.*))?", Pattern.DOTALL)
+        Matcher matcher = Pattern.compile("Errore HTTP (\\d{3})(?::\\s*(.*))?", Pattern.DOTALL)
                 .matcher(message);
         if (matcher.find()) {
             int status = Integer.parseInt(matcher.group(1));

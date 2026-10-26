@@ -1,12 +1,11 @@
 package it.unical.ea_project_javafx.controller.activity.photo;
 
+import java.util.function.Consumer;
 import javafx.fxml.FXML;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import lombok.Setter;
-
-import java.util.function.Consumer;
 
 public class PhotoItemController {
 
@@ -28,7 +27,7 @@ public class PhotoItemController {
     @FXML
     void handleClick(MouseEvent event) {
 
-        if(onFotoClickedCallBack != null) {
+        if (onFotoClickedCallBack != null) {
             onFotoClickedCallBack.accept(url);
         }
 

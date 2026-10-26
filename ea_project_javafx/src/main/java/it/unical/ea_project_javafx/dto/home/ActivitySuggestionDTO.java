@@ -1,6 +1,5 @@
 package it.unical.ea_project_javafx.dto.home;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

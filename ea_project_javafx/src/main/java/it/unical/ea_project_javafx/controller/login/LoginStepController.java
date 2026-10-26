@@ -1,17 +1,24 @@
 package it.unical.ea_project_javafx.controller.login;
 
-import it.unical.ea_project_javafx.util.ViewSupport;
 import com.google.gson.JsonObject;
-import it.unical.ea_project_javafx.dto.UserDTO;
+import it.unical.ea_project_javafx.dto.user.UserDTO;
 import it.unical.ea_project_javafx.navigation.StepNavigator;
-import it.unical.ea_project_javafx.util.ApiService;
+import it.unical.ea_project_javafx.security.TokenStorage;
 import it.unical.ea_project_javafx.security.UserSession;
-import it.unical.ea_project_javafx.util.TokenStorage;
+import it.unical.ea_project_javafx.service.api.ApiService;
+import it.unical.ea_project_javafx.ui.ViewSupport;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputControl;
 import javafx.scene.input.KeyCode;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.SVGPath;
 
 public class LoginStepController {
 
@@ -69,11 +76,11 @@ public class LoginStepController {
     }
 
     private void updatePasswordEye(boolean revealed) {
-        javafx.scene.shape.SVGPath eye = new javafx.scene.shape.SVGPath();
+        SVGPath eye = new SVGPath();
         eye.setContent("M1 8 Q10 -4 19 8 Q10 20 1 8 Z M13 8 A3 3 0 1 1 7 8 A3 3 0 1 1 13 8"
                 + (revealed ? " M2 1 L18 15" : ""));
-        eye.setFill(javafx.scene.paint.Color.TRANSPARENT);
-        eye.setStroke(javafx.scene.paint.Color.web("#d6d3d1"));
+        eye.setFill(Color.TRANSPARENT);
+        eye.setStroke(Color.web("#d6d3d1"));
         eye.setStrokeWidth(1.5);
         revealPasswordButton.setText("");
         revealPasswordButton.setGraphic(eye);

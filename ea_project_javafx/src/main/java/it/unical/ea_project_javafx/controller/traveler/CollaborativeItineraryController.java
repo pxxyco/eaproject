@@ -1,15 +1,31 @@
 package it.unical.ea_project_javafx.controller.traveler;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import it.unical.ea_project_javafx.service.api.ApiService;
+import it.unical.ea_project_javafx.ui.ViewSupport;
+import it.unical.ea_project_javafx.ui.background.BackgroundHelper;
 import it.unical.ea_project_javafx.util.JsonCodec;
-import it.unical.ea_project_javafx.util.ViewSupport;
-import com.google.gson.*;
-import javafx.fxml.*;
-import javafx.scene.control.*;
-import javafx.scene.layout.StackPane;
-import javafx.beans.property.SimpleStringProperty;
-import it.unical.ea_project_javafx.util.ApiService;
 import java.time.LocalTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.StackPane;
 
 public class CollaborativeItineraryController {
     private record ListChoice(long id, String name) {
@@ -20,7 +36,7 @@ public class CollaborativeItineraryController {
     }
 
     @FXML
-    private javafx.scene.image.ImageView bgImageView;
+    private ImageView bgImageView;
     @FXML
     private StackPane navbarContainer;
     @FXML
@@ -46,7 +62,7 @@ public class CollaborativeItineraryController {
 
     @FXML
     public void initialize() {
-        it.unical.ea_project_javafx.util.BackgroundHelper.setupBackground(bgImageView);
+        BackgroundHelper.setupBackground(bgImageView);
         ViewSupport.loadNavbar(navbarContainer, message -> ViewSupport.show(statusLabel, message));
         daySpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 365, 1));
         positionSpinner.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 500, 1));

@@ -15,14 +15,10 @@
     -fx-cursor: hand;
 }
 
-.notification-bell-container:hover {}
-
 .notification-bell-icon {
     -fx-font-size: 19px;
     -fx-text-fill: #f5f5f4;
 }
-
-.notification-bell-container:hover .notification-bell-icon {}
 
 .notification-badge {
     -fx-background-color: #e7e5e4;

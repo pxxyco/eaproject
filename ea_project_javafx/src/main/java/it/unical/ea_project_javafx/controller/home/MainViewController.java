@@ -1,18 +1,20 @@
 package it.unical.ea_project_javafx.controller.home;
 
-import it.unical.ea_project_javafx.util.ViewSupport;
+import it.unical.ea_project_javafx.security.TokenStorage;
 import it.unical.ea_project_javafx.security.UserSession;
-import it.unical.ea_project_javafx.util.ApiService;
-import it.unical.ea_project_javafx.util.BackgroundHelper;
-import it.unical.ea_project_javafx.util.TokenStorage;
+import it.unical.ea_project_javafx.service.api.ApiService;
+import it.unical.ea_project_javafx.ui.ViewSupport;
+import it.unical.ea_project_javafx.ui.background.BackgroundHelper;
+import it.unical.ea_project_javafx.ui.scroll.StickySearch;
 import javafx.fxml.FXML;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 public class MainViewController implements AutoCloseable {
     @FXML
-    private javafx.scene.control.ScrollPane homeScroll;
+    private ScrollPane homeScroll;
     @FXML
     private VBox stickySearchDock;
     private StickySearch stickySearch;
@@ -20,8 +22,7 @@ public class MainViewController implements AutoCloseable {
 
     @FXML
     private ImageView bgImageView;
-    @FXML
-    private VBox cardsContainer;
+
     @FXML
     private StackPane navbarContainer;
     @FXML

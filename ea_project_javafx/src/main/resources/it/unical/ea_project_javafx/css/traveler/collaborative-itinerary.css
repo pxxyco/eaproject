@@ -167,9 +167,6 @@
     -fx-background-radius: 0 0 10 0;
 }
 
-.itinerary-editor .text-field:focused,
-.itinerary-editor .text-area:focused {}
-
 .itinerary-editor .combo-box>.list-cell {
     -fx-background-color: transparent;
     -fx-background-radius: 12;
