@@ -14,6 +14,7 @@ import it.unical.ea_project_javafx.ui.animation.NavIndicator;
 import it.unical.ea_project_javafx.ui.animation.UiEffects;
 import it.unical.ea_project_javafx.ui.dialog.PopupFactory;
 import it.unical.ea_project_javafx.util.JsonCodec;
+import java.util.Arrays;
 import java.util.Locale;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -124,6 +125,14 @@ public class NavbarController {
         bindVisibilityToManaged(organizerAttendeesNavItem);
         configureUserAvatar();
         updateNavbarState();
+        for (Label item : Arrays.asList(homeNavItem, dashboardNavItem, travelerHistoryNavItem, travelerFavoritesNavItem,
+                travelerItineraryNavItem, organizerEventsNavItem, organizerAttendeesNavItem)) {
+            if (item != null)
+                item.addEventFilter(MouseEvent.MOUSE_PRESSED, e -> {
+                    if (e.isPrimaryButtonDown())
+                        NavIndicator.preview(item);
+                });
+        }
         if (notificationBellContainer != null) {
             notificationBellContainer.sceneProperty().addListener((o, a, b) -> watchScene(b));
             watchScene(notificationBellContainer.getScene());

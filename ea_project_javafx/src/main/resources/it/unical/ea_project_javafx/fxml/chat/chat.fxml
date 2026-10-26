@@ -30,7 +30,8 @@
                     <Insets top="18" right="30" bottom="26" left="30" />
                 </BorderPane.margin>
                 <left>
-                    <VBox spacing="14" prefWidth="270" minWidth="220" styleClass="chat-sidebar">
+                    <VBox spacing="14" prefWidth="330" minWidth="280" maxWidth="380"
+                        styleClass="chat-sidebar">
                         <Label text="Messaggi" styleClass="chat-title" />
                         <Label fx:id="connectionLabel" text="Connessione…" wrapText="true"
                             styleClass="chat-meta" />
@@ -76,10 +77,27 @@
                         <bottom>
                             <VBox spacing="10">
                                 <Label fx:id="statusLabel" wrapText="true" styleClass="chat-status" />
+                                <HBox fx:id="replyBanner" spacing="8" alignment="CENTER_LEFT"
+                                    visible="false" managed="false" styleClass="chat-quote">
+                                    <Label fx:id="replyLabel" maxWidth="Infinity"
+                                        HBox.hgrow="ALWAYS" textOverrun="ELLIPSIS" />
+                                    <Button text="×" onAction="#handleCancelReply"
+                                        styleClass="btn-secondary" />
+                                </HBox>
+                                <HBox fx:id="attachmentBanner" spacing="8" alignment="CENTER_LEFT"
+                                    visible="false" managed="false" styleClass="chat-quote">
+                                    <Label fx:id="attachmentLabel" maxWidth="Infinity"
+                                        HBox.hgrow="ALWAYS" textOverrun="ELLIPSIS" />
+                                    <Button text="×" onAction="#handleRemoveAttachment"
+                                        styleClass="btn-secondary" />
+                                </HBox>
                                 <TextArea fx:id="composer" promptText="Scrivi un messaggio…"
                                     wrapText="true" prefRowCount="3" styleClass="chat-composer" />
                                 <HBox alignment="CENTER_RIGHT" spacing="12">
-                                    <Label text="Ctrl + Invio per inviare" styleClass="chat-meta" />
+                                    <Button fx:id="attachButton" text="Foto"
+                                        onAction="#handleAttach" styleClass="btn-secondary" />
+                                    <Button fx:id="emojiButton" text="☺" onAction="#handleEmoji"
+                                        styleClass="btn-secondary" />
                                     <Region HBox.hgrow="ALWAYS" />
                                     <Label fx:id="characterCount" text="0 / 4000"
                                         styleClass="chat-meta" />

@@ -252,3 +252,6 @@ application-local.yml
 
 # Runtime photo storage; default images are initialized from backend resources.
 /photo/
+
+# Private chat attachments (never served as public photos)
+**/photo-private/

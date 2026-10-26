@@ -20,6 +20,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
@@ -40,7 +41,8 @@ public class ApiService {
     }
 
     public static final String BASE_URL = System
-            .getProperty("eaproject.api.url", System.getenv().getOrDefault("EA_PROJECT_API_URL", "https://localhost:8443"))
+            .getProperty("eaproject.api.url",
+                    System.getenv().getOrDefault("EA_PROJECT_API_URL", "https://localhost:8443"))
             .replaceAll("/+$", "");
 
     private static final HttpClient CLIENT = HttpClient.newBuilder()
@@ -233,6 +235,17 @@ public class ApiService {
                 error -> handleFailure(onFailure), loadingSetter, true);
     }
 
+    public static void uploadPhoto(String url, Path file, Map<String, String> fields,
+            Consumer<HttpResponse<String>> success, Consumer<String> failure) {
+        Map<String, String> snapshot = Map.copyOf(fields);
+        executeRequest(token -> {
+            if (Files.size(file) > 8 * 1024 * 1024)
+                throw new IOException("Foto troppo grande");
+            return buildMultipartRequest(url, List.of(file), "file", token, snapshot);
+        }, success, failure, e -> failure.accept("Impossibile caricare la foto. Controlla il file e la connessione."),
+                null, true);
+    }
+
     public static void uploadFile(String url, Path file, Consumer<HttpResponse<String>> onSuccess,
             Runnable onFailure, Consumer<Boolean> loadingSetter) {
         uploadFiles(url, List.of(file), "file", onSuccess, onFailure, null, loadingSetter);
@@ -369,8 +382,20 @@ public class ApiService {
 
     private static HttpRequest buildMultipartRequest(String url, List<Path> files, String formField,
             String token) throws IOException {
-        String boundary = "----CopilotUpload" + UUID.randomUUID();
+        return buildMultipartRequest(url, files, formField, token, Map.of());
+    }
+
+    private static HttpRequest buildMultipartRequest(String url, List<Path> files, String formField,
+            String token, Map<String, String> fields) throws IOException {
+        String boundary = "----EAProjectUpload" + UUID.randomUUID();
         ByteArrayOutputStream body = new ByteArrayOutputStream();
+        for (var field : fields.entrySet()) {
+            if (!field.getKey().matches("[A-Za-z][A-Za-z0-9]*"))
+                throw new IOException("Campo non valido");
+            body.write(("--" + boundary + "\r\nContent-Disposition: form-data; name=\"" + field.getKey()
+                    + "\"\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n" + field.getValue() + "\r\n")
+                    .getBytes(StandardCharsets.UTF_8));
+        }
         for (Path file : files) {
             body.write(("--" + boundary + "\r\n"
                     + "Content-Disposition: form-data; name=\"" + formField + "\"; filename=\""

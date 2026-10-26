@@ -10,13 +10,14 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javafx.geometry.Rectangle2D;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ProgressIndicator;
+import it.unical.ea_project_javafx.ui.loading.LoadingRing;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
@@ -45,7 +46,7 @@ public class ExperienceCardController {
     @FXML
     private Label priceLabel;
     @FXML
-    private ProgressIndicator imageLoader;
+    private LoadingRing imageLoader;
     @FXML
     private Button editButton;
     @FXML
@@ -70,12 +71,28 @@ public class ExperienceCardController {
 
     @FXML
     public void initialize() {
+        setCardWidth(325);
+        Region container = (Region) imageView.getParent();
+        container.setMinHeight(IMAGE_HEIGHT);
+        container.setPrefHeight(IMAGE_HEIGHT);
+        container.setMaxHeight(IMAGE_HEIGHT);
+        cardRoot.setMaxHeight(Region.USE_PREF_SIZE);
         Rectangle clip = new Rectangle();
-        clip.widthProperty().bind(imageView.fitWidthProperty());
-        clip.setArcWidth(24);
-        clip.setArcHeight(24);
-        clip.heightProperty().bind(imageView.fitHeightProperty());
-        imageView.setClip(clip);
+        clip.widthProperty().bind(container.widthProperty());
+        clip.heightProperty().bind(container.heightProperty());
+        clip.setArcWidth(44);
+        clip.setArcHeight(44);
+        container.setClip(clip);
+        imageView.fitWidthProperty().bind(container.widthProperty());
+        imageView.fitHeightProperty().bind(container.heightProperty());
+        imageView.setPreserveRatio(false);
+        imageView.imageProperty().addListener((o, a, image) -> {
+            if (image != null)
+                image.progressProperty().addListener((v, x, y) -> cropImage());
+            cropImage();
+        });
+        container.widthProperty().addListener((o, a, c) -> cropImage());
+        container.heightProperty().addListener((o, a, c) -> cropImage());
         editButton.addEventFilter(MouseEvent.MOUSE_CLICKED, Event::consume);
         deleteButton.addEventFilter(MouseEvent.MOUSE_CLICKED, Event::consume);
     }
@@ -84,11 +101,23 @@ public class ExperienceCardController {
         cardRoot.setMinWidth(width);
         cardRoot.setPrefWidth(width);
         cardRoot.setMaxWidth(width);
-        imageView.setFitWidth(width - 12);
+
         var container = (Region) imageView.getParent();
         container.setMinWidth(0);
-        container.setPrefWidth(width - 12);
-        container.setMaxWidth(width - 12);
+        container.setPrefWidth(width);
+        container.setMaxWidth(width);
+    }
+
+    private void cropImage() {
+        Image image = imageView.getImage();
+        if (image == null || image.getWidth() <= 0 || imageView.getFitWidth() <= 0 || imageView.getFitHeight() <= 0)
+            return;
+        double ratio = imageView.getFitWidth() / imageView.getFitHeight(), w = image.getWidth(), h = image.getHeight();
+        if (w / h > ratio)
+            w = h * ratio;
+        else
+            h = w / ratio;
+        imageView.setViewport(new Rectangle2D((image.getWidth() - w) / 2, (image.getHeight() - h) / 2, w, h));
     }
 
     private static synchronized Image getCachedImage(String imageUrl) {

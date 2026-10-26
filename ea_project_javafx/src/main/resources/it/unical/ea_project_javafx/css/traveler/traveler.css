@@ -695,3 +695,55 @@
     -fx-spacing: 22;
     -fx-padding: 12 0;
 }
+
+.traveler-dashboard-content .dashboard-welcome-title {
+    -fx-font-size: 38;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f4f7f4;
+}
+
+.traveler-dashboard-content .dashboard-welcome-eyebrow {
+    -fx-font-size: 12;
+    -fx-font-weight: bold;
+    -fx-text-fill: #c2cdc5;
+}
+
+.traveler-dashboard-content .dashboard-welcome-subtitle {
+    -fx-font-size: 18;
+    -fx-text-fill: #d3ded6;
+}
+
+.traveler-dashboard-content .dashboard-welcome-signature {
+    -fx-font-size: 11;
+    -fx-text-fill: #aabcb0;
+}
+
+.traveler-dashboard-content .section-title {
+    -fx-font-size: 26;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f4f7f4;
+}
+
+.traveler-dashboard-content .dashboard-space-panel {
+    -fx-padding: 24;
+    -fx-background-color: rgba(32, 43, 37, .60);
+    -fx-background-radius: 22;
+    -fx-border-radius: 22;
+}
+
+.traveler-dashboard-content .dashboard-space-title {
+    -fx-font-size: 19;
+    -fx-font-weight: bold;
+}
+
+.dashboard-agenda-note {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent transparent rgba(196, 216, 203, .5);
+    -fx-border-width: 0 0 0 2;
+    -fx-padding: 8 0 8 28;
+}
+
+.dashboard-agenda-note .dashboard-kpi-value {
+    -fx-font-size: 34;
+    -fx-min-width: 45;
+}

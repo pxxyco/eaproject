@@ -29,7 +29,8 @@
             <StackPane fx:id="navbarContainer" />
         </top>
         <center>
-            <StackPane fx:id="historyHost" styleClass="history-host">
+            <StackPane fx:id="historyHost" maxWidth="1120" styleClass="history-host"
+                BorderPane.alignment="TOP_CENTER">
                 <VBox fx:id="historyHeader" maxWidth="1120" spacing="26" styleClass="history-header">
                     <HBox alignment="CENTER_LEFT" spacing="14.0">
                         <VBox spacing="5.0" HBox.hgrow="ALWAYS">

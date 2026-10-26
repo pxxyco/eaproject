@@ -85,7 +85,8 @@ public class ChatEvents {
         try {
             delivery.execute(() -> {
                 send(event.travelerId(), event.conversationId());
-                send(event.organizerId(), event.conversationId());
+                if (!event.organizerId().equals(event.travelerId()))
+                    send(event.organizerId(), event.conversationId());
             });
         } catch (RejectedExecutionException ex) {
             disconnect(event.travelerId());

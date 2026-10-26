@@ -169,6 +169,17 @@ public final class BookingPresentation {
         return status.isBlank() ? "Stato non disponibile" : status;
     }
 
+    public static String paymentStatus(String status) {
+        if (status == null || status.isBlank())
+            return "Non registrato";
+        return switch (status) {
+            case "COMPLETED", "CONFIRMED" -> "Pagato";
+            case "PENDING" -> "In attesa";
+            case "CANCELLED" -> "Annullato";
+            default -> status;
+        };
+    }
+
     public static String statusStyleClass(String status) {
         return switch (status) {
             case "Cancellata", "Prenotazione cancellata", "Esperienza annullata" -> "booking-status-cancelled";

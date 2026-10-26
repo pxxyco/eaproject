@@ -40,6 +40,7 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
+import it.unical.ea_project_javafx.ui.file.NativeFiles;
 import javafx.stage.Stage;
 
 public class CreateOfferController {
@@ -190,7 +191,8 @@ public class CreateOfferController {
             }
             if (rootPane != null) {
                 rootPane.getChildren().stream()
-                        .filter(node -> node.getStyleClass().contains("glass-overlay"))
+                        .filter(node -> node.getStyleClass().contains("glass-overlay")
+                                || node.getStyleClass().contains("app-background-shade"))
                         .forEach(node -> {
                             node.setVisible(false);
                             node.setManaged(false);
@@ -284,12 +286,12 @@ public class CreateOfferController {
 
     private File chooseCover() {
         FileChooser chooser = createImageChooser("Seleziona la foto di copertina");
-        return chooser.showOpenDialog(rootPane.getScene().getWindow());
+        return NativeFiles.open(chooser, rootPane.getScene().getWindow());
     }
 
     private List<File> choosePhotos() {
         FileChooser chooser = createImageChooser("Seleziona una o più foto secondarie");
-        List<File> selectedFiles = chooser.showOpenMultipleDialog(rootPane.getScene().getWindow());
+        List<File> selectedFiles = NativeFiles.openMultiple(chooser, rootPane.getScene().getWindow());
         return selectedFiles == null ? List.of() : List.copyOf(selectedFiles);
     }
 

@@ -30,7 +30,8 @@
                         </image>
                     </ImageView>
                 </StackPane>
-                <Separator orientation="VERTICAL" styleClass="nav-divider" />
+                <Separator orientation="VERTICAL" minHeight="42" prefHeight="42" maxHeight="42"
+                    styleClass="nav-divider" />
 
                 <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="nav-links">
                     <children>

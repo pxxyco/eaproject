@@ -21,7 +21,6 @@ import java.util.Objects;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -29,7 +28,6 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
-import javafx.scene.control.ScrollBar;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextArea;
@@ -112,15 +110,6 @@ public class BookingHistoryController implements AutoCloseable {
             if (event.getDeltaY() < 0)
                 Platform.runLater(this::loadNearEnd);
         });
-        historyList.skinProperty().addListener((o, a, b) -> Platform.runLater(() -> {
-            for (Node node : historyList.lookupAll(".scroll-bar"))
-                if (node instanceof ScrollBar bar
-                        && bar.getOrientation() == Orientation.VERTICAL)
-                    bar.valueProperty().addListener((obs, old, value) -> {
-                        if (value.doubleValue() > old.doubleValue())
-                            loadNearEnd();
-                    });
-        }));
         searchDelay.setOnFinished(event -> loadHistory());
         searchField.textProperty().addListener((obs, oldValue, newValue) -> searchDelay.playFromStart());
         historyFilterCombo.valueProperty().addListener((obs, oldValue, newValue) -> loadHistory());
@@ -148,11 +137,31 @@ public class BookingHistoryController implements AutoCloseable {
     private void loadNearEnd() {
         if (closed || loading || !hasMore)
             return;
+        historyList.layout();
+        Node viewport = historyList.lookup(".clipped-container");
+        if (viewport == null)
+            return;
+        var visibleArea = viewport.localToScene(viewport.getBoundsInLocal());
         boolean near = historyList.lookupAll(".list-cell").stream()
                 .filter(node -> node instanceof ListCell<?> cell && !cell.isEmpty()
-                        && cell.isVisible())
-                .anyMatch(node -> ((ListCell<?>) node).getIndex() >= historyList.getItems().size()
-                        - 2);
+                        && cell.getIndex() >= historyList.getItems().size() - 2)
+                .anyMatch(node -> {
+                    // VirtualFlow also keeps spare cells in a separate, hidden group.
+                    boolean inViewport = false;
+                    for (Node parent = node; parent != null; parent = parent.getParent()) {
+                        if (!parent.isVisible())
+                            return false;
+                        if (parent == viewport) {
+                            inViewport = true;
+                            break;
+                        }
+                    }
+                    if (!inViewport)
+                        return false;
+                    var bounds = node.localToScene(node.getBoundsInLocal());
+                    return bounds.getMinY() <= visibleArea.getMaxY() + 40
+                            && bounds.getMaxY() >= visibleArea.getMinY();
+                });
         if (near)
             loadPage();
     }

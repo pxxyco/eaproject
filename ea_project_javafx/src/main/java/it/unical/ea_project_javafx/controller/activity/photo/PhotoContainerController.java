@@ -9,6 +9,7 @@ import it.unical.ea_project_javafx.dto.trip.TripDTO;
 import it.unical.ea_project_javafx.dto.trip.TripImageDTO;
 import it.unical.ea_project_javafx.service.api.ApiService;
 import java.io.IOException;
+import it.unical.ea_project_javafx.util.ImageUtils;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.function.Consumer;
@@ -60,8 +61,9 @@ public class PhotoContainerController implements ActivitySectionController, Trip
 
     private void loadActivityImages(List<ActivityImageDTO> activities) {
 
-        imageUrls = activities.stream()
-                .map(a -> ApiService.BASE_URL + a.getImageUrl())
+        imgsContainer.getChildren().clear();
+        imageUrls = (activities == null ? List.<ActivityImageDTO>of() : activities).stream()
+                .map(a -> ImageUtils.buildFullUrl(a.getImageUrl()))
                 .toList();
         int max = Math.min(imageUrls.size(), 5);
         for (int i = 0; i < max; i++) {
@@ -75,8 +77,9 @@ public class PhotoContainerController implements ActivitySectionController, Trip
 
     private void loadTripImages(List<TripImageDTO> images) {
 
-        imageUrls = images.stream()
-                .map(i -> ApiService.BASE_URL + i.getImageUrl())
+        imgsContainer.getChildren().clear();
+        imageUrls = (images == null ? List.<TripImageDTO>of() : images).stream()
+                .map(i -> ImageUtils.buildFullUrl(i.getImageUrl()))
                 .toList();
         int max = Math.min(imageUrls.size(), 5);
         for (int i = 0; i < max; i++) {

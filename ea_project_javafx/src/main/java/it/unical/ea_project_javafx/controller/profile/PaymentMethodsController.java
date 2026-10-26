@@ -1,6 +1,10 @@
 package it.unical.ea_project_javafx.controller.profile;
 
 import com.google.gson.JsonParser;
+import com.google.gson.JsonObject;
+import it.unical.ea_project_javafx.ui.BookingPresentation;
+import it.unical.ea_project_javafx.ui.chart.OrganizerEconomy;
+import javafx.scene.control.Pagination;
 import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.service.api.ApiService;
 import it.unical.ea_project_javafx.ui.UiText;
@@ -9,6 +13,8 @@ import it.unical.ea_project_javafx.ui.background.BackgroundHelper;
 import it.unical.ea_project_javafx.ui.dialog.PopupFactory;
 import it.unical.ea_project_javafx.util.JsonCodec;
 import java.time.YearMonth;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -26,7 +32,19 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
-public class PaymentMethodsController {
+public class PaymentMethodsController implements AutoCloseable {
+    @FXML
+    private VBox financeEconomyHost;
+    @FXML
+    private Label payoutReadiness, financeUpdatedLabel;
+    private OrganizerEconomy economy;
+
+    @Override
+    public void close() {
+        ledgerGeneration++;
+        if (economy != null)
+            economy.close();
+    }
 
     @FXML
     private ImageView bgImageView;
@@ -74,6 +92,15 @@ public class PaymentMethodsController {
 
     @FXML
     private Button addCardButton, payoutButton;
+    @FXML
+    private Label paidLabel, pendingLabel, cancelledLabel;
+    @FXML
+    private TableView<JsonObject> ledgerTable;
+    @FXML
+    private TableColumn<JsonObject, String> ledgerTitle, ledgerParticipant, ledgerAmount, ledgerStatus, ledgerDate;
+    @FXML
+    private Pagination ledgerPagination;
+    private long ledgerGeneration;
     private final UserSession userSession = UserSession.getInstance();
     private final ObservableList<CardRow> mockCards = FXCollections.observableArrayList();
 
@@ -84,11 +111,29 @@ public class PaymentMethodsController {
         setupViewByRole();
         setupCardsTable();
         if ("ORGANIZER".equals(userSession.getRole())) {
+            economy = new OrganizerEconomy();
+            financeEconomyHost.getChildren().setAll(economy);
+            economy.refresh();
+            ledgerTitle.setCellValueFactory(c -> new SimpleStringProperty(JsonCodec.string(c.getValue(), "title", "")));
+            ledgerParticipant.setCellValueFactory(
+                    c -> new SimpleStringProperty(JsonCodec.string(c.getValue(), "participant", "")));
+            ledgerAmount.setCellValueFactory(
+                    c -> new SimpleStringProperty(UiText.money(c.getValue().get("amount").getAsBigDecimal())));
+            ledgerStatus.setCellValueFactory(c -> new SimpleStringProperty(
+                    BookingPresentation.paymentStatus(JsonCodec.string(c.getValue(), "status", ""))));
+            ledgerDate.setCellValueFactory(c -> new SimpleStringProperty(formatLedgerDate(c.getValue())));
+            ledgerTable.setPlaceholder(
+                    new Label("Nessun pagamento registrato. Le prenotazioni senza pagamento non sono incassi."));
+            ledgerTable.setFixedCellSize(48);
+            ledgerPagination.currentPageIndexProperty().addListener((o, a, b) -> loadLedger());
+            loadLedger();
             ApiService.callDetailed(ApiService.BASE_URL + "/api/account/settings", null, ApiService.Method.GET, r -> {
                 var d = JsonParser.parseString(r.body()).getAsJsonObject();
                 payoutHolderField.setText(JsonCodec.string(d, "payoutHolder", ""));
                 ibanField.setText(JsonCodec.string(d, "iban", ""));
                 bicField.setText(JsonCodec.string(d, "bic", ""));
+                payoutReadiness.setText(ibanField.getText().isBlank() ? "Completa le coordinate per gli accrediti"
+                        : "Coordinate salvate · conto dimostrativo");
             }, message -> ViewSupport.error(statusMessageLabel, message), null);
         } else
             loadCards();
@@ -98,8 +143,8 @@ public class PaymentMethodsController {
         boolean isOrganizer = "ORGANIZER".equalsIgnoreCase(userSession.getRole());
 
         if (isOrganizer) {
-            titleLabel.setText("Dati di Incasso & Payout");
-            subtitleLabel.setText("Configura il conto bancario su cui ricevere gli accrediti per i tuoi viaggi.");
+            titleLabel.setText("Incassi e payout");
+            subtitleLabel.setText("Controlla i pagamenti registrati e gestisci le coordinate del tuo account.");
             travelerPaymentsSection.setVisible(false);
             travelerPaymentsSection.setManaged(false);
             organizerPayoutSection.setVisible(true);
@@ -112,6 +157,41 @@ public class PaymentMethodsController {
             organizerPayoutSection.setVisible(false);
             organizerPayoutSection.setManaged(false);
         }
+    }
+
+    private String formatLedgerDate(JsonObject entry) {
+        try {
+            return ApiService.<LocalDateTime>fromJson(entry.get("date").toString(), LocalDateTime.class)
+                    .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        } catch (RuntimeException e) {
+            return "—";
+        }
+    }
+
+    @FXML
+    private void handleRefreshFinance() {
+        if (economy != null)
+            economy.refresh();
+        loadLedger();
+    }
+
+    private void loadLedger() {
+        long version = ++ledgerGeneration;
+        ApiService.callDetailed(
+                ApiService.BASE_URL + "/api/payments/organizer/finance?page=" + ledgerPagination.getCurrentPageIndex(),
+                null, ApiService.Method.GET, r -> {
+                    if (version != ledgerGeneration)
+                        return;
+                    JsonObject data = JsonParser.parseString(r.body()).getAsJsonObject();
+                    paidLabel.setText(UiText.money(data.get("paid").getAsBigDecimal()));
+                    pendingLabel.setText(UiText.money(data.get("pending").getAsBigDecimal()));
+                    cancelledLabel.setText(UiText.money(data.get("cancelled").getAsBigDecimal()));
+                    ledgerPagination.setPageCount(Math.max(1, data.get("totalPages").getAsInt()));
+                    financeUpdatedLabel.setText(
+                            "Aggiornato alle " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
+                    ledgerTable.getItems().clear();
+                    data.getAsJsonArray("entries").forEach(e -> ledgerTable.getItems().add(e.getAsJsonObject()));
+                }, message -> ViewSupport.error(statusMessageLabel, message), null);
     }
 
     private void setupCardsTable() {

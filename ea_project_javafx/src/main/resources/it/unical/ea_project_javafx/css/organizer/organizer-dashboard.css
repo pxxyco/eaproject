@@ -1,142 +1,52 @@
-.dashboard-container {
-    -fx-max-width: infinity;
+/* Operational workspace: concise summaries, virtual tables, clear actions. */
+.organizer-workspace {
+    -fx-padding: 30 32 44 32;
 }
 
 .dash-title {
-    -fx-font-size: 22px;
+    -fx-font-size: 32;
     -fx-font-weight: bold;
-    -fx-text-fill: #ffffff;
+    -fx-text-fill: #f5f7f5;
 }
 
 .dash-subtitle {
-    -fx-font-size: 12px;
-    -fx-text-fill: rgba(255, 255, 255, 0.6);
+    -fx-font-size: 13;
+    -fx-text-fill: #c2cdc5;
 }
 
-/* Action Buttons */
-.btn-card-action {
-    -fx-background-color: #e7e5e4;
-    -fx-text-fill: #1c1917;
-    -fx-font-weight: bold;
-    -fx-font-size: 13px;
-    -fx-background-radius: 8px;
-    -fx-padding: 8px 18px;
-    -fx-cursor: hand;
-}
-
-/* KPI Cards */
 .kpi-card {
-    -fx-background-color: rgba(255, 255, 255, 0.08);
-    -fx-border-color: rgba(255, 255, 255, 0.16);
-    -fx-border-radius: 12px;
-    -fx-background-radius: 12px;
-    -fx-padding: 16px 20px;
-    -fx-spacing: 8px;
+    -fx-padding: 20 22;
+    -fx-min-width: 175;
 }
 
 .kpi-title {
-    -fx-font-size: 11px;
-    -fx-font-weight: bold;
-    -fx-text-fill: rgba(255, 255, 255, 0.6);
-}
-
-.kpi-value,
-.kpi-value-green {
-    -fx-font-size: 26px;
-    -fx-font-weight: bold;
+    -fx-font-size: 12;
+    -fx-text-fill: #c2cdc5;
 }
 
 .kpi-value {
-    -fx-text-fill: #ffffff;
-}
-
-.kpi-value-green {
-    -fx-text-fill: #34d399;
-}
-
-.activity-card {
-    -fx-background-color: rgba(255, 255, 255, 0.08);
-    -fx-border-color: rgba(255, 255, 255, 0.16);
-    -fx-border-radius: 12px;
-    -fx-background-radius: 12px;
-    -fx-padding: 14px 16px;
-    -fx-pref-width: 290px;
-    -fx-min-width: 290px;
-}
-
-/* Custom Table View */
-.custom-table {
-    -fx-background-color: rgba(255, 255, 255, 0.04);
-    -fx-border-color: rgba(255, 255, 255, 0.14);
-    -fx-border-radius: 12px;
-    -fx-background-radius: 12px;
-    -fx-padding: 0;
-}
-
-.custom-table .column-header-background,
-.custom-table .column-header .filler,
-.custom-table .show-hide-columns-button,
-.custom-table .virtual-flow .clipped-container .sheet .table-row-cell:empty {
-    -fx-background-color: transparent;
-    -fx-border-color: transparent;
-}
-
-.custom-table .column-header {
-    -fx-background-color: transparent;
-    -fx-border-color: rgba(255, 255, 255, 0.1);
-    -fx-border-width: 0 0 1 0;
-    -fx-padding: 12px 10px;
-}
-
-.custom-table .column-header .label {
-    -fx-text-fill: rgba(255, 255, 255, 0.6);
-    -fx-font-size: 12px;
+    -fx-font-size: 29;
     -fx-font-weight: bold;
-    -fx-alignment: center-left;
+    -fx-text-fill: #f5f7f5;
 }
 
-.custom-table .table-row-cell {
-    -fx-background-color: transparent;
-    -fx-border-color: rgba(255, 255, 255, 0.05);
-    -fx-border-width: 0 0 1 0;
-    -fx-padding: 8px 0;
+.organizer-selection {
+    -fx-padding: 18 22;
 }
 
-.custom-table .table-row-cell:hover {
-    -fx-background-color: rgba(255, 255, 255, 0.05);
+.organizer-selection .label {
+    -fx-text-fill: #eaf2ec;
 }
 
-.custom-table .table-cell {
-    -fx-text-fill: #ffffff;
-    -fx-font-size: 13px;
-    -fx-alignment: center-left;
-    -fx-border-color: transparent;
+.organizer-workspace .pagination .pagination-control .number-button,
+.organizer-workspace .pagination .pagination-control .bullet-button {
+    -fx-background-radius: 12;
 }
 
-.custom-table .table-row-cell:filled:selected {
-    -fx-background-color: rgba(255, 255, 255, 0.12);
+.organizer-workspace .pagination .page-information {
+    -fx-text-fill: #c2cdc5;
 }
 
-.custom-table .placeholder .label {
-    -fx-text-fill: rgba(255, 255, 255, 0.6);
-}
-
-.custom-table .corner {
-    -fx-background-color: transparent;
-}
-
-.custom-table .scroll-bar:horizontal,
-.custom-table .scroll-bar:vertical {
-    -fx-background-color: transparent;
-}
-
-.custom-table .scroll-bar .thumb {
-    -fx-background-color: rgba(231, 229, 228, 0.25);
-    -fx-background-radius: 4px;
-}
-
-.custom-table .scroll-bar .increment-button,
-.custom-table .scroll-bar .decrement-button {
-    -fx-background-color: transparent;
-    -fx-padding: 3px;
+.organizer-dashboard-fragment {
+    -fx-padding: 0;
 }

@@ -21,6 +21,7 @@ import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.util.StringConverter;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
@@ -123,6 +124,26 @@ public class FavoritesController {
         ViewSupport.loadNavbar(navbarContainer);
         newListVisibilityCombo.getItems().setAll("PRIVATE", "SHARED", "PUBLIC");
         editListVisibilityCombo.getItems().setAll("PRIVATE", "SHARED", "PUBLIC");
+        StringConverter<String> visibilityConverter = new StringConverter<>() {
+            @Override
+            public String toString(String value) {
+                if (value == null)
+                    return "";
+                return switch (value) {
+                    case "PRIVATE" -> "Solo io";
+                    case "SHARED" -> "Persone invitate";
+                    case "PUBLIC" -> "Tutti";
+                    default -> value;
+                };
+            }
+
+            @Override
+            public String fromString(String value) {
+                return value;
+            }
+        };
+        newListVisibilityCombo.setConverter(visibilityConverter);
+        editListVisibilityCombo.setConverter(visibilityConverter);
         newListVisibilityCombo.getSelectionModel().selectFirst();
         for (var list : List.of(listsListView, tripSearchResults, savedTripsListView,
                 activitySearchResults, savedActivitiesListView)) {
@@ -130,7 +151,9 @@ public class FavoritesController {
                 @Override
                 protected void updateItem(String item, boolean empty) {
                     super.updateItem(item, empty);
-                    String display = empty || item == null ? null : ID_PATTERN.matcher(item).replaceFirst("").strip();
+                    String display = empty || item == null ? null
+                            : ID_PATTERN.matcher(item).replaceFirst("").strip().replace("[PRIVATE]", "· Solo io")
+                                    .replace("[SHARED]", "· Persone invitate").replace("[PUBLIC]", "· Tutti");
                     setText(display);
                     setAccessibleText(display);
                 }
@@ -145,7 +168,8 @@ public class FavoritesController {
         sharedListDetailsListView.setItems(FXCollections.observableArrayList());
         sharedListNameColumn.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().listName));
         sharedListOrganizerColumn.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().organizer));
-        sharedListPermissionColumn.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().permission));
+        sharedListPermissionColumn.setCellValueFactory(cell -> new SimpleStringProperty(
+                "EDIT".equals(cell.getValue().permission) ? "Puoi modificare" : "Solo lettura"));
         sharedListSharedAtColumn.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().sharedAt));
         sharedListsTable.getSelectionModel().selectedItemProperty()
                 .addListener((obs, oldRow, newRow) -> showSharedListDetails(newRow));
@@ -173,13 +197,14 @@ public class FavoritesController {
             favoritesSelected = FAVORITES_ITEM.equals(value);
             if (favoritesSelected) {
                 selectedListNameLabel.setText("Preferiti");
-                selectedListVisibilityLabel.setText("Privata · lista predefinita, non modificabile");
+                selectedListVisibilityLabel.setText("La tua raccolta personale");
                 editListNameField.setText("Preferiti");
                 editListNameField.setDisable(true);
                 editListVisibilityCombo.setValue("PRIVATE");
                 editListVisibilityCombo.setDisable(true);
                 saveListChangesButton.setDisable(true);
-                if (deleteListButton != null) deleteListButton.setDisable(true);
+                if (deleteListButton != null)
+                    deleteListButton.setDisable(true);
                 shareListButton.setVisible(false);
                 shareListButton.setManaged(false);
                 setContentControlsEnabled(true);
@@ -191,7 +216,8 @@ public class FavoritesController {
 
             selectedListNameLabel.setText(displayName(value));
             String visibility = extractVisibility(value);
-            selectedListVisibilityLabel.setText("Visibilità: " + visibility);
+            selectedListVisibilityLabel
+                    .setText("Visibilità: " + editListVisibilityCombo.getConverter().toString(visibility));
             editListNameField.setText(displayName(value));
             editListVisibilityCombo.setValue(visibility);
             saveListChangesButton.setDisable(false);
@@ -770,7 +796,8 @@ public class FavoritesController {
         long requestSelection = selectionVersion;
         ApiService.call(ApiService.BASE_URL + "/api/list-trips/list/" + listId, null, ApiService.Method.GET,
                 response -> Platform.runLater(() -> {
-                    if (requestSelection != selectionVersion || favoritesSelected) return;
+                    if (requestSelection != selectionVersion || favoritesSelected)
+                        return;
                     try {
                         savedTripsListView.getItems().clear();
                         JsonArray array = JsonParser.parseString(response.body()).getAsJsonArray();
@@ -790,7 +817,8 @@ public class FavoritesController {
                 null);
         ApiService.call(ApiService.BASE_URL + "/api/list-activities/list/" + listId, null, ApiService.Method.GET,
                 response -> Platform.runLater(() -> {
-                    if (requestSelection != selectionVersion || favoritesSelected) return;
+                    if (requestSelection != selectionVersion || favoritesSelected)
+                        return;
                     try {
                         savedActivitiesListView.getItems().clear();
                         JsonArray array = JsonParser.parseString(response.body()).getAsJsonArray();
@@ -814,13 +842,16 @@ public class FavoritesController {
     private void changeFavorite(ListView<String> source, FavoriteService.Target target, boolean save) {
         Long id = extractId(source.getSelectionModel().getSelectedItem());
         if (id == null) {
-            ViewSupport.error(statusMessageLabel, save ? "Seleziona un'esperienza dai risultati." : "Seleziona un preferito da rimuovere.");
+            ViewSupport.error(statusMessageLabel,
+                    save ? "Seleziona un'esperienza dai risultati." : "Seleziona un preferito da rimuovere.");
             return;
         }
         long requestSelection = selectionVersion;
         FavoriteService.set(target, id.toString(), save, favorite -> {
-            if (requestSelection != selectionVersion) return;
-            ViewSupport.success(statusMessageLabel, favorite ? "Esperienza aggiunta ai preferiti." : "Esperienza rimossa dai preferiti.");
+            if (requestSelection != selectionVersion)
+                return;
+            ViewSupport.success(statusMessageLabel,
+                    favorite ? "Esperienza aggiunta ai preferiti." : "Esperienza rimossa dai preferiti.");
             loadFavorites();
         }, message -> ViewSupport.error(statusMessageLabel, message), null);
     }
@@ -828,16 +859,20 @@ public class FavoritesController {
     private void loadFavorites() {
         long requestSelection = selectionVersion;
         FavoriteService.list(favorites -> {
-            if (requestSelection != selectionVersion || !favoritesSelected) return;
+            if (requestSelection != selectionVersion || !favoritesSelected)
+                return;
             savedTripsListView.getItems().clear();
             savedActivitiesListView.getItems().clear();
             for (var favorite : favorites) {
                 String row = favorite.getTitle() + " — " + favorite.getCity() + " #" + favorite.getItemId();
-                if ("TRIP".equals(favorite.getType())) savedTripsListView.getItems().add(row);
-                else savedActivitiesListView.getItems().add(row);
+                if ("TRIP".equals(favorite.getType()))
+                    savedTripsListView.getItems().add(row);
+                else
+                    savedActivitiesListView.getItems().add(row);
             }
         }, message -> {
-            if (requestSelection == selectionVersion) ViewSupport.error(statusMessageLabel, message);
+            if (requestSelection == selectionVersion)
+                ViewSupport.error(statusMessageLabel, message);
         });
     }
 

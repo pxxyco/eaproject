@@ -35,6 +35,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import it.unical.ea_project_javafx.ui.file.NativeFiles;
 import javafx.stage.Window;
 
 import static it.unical.ea_project_javafx.ui.BookingPresentation.bookingRow;
@@ -390,7 +391,7 @@ public class BookingsController {
                             .add(new FileChooser.ExtensionFilter("Calendario iCalendar (*.ics)", "*.ics"));
                     Window owner = statusMessageLabel.getScene() == null ? null
                             : statusMessageLabel.getScene().getWindow();
-                    File file = chooser.showSaveDialog(owner);
+                    File file = NativeFiles.save(chooser, owner);
                     if (file == null) {
                         ViewSupport.success(statusMessageLabel, "Esportazione annullata: nessun file salvato.");
                         return;

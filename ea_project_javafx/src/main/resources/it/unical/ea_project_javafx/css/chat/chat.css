@@ -188,3 +188,40 @@
     -fx-border-radius: 12;
     -fx-padding: 16 12;
 }
+
+.chat-peer-name {
+    -fx-font-size: 15;
+    -fx-font-weight: bold;
+    -fx-text-fill: #fafaf9;
+}
+
+.chat-preview {
+    -fx-font-size: 12;
+    -fx-text-fill: #c7c7c4;
+}
+
+.chat-unread-dot {
+    -fx-fill: #a6e3bd;
+}
+
+.chat-text-run {
+    -fx-fill: #fafaf9;
+    -fx-font-size: 14;
+}
+
+.chat-message-own .chat-text-run {
+    -fx-fill: #1c1917;
+}
+
+.chat-quote {
+    -fx-padding: 9 12;
+    -fx-background-color: rgba(120, 145, 135, .18);
+    -fx-background-radius: 10;
+    -fx-border-color: transparent transparent transparent #9fc7b2;
+    -fx-border-width: 0 0 0 3;
+    -fx-text-fill: #e7e5e4;
+}
+
+.chat-message-own .chat-quote {
+    -fx-text-fill: #292524;
+}

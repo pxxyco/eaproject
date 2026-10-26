@@ -8,6 +8,9 @@ import it.unical.ea_project_javafx.dto.trip.TripDTO;
 import it.unical.ea_project_javafx.ui.map.MarkerLayer;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
+import javafx.scene.shape.Rectangle;
+import javafx.geometry.Insets;
+import java.util.List;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.input.ScrollEvent;
@@ -23,6 +26,17 @@ public class ItineraryController implements ActivitySectionController, TripSecti
     public StackPane mapContainer;
     @FXML
     private VBox itinerarioItemsContainer;
+
+    @FXML
+    private void initialize() {
+        mapContainer.setPadding(Insets.EMPTY);
+        Rectangle clip = new Rectangle();
+        clip.widthProperty().bind(mapContainer.widthProperty());
+        clip.heightProperty().bind(mapContainer.heightProperty());
+        clip.setArcWidth(44);
+        clip.setArcHeight(44);
+        mapContainer.setClip(clip);
+    }
 
     private MapPoint standard = new MapPoint(41.8719, 12.5674);
     private MapView mapView;
@@ -66,7 +80,7 @@ public class ItineraryController implements ActivitySectionController, TripSecti
 
     private void setItinerario(TripDTO trip) {
 
-        int lenght = trip.getStages().size();
+        int lenght = (trip.getStages() == null ? 0 : trip.getStages().size());
 
         if (lenght > 0) {
             for (int i = 0; i < lenght; i++) {
@@ -97,6 +111,9 @@ public class ItineraryController implements ActivitySectionController, TripSecti
     private void setMap(ActivityDTO activity) {
 
         mapView = new MapView();
+        mapView.setMinSize(0, 0);
+        mapView.setPrefSize(650, 340);
+        mapView.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
         if (activity.getLongitude() != null && activity.getLatitude() != null) {
             MapPoint centro = new MapPoint(activity.getLatitude(), activity.getLongitude());
@@ -120,8 +137,11 @@ public class ItineraryController implements ActivitySectionController, TripSecti
     private void setMap(TripDTO trip) {
 
         mapView = new MapView();
+        mapView.setMinSize(0, 0);
+        mapView.setPrefSize(650, 340);
+        mapView.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 
-        var mappedStages = trip.getStages().stream()
+        var mappedStages = (trip.getStages() == null ? List.<StageDTO>of() : trip.getStages()).stream()
                 .filter(stage -> stage.getLatitude() != null && stage.getLongitude() != null).toList();
         if (!mappedStages.isEmpty()) {
             MapPoint centro = new MapPoint(mappedStages.getFirst().getLatitude(),

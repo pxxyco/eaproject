@@ -282,9 +282,11 @@ public final class PopupFactory {
             region.setMaxWidth(currentWidth <= 0 || currentWidth == Double.MAX_VALUE
                     ? maxWidth
                     : Math.min(currentWidth, maxWidth));
-            region.setMaxHeight(currentHeight <= 0 || currentHeight == Double.MAX_VALUE
-                    ? maxHeight
-                    : Math.min(currentHeight, maxHeight));
+            if (currentHeight == Region.USE_PREF_SIZE || content instanceof VBox)
+                region.setMaxHeight(Region.USE_PREF_SIZE);
+            else
+                region.setMaxHeight(currentHeight <= 0 || currentHeight == Double.MAX_VALUE ? maxHeight
+                        : Math.min(currentHeight, maxHeight));
         }
     }
 

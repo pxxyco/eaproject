@@ -1,6 +1,8 @@
 package it.unical.ea_project.repository.booking;
 
 import it.unical.ea_project.domain.booking.Booking;
+import it.unical.ea_project.domain.trip.Trip;
+import it.unical.ea_project.domain.activity.Activity;
 import jakarta.persistence.LockModeType;
 import jakarta.transaction.Transactional;
 import java.util.List;
@@ -14,6 +16,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
+  @Query("select count(b) from Booking b left join b.trip t left join b.activity a where b.user.id=:traveler and b.deletedAt is null and (t.createdBy.id=:organizer or a.createdBy.id=:organizer)")
+  long countContactBookings(@Param("traveler") Long traveler, @Param("organizer") Long organizer);
+
   @EntityGraph(attributePaths = { "trip", "activity" })
   @Query("select b from Booking b where b.user.id=:user and b.deletedAt is null order by b.createdAt desc")
   List<Booking> recommendationHistory(@Param("user") Long user, Pageable page);
@@ -42,6 +47,12 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
       ORDER BY b.createdAt DESC
       """)
   List<Booking> findActiveBookingsForOrganizer(@Param("organizerId") Long organizerId);
+
+  @Query("select count(b),coalesce(sum(b.seats),0),coalesce(sum(b.price),0) from Booking b left join b.trip t left join b.activity a where b.deletedAt is null and b.bookingStatus<>:cancelled and ((t.createdBy.id=:organizer and t.deletedAt is null and t.status<>:tripCancelled) or (a.createdBy.id=:organizer and a.deletedAt is null and a.status<>:activityCancelled))")
+  List<Object[]> organizerReservationTotals(@Param("organizer") Long organizer,
+      @Param("cancelled") Booking.BookingStatus cancelled,
+      @Param("tripCancelled") Trip.TripStatus tripCancelled,
+      @Param("activityCancelled") Activity.Status activityCancelled);
 
   // soft delete tramite campo deleted_at
   @Modifying

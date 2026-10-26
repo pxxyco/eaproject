@@ -35,6 +35,10 @@ public class ChatMessage {
     private String clientId;
     @Column(nullable = false, length = 4000)
     private String body;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private ChatMessage replyTo;
+    private String attachmentKey;
+    private String attachmentHash;
     @Column(nullable = false)
     private Instant sentAt = Instant.now();
 }

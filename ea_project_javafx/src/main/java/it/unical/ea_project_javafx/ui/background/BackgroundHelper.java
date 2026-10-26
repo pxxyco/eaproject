@@ -100,10 +100,11 @@ public class BackgroundHelper {
                 return;
             if (!(bgImageView.getParent() instanceof StackPane root))
                 return;
-            root.setStyle("-fx-background-color: #101010;");
+            if (!root.getStyle().contains("-fx-background-color"))
+                root.setStyle(root.getStyle() + ";-fx-background-color: #101010;");
             Region shade = null;
             for (var node : root.getChildren()) {
-                if (node instanceof Region region
+                if (node instanceof Region region && region.getClass() == Region.class
                         && region.getStyleClass().stream()
                                 .anyMatch(c -> c.endsWith("overlay") || c.equals("app-background-shade"))) {
                     shade = region;

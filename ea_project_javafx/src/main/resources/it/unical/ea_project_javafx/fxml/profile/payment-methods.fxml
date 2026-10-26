@@ -3,6 +3,8 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.Pagination?>
+<?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
@@ -19,7 +21,7 @@
         <URL value="@../../css/profile/profile.css" />
         <URL value="@../../css/common/style.css" />
     </stylesheets>
-    <ImageView fx:id="bgImageView" mouseTransparent="true" opacity="0.12" />
+    <ImageView fx:id="bgImageView" mouseTransparent="true" preserveRatio="false" />
     <BorderPane>
         <top>
             <StackPane fx:id="navbarContainer" />
@@ -30,11 +32,8 @@
                     <VBox maxWidth="1080" spacing="24">
                         <Label text="PRONTI PER LA PROSSIMA ESPERIENZA" styleClass="account-kicker"
                             wrapText="true" />
-                        <Label text="Metodi di pagamento" styleClass="account-title" wrapText="true" />
-                        <Label text="Le tue carte di prova e le coordinate del tuo account."
-                            styleClass="account-subtitle" wrapText="true" />
-                        <Label fx:id="titleLabel" managed="false" visible="false" />
-                        <Label fx:id="subtitleLabel" managed="false" visible="false" />
+                        <Label fx:id="titleLabel" styleClass="account-title" wrapText="true" />
+                        <Label fx:id="subtitleLabel" styleClass="account-subtitle" wrapText="true" />
                         <Label fx:id="statusMessageLabel" visible="false" managed="false"
                             wrapText="true" />
                         <VBox fx:id="travelerPaymentsSection" spacing="24">
@@ -101,32 +100,87 @@
                                     onAction="#handleAddCard" styleClass="btn-primary" />
                             </VBox>
                         </VBox>
-                        <VBox fx:id="organizerPayoutSection" spacing="20" styleClass="account-panel">
-                            <Label text="Coordinate per gli accrediti" styleClass="section-header"
-                                wrapText="true" />
-                            <Label
-                                text="Dati salvati nel tuo account dimostrativo. Il progetto non esegue bonifici o accrediti reali."
-                                styleClass="section-subtitle" wrapText="true" />
-                            <VBox spacing="7">
-                                <Label text="Intestatario del conto" styleClass="form-label"
-                                    wrapText="true" />
-                                <TextField fx:id="payoutHolderField"
-                                    promptText="Nome o ragione sociale" styleClass="custom-input" />
+                        <VBox fx:id="organizerPayoutSection" spacing="26">
+                            <VBox fx:id="financeEconomyHost" spacing="18" />
+                            <HBox spacing="16">
+                                <VBox spacing="8" styleClass="account-panel" HBox.hgrow="ALWAYS">
+                                    <Label text="Incassato" styleClass="section-subtitle" />
+                                    <Label fx:id="paidLabel" text="—" styleClass="account-title" />
+                                </VBox>
+                                <VBox spacing="8" styleClass="account-panel" HBox.hgrow="ALWAYS">
+                                    <Label text="Pagamenti in attesa" styleClass="section-subtitle" />
+                                    <Label fx:id="pendingLabel" text="—" styleClass="account-title" />
+                                </VBox>
+                                <VBox spacing="8" styleClass="account-panel" HBox.hgrow="ALWAYS">
+                                    <Label text="Pagamenti annullati" styleClass="section-subtitle" />
+                                    <Label fx:id="cancelledLabel" text="—"
+                                        styleClass="account-title" />
+                                </VBox>
+                            </HBox>
+                            <VBox spacing="16" styleClass="account-panel">
+                                <HBox spacing="18" alignment="CENTER_LEFT">
+                                    <Label text="Movimenti registrati" styleClass="section-header"
+                                        HBox.hgrow="ALWAYS" maxWidth="Infinity" />
+                                    <Button text="Aggiorna" onAction="#handleRefreshFinance"
+                                        styleClass="btn-secondary" />
+                                </HBox>
+                                <Label
+                                    text="Gli importi si riferiscono ai pagamenti salvati, non al valore delle prenotazioni. In modalità demo non vengono eseguiti trasferimenti reali."
+                                    wrapText="true" styleClass="section-subtitle" />
+                                <TableView fx:id="ledgerTable" prefHeight="350"
+                                    styleClass="custom-table">
+                                    <columns>
+                                        <TableColumn fx:id="ledgerTitle" text="Esperienza"
+                                            prefWidth="260" />
+                                        <TableColumn fx:id="ledgerParticipant" text="Partecipante"
+                                            prefWidth="200" />
+                                        <TableColumn fx:id="ledgerAmount" text="Importo"
+                                            prefWidth="120" />
+                                        <TableColumn fx:id="ledgerStatus" text="Stato"
+                                            prefWidth="130" />
+                                        <TableColumn fx:id="ledgerDate" text="Data" prefWidth="170" />
+                                    </columns>
+                                    <columnResizePolicy>
+                                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                    </columnResizePolicy>
+                                </TableView>
+                                <Pagination fx:id="ledgerPagination" maxPageIndicatorCount="7" />
+                                <Label fx:id="financeUpdatedLabel" text=""
+                                    styleClass="section-subtitle" />
+                                <TitledPane text="Come leggere questi importi" expanded="false">
+                                    <Label
+                                        text="Incassato: pagamenti completati o confermati. In attesa: pagamenti creati ma non completati. Annullati: operazioni cancellate. Le prenotazioni prive di pagamento non aumentano gli incassi. Le coordinate vengono salvate ma non sono verificate da una banca; non sono previsti bonifici reali o date di accredito."
+                                        wrapText="true" />
+                                </TitledPane>
                             </VBox>
-                            <VBox spacing="7">
-                                <Label text="IBAN" styleClass="form-label" wrapText="true" />
-                                <TextField fx:id="ibanField"
-                                    promptText="IT60 X054 2811 1010 0000 0123 456"
-                                    styleClass="custom-input" />
+                            <VBox spacing="18" styleClass="account-panel">
+                                <Label fx:id="payoutReadiness" text="Coordinate per gli accrediti"
+                                    styleClass="section-header" wrapText="true" />
+                                <Label
+                                    text="Dati salvati nel tuo account dimostrativo. Il progetto non esegue bonifici o accrediti reali."
+                                    styleClass="section-subtitle" wrapText="true" />
+                                <VBox spacing="7">
+                                    <Label text="Intestatario del conto" styleClass="form-label"
+                                        wrapText="true" />
+                                    <TextField fx:id="payoutHolderField"
+                                        promptText="Nome o ragione sociale"
+                                        styleClass="custom-input" />
+                                </VBox>
+                                <VBox spacing="7">
+                                    <Label text="IBAN" styleClass="form-label" wrapText="true" />
+                                    <TextField fx:id="ibanField"
+                                        promptText="IT60 X054 2811 1010 0000 0123 456"
+                                        styleClass="custom-input" />
+                                </VBox>
+                                <VBox spacing="7">
+                                    <Label text="BIC / SWIFT, facoltativo" styleClass="form-label"
+                                        wrapText="true" />
+                                    <TextField fx:id="bicField" promptText="UNCRITMM"
+                                        styleClass="custom-input" />
+                                </VBox>
+                                <Button fx:id="payoutButton" text="Salva coordinate"
+                                    onAction="#handleSavePayout" styleClass="btn-primary" />
                             </VBox>
-                            <VBox spacing="7">
-                                <Label text="BIC / SWIFT, facoltativo" styleClass="form-label"
-                                    wrapText="true" />
-                                <TextField fx:id="bicField" promptText="UNCRITMM"
-                                    styleClass="custom-input" />
-                            </VBox>
-                            <Button fx:id="payoutButton" text="Salva coordinate"
-                                onAction="#handleSavePayout" styleClass="btn-primary" />
                         </VBox>
                     </VBox>
                 </VBox>

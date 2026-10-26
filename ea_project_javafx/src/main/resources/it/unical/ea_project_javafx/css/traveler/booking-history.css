@@ -240,3 +240,25 @@
     -fx-focus-color: transparent;
     -fx-faint-focus-color: transparent;
 }
+
+.history-host {
+    -fx-padding: 28 32 36;
+}
+
+.history-feed {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.history-feed .list-cell {
+    -fx-background-color: transparent;
+    -fx-padding: 12 0;
+}
+
+.history-feed .list-cell:empty {
+    -fx-padding: 0;
+}
+
+.history-header {
+    -fx-padding: 0 0 18;
+}

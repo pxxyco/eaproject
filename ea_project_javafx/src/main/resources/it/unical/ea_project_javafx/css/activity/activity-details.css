@@ -75,13 +75,13 @@
 }
 
 .section-button-active {
-    -fx-background-color: #e7e5e4;
-    -fx-border-color: #e7e5e4;
-    -fx-text-fill: #1c1917;
+    -fx-background-color: rgba(168, 203, 180, 0.18);
+    -fx-border-color: -app-accent;
+    -fx-text-fill: #f4f6f1;
 }
 
 .section-button-active:hover {
-    -fx-background-color: #fafaf9;
+    -fx-background-color: rgba(168, 203, 180, 0.24);
 }
 
 .hero {
@@ -197,7 +197,7 @@
     -fx-border-color: #d6d3d1;
 }
 
-.booking-card .date-picker > .arrow-button:hover {
+.booking-card .date-picker>.arrow-button:hover {
     -fx-background-color: rgba(231, 229, 228, 0.18);
     -fx-background-radius: 6px;
 }
@@ -210,8 +210,8 @@
     -fx-alignment: center;
 }
 
-.booking-card .booking-spinner > .increment-arrow-button,
-.booking-card .booking-spinner > .decrement-arrow-button {
+.booking-card .booking-spinner>.increment-arrow-button,
+.booking-card .booking-spinner>.decrement-arrow-button {
     -fx-background-color: transparent;
     -fx-background-insets: 0;
     -fx-background-radius: 6px;
@@ -224,8 +224,8 @@
     -fx-background-color: rgba(231, 229, 228, 0.18);
 }
 
-.booking-card .booking-spinner > .increment-arrow-button > .increment-arrow,
-.booking-card .booking-spinner > .decrement-arrow-button > .decrement-arrow {
+.booking-card .booking-spinner>.increment-arrow-button>.increment-arrow,
+.booking-card .booking-spinner>.decrement-arrow-button>.decrement-arrow {
     -fx-background-color: #d6d3d1;
 }
 
@@ -251,4 +251,61 @@
 .btn-favorite.active {
     -fx-text-fill: #ef4444;
     -fx-border-color: rgba(239, 68, 68, 0.6);
+}
+
+.experience-heading .hero-title {
+    -fx-font-size: 36;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f7faf7;
+}
+
+.experience-heading .hero-subtitle {
+    -fx-font-size: 16;
+    -fx-text-fill: #d3ded6;
+}
+
+.experience-summary {
+    -fx-font-size: 13;
+    -fx-text-fill: #d3ded6;
+    -fx-padding: 0 0 4 0;
+}
+
+.experience-body {
+    -fx-padding: 24;
+    -fx-background-radius: 22;
+    -fx-border-radius: 22;
+}
+
+.experience-detail .booking-title {
+    -fx-font-size: 24;
+}
+
+.experience-detail .booking-subtitle {
+    -fx-font-size: 13;
+    -fx-text-fill: #c2cdc5;
+}
+
+.experience-detail .booking-card {
+    -fx-spacing: 18;
+}
+
+.experience-detail .price-big {
+    -fx-font-size: 32;
+}
+
+.experience-detail .badge-category,
+.experience-detail .badge-rating {
+    -fx-padding: 6 12;
+    -fx-background-color: rgba(232, 245, 237, .09);
+    -fx-border-color: rgba(232, 245, 237, .22);
+}
+
+.experience-detail .content-scroll,
+.experience-detail .content-scroll>.viewport {
+    -fx-background-color: transparent;
+}
+
+.experience-detail .booking-card .btn-primary {
+    -fx-min-width: 145;
+    -fx-min-height: 44;
 }

@@ -1,6 +1,7 @@
 package it.unical.ea_project_javafx.controller.activity.photo;
 
 import java.util.function.Consumer;
+import it.unical.ea_project_javafx.util.ImageUtils;
 import javafx.fxml.FXML;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -19,8 +20,13 @@ public class PhotoItemController {
 
     public void setFoto(String url) {
 
-        this.url = url;
-        image.setImage(new Image(url, 150, 150, false, true));
+        this.url = ImageUtils.buildFullUrl(url);
+        try {
+            image.setImage(new Image(this.url, 150, 150, true, true, true));
+        } catch (IllegalArgumentException invalid) {
+            this.url = ImageUtils.getDefaultImageUrl();
+            image.setImage(new Image(this.url, 150, 150, true, true, true));
+        }
 
     }
 

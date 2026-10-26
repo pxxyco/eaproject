@@ -7,6 +7,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.util.Duration;
 
 public final class PageTransitions {
+    private static final String FADE = PageTransitions.class.getName() + ".fade";
+
     private PageTransitions() {
     }
 
@@ -16,8 +18,11 @@ public final class PageTransitions {
             content = center(root);
         if (content == null)
             return;
-        FadeTransition fade = new FadeTransition(Duration.millis(180), content);
-        content.setOpacity(.72);
+        if (content.getProperties().get(FADE) instanceof FadeTransition previous)
+            previous.stop();
+        FadeTransition fade = new FadeTransition(Duration.millis(170), content);
+        content.getProperties().put(FADE, fade);
+        content.setOpacity(.94);
         fade.setToValue(1);
         fade.play();
     }
@@ -35,8 +40,11 @@ public final class PageTransitions {
     }
 
     public static void appear(Node node) {
-        node.setOpacity(0);
+        if (node.getProperties().get(FADE) instanceof FadeTransition previous)
+            previous.stop();
+        node.setOpacity(.86);
         FadeTransition fade = new FadeTransition(Duration.millis(220), node);
+        node.getProperties().put(FADE, fade);
         fade.setToValue(1);
         fade.play();
     }

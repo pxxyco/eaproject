@@ -6,6 +6,8 @@ import it.unical.ea_project_javafx.ui.animation.UiEffects;
 import it.unical.ea_project_javafx.ui.scroll.SmoothScrolling;
 import java.io.IOException;
 import java.net.URL;
+import javafx.animation.PauseTransition;
+import javafx.util.Duration;
 import java.util.function.Consumer;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -17,6 +19,7 @@ public class SceneNavigator {
 
     private static SceneNavigator instance;
     private Stage mainStage;
+    private final PauseTransition navigationDelay = new PauseTransition(Duration.millis(40));
 
     private SceneNavigator() {
     }
@@ -47,6 +50,15 @@ public class SceneNavigator {
     }
 
     public void loadScene(String fxmlPath, Consumer<Object> controllerInitializer) {
+        navigationDelay.stop();
+        if (mainStage != null && mainStage.getScene() != null && mainStage.isShowing()) {
+            navigationDelay.setOnFinished(e -> performLoad(fxmlPath, controllerInitializer));
+            navigationDelay.playFromStart();
+        } else
+            performLoad(fxmlPath, controllerInitializer);
+    }
+
+    private void performLoad(String fxmlPath, Consumer<Object> controllerInitializer) {
 
         if (mainStage == null) {
             throw new IllegalStateException("SceneNavigator non inizializzato.");
@@ -84,6 +96,7 @@ public class SceneNavigator {
                 scene.setRoot(root);
             SmoothScrolling.install(scene);
             UiEffects.install(scene);
+            UiEffects.prepare(root);
             PageTransitions.enter(root);
             if (mainStage.getScene() != scene)
                 mainStage.setScene(scene);

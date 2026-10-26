@@ -381,7 +381,7 @@ public class BookingServiceImpl implements BookingService {
         // The repository returns newest payments first; retain only the first
         // non-deleted one per booking.
         for (Payment payment : paymentRepository
-                .findAllByBookingBookingIdInAndDeletedAtIsNullOrderByCreatedAtDesc(ids)) {
+                .findBookingPaymentsBatch(ids)) {
             if (payment == null || payment.getBooking() == null)
                 continue;
             Long bookingId = payment.getBooking().getBookingId();
@@ -394,7 +394,7 @@ public class BookingServiceImpl implements BookingService {
 
     private BookingDTO toDto(Booking booking) {
         String paymentStatus = paymentRepository
-                .findAllByBookingBookingIdAndDeletedAtIsNullOrderByCreatedAtDesc(booking.getBookingId())
+                .findBookingPayments(booking.getBookingId())
                 .stream()
                 .findFirst()
                 .map(payment -> payment.getStatus() != null ? payment.getStatus().name() : null)

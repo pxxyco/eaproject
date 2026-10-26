@@ -12,7 +12,14 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
-public class DashboardViewController {
+public class DashboardViewController implements AutoCloseable {
+    private AutoCloseable child;
+
+    @Override
+    public void close() throws Exception {
+        if (child != null)
+            child.close();
+    }
 
     @FXML
     private ImageView bgImageView;
@@ -32,6 +39,8 @@ public class DashboardViewController {
 
     private void loadRoleDashboard() {
         String role = userSession.getRole();
+        if ("ORGANIZER".equals(role))
+            dashboardContent.setMaxWidth(1220);
         String dashboardPath = "ORGANIZER".equalsIgnoreCase(role)
                 ? "/it/unical/ea_project_javafx/fxml/organizer/organizer-dashboard.fxml"
                 : "/it/unical/ea_project_javafx/fxml/traveler/traveler-dashboard.fxml";
@@ -40,6 +49,8 @@ public class DashboardViewController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(dashboardPath));
             Parent dashboard = loader.load();
             Object controller = loader.getController();
+            if (controller instanceof AutoCloseable lifecycle)
+                child = lifecycle;
             if (controller instanceof ProfileDashboardController profileDashboardController) {
                 profileDashboardController.setUser(userSession);
             }

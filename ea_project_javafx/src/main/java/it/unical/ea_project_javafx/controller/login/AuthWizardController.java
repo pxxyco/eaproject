@@ -7,6 +7,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.VBox;
+import javafx.scene.layout.StackPane;
 
 public class AuthWizardController implements StepNavigator {
 
@@ -15,7 +16,9 @@ public class AuthWizardController implements StepNavigator {
     @FXML
     private VBox authCard;
     @FXML
-    private VBox stepLogin, stepForgotPassword, stepRole, stepDetails, loadingOverlay, feedbackOverlay;
+    private VBox stepLogin, stepForgotPassword, stepRole, stepDetails, feedbackOverlay;
+    @FXML
+    private StackPane loadingOverlay;
 
     @FXML
     private LoginStepController stepLoginController;

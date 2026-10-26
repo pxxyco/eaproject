@@ -6,6 +6,9 @@ import it.unical.ea_project.security.AuthUser;
 import it.unical.ea_project.service.chat.ChatService;
 import it.unical.ea_project.service.security.JwtService;
 import java.util.List;
+import java.util.Map;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -34,10 +37,10 @@ public class ChatController {
         jwt = j;
     }
 
-    public record Open(Long organizerId) {
+    public record Open(Long organizerId, Long travelerId) {
     }
 
-    public record Send(String clientId, String body) {
+    public record Send(String clientId, String body, Long replyToId) {
     }
 
     public record Read(Long throughId) {
@@ -51,6 +54,8 @@ public class ChatController {
 
     @PostMapping("/conversations")
     public ChatService.ConversationView open(@AuthenticationPrincipal AuthUser user, @RequestBody Open request) {
+        if ("ORGANIZER".equals(user.role()) && request.travelerId() != null)
+            return service.openTraveler(user.id(), request.travelerId());
         if (request.organizerId() == null)
             throw new IllegalArgumentException("Organizzatore obbligatorio.");
         return service.open(user.id(), request.organizerId());
@@ -70,7 +75,33 @@ public class ChatController {
     @PostMapping("/conversations/{id}/messages")
     public ChatService.MessageView send(@PathVariable Long id, @AuthenticationPrincipal AuthUser user,
             @RequestBody Send request) {
-        return service.send(id, user.id(), request.clientId(), request.body());
+        return service.send(id, user.id(), request.clientId(), request.body(), request.replyToId(), null);
+    }
+
+    @PostMapping(value = "/conversations/{id}/photos", consumes = "multipart/form-data")
+    public ChatService.MessageView photo(@PathVariable Long id, @AuthenticationPrincipal AuthUser user,
+            @RequestParam String clientId, @RequestParam(defaultValue = "") String body,
+            @RequestParam(required = false) Long replyToId, @RequestParam MultipartFile file) {
+        return service.send(id, user.id(), clientId, body, replyToId, file);
+    }
+
+    @GetMapping("/conversations/{id}/messages/{message}/photo")
+    public ResponseEntity<Map<String, String>> photo(@PathVariable Long id, @PathVariable Long message,
+            @AuthenticationPrincipal AuthUser user) {
+        return ResponseEntity.ok().header("Cache-Control", "no-store")
+                .body(Map.of("data", service.photo(id, user.id(), message)));
+    }
+
+    @DeleteMapping("/conversations/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id, @AuthenticationPrincipal AuthUser user) {
+        service.delete(id, user.id());
+    }
+
+    @PostMapping("/conversations/{id}/read-all")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void readAll(@PathVariable Long id, @AuthenticationPrincipal AuthUser user) {
+        service.readAll(id, user.id());
     }
 
     @PostMapping("/conversations/{id}/read")

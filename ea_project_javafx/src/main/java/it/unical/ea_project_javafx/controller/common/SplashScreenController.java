@@ -15,7 +15,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ProgressIndicator;
+import it.unical.ea_project_javafx.ui.loading.LoadingRing;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
@@ -37,7 +37,7 @@ public class SplashScreenController {
     @FXML
     private ImageView errorImageView;
     @FXML
-    private ProgressIndicator progressIndicator;
+    private LoadingRing progressIndicator;
     @FXML
     private Label errorTitleLabel;
     @FXML

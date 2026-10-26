@@ -3,7 +3,7 @@
 <?import java.net.URL?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ProgressIndicator?>
+<?import it.unical.ea_project_javafx.ui.loading.LoadingRing?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
@@ -22,7 +22,7 @@
 
         <Label fx:id="iconLabel" />
 
-        <ProgressIndicator fx:id="progressIndicator" />
+        <LoadingRing fx:id="progressIndicator" prefWidth="130" prefHeight="130" />
 
         <Label fx:id="errorTitleLabel" managed="false" styleClass="splash-title-label"
             text="Oops, qualcosa è andato storto..." visible="false" />

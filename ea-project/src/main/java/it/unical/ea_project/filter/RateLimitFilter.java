@@ -81,9 +81,12 @@ public class RateLimitFilter extends OncePerRequestFilter {
         } else if (path.equals("/api/chat/events")) {
             bucket = "chat-connect";
             capacity = 10;
-        } else if (path.startsWith("/api/chat/") && path.endsWith("/messages") && method.equals("POST")) {
+        } else if (path.startsWith("/api/chat/") && (path.endsWith("/messages") || path.endsWith("/photos"))
+                && method.equals("POST")) {
             bucket = "chat-send";
-            capacity = 40;
+            capacity = path.endsWith("/photos") ? 10 : 40;
+            if (path.endsWith("/photos"))
+                bucket = "chat-photo-send";
         } else if (!method.equals("GET") && !method.equals("HEAD") && !method.equals("OPTIONS")) {
             bucket = "write";
             capacity = path.contains("photo") || path.contains("images") ? 20 : 60;

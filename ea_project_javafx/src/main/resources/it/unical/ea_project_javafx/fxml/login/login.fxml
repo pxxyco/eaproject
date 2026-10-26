@@ -37,9 +37,9 @@
             <fx:include fx:id="stepForgotPassword" source="step-forgot-password.fxml" />
             <fx:include fx:id="stepRole" source="step-role.fxml" />
             <fx:include fx:id="stepDetails" source="step-details.fxml" />
-            <fx:include fx:id="loadingOverlay" source="../common/loading-overlay.fxml" />
         </StackPane>
     </VBox>
 
+    <fx:include fx:id="loadingOverlay" source="../common/loading-screen.fxml" />
     <fx:include fx:id="feedbackOverlay" source="feedback-overlay.fxml" />
 </StackPane>

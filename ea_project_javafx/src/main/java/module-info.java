@@ -15,6 +15,8 @@ module it.unical.ea_project_javafx {
     requires static lombok;
 
     exports it.unical.ea_project_javafx;
+    exports it.unical.ea_project_javafx.ui.loading;
+    exports it.unical.ea_project_javafx.ui.control;
 
     opens it.unical.ea_project_javafx to javafx.fxml;
 

@@ -14,6 +14,7 @@ import it.unical.ea_project_javafx.service.api.ApiService;
 import it.unical.ea_project_javafx.ui.UiText;
 import it.unical.ea_project_javafx.ui.dialog.PopupFactory;
 import it.unical.ea_project_javafx.ui.scroll.ScrollSupport;
+import it.unical.ea_project_javafx.ui.animation.PageTransitions;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -28,6 +29,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import javafx.animation.PauseTransition;
+import javafx.animation.Timeline;
+import javafx.animation.KeyFrame;
+import javafx.animation.KeyValue;
+import javafx.animation.Interpolator;
+import it.unical.ea_project_javafx.ui.payment.MockCheckoutDialog;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -51,6 +57,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import it.unical.ea_project_javafx.ui.file.NativeFiles;
 import javafx.stage.Window;
 import javafx.util.Duration;
 
@@ -132,6 +139,8 @@ public class TravelerDashboardController implements ProfileDashboardController {
 
     @FXML
     private Button previousRecommendation, nextRecommendation;
+    private final Timeline searchMotion = new Timeline();
+    private boolean searchOpen;
     private long discoveryGeneration;
     private final List<Object> discoveryItems = new ArrayList<>();
     private int discoveryOffset;
@@ -144,6 +153,12 @@ public class TravelerDashboardController implements ProfileDashboardController {
     public void initialize() {
         searchTypeCombo.setItems(FXCollections.observableArrayList("Attività", "Viaggi"));
         searchTypeCombo.getSelectionModel().selectFirst();
+        searchField.setMinWidth(0);
+        searchTypeCombo.setMinWidth(0);
+        searchField.setPrefWidth(0);
+        searchTypeCombo.setPrefWidth(0);
+        searchField.setOpacity(0);
+        searchTypeCombo.setOpacity(0);
         setupBookingFilters();
         setupBookingTable();
         PauseTransition resizeCards = new PauseTransition(Duration.millis(150));
@@ -259,17 +274,30 @@ public class TravelerDashboardController implements ProfileDashboardController {
 
     @FXML
     private void toggleSearch() {
-        boolean show = !searchField.isVisible();
-        searchField.setVisible(show);
-        searchField.setManaged(show);
-        searchTypeCombo.setVisible(show);
-        searchTypeCombo.setManaged(show);
-        if (show)
-            searchField.requestFocus();
-        else {
-            searchField.clear();
-            loadRecommendations();
-        }
+        searchOpen = !searchOpen;
+        searchMotion.stop();
+        searchField.setVisible(true);
+        searchField.setManaged(true);
+        searchTypeCombo.setVisible(true);
+        searchTypeCombo.setManaged(true);
+        searchMotion.getKeyFrames().setAll(new KeyFrame(Duration.millis(240),
+                new KeyValue(searchField.prefWidthProperty(), searchOpen ? 230 : 0, Interpolator.EASE_BOTH),
+                new KeyValue(searchTypeCombo.prefWidthProperty(), searchOpen ? 120 : 0, Interpolator.EASE_BOTH),
+                new KeyValue(searchField.opacityProperty(), searchOpen ? 1 : 0, Interpolator.EASE_BOTH),
+                new KeyValue(searchTypeCombo.opacityProperty(), searchOpen ? 1 : 0, Interpolator.EASE_BOTH)));
+        searchMotion.setOnFinished(e -> {
+            searchField.setVisible(searchOpen);
+            searchField.setManaged(searchOpen);
+            searchTypeCombo.setVisible(searchOpen);
+            searchTypeCombo.setManaged(searchOpen);
+            if (searchOpen)
+                searchField.requestFocus();
+            else {
+                searchField.clear();
+                loadRecommendations();
+            }
+        });
+        searchMotion.playFromStart();
     }
 
     @FXML
@@ -315,8 +343,7 @@ public class TravelerDashboardController implements ProfileDashboardController {
         }
         discoveryTitle.setText(selectedCategory.getText());
         discoverySubtitle.setText("Esplora le esperienze di questa categoria.");
-        recommendedContainer.getChildren().setAll(new Label("Caricamento delle esperienze…"));
-        carousel(false);
+        // Retain the current page while the category request is in flight.
         boolean trips = category.equals("TRIP");
         long request = ++discoveryGeneration;
         String endpoint = trips ? "/api/trips/search?page=0&size=9"
@@ -362,6 +389,7 @@ public class TravelerDashboardController implements ProfileDashboardController {
         discoveryPageSize = viewport <= 0 ? 3 : Math.max(1, Math.min(3, (int) ((viewport + 16) / 280)));
         discoveryOffset = Math.min(discoveryOffset,
                 Math.max(0, ((discoveryItems.size() - 1) / discoveryPageSize) * discoveryPageSize));
+        recommendedScroll.setVvalue(0);
         recommendedContainer.getChildren().clear();
         carousel(discoveryItems.size() > discoveryPageSize);
         if (discoveryItems.isEmpty()) {
@@ -375,6 +403,7 @@ public class TravelerDashboardController implements ProfileDashboardController {
             addCard(item, item instanceof TripHomeDTO);
         previousRecommendation.setDisable(discoveryOffset == 0);
         nextRecommendation.setDisable(discoveryOffset + discoveryPageSize >= discoveryItems.size());
+        PageTransitions.appear(recommendedContainer);
     }
 
     private void addCard(Object item, boolean trip) {
@@ -451,13 +480,18 @@ public class TravelerDashboardController implements ProfileDashboardController {
         actionColumn.setCellFactory(column -> new TableCell<>() {
             private final Button export = new Button("📅");
             private final Button cancel = new Button("Annulla");
-            private final HBox box = new HBox(6, export, cancel);
+            private final Button pay = new Button("Paga");
+            private final HBox box = new HBox(6, export, cancel, pay);
             {
                 export.setMinWidth(40);
                 cancel.setMinWidth(68);
                 export.setTooltip(new Tooltip("Esporta il calendario .ics"));
                 export.getStyleClass().add("btn-secondary");
                 cancel.getStyleClass().add("danger-action-button");
+                pay.getStyleClass().add("btn-primary");
+                pay.setMinWidth(55);
+                pay.setOnAction(e -> MockCheckoutDialog.show(bookingsTable, currentBooking(),
+                        TravelerDashboardController.this::loadBookings));
                 export.setOnAction(event -> exportIcs(currentBooking()));
                 cancel.setOnAction(event -> requestCancel(currentBooking()));
             }
@@ -482,6 +516,8 @@ public class TravelerDashboardController implements ProfileDashboardController {
                 export.setManaged(!cancelled);
                 cancel.setVisible(canCancel);
                 cancel.setManaged(canCancel);
+                pay.setVisible(MockCheckoutDialog.eligible(booking));
+                pay.setManaged(pay.isVisible());
                 setGraphic(box);
             }
 
@@ -738,7 +774,7 @@ public class TravelerDashboardController implements ProfileDashboardController {
                     chooser.setInitialFileName(name);
                     chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("iCalendar (*.ics)", "*.ics"));
                     Window owner = bookingsTable.getScene() == null ? null : bookingsTable.getScene().getWindow();
-                    File file = chooser.showSaveDialog(owner);
+                    File file = NativeFiles.save(chooser, owner);
                     if (file == null)
                         return;
                     try {

@@ -216,7 +216,9 @@
 }
 
 .combo-box-popup .list-view {
-    -fx-background-color: #242423;
+    -fx-background-color: #203229;
+    -fx-control-inner-background: #203229;
+    -fx-control-inner-background-alt: #203229;
     -fx-border-color: rgba(231, 229, 228, 0.24);
     -fx-border-radius: 16px;
     -fx-background-radius: 16px;
@@ -238,7 +240,7 @@
 }
 
 .combo-box-popup .list-view .list-cell:filled:selected {
-    -fx-background-color: #57534e;
+    -fx-background-color: #395345;
     -fx-text-fill: #ffffff;
 }
 
@@ -315,8 +317,8 @@
 }
 
 .date-picker-popup {
-    -fx-background-color: #242423 !important;
-    -fx-border-color: rgba(231, 229, 228, 0.24) !important;
+    -fx-background-color: #203229 !important;
+    -fx-border-color: rgba(228, 242, 233, 0.24) !important;
     -fx-border-width: 1px;
     -fx-border-radius: 12px;
     -fx-background-radius: 12px;
@@ -1047,4 +1049,555 @@
 .nav-menu-active .label {
     -fx-text-fill: #f5dbaf;
     -fx-font-weight: bold;
+}
+
+/* One glass surface language across pages, menus, forms and overlays. */
+.root {
+    -ea-glass: rgba(25, 34, 31, .67);
+    -ea-glass-inset: rgba(245, 250, 247, .065);
+    -ea-glass-border: rgba(232, 245, 237, .18);
+}
+
+.root .glass-card,
+.root .account-panel,
+.root .kpi-card,
+.root .booking-card,
+.root .chat-panel,
+.root .itinerary-panel,
+.root .profile-card,
+.root .security-card,
+.root .organizer-selection,
+.root .content-rows.experience-body,
+.root .experience-card,
+.root .booking-search-box,
+.root .booking-count-card,
+.root .dashboard-upcoming-card,
+.root .sharing-popup-card,
+.root .itinerario,
+.root .descrizione-card,
+.root .foto,
+.root .photo-container,
+.root .recensione-container,
+.root .map-card {
+    -fx-background-color: linear-gradient(to bottom right, rgba(245, 250, 247, .075), rgba(245, 250, 247, .018)), -ea-glass;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 22, 21;
+    -fx-border-radius: 22;
+    -fx-border-width: 1;
+    -fx-border-color: -ea-glass-border;
+}
+
+.root .account-panel .account-panel {
+    -fx-background-color: -ea-glass-inset;
+}
+
+.root .custom-input,
+.root .custom-combo,
+.root .chat-composer,
+.root .search-bar,
+.root .search-container {
+    -fx-background-color: rgba(228, 242, 233, .075);
+    -fx-border-color: rgba(232, 245, 237, .19);
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+    -fx-text-fill: #f5f7f5;
+    -fx-prompt-text-fill: #b6c0ba;
+}
+
+.root .text-area .content {
+    -fx-background-color: transparent;
+}
+
+.root .combo-box-popup .list-view,
+.root .combo-box-popup .list-cell,
+.context-menu,
+.context-menu .menu-item,
+.context-menu .menu-item .label {
+    -fx-background-color: #23312c;
+    -fx-text-fill: #f5f7f5;
+}
+
+.context-menu {
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: rgba(230, 245, 237, .22);
+    -fx-padding: 8;
+}
+
+.context-menu .menu-item {
+    -fx-background-radius: 11;
+    -fx-padding: 11 15;
+}
+
+.context-menu .menu-item:focused,
+.root .combo-box-popup .list-cell:hover {
+    -fx-background-color: #3a5045;
+}
+
+.root .table-view {
+    -fx-background-color: rgba(20, 31, 26, .55);
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: rgba(231, 245, 236, .16);
+    -fx-padding: 8;
+}
+
+.root .table-view .column-header-background {
+    -fx-background-color: rgba(232, 245, 237, .07);
+    -fx-background-radius: 12 12 0 0;
+}
+
+.root .table-view .column-header,
+.root .table-view .filler {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 10 5;
+}
+
+.root .table-view .column-header .label {
+    -fx-text-fill: #cbd9d0;
+    -fx-font-size: 12;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.root .table-row-cell {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent rgba(232, 245, 237, .06) transparent;
+}
+
+.root .table-row-cell:odd {
+    -fx-background-color: rgba(232, 245, 237, .025);
+}
+
+.root .table-row-cell:selected {
+    -fx-background-color: rgba(159, 210, 179, .16);
+}
+
+.root .table-cell {
+    -fx-text-fill: #eef4ef;
+    -fx-alignment: CENTER_LEFT;
+    -fx-border-color: transparent;
+    -fx-padding: 10 8;
+}
+
+.root .table-row-cell:empty {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.root .navbar .nav-divider {
+    -fx-opacity: .6;
+    -fx-padding: 0 4;
+}
+
+.root .navbar .nav-divider:vertical .line {
+    -fx-background-color: transparent;
+    -fx-border-color: rgba(255, 255, 255, .65);
+    -fx-border-width: 0 0 0 1;
+    -fx-border-insets: 0;
+}
+
+.root .separator:horizontal .line {
+    -fx-border-color: rgba(232, 245, 237, .15);
+    -fx-border-width: 1 0 0 0;
+    -fx-background-color: transparent;
+}
+
+.root .combo-box,
+.root .date-picker,
+.root .spinner {
+    -fx-background-color: rgba(228, 242, 233, .075);
+    -fx-border-color: rgba(232, 245, 237, .19);
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+    -fx-padding: 5 8;
+}
+
+.root .combo-box .list-cell,
+.root .date-picker .text-field {
+    -fx-background-color: transparent;
+    -fx-text-fill: #eef4ef;
+}
+
+.root .combo-box-popup .list-cell {
+    -fx-background-color: #23312c;
+}
+
+.root .booking-status-pill {
+    -fx-padding: 6 10;
+    -fx-background-radius: 12;
+    -fx-font-size: 12;
+    -fx-font-weight: bold;
+}
+
+.root .booking-status-confirmed {
+    -fx-background-color: rgba(124, 220, 168, .14);
+    -fx-text-fill: #b3edcb;
+}
+
+.root .booking-status-pending {
+    -fx-background-color: rgba(239, 200, 120, .15);
+    -fx-text-fill: #f1d28c;
+}
+
+.root .booking-status-cancelled {
+    -fx-background-color: rgba(240, 120, 120, .13);
+    -fx-text-fill: #f1b4b4;
+}
+
+.root .booking-status-completed,
+.root .booking-status-neutral {
+    -fx-background-color: rgba(232, 245, 237, .10);
+    -fx-text-fill: #d7e6db;
+}
+
+.root .table-row-cell:selected {
+    -fx-background-color: rgba(159, 210, 179, .16);
+}
+
+.root .organizer-row-action {
+    -fx-padding: 7 10;
+    -fx-background-color: rgba(232, 245, 237, .10);
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-border-color: rgba(232, 245, 237, .18);
+    -fx-text-fill: #f1f7f3;
+    -fx-font-size: 12;
+}
+
+.root .organizer-row-action .label {
+    -fx-text-fill: #f1f7f3;
+}
+
+.root .organizer-row-action:hover {
+    -fx-background-color: rgba(232, 245, 237, .19);
+}
+
+.root .organizer-row-action .arrow {
+    -fx-background-color: #f1f7f3;
+}
+
+.experience-detail .back-link {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 4 0;
+}
+
+.context-menu .menu-item .label {
+    -fx-background-color: transparent;
+}
+
+.root .experience-body .descrizione-card,
+.root .experience-body .itinerario,
+.root .experience-body .foto,
+.root .experience-body .recensione-container {
+    -fx-background-color: rgba(232, 245, 237, .045);
+}
+
+.notification-tray,
+.notification-toast {
+    -fx-background-color: rgba(27, 40, 33, .97);
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+    -fx-border-color: rgba(232, 245, 237, .2);
+}
+
+.root .transparent-combo,
+.root .transparent-datepicker {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+/* Shared typography, popovers and native controls. Hierarchy keeps its font sizes. */
+.root {
+    -fx-font-family: "System";
+}
+
+.root .label,
+.root .button,
+.root .menu-button,
+.root .text-input,
+.root .combo-box,
+.root .tab-label {
+    -fx-font-family: "System";
+}
+
+.root .chat-panel,
+.root .history-booking-card,
+.root .main-modal-card,
+.root .favorites-shared-section,
+.root .dashboard-space-panel,
+.root .app-modal-panel.app-modal-panel {
+    -fx-background-color: rgba(25, 34, 31, .78);
+    -fx-background-radius: 22;
+    -fx-border-radius: 22;
+    -fx-border-color: rgba(232, 245, 237, .18);
+}
+
+.root .chat-message-other {
+    -fx-background-color: rgba(232, 245, 237, .09);
+}
+
+.root .chat-compact,
+.chat-compact {
+    -fx-padding: 0;
+    -fx-background-color: transparent;
+}
+
+.chat-compact .chat-thread {
+    -fx-padding: 12;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.root .titled-pane {
+    -fx-text-fill: #edf5ef;
+    -fx-background-color: transparent;
+}
+
+.root .titled-pane>.title {
+    -fx-background-color: rgba(228, 242, 233, .07);
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+    -fx-border-color: rgba(228, 242, 233, .14);
+    -fx-padding: 14 18;
+}
+
+.root .titled-pane>.content {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 18 4;
+}
+
+.root .titled-pane .arrow {
+    -fx-background-color: #c4d8cb;
+}
+
+.root .tab-pane .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.root .tab-pane .tab {
+    -fx-background-color: rgba(228, 242, 233, .07);
+    -fx-background-radius: 14 14 0 0;
+    -fx-padding: 10 18;
+}
+
+.root .tab-pane .tab:selected {
+    -fx-background-color: rgba(170, 209, 182, .18);
+}
+
+.root .tab-pane .tab-label {
+    -fx-text-fill: #edf5ef;
+    -fx-font-size: 14;
+}
+
+.root .booking-search-box .transparent-combo {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+    -fx-max-height: 40;
+}
+
+.root .booking-search-box .transparent-combo>.list-cell {
+    -fx-text-fill: #edf5ef;
+    -fx-padding: 4 0;
+    -fx-background-color: transparent;
+}
+
+.root .booking-search-box .transparent-combo>.arrow-button {
+    -fx-background-color: transparent;
+    -fx-padding: 5 10;
+}
+
+.root .booking-search-box .transparent-combo .arrow {
+    -fx-background-color: #c4d8cb;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: #203229;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-border-color: rgba(228, 242, 233, .19);
+    -fx-padding: 8;
+}
+
+.combo-box-popup .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #edf5ef;
+    -fx-padding: 10 14;
+    -fx-background-radius: 10;
+}
+
+.combo-box-popup .list-cell:hover,
+.combo-box-popup .list-cell:selected {
+    -fx-background-color: #395345;
+    -fx-text-fill: white;
+}
+
+.date-picker-popup {
+    -fx-background-color: #203229;
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: rgba(228, 242, 233, .24);
+    -fx-padding: 12;
+}
+
+.date-picker-popup .month-year-pane,
+.date-picker-popup .calendar-grid {
+    -fx-background-color: transparent;
+}
+
+.date-picker-popup .month-year-pane .label {
+    -fx-text-fill: #edf5ef;
+    -fx-font-weight: bold;
+}
+
+.date-picker-popup .day-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: #dcebe1;
+    -fx-background-radius: 10;
+    -fx-border-color: transparent;
+    -fx-padding: 9;
+}
+
+.date-picker-popup .day-name-cell {
+    -fx-text-fill: #afc6b7;
+}
+
+.date-picker-popup .previous-month,
+.date-picker-popup .next-month {
+    -fx-text-fill: #657e6e;
+}
+
+.date-picker-popup .day-cell:hover,
+.date-picker-popup .selected {
+    -fx-background-color: #476a53;
+    -fx-text-fill: white;
+}
+
+.date-picker-popup .today {
+    -fx-border-color: #c8b998;
+    -fx-border-radius: 10;
+}
+
+.date-picker-popup .spinner .button {
+    -fx-background-color: transparent;
+}
+
+.date-picker-popup .spinner .left-arrow,
+.date-picker-popup .spinner .right-arrow {
+    -fx-background-color: #dcebe1;
+}
+
+.root .pagination .pagination-control .number-button,
+.root .pagination .pagination-control .left-arrow-button,
+.root .pagination .pagination-control .right-arrow-button {
+    -fx-background-color: rgba(255, 255, 255, .08);
+    -fx-text-fill: #e7e5e4;
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-border-color: rgba(231, 229, 228, .2);
+    -fx-min-width: 40;
+    -fx-min-height: 40;
+    -fx-padding: 9 14;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.root .pagination .pagination-control .number-button:selected {
+    -fx-background-color: #e7e5e4;
+    -fx-text-fill: #1c1917;
+}
+
+.root .pagination .pagination-control .number-button:hover {
+    -fx-background-color: rgba(231, 229, 228, .2);
+}
+
+.root .pagination .pagination-control .left-arrow,
+.root .pagination .pagination-control .right-arrow {
+    -fx-background-color: #dcebe1;
+}
+
+.root .pagination .page-information {
+    -fx-text-fill: #becfc3;
+}
+
+.root .nav-item,
+.root .nav-item:active {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.root .password-reveal {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-effect: null;
+    -fx-background-radius: 10;
+    -fx-padding: 6;
+    -fx-text-fill: #b5c6bc;
+}
+
+.root .password-reveal:hover {
+    -fx-background-color: rgba(228, 242, 233, .06);
+    -fx-text-fill: white;
+}
+
+.checkout-total,
+.economy-value {
+    -fx-font-size: 25;
+    -fx-font-weight: bold;
+    -fx-text-fill: #f0f7f2;
+}
+
+.economy-chart .chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.economy-chart .chart-vertical-grid-lines,
+.economy-chart .chart-horizontal-grid-lines {
+    -fx-stroke: rgba(228, 242, 233, .09);
+}
+
+.economy-chart .axis {
+    -fx-tick-label-fill: #bfd2c5;
+}
+
+.economy-chart .axis-label,
+.economy-chart .chart-legend-item {
+    -fx-text-fill: #dcebe1;
+}
+
+.economy-chart .chart-legend {
+    -fx-background-color: transparent;
+}
+
+.economy-chart .default-color0.chart-bar {
+    -fx-bar-fill: #a9cfb8;
+}
+
+.economy-chart .default-color1.chart-bar {
+    -fx-bar-fill: #c9b58e;
+}
+
+.combo-box-popup,
+.root.combo-box-popup,
+.root .combo-box-popup .list-view {
+    -fx-background-color: #203229;
+    -fx-control-inner-background: #203229;
+    -fx-control-inner-background-alt: #203229;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-border-color: rgba(228, 242, 233, .19);
+}
+
+.root .combo-box-popup .list-cell {
+    -fx-background-color: transparent;
+}
+
+.root .combo-box-popup .list-cell:filled:selected,
+.root .combo-box-popup .list-cell:filled:hover {
+    -fx-background-color: #395345;
+    -fx-text-fill: white;
 }

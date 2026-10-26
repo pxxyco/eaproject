@@ -37,6 +37,10 @@ public class Conversation {
     private User organizer;
     @Column(nullable = false)
     private Instant updatedAt = Instant.now();
+    private Instant travelerDeletedAt;
+    private Instant organizerDeletedAt;
+    private Long travelerClearedThroughId;
+    private Long organizerClearedThroughId;
     private Long travelerReadId;
     private Long organizerReadId;
     @Column(length = 160)

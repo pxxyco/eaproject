@@ -1,268 +1,205 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <?import java.net.URL?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
-<StackPane xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
+<StackPane xmlns:fx="http://javafx.com/fxml/1"
     fx:controller="it.unical.ea_project_javafx.controller.traveler.FavoritesController"
-    styleClass="favorites-page-root">
+    styleClass="favorites-page-root, favorites-simple">
     <stylesheets>
         <URL value="@../../css/common/style.css" />
-        <URL value="@../../css/home/home.css" />
+        <URL value="@../../css/profile/profile.css" />
         <URL value="@../../css/traveler/favorites.css" />
     </stylesheets>
-    <ImageView fx:id="bgImageView" pickOnBounds="true" preserveRatio="false" mouseTransparent="true" />
-    <Region styleClass="favorites-overlay" mouseTransparent="true" />
-    <BorderPane styleClass="favorites-page-shell">
+    <ImageView fx:id="bgImageView" preserveRatio="false" mouseTransparent="true" />
+    <BorderPane>
         <top>
             <StackPane fx:id="navbarContainer" />
         </top>
         <center>
-            <ScrollPane fitToWidth="true" styleClass="favorites-scroll">
-                <content>
-                    <VBox alignment="TOP_CENTER" spacing="36.0" styleClass="favorites-content">
-                        <padding>
-                            <Insets bottom="44.0" left="30.0" right="30.0" top="30.0" />
-                        </padding>
-                        <VBox maxWidth="1240.0" spacing="36.0" styleClass="favorites-inner-layout">
-                            <HBox alignment="CENTER_LEFT" spacing="22.0" styleClass="favorites-hero">
-                                <VBox spacing="7.0" HBox.hgrow="ALWAYS">
-                                    <Label styleClass="favorites-eyebrow"
-                                        text="IL TUO SPAZIO PERSONALE" />
-                                    <Label styleClass="favorites-title" text="I tuoi preferiti" />
-                                    <Label styleClass="favorites-subtitle"
-                                        text="Conserva le esperienze che ti ispirano e condividi le tue raccolte."
-                                        wrapText="true" />
+            <ScrollPane fitToWidth="true" styleClass="main-scroll">
+                <VBox alignment="TOP_CENTER">
+                    <VBox maxWidth="1120" spacing="26" styleClass="favorites-simple-layout">
+                        <VBox spacing="8">
+                            <Label text="Le esperienze da ricordare" styleClass="account-kicker" />
+                            <Label text="I tuoi preferiti" styleClass="account-title" />
+                            <Label
+                                text="Scegli una raccolta e ritrova i tuoi viaggi e le tue attività. Le opzioni aggiuntive si aprono solo quando ti servono."
+                                wrapText="true" styleClass="section-subtitle" />
+                        </VBox>
+                        <Label fx:id="statusMessageLabel" visible="false" managed="false"
+                            wrapText="true" />
+                        <TabPane tabClosingPolicy="UNAVAILABLE" styleClass="favorites-tabs">
+                            <Tab text="Le mie raccolte">
+                                <VBox spacing="24">
+                                    <VBox spacing="14" styleClass="favorites-create-inline">
+                                        <Label
+                                            text="Dai un nome alla raccolta e scegli chi può vederla."
+                                            styleClass="section-subtitle" wrapText="true" />
+                                        <HBox spacing="12" alignment="CENTER_LEFT">
+                                            <TextField fx:id="newListNameField"
+                                                promptText="Es. Weekend in Sicilia"
+                                                styleClass="custom-input" HBox.hgrow="ALWAYS" />
+                                            <ComboBox fx:id="newListVisibilityCombo" prefWidth="200" />
+                                            <Button text="Crea raccolta"
+                                                onAction="#handleCreateList"
+                                                styleClass="btn-primary" />
+                                        </HBox>
+                                    </VBox>
+                                    <HBox spacing="24" alignment="TOP_LEFT">
+                                        <VBox prefWidth="240" minWidth="210" spacing="14">
+                                            <Label text="Scegli una raccolta"
+                                                styleClass="section-header" />
+                                            <ListView fx:id="listsListView" prefHeight="340"
+                                                styleClass="favorites-list-view" />
+                                            <TitledPane text="Modifica raccolta" expanded="false"
+                                                animated="true">
+                                                <VBox spacing="12">
+                                                    <TextField fx:id="editListNameField"
+                                                        promptText="Nome raccolta"
+                                                        styleClass="custom-input" />
+                                                    <ComboBox fx:id="editListVisibilityCombo"
+                                                        maxWidth="Infinity" />
+                                                    <HBox spacing="10">
+                                                        <Button fx:id="saveListChangesButton"
+                                                            text="Salva"
+                                                            onAction="#handleSaveListChanges"
+                                                            styleClass="btn-primary" />
+                                                        <Button fx:id="deleteListButton"
+                                                            text="Elimina"
+                                                            onAction="#handleDeleteList"
+                                                            styleClass="danger-action-button"
+                                                            disable="true" />
+                                                    </HBox>
+                                                </VBox>
+                                            </TitledPane>
+                                        </VBox>
+                                        <VBox spacing="20" minWidth="0" HBox.hgrow="ALWAYS"
+                                            styleClass="favorites-content">
+                                            <HBox spacing="12" alignment="CENTER_LEFT">
+                                                <VBox spacing="6" HBox.hgrow="ALWAYS">
+                                                    <Label fx:id="selectedListNameLabel"
+                                                        text="I tuoi preferiti"
+                                                        styleClass="section-header" wrapText="true" />
+                                                    <Label fx:id="selectedListVisibilityLabel"
+                                                        text="Solo tu" styleClass="section-subtitle"
+                                                        wrapText="true" />
+                                                </VBox>
+                                                <Button fx:id="shareListButton" text="Condividi"
+                                                    onAction="#handleShareList"
+                                                    styleClass="btn-secondary" visible="false"
+                                                    managed="false" />
+                                            </HBox>
+                                            <TabPane tabClosingPolicy="UNAVAILABLE"
+                                                styleClass="favorites-tabs">
+                                                <Tab text="Viaggi">
+                                                    <VBox spacing="16">
+                                                        <ListView fx:id="savedTripsListView"
+                                                            prefHeight="270"
+                                                            styleClass="favorites-list-view" />
+                                                        <Button fx:id="removeTripButton"
+                                                            text="Rimuovi il viaggio selezionato"
+                                                            onAction="#handleRemoveTrip"
+                                                            styleClass="btn-secondary" />
+                                                        <TitledPane
+                                                            text="+ Cerca e aggiungi un viaggio"
+                                                            expanded="false" animated="true">
+                                                            <VBox spacing="12">
+                                                                <HBox spacing="10">
+                                                                    <TextField
+                                                                        fx:id="tripSearchField"
+                                                                        promptText="Titolo o destinazione"
+                                                                        styleClass="custom-input"
+                                                                        HBox.hgrow="ALWAYS" />
+                                                                    <Button text="Cerca"
+                                                                        onAction="#handleSearchTrips"
+                                                                        styleClass="btn-secondary" />
+                                                                </HBox>
+                                                                <ListView fx:id="tripSearchResults"
+                                                                    prefHeight="160"
+                                                                    styleClass="favorites-list-view" />
+                                                                <Button fx:id="addTripButton"
+                                                                    text="Aggiungi il viaggio selezionato"
+                                                                    onAction="#handleAddTrip"
+                                                                    styleClass="btn-primary" />
+                                                            </VBox>
+                                                        </TitledPane>
+                                                    </VBox>
+                                                </Tab>
+                                                <Tab text="Attività">
+                                                    <VBox spacing="16">
+                                                        <ListView fx:id="savedActivitiesListView"
+                                                            prefHeight="270"
+                                                            styleClass="favorites-list-view" />
+                                                        <Button fx:id="removeActivityButton"
+                                                            text="Rimuovi l’attività selezionata"
+                                                            onAction="#handleRemoveActivity"
+                                                            styleClass="btn-secondary" />
+                                                        <TitledPane
+                                                            text="+ Cerca e aggiungi un’attività"
+                                                            expanded="false" animated="true">
+                                                            <VBox spacing="12">
+                                                                <HBox spacing="10">
+                                                                    <TextField
+                                                                        fx:id="activitySearchField"
+                                                                        promptText="Titolo o città"
+                                                                        styleClass="custom-input"
+                                                                        HBox.hgrow="ALWAYS" />
+                                                                    <Button text="Cerca"
+                                                                        onAction="#handleSearchActivities"
+                                                                        styleClass="btn-secondary" />
+                                                                </HBox>
+                                                                <ListView
+                                                                    fx:id="activitySearchResults"
+                                                                    prefHeight="160"
+                                                                    styleClass="favorites-list-view" />
+                                                                <Button fx:id="addActivityButton"
+                                                                    text="Aggiungi l’attività selezionata"
+                                                                    onAction="#handleAddActivity"
+                                                                    styleClass="btn-primary" />
+                                                            </VBox>
+                                                        </TitledPane>
+                                                    </VBox>
+                                                </Tab>
+                                            </TabPane>
+                                        </VBox>
+                                    </HBox>
                                 </VBox>
-                                <VBox alignment="CENTER_RIGHT" spacing="3.0"
-                                    styleClass="favorites-hero-mark">
-                                    <Label text="✦" styleClass="favorites-hero-star" />
-                                    <Label text="SALVATI PER TE" styleClass="favorites-hero-caption" />
-                                </VBox>
-                            </HBox>
-
-                            <Label fx:id="statusMessageLabel" managed="false" visible="false"
-                                wrapText="true" styleClass="favorites-status" />
-
-                            <HBox alignment="CENTER_LEFT" spacing="20.0"
-                                styleClass="favorites-create-line">
-                                <VBox spacing="4.0" minWidth="190.0">
-                                    <Label styleClass="favorites-section-kicker"
-                                        text="NUOVA RACCOLTA" />
-                                    <Label styleClass="favorites-section-title"
-                                        text="Crea una lista" />
-                                </VBox>
-                                <TextField fx:id="newListNameField"
-                                    promptText="Es. Weekend in Sicilia" styleClass="favorites-field"
-                                    HBox.hgrow="ALWAYS" />
-                                <ComboBox fx:id="newListVisibilityCombo" promptText="Visibilità"
-                                    styleClass="favorites-visibility" prefWidth="150.0" />
-                                <Button text="＋ Crea lista" onAction="#handleCreateList"
-                                    styleClass="favorites-primary-button, favorites-create-button" />
-                            </HBox>
-
-                            <HBox spacing="36.0" styleClass="favorites-workspace"
-                                alignment="TOP_LEFT">
-                                <VBox spacing="20.0" prefWidth="250.0" minWidth="220.0"
-                                    styleClass="favorites-sidebar">
-                                    <HBox alignment="CENTER_LEFT" spacing="8.0">
-                                        <Label styleClass="favorites-section-title"
-                                            text="Le tue liste" />
-                                        <Region HBox.hgrow="ALWAYS" />
-                                        <Label styleClass="favorites-count-note" text="COLLEZIONI" />
+                            </Tab>
+                            <Tab text="Condivise con me">
+                                <VBox spacing="20" styleClass="favorites-content">
+                                    <HBox alignment="CENTER_LEFT" spacing="18">
+                                        <Label text="Raccolte ricevute" styleClass="section-header"
+                                            HBox.hgrow="ALWAYS" maxWidth="Infinity" />
+                                        <Button text="Aggiorna" onAction="#handleRefreshSharedLists"
+                                            styleClass="btn-secondary" />
                                     </HBox>
                                     <Label
-                                        text="Seleziona una lista per vedere e organizzare i contenuti."
-                                        styleClass="favorites-muted" wrapText="true" />
-                                    <ListView fx:id="listsListView" prefHeight="380.0"
-                                        styleClass="favorites-list-view, favorites-list-selector" />
-                                    <Separator styleClass="favorites-rule" />
-                                    <Label styleClass="favorites-section-kicker"
-                                        text="IMPOSTAZIONI LISTA" />
-                                    <TextField fx:id="editListNameField"
-                                        promptText="Nome della lista" styleClass="favorites-field" />
-                                    <ComboBox fx:id="editListVisibilityCombo"
-                                        promptText="Visibilità" styleClass="favorites-visibility"
-                                        maxWidth="Infinity" />
-                                    <HBox spacing="8.0">
-                                        <Button fx:id="saveListChangesButton" text="Salva"
-                                            onAction="#handleSaveListChanges"
-                                            styleClass="favorites-secondary-button, favorites-small-action"
-                                            HBox.hgrow="ALWAYS" />
-                                        <Button fx:id="deleteListButton" text="Elimina"
-                                            onAction="#handleDeleteList"
-                                            styleClass="favorites-danger-action" disable="true" />
-                                    </HBox>
+                                        text="Seleziona una raccolta per consultarne il contenuto e i tuoi permessi."
+                                        styleClass="section-subtitle" wrapText="true" />
+                                    <Label fx:id="sharedListsStatusLabel" wrapText="true" />
+                                    <TableView fx:id="sharedListsTable" prefHeight="230">
+                                        <columns>
+                                            <TableColumn fx:id="sharedListNameColumn"
+                                                text="Raccolta" prefWidth="270" />
+                                            <TableColumn fx:id="sharedListOrganizerColumn"
+                                                text="Proprietario" prefWidth="180" />
+                                            <TableColumn fx:id="sharedListPermissionColumn"
+                                                text="Permessi" prefWidth="130" />
+                                            <TableColumn fx:id="sharedListSharedAtColumn"
+                                                text="Condivisa il" prefWidth="170" />
+                                        </columns>
+                                        <columnResizePolicy>
+                                            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                        </columnResizePolicy>
+                                    </TableView>
+                                    <ListView fx:id="sharedListDetailsListView" prefHeight="230"
+                                        styleClass="favorites-list-view" />
                                 </VBox>
-
-                                <VBox spacing="22.0" minWidth="0.0" HBox.hgrow="ALWAYS"
-                                    styleClass="favorites-main-area">
-                                    <HBox alignment="CENTER_LEFT" spacing="20.0"
-                                        styleClass="favorites-selected-heading">
-                                        <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-                                            <Label styleClass="favorites-section-kicker"
-                                                text="RACCOLTA SELEZIONATA" />
-                                            <Label fx:id="selectedListNameLabel"
-                                                styleClass="favorites-selected-title"
-                                                text="Seleziona una lista" wrapText="true" />
-                                            <Label fx:id="selectedListVisibilityLabel"
-                                                styleClass="favorites-muted" text="—" />
-                                        </VBox>
-                                        <Button fx:id="shareListButton"
-                                            text="↗ Condividi / permessi"
-                                            onAction="#handleShareList"
-                                            styleClass="favorites-secondary-button, favorites-share-button"
-                                            visible="false" />
-                                    </HBox>
-
-                                    <HBox spacing="24.0" minWidth="0.0" alignment="TOP_LEFT"
-                                        styleClass="favorites-collection-grid">
-                                        <VBox spacing="20.0" minWidth="0.0" prefWidth="360.0"
-                                            HBox.hgrow="ALWAYS"
-                                            styleClass="favorites-collection-column">
-                                            <HBox alignment="CENTER_LEFT" spacing="10.0">
-                                                <Label text="↗" styleClass="favorites-type-glyph" />
-                                                <VBox spacing="3.0" HBox.hgrow="ALWAYS">
-                                                    <Label styleClass="favorites-section-title"
-                                                        text="Viaggi" />
-                                                    <Label styleClass="favorites-muted"
-                                                        text="Itinerari da tenere a portata di mano" />
-                                                </VBox>
-                                            </HBox>
-                                            <ListView fx:id="savedTripsListView" prefHeight="166.0"
-                                                styleClass="favorites-list-view, favorites-content-list" />
-                                            <HBox alignment="CENTER_LEFT" spacing="8.0">
-                                                <Button fx:id="removeTripButton"
-                                                    text="Rimuovi selezionato"
-                                                    onAction="#handleRemoveTrip"
-                                                    styleClass="favorites-text-action" />
-                                                <Region HBox.hgrow="ALWAYS" />
-                                                <Label styleClass="favorites-count-note"
-                                                    text="VIAGGIO" />
-                                            </HBox>
-                                            <Separator styleClass="favorites-rule" />
-                                            <Label styleClass="favorites-section-kicker"
-                                                text="AGGIUNGI UN VIAGGIO" />
-                                            <HBox spacing="8.0">
-                                                <TextField fx:id="tripSearchField"
-                                                    promptText="Titolo o destinazione"
-                                                    styleClass="favorites-field" HBox.hgrow="ALWAYS" />
-                                                <Button text="Cerca" onAction="#handleSearchTrips"
-                                                    styleClass="favorites-secondary-button, favorites-search-button" />
-                                            </HBox>
-                                            <ListView fx:id="tripSearchResults" prefHeight="125.0"
-                                                styleClass="favorites-list-view, favorites-search-results" />
-                                            <Button fx:id="addTripButton" text="＋ Aggiungi viaggio"
-                                                onAction="#handleAddTrip"
-                                                styleClass="favorites-primary-button, favorites-add-button"
-                                                maxWidth="Infinity" />
-                                        </VBox>
-
-                                        <VBox spacing="20.0" minWidth="0.0" prefWidth="360.0"
-                                            HBox.hgrow="ALWAYS"
-                                            styleClass="favorites-collection-column">
-                                            <HBox alignment="CENTER_LEFT" spacing="10.0">
-                                                <Label text="✦" styleClass="favorites-type-glyph" />
-                                                <VBox spacing="3.0" HBox.hgrow="ALWAYS">
-                                                    <Label styleClass="favorites-section-title"
-                                                        text="Attività" />
-                                                    <Label styleClass="favorites-muted"
-                                                        text="Esperienze che vuoi ricordare" />
-                                                </VBox>
-                                            </HBox>
-                                            <ListView fx:id="savedActivitiesListView"
-                                                prefHeight="166.0"
-                                                styleClass="favorites-list-view, favorites-content-list" />
-                                            <HBox alignment="CENTER_LEFT" spacing="8.0">
-                                                <Button fx:id="removeActivityButton"
-                                                    text="Rimuovi selezionata"
-                                                    onAction="#handleRemoveActivity"
-                                                    styleClass="favorites-text-action" />
-                                                <Region HBox.hgrow="ALWAYS" />
-                                                <Label styleClass="favorites-count-note"
-                                                    text="ATTIVITÀ" />
-                                            </HBox>
-                                            <Separator styleClass="favorites-rule" />
-                                            <Label styleClass="favorites-section-kicker"
-                                                text="AGGIUNGI UN'ATTIVITÀ" />
-                                            <HBox spacing="8.0">
-                                                <TextField fx:id="activitySearchField"
-                                                    promptText="Titolo o città"
-                                                    styleClass="favorites-field" HBox.hgrow="ALWAYS" />
-                                                <Button text="Cerca"
-                                                    onAction="#handleSearchActivities"
-                                                    styleClass="favorites-secondary-button, favorites-search-button" />
-                                            </HBox>
-                                            <ListView fx:id="activitySearchResults"
-                                                prefHeight="125.0"
-                                                styleClass="favorites-list-view, favorites-search-results" />
-                                            <Button fx:id="addActivityButton"
-                                                text="＋ Aggiungi attività"
-                                                onAction="#handleAddActivity"
-                                                styleClass="favorites-primary-button, favorites-add-button"
-                                                maxWidth="Infinity" />
-                                        </VBox>
-                                    </HBox>
-                                </VBox>
-                            </HBox>
-
-                            <VBox spacing="16.0" styleClass="favorites-shared-section">
-                                <HBox alignment="CENTER_LEFT" spacing="16.0">
-                                    <VBox spacing="5.0" HBox.hgrow="ALWAYS">
-                                        <Label styleClass="favorites-section-kicker"
-                                            text="IN VIAGGIO INSIEME" />
-                                        <Label styleClass="favorites-section-title"
-                                            text="Liste condivise con te" />
-                                        <Label fx:id="sharedListsStatusLabel"
-                                            styleClass="favorites-muted"
-                                            text="Caricamento liste condivise…" wrapText="true" />
-                                    </VBox>
-                                    <Button text="↻ Aggiorna" onAction="#handleRefreshSharedLists"
-                                        styleClass="favorites-secondary-button, favorites-small-action" />
-                                </HBox>
-                                <HBox spacing="24.0" minWidth="0.0" alignment="TOP_LEFT">
-                                    <VBox spacing="8.0" minWidth="0.0" HBox.hgrow="ALWAYS">
-                                        <TableView fx:id="sharedListsTable" prefHeight="210.0"
-                                            minWidth="0.0" styleClass="favorites-shared-table">
-                                            <columns>
-                                                <TableColumn fx:id="sharedListNameColumn"
-                                                    text="Lista" prefWidth="190.0" />
-                                                <TableColumn fx:id="sharedListOrganizerColumn"
-                                                    text="Organizzatore" prefWidth="135.0" />
-                                                <TableColumn fx:id="sharedListPermissionColumn"
-                                                    text="Permesso" prefWidth="90.0" />
-                                                <TableColumn fx:id="sharedListSharedAtColumn"
-                                                    text="Condivisa il" prefWidth="135.0" />
-                                            </columns>
-                                        </TableView>
-                                    </VBox>
-                                    <VBox spacing="8.0" minWidth="0.0" prefWidth="330.0"
-                                        HBox.hgrow="ALWAYS">
-                                        <Label styleClass="favorites-section-kicker"
-                                            text="DETTAGLI DELLA CONDIVISIONE" />
-                                        <ListView fx:id="sharedListDetailsListView"
-                                            prefHeight="210.0"
-                                            styleClass="favorites-list-view, favorites-shared-details" />
-                                    </VBox>
-                                </HBox>
-                            </VBox>
-                        </VBox>
+                            </Tab>
+                        </TabPane>
                     </VBox>
-                </content>
+                </VBox>
             </ScrollPane>
         </center>
     </BorderPane>

@@ -31,6 +31,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
 import javafx.stage.FileChooser;
+import it.unical.ea_project_javafx.ui.file.NativeFiles;
 import javafx.stage.Window;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
@@ -224,7 +225,7 @@ public class ProfileController {
         Window owner = avatarContainer != null && avatarContainer.getScene() != null
                 ? avatarContainer.getScene().getWindow()
                 : null;
-        File chosen = chooser.showOpenDialog(owner);
+        File chosen = NativeFiles.open(chooser, owner);
         if (chosen == null)
             return;
 

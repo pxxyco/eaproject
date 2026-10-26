@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import java.net.URL?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import it.unical.ea_project_javafx.ui.loading.LoadingRing?>
+<StackPane xmlns:fx="http://javafx.com/fxml/1" fx:id="loadingRoot"
+    fx:controller="it.unical.ea_project_javafx.controller.common.LoadingOverlayController"
+    styleClass="loading-screen">
+    <stylesheets>
+        <URL value="@../../css/common/style.css" />
+        <URL value="@../../css/common/loading-screen.css" />
+    </stylesheets>
+    <VBox alignment="CENTER" spacing="24" maxWidth="480" maxHeight="-Infinity"
+        styleClass="loading-focus">
+        <LoadingRing fx:id="ring" prefWidth="150" prefHeight="150" />
+        <Label fx:id="errorIcon" text="!" visible="false" managed="false"
+            styleClass="loading-error-icon" />
+        <Label text="EA PROJECT" styleClass="loading-brand" />
+        <Label fx:id="label" text="Prepariamo la tua esperienza…" wrapText="true"
+            textAlignment="CENTER" styleClass="loading-message" />
+        <Label text="Un momento, ci siamo quasi." styleClass="loading-caption" />
+    </VBox>
+</StackPane>

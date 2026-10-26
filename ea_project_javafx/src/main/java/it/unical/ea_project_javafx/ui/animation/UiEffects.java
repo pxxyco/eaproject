@@ -22,7 +22,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBoxBase;
-import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.RadioButton;
@@ -126,6 +125,19 @@ public final class UiEffects {
         });
     }
 
+    public static void prepare(Parent root) {
+        root.applyCss();
+        root.layout();
+        prepareStates(root);
+    }
+
+    private static void prepareStates(Node node) {
+        if (node instanceof Region region && eligible(region))
+            region.getProperties().computeIfAbsent(STATE, key -> new State(region));
+        if (node instanceof Parent parent)
+            List.copyOf(parent.getChildrenUnmodifiable()).forEach(UiEffects::prepareStates);
+    }
+
     private static void watch(Node node) {
         if (node.getProperties().putIfAbsent(WATCHED, Boolean.TRUE) != null)
             return;
@@ -166,7 +178,8 @@ public final class UiEffects {
     }
 
     private static boolean eligible(Region node) {
-        if (node.getStyleClass().contains("history-feed"))
+        if (node.getStyleClass().contains("history-feed") || node.getStyleClass().contains("password-reveal")
+                || node.getStyleClass().contains("favorites-tabs") || node.getStyleClass().contains("back-link"))
             return false;
         // Skin internals are styled by their owning control rather than animated
         // individually.
@@ -220,7 +233,20 @@ public final class UiEffects {
                     && node.getParent() instanceof Region parent && parent.getStyleClass().contains("search-field")
                             ? parent
                             : inner instanceof Region region ? region : node;
-            background = surface.getBackground();
+            boolean glass = node.getStyleClass().stream()
+                    .anyMatch(c -> c.endsWith("-card") || c.endsWith("-panel") || c.endsWith("-tray")
+                            || c.equals("glass-card") || c.equals("context-menu") || c.equals("booking-search-box"))
+                    && !node.getStyleClass().contains("popup-factory-transparent-surface");
+            double opacity = node.getStyleClass().contains("app-modal-panel")
+                    || node.getStyleClass().contains("context-menu") ? .94 : .68;
+            boolean section = node.getStyleClass().contains("section-button")
+                    || node.getStyleClass().contains("section-button-active");
+            background = section
+                    ? new Background(
+                            new BackgroundFill(Color.rgb(255, 255, 255, .09), new CornerRadii(20), Insets.EMPTY))
+                    : glass ? new Background(
+                            new BackgroundFill(Color.rgb(25, 34, 31, opacity), new CornerRadii(22), Insets.EMPTY))
+                            : surface.getBackground();
             border = surface.getBorder();
             CornerRadii chosen = border != null && !border.getStrokes().isEmpty()
                     ? border.getStrokes().getFirst().getRadii()
@@ -236,22 +262,20 @@ public final class UiEffects {
             if (!surface.borderProperty().isBound())
                 surface.borderProperty().bind(animatedBorder);
             // Native selected fills and check/radio marks must retain their contrast.
-            if (!(node instanceof CheckBox || node instanceof RadioButton || node instanceof ToggleButton)
+            boolean nativePopup = false;
+            for (Node ancestor = node; ancestor != null; ancestor = ancestor.getParent())
+                nativePopup |= ancestor.getStyleClass().contains("combo-box-popup");
+            if (!nativePopup
+                    && !(node instanceof CheckBox || node instanceof RadioButton || node instanceof ToggleButton
+                            || node instanceof ListView<?>)
                     && !surface.backgroundProperty().isBound())
                 surface.backgroundProperty().bind(animatedBackground);
             if (nav && node instanceof Label label) {
                 animatedText.set(label.getTextFill());
                 label.textFillProperty().bind(animatedText);
-                marker = new Region();
-                marker.setMinSize(18, 2);
-                marker.setPrefSize(18, 2);
-                marker.setMaxSize(18, 2);
-                marker.setMouseTransparent(true);
-                label.setGraphic(marker);
-                label.setContentDisplay(ContentDisplay.BOTTOM);
-                label.setGraphicTextGap(5);
-            } else
-                marker = null;
+                animatedBackground.set(Background.EMPTY);
+            }
+            marker = null;
             value.addListener((o, a, b) -> paint(b.doubleValue()));
             node.getStyleClass().addListener((ListChangeListener<String>) change -> transition());
             node.hoverProperty().addListener((o, a, b) -> transition());
@@ -326,9 +350,7 @@ public final class UiEffects {
         private void paint(double amount) {
             if (nav) {
                 animatedBorder.set(Border.EMPTY);
-                marker.setBackground(
-                        new Background(new BackgroundFill(accent, new CornerRadii(2), Insets.EMPTY)));
-                marker.setOpacity(0);
+                animatedBackground.set(Background.EMPTY);
                 animatedText.set(Color.web("#d8d5d0").interpolate(accent, amount * .85));
             } else {
                 Color neutral = alpha(accent,
@@ -339,7 +361,7 @@ public final class UiEffects {
                 animatedBorder
                         .set(new Border(new BorderStroke(color, BorderStrokeStyle.SOLID, radii, new BorderWidths(1))));
             }
-            if (background != null && !background.getFills().isEmpty()) {
+            if (!nav && background != null && !background.getFills().isEmpty()) {
                 List<BackgroundFill> fills = new ArrayList<>();
                 for (BackgroundFill fill : background.getFills()) {
                     var paint = fill.getFill();

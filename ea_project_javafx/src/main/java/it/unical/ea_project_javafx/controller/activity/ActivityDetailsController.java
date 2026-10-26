@@ -25,6 +25,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
+import javafx.geometry.Rectangle2D;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -51,7 +53,16 @@ import javafx.scene.layout.VBox;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
-public class ActivityDetailsController {
+public class ActivityDetailsController implements AutoCloseable {
+    private boolean closed;
+
+    @Override
+    public void close() {
+        closed = true;
+        closeInAppModal();
+        bodyContainer.getChildren().clear();
+        itinerarioNode = null;
+    }
 
     @FXML
     private StackPane root;
@@ -118,8 +129,12 @@ public class ActivityDetailsController {
     @FXML
     private ReviewController newRecCardController;
 
-    @FXML private ScrollPane contentScroll;
-    @FXML private Button btnFavorite;
+    @FXML
+    private ScrollPane contentScroll;
+    @FXML
+    private Button btnFavorite;
+    @FXML
+    private Label experienceSummary;
 
     private ReviewsContainerController recensioniController;
     private PopupFactory.Handle activeInAppModal;
@@ -155,13 +170,18 @@ public class ActivityDetailsController {
             btnContactOrganizer.setVisible(!isOrganizer);
             btnContactOrganizer.setManaged(!isOrganizer);
         }
-        // bookingCard.setVisible(!isOrganizer);
-        // bookingCard.setManaged(!isOrganizer);
+        if (isOrganizer) {
+            bookingCard.setManaged(false);
+            bookingCard.setVisible(false);
+        }
 
         btnInitialize();
 
-        // USE FOR DEBUG AND TEST
-        // loadData(Type.ACTIVITY, "1");
+    }
+
+    @FXML
+    private void handleBackToExperiences() {
+        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/home/mainview.fxml", null);
     }
 
     public void loadData(Type type, String id) {
@@ -174,11 +194,14 @@ public class ActivityDetailsController {
                 ApiService.get(
                         ApiService.BASE_URL + "/api/activities/" + id,
                         response -> {
+                            if (closed)
+                                return;
                             activity = ApiService.fromJson(response.body(), ActivityDTO.class);
 
                             setActivityData();
                             setupFavorite();
                             handleDescrizione(null);
+                            Platform.runLater(this::prepareItinerary);
                             contentScroll.setManaged(true);
                             contentScroll.setVisible(true);
                             PageTransitions.appear(contentScroll);
@@ -197,11 +220,14 @@ public class ActivityDetailsController {
                 ApiService.get(
                         ApiService.BASE_URL + "/api/trips/" + id,
                         response -> {
+                            if (closed)
+                                return;
                             trip = ApiService.fromJson(response.body(), TripDTO.class);
 
                             setTripData();
                             setupFavorite();
                             handleDescrizione(null);
+                            Platform.runLater(this::prepareItinerary);
                             loadingOverlay.setVisible(false);
                             contentScroll.setManaged(true);
                             contentScroll.setVisible(true);
@@ -274,6 +300,7 @@ public class ActivityDetailsController {
         lblPrezzo.setText(setMoneyCurrency(prezzo));
         lblTotale.setText(setMoneyCurrency(prezzo));
         updateBookingAvailability();
+        updateExperienceSummary();
 
     }
 
@@ -289,7 +316,7 @@ public class ActivityDetailsController {
             datePicker.setValue(LocalDate.now());
         }
 
-        lblCategoria.setText("TRIP");
+        lblCategoria.setText("Viaggio");
         lblLocalita.setText(trip.getDestinationCity());
         lblTitolo.setText(trip.getTitle());
 
@@ -297,12 +324,21 @@ public class ActivityDetailsController {
         lblPrezzo.setText(setMoneyCurrency(trip.getTotalPrice()));
         lblTotale.setText(setMoneyCurrency(trip.getTotalPrice()));
         updateBookingAvailability();
+        updateExperienceSummary();
 
     }
 
     private void setHeroImage(String imageUrl) {
         if (!heroImage.fitWidthProperty().isBound()) {
+            heroImage.setPreserveRatio(false);
             heroImage.fitWidthProperty().bind(hero.widthProperty());
+            hero.widthProperty().addListener((o, a, b) -> updateHeroViewport());
+            hero.heightProperty().addListener((o, a, b) -> updateHeroViewport());
+            heroImage.imageProperty().addListener((o, a, image) -> {
+                if (image != null)
+                    image.progressProperty().addListener((v, x, y) -> updateHeroViewport());
+                updateHeroViewport();
+            });
             heroImage.fitHeightProperty().bind(hero.heightProperty());
             Rectangle clip = new Rectangle();
             clip.widthProperty().bind(hero.widthProperty());
@@ -330,6 +366,35 @@ public class ActivityDetailsController {
 
         heroImage.setImage(image);
 
+    }
+
+    private void updateExperienceSummary() {
+        String period;
+        if (myType == Type.TRIP) {
+            var formatter = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.ITALIAN);
+            period = (trip.getStartDate() == null ? "Data da definire" : trip.getStartDate().format(formatter))
+                    + (trip.getEndDate() == null ? "" : " → " + trip.getEndDate().format(formatter));
+        } else {
+            var formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ITALIAN);
+            period = (activity.getStartDate() == null ? "Data da definire" : activity.getStartDate().format(formatter))
+                    + (activity.getDurationMinutes() == null ? "" : " · " + activity.getDurationMinutes() + " minuti");
+        }
+        Integer available = myType == Type.TRIP ? trip.getAvailableSeats() : activity.getAvailableSeats();
+        experienceSummary.setText(period + (available == null ? "" : " · " + available + " posti disponibili"));
+    }
+
+    private void updateHeroViewport() {
+        Image image = heroImage.getImage();
+        if (image == null || image.getWidth() <= 0 || hero.getWidth() <= 0 || hero.getHeight() <= 0)
+            return;
+        double target = hero.getWidth() / hero.getHeight();
+        double width = image.getWidth(), height = image.getHeight();
+        if (width / height > target)
+            width = height * target;
+        else
+            height = width / target;
+        heroImage.setViewport(
+                new Rectangle2D((image.getWidth() - width) / 2, (image.getHeight() - height) / 2, width, height));
     }
 
     private String resolveUrl(String url) {
@@ -468,21 +533,49 @@ public class ActivityDetailsController {
     }
 
     private void showSection(Node node) {
-        bodyContainer.getChildren().setAll(node);
+        // Keep only the two deliberately preloaded sections between tab changes.
+        bodyContainer.getChildren()
+                .removeIf(child -> child != node && child != descrizioneNode && child != itinerarioNode);
+        for (Node child : bodyContainer.getChildren()) {
+            child.setVisible(false);
+            child.setManaged(false);
+        }
+        if (!bodyContainer.getChildren().contains(node))
+            bodyContainer.getChildren().add(node);
+        node.setVisible(true);
+        node.setManaged(true);
+        node.setOpacity(1);
         PageTransitions.appear(node);
+    }
+
+    private void prepareItinerary() {
+        if (closed || itinerarioNode != null)
+            return;
+        itinerarioNode = loadSection("itinerary.fxml");
+        itinerarioNode.setManaged(false);
+        itinerarioNode.setOpacity(0);
+        bodyContainer.getChildren().add(0, itinerarioNode);
+        if (itinerarioNode instanceof Region region) {
+            region.resize(Math.max(600, bodyContainer.getWidth()), 400);
+            region.applyCss();
+            region.layout();
+        }
+        itinerarioNode.setVisible(false);
     }
 
     @FXML
     private void handleDescrizione(ActionEvent event) {
         setActiveButton(btnDescrizione);
-        descrizioneNode = loadSection("activity-description.fxml");
+        if (descrizioneNode == null)
+            descrizioneNode = loadSection("activity-description.fxml");
         showSection(descrizioneNode);
     }
 
     @FXML
     private void handleItinerario(ActionEvent event) {
         setActiveButton(btnItinerario);
-        itinerarioNode = loadSection("itinerary.fxml");
+        if (itinerarioNode == null)
+            itinerarioNode = loadSection("itinerary.fxml");
         showSection(itinerarioNode);
     }
 
@@ -651,6 +744,7 @@ public class ActivityDetailsController {
             return;
         VBox panel = new VBox(14);
         panel.setMaxWidth(480);
+        panel.setMaxHeight(Region.USE_PREF_SIZE);
         Label title = new Label("Prenotazione non completata");
         title.getStyleClass().add("app-modal-title");
         Label body = new Label(message);
@@ -729,7 +823,8 @@ public class ActivityDetailsController {
                 && "TRAVELER".equalsIgnoreCase(UserSession.getInstance().getRole());
         btnFavorite.setVisible(traveler);
         btnFavorite.setManaged(traveler);
-        if (!traveler) return;
+        if (!traveler)
+            return;
         FavoriteService.state(FavoriteService.Target.valueOf(myType.name()), id, this::updateFavoriteButton,
                 message -> updateFavoriteButton(false), btnFavorite::setDisable);
     }
@@ -745,7 +840,8 @@ public class ActivityDetailsController {
         isFavorite = favorite;
         btnFavorite.setText(favorite ? "♥" : "♡");
         btnFavorite.getStyleClass().remove("active");
-        if (favorite) btnFavorite.getStyleClass().add("active");
+        if (favorite)
+            btnFavorite.getStyleClass().add("active");
     }
 
 }

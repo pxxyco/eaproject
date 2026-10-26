@@ -674,3 +674,57 @@
 .favorites-create-line {
     -fx-padding: 24;
 }
+
+.favorites-simple-layout {
+    -fx-padding: 30 32 44;
+}
+
+.favorites-simple .tab-pane {
+    -fx-background-color: transparent;
+}
+
+.favorites-simple .tab-content-area {
+    -fx-padding: 22 0 0;
+    -fx-background-color: transparent;
+}
+
+.favorites-simple .favorites-list-view {
+    -fx-background-color: rgba(228, 242, 233, .045);
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-border-color: rgba(228, 242, 233, .13);
+    -fx-padding: 8;
+}
+
+.favorites-simple .list-cell {
+    -fx-padding: 16 12;
+    -fx-font-size: 15;
+    -fx-background-color: transparent;
+    -fx-text-fill: #edf4ef;
+}
+
+.favorites-simple .list-cell:selected {
+    -fx-background-color: rgba(159, 210, 179, .16);
+    -fx-background-radius: 12;
+}
+
+.favorites-simple .favorites-tabs {
+    -fx-border-color: transparent;
+    -fx-background-color: transparent;
+}
+
+.favorites-create-inline {
+    -fx-padding: 6 0 18;
+}
+
+.favorites-content {
+    -fx-padding: 0 0 0 8;
+    -fx-spacing: 20;
+    -fx-background-color: transparent;
+}
+
+.favorites-create-inline .combo-box {
+    -fx-min-height: 40;
+    -fx-pref-height: 40;
+    -fx-max-height: 40;
+}
