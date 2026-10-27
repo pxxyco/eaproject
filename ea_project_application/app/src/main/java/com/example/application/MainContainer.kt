@@ -4,16 +4,19 @@ import android.app.Activity
 import androidx.activity.compose.BackHandler
 import com.example.application.dto.UserDTO
 import com.example.application.screens.organizer.OrganizerDashboardScreen
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.*
+import com.example.application.ui.background.BackgroundHelper
+import androidx.compose.material3.*
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.example.application.ui.effects.navigationFade
+import com.example.application.ui.effects.LocalNavigationTail
+import com.example.application.screens.common.ScreenLoadingHost
+import com.example.application.screens.common.LocalScreenLoadingHost
+import com.example.application.screens.common.LoadingOverlay
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import com.example.application.network.ApiService
@@ -33,7 +36,7 @@ fun MainContainer() {
         else AuthRepository.restoreSession()
     }
     AppErrorDialog(onExit = { (context as? Activity)?.finishAffinity() })
-    MainNavigation(user = UserSession.user, onLogout = { AuthRepository.logout() })
+    BackgroundHelper { MainNavigation(user = UserSession.user, onLogout = { AuthRepository.logout() }) }
 }
 
 @Composable
@@ -55,48 +58,48 @@ internal fun MainNavigation(
         destination = AppDestinations.HOME
         returnToPersonalTab = false
     }
-    NavigationSuiteScaffold(navigationSuiteItems = {
-        listOf(AppDestinations.HOME, if (organizer) AppDestinations.DASHBOARD else AppDestinations.`MY-TRIP`, AppDestinations.PROFILE).forEach { destinationItem ->
-            item(
-                icon = { Icon(painterResource(destinationItem.icon), contentDescription = null) },
-                label = { Text(destinationItem.label) },
-                selected = destinationItem == current,
-                onClick = {
-                    destination = destinationItem
-                    returnToPersonalTab = false
-                }
-            )
-        }
-    }) {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            val contentModifier = Modifier.padding(innerPadding)
-            key(user?.id, user?.role) {
-                when (current) {
-                    AppDestinations.HOME -> homeContent(contentModifier)
-                    AppDestinations.`MY-TRIP` -> {
-                        if (user == null) MyTrip(modifier = contentModifier, onLoginClick = {
-                            returnToPersonalTab = true
-                            destination = AppDestinations.PROFILE
-                        }) else tripsContent(contentModifier)
+    val loadingHost = remember { ScreenLoadingHost() }
+    Box(Modifier.fillMaxSize()) {
+        val bottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+        Box(Modifier.fillMaxSize().padding(bottom = 70.dp + bottomInset).navigationFade()) {
+            val contentModifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
+            CompositionLocalProvider(LocalNavigationTail provides 72.dp, LocalScreenLoadingHost provides loadingHost) {
+                key(user?.id, user?.role) {
+                    when (current) {
+                        AppDestinations.HOME -> homeContent(contentModifier)
+                        AppDestinations.`MY-TRIP` -> {
+                            if (user == null) MyTrip(modifier = contentModifier, onLoginClick = {
+                                returnToPersonalTab = true
+                                destination = AppDestinations.PROFILE
+                            }) else tripsContent(contentModifier)
+                        }
+                        AppDestinations.DASHBOARD -> user?.id?.let { dashboardContent(it, contentModifier) }
+                        AppDestinations.PROFILE -> ProfileScreen(
+                            user = user,
+                            onLoginSuccess = {
+                                if (returnToPersonalTab) destination = AppDestinations.`MY-TRIP`
+                                returnToPersonalTab = false
+                            },
+                            onLogoutClick = {
+                                returnToPersonalTab = false
+                                destination = AppDestinations.PROFILE
+                                onLogout()
+                            },
+                            modifier = contentModifier
+                        )
                     }
-                    AppDestinations.DASHBOARD -> user?.id?.let { dashboardContent(it, contentModifier) }
-                    AppDestinations.PROFILE -> ProfileScreen(
-                        user = user,
-                        onLoginSuccess = {
-                            if (returnToPersonalTab) destination = AppDestinations.`MY-TRIP`
-                            returnToPersonalTab = false
-                        },
-                        onLogoutClick = {
-                            returnToPersonalTab = false
-                            destination = AppDestinations.PROFILE
-                            onLogout()
-                        },
-                        modifier = contentModifier
-                    )
                 }
             }
         }
+        com.example.application.ui.navigation.FloatingNavigation(
+            destinations = listOf(AppDestinations.HOME, if (organizer) AppDestinations.DASHBOARD else AppDestinations.`MY-TRIP`, AppDestinations.PROFILE),
+            selected = current,
+            onSelect = { destination = it; returnToPersonalTab = false },
+            modifier = Modifier.align(androidx.compose.ui.Alignment.BottomCenter).navigationBarsPadding()
+                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)).padding(horizontal = 18.dp, vertical = 12.dp))
+        loadingHost.message?.let { LoadingOverlay(message = it, modifier = Modifier.fillMaxSize()) }
     }
+
 }
 
 enum class AppDestinations(

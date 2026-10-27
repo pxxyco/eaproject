@@ -1,5 +1,6 @@
 package com.example.application.screens.home
 
+import com.example.application.ui.effects.LocalNavigationTail
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -75,7 +76,7 @@ internal fun HomeScreenContent(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth()
-                .verticalScroll(scrollState)
+                .verticalScroll(scrollState).padding(bottom = LocalNavigationTail.current)
                 .padding(horizontal = 16.dp)
         ) {
             Spacer(Modifier.height(16.dp))
@@ -113,7 +114,8 @@ internal fun HomeScreenContent(
                 }
 
             } else if (homeError == null) {
-
+                RecommendationsSection()
+                Spacer(Modifier.height(28.dp))
                 SectionTitle("Le Migliori Attività")
                 Spacer(Modifier.height(12.dp))
                 ActivityRow(activities)

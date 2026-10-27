@@ -85,9 +85,10 @@ public class AccountController {
         if (input.last4() == null || !input.last4().matches("[0-9]{4}")
                 || !Set.of("Visa", "Mastercard", "Amex", "Altro").contains(input.brand() == null ? "" : input.brand()))
             throw new IllegalArgumentException("Dati della carta non validi.");
+        int expiryYear = input.expiryYear() >= 0 && input.expiryYear() <= 99 ? 2000 + input.expiryYear() : input.expiryYear();
         try {
-            if (YearMonth.of(input.expiryYear(), input.expiryMonth()).isBefore(YearMonth.now())
-                    || input.expiryYear() > YearMonth.now().getYear() + 20)
+            if (YearMonth.of(expiryYear, input.expiryMonth()).isBefore(YearMonth.now())
+                    || expiryYear > YearMonth.now().getYear() + 20)
                 throw new IllegalArgumentException();
         } catch (Exception ex) {
             throw new IllegalArgumentException("La scadenza della carta non è valida.");
@@ -98,7 +99,7 @@ public class AccountController {
         c.setLast4(input.last4());
         c.setHolder(text(input.holder(), 120, true));
         c.setExpiryMonth(input.expiryMonth());
-        c.setExpiryYear(input.expiryYear());
+        c.setExpiryYear(expiryYear);
         return cards.save(c);
     }
 

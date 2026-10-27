@@ -1,5 +1,9 @@
 package com.example.application.screens.organizer
 
+import com.example.application.screens.common.readPhotoBytes
+import com.example.application.screens.common.PhotoTooLargeException
+import com.example.application.screens.common.MAX_PHOTO_BYTES
+
 import org.junit.Assert.*
 import org.junit.Test
 import java.io.InputStream
@@ -17,9 +21,9 @@ class PhotoUploadDataTest {
         }
     }
     @Test fun acceptsImageAtServerLimit() {
-        assertEquals(MAX_PHOTO_BYTES, stream(MAX_PHOTO_BYTES).use(::readPhotoBytes).size)
+        assertEquals(MAX_PHOTO_BYTES, stream(MAX_PHOTO_BYTES).use { readPhotoBytes(it) }.size)
     }
     @Test fun rejectsOversizedImageWithoutReadingUnboundedInput() {
-        assertThrows(PhotoTooLargeException::class.java) { stream(MAX_PHOTO_BYTES + 1).use(::readPhotoBytes) }
+        assertThrows(PhotoTooLargeException::class.java) { stream(MAX_PHOTO_BYTES + 1).use { readPhotoBytes(it) } }
     }
 }

@@ -11,7 +11,7 @@ import com.example.application.dto.TripHomeDTO
 import com.example.application.network.AppStatus
 import com.example.application.network.HomeRepository
 import com.example.application.screens.common.LoadingOverlay
-import com.example.application.ui.theme.ScreenBackground
+import com.example.application.screens.common.publishScreenLoading
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -151,19 +151,21 @@ fun HomeScreen(modifier: Modifier = Modifier) {
         }
     }
 
+    val loadingMessage = when {
+        appError != null -> "Connessione persa. Riconnessione in corso..."
+        homeLoading -> "Caricamento in corso..."
+        searchLoading -> "Ricerca in corso..."
+        else -> null
+    }
+    val hostedLoading = publishScreenLoading(loadingMessage)
+
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(ScreenBackground)
+            .background(androidx.compose.ui.graphics.Color.Transparent)
     ) {
         if (homeLoading || appError != null) {
-            LoadingOverlay(
-                message = if (appError != null) {
-                    "Connessione persa. Riconnessione in corso..."
-                } else {
-                    "Caricamento in corso..."
-                }
-            )
+            if (!hostedLoading) LoadingOverlay(message = loadingMessage.orEmpty())
         } else {
             HomeScreenContent(
                 activities = activities,
@@ -191,7 +193,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
             )
 
 
-            if (searchLoading) {
+            if (searchLoading && !hostedLoading) {
                 LoadingOverlay(message = "Ricerca in corso...")
             }
         }

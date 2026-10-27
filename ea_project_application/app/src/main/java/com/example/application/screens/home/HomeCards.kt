@@ -119,7 +119,7 @@ internal fun SectionTitle(title: String) {
     Text(
         text = title,
         style = MaterialTheme.typography.titleLarge,
-        color = Color.White,
+        color = MaterialTheme.colorScheme.onSurface,
         fontSize = 21.sp,
         fontWeight = FontWeight.ExtraBold
     )
