@@ -4,6 +4,8 @@ import it.unical.ea_project.domain.activity.ActivityImage;
 import it.unical.ea_project.dto.activity.ActivityImageDTO;
 import it.unical.ea_project.security.AuthUser;
 import it.unical.ea_project.service.activity.ActivityImageService;
+import it.unical.ea_project.service.activity.ActivityService;
+import java.util.Objects;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,9 +25,15 @@ import org.springframework.web.multipart.MultipartFile;
 public class ActivityImageController {
 
         private final ActivityImageService activityImageService;
+        private final ActivityService activityService;
 
         @GetMapping("/activity/{activityId}")
-        public ResponseEntity<List<ActivityImageDTO>> getImagesByActivity(@PathVariable Long activityId) {
+        public ResponseEntity<List<ActivityImageDTO>> getImagesByActivity(@PathVariable Long activityId,
+                        @AuthenticationPrincipal AuthUser user) {
+                var offer = activityService.getActivityDtoById(activityId);
+                if (offer.isEmpty() || "DRAFT".equals(offer.get().getStatus())
+                                && (user == null || !Objects.equals(offer.get().getCreatedByUserId(), user.id())))
+                        return ResponseEntity.notFound().build();
                 List<ActivityImageDTO> images = activityImageService.getImagesByActivityId(activityId).stream()
                                 .map(img -> ActivityImageDTO.builder()
                                                 .imageId(img.getImageId())

@@ -14,9 +14,9 @@ import it.unical.ea_project.service.booking.BookingService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.math.BigDecimal;
+import it.unical.ea_project.util.CalendarWriter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -264,41 +264,7 @@ public class BookingServiceImpl implements BookingService {
         String dtStart = allDay ? "DTSTART;VALUE=DATE:" + start : "DTSTART;TZID=Europe/Rome:" + start;
         String dtEnd = allDay ? "DTEND;VALUE=DATE:" + end : "DTEND;TZID=Europe/Rome:" + end;
         String uid = "booking-" + booking.getBookingId() + "-" + stableId + "@ea-project";
-        String now = LocalDateTime.now(ZoneId.of("UTC"))
-                .format(DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'"));
-
-        return "BEGIN:VCALENDAR\r\n" +
-                "VERSION:2.0\r\n" +
-                "PRODID:-//EA Project//Prenotazioni//IT\r\n" +
-                "CALSCALE:GREGORIAN\r\n" +
-                "METHOD:PUBLISH\r\n" +
-                "BEGIN:VEVENT\r\n" +
-                "UID:" + escapeIcs(uid) + "\r\n" +
-                "DTSTAMP:" + now + "\r\n" +
-                dtStart + "\r\n" +
-                dtEnd + "\r\n" +
-                "SUMMARY:" + escapeIcs(title) + "\r\n" +
-                (location.isBlank() ? "" : "LOCATION:" + escapeIcs(location) + "\r\n") +
-                "DESCRIPTION:" + escapeIcs(description) + "\r\n" +
-                "STATUS:CONFIRMED\r\n" +
-                "END:VEVENT\r\n" +
-                "END:VCALENDAR\r\n";
-
-    }
-
-    private String escapeIcs(String value) {
-
-        if (value == null) {
-            return "";
-        }
-
-        return value.replace("\\", "\\\\")
-                .replace(";", "\\;")
-                .replace(",", "\\,")
-                .replace("\r\n", "\\n")
-                .replace("\n", "\\n")
-                .replace("\r", "");
-
+        return CalendarWriter.event(uid, title, location, description, dtStart, dtEnd, "CONFIRMED");
     }
 
     private String safeTitle(String title) {

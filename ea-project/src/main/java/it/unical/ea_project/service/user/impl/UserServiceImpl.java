@@ -7,6 +7,7 @@ import it.unical.ea_project.service.media.PhotoStorageService;
 import it.unical.ea_project.service.security.LoginAttemptService;
 import it.unical.ea_project.service.user.UserService;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
@@ -75,8 +76,8 @@ public class UserServiceImpl implements UserService {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
                 });
 
-        String username = user.getUsername() == null ? "" : user.getUsername().trim();
-        String email = user.getEmail() == null ? "" : user.getEmail().trim();
+        String username = user.getUsername() == null ? "" : user.getUsername().trim().toLowerCase(Locale.ROOT);
+        String email = user.getEmail() == null ? "" : user.getEmail().trim().toLowerCase(Locale.ROOT);
 
         if (!USERNAME_PATTERN.matcher(username).matches()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -104,8 +105,8 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public User updateProfile(Long userId, String username, String email, String fullName) {
         User user = findActiveUser(userId);
-        String normalizedUsername = username == null ? "" : username.trim();
-        String normalizedEmail = email == null ? "" : email.trim();
+        String normalizedUsername = username == null ? "" : username.trim().toLowerCase(Locale.ROOT);
+        String normalizedEmail = email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
         String normalizedFullName = fullName == null ? "" : fullName.trim().replaceAll("\\s+", " ");
 
         if (!USERNAME_PATTERN.matcher(normalizedUsername).matches()) {
@@ -141,19 +142,22 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public User updateProfilePhoto(Long userId, MultipartFile file) {
         User user = findActiveUser(userId);
+        String previousPhoto = user.getProfilePhotoUrl();
         user.setProfilePhotoUrl(photoStorageService.storeProfilePhoto(userId, file));
-        return userRepository.save(user);
+        User saved = userRepository.save(user);
+        photoStorageService.deleteProfilePhoto(userId, previousPhoto);
+        return saved;
     }
 
     @Override
     @Transactional
     public User removeProfilePhoto(Long userId) {
         User user = findActiveUser(userId);
+        String previousPhoto = user.getProfilePhotoUrl();
         user.setProfilePhotoUrl(null);
         User saved = userRepository.save(user);
-        // Update the entity before filesystem cleanup; on cleanup failure the
-        // transaction keeps the previous URL.
-        photoStorageService.deleteProfilePhoto(userId);
+        // Remove only the former immutable file after the database commit.
+        photoStorageService.deleteProfilePhoto(userId, previousPhoto);
         return saved;
     }
 

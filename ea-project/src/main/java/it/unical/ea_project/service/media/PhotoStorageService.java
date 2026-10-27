@@ -1,7 +1,6 @@
 package it.unical.ea_project.service.media;
 
 import java.awt.Color;
-import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -9,231 +8,210 @@ import java.io.UncheckedIOException;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.Semaphore;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.stream.ImageInputStream;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+/**
+ * Bounded image decoding and atomic writes for public offer photos and avatars.
+ */
 @Service
 public class PhotoStorageService {
-
     private final Path storageRoot;
+    private final Semaphore decoders = new Semaphore(2);
+    private static final Set<String> FORMATS = Set.of("png", "jpeg", "jpg", "gif", "bmp");
 
     public PhotoStorageService(@Value("${app.storage.path:photo}") String storagePath) {
-        this.storageRoot = Paths.get(storagePath).toAbsolutePath().normalize();
+        storageRoot = Path.of(storagePath).toAbsolutePath().normalize();
     }
 
     public String storeActivityPhoto(Long activityId, Long imageId, MultipartFile file) {
-        return storeCover("activity", activityId, imageId, file);
+        return storeOffer("activity", activityId, imageId, file);
     }
 
     public String storeTripPhoto(Long tripId, Long imageId, MultipartFile file) {
-        return storeCover("trip", tripId, imageId, file);
+        return storeOffer("trip", tripId, imageId, file);
     }
 
-    /**
-     * Saves a validated user avatar as a normalized JPEG.
-     * Only the authenticated user ID is used in the path.
-     */
+    private String storeOffer(String type, Long entityId, Long imageId, MultipartFile file) {
+        if (entityId == null || entityId <= 0 || imageId == null || imageId <= 0)
+            throw new IllegalArgumentException("Identificatore della foto non valido.");
+        String relative = type + "/" + entityId + "/" + imageId + ".jpg";
+        Path target = storageRoot.resolve(relative);
+        store(file, target, 10L * 1024 * 1024, 2400);
+        onCompletion(false, () -> delete(target));
+        return "/photo/" + relative;
+    }
+
     public String storeProfilePhoto(Long userId, MultipartFile file) {
-
-        final long maxBytes = 5L * 1024L * 1024L;
-        if (userId == null || userId <= 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Utente non valido.");
-        }
-
-        if (file == null || file.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Seleziona una foto del profilo.");
-        }
-
-        if (file.getSize() > maxBytes) {
-            throw new ResponseStatusException(HttpStatus.CONTENT_TOO_LARGE,
-                    "La foto del profilo non può superare 5 MB.");
-        }
-
-        BufferedImage source;
-        try (var inputStream = file.getInputStream();
-                ImageInputStream imageInput = ImageIO.createImageInputStream(inputStream)) {
-
-            if (imageInput == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Il file non è un'immagine supportata. Usa PNG, JPG, GIF o BMP.");
-            }
-
-            Iterator<ImageReader> readers = ImageIO.getImageReaders(imageInput);
-            if (!readers.hasNext()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                        "Il file non è un'immagine supportata. Usa PNG, JPG, GIF o BMP.");
-            }
-
-            ImageReader reader = readers.next();
-            try {
-
-                reader.setInput(imageInput, true, true);
-                int width = reader.getWidth(0);
-                int height = reader.getHeight(0);
-                long pixels = (long) width * height;
-                if (width < 1 || height < 1 || width > 8000 || height > 8000 || pixels > 25_000_000L) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                            "La foto ha dimensioni eccessive. Riducila prima di caricarla.");
-                }
-
-                source = reader.read(0);
-            } finally {
-                reader.dispose();
-            }
-
-        } catch (ResponseStatusException exception) {
-            throw exception;
-        } catch (IOException exception) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Impossibile leggere la foto del profilo. Usa un'immagine PNG, JPG, GIF o BMP valida.");
-        }
-
-        if (source == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Il file non è un'immagine supportata. Usa PNG, JPG, GIF o BMP.");
-        }
-
-        double scale = Math.min(1.0, 1200.0 / Math.max(source.getWidth(), source.getHeight()));
-        int outputWidth = Math.max(1, (int) Math.round(source.getWidth() * scale));
-        int outputHeight = Math.max(1, (int) Math.round(source.getHeight() * scale));
-        BufferedImage normalized = new BufferedImage(outputWidth, outputHeight, BufferedImage.TYPE_INT_RGB);
-        Graphics2D graphics = normalized.createGraphics();
-        graphics.setColor(Color.WHITE);
-        graphics.fillRect(0, 0, normalized.getWidth(), normalized.getHeight());
-        graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-        graphics.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        graphics.drawImage(source, 0, 0, outputWidth, outputHeight, null);
-        graphics.dispose();
-
-        Path profileDirectory = storageRoot.resolve("profile").normalize();
-        Path targetFile = profileDirectory.resolve(userId + ".jpg").normalize();
-        if (!targetFile.startsWith(storageRoot) || !targetFile.startsWith(profileDirectory)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Percorso della foto non valido.");
-        }
-
-        Path temporaryFile = null;
-        try {
-
-            Files.createDirectories(profileDirectory);
-            temporaryFile = Files.createTempFile(profileDirectory, userId + "-", ".tmp");
-            if (!ImageIO.write(normalized, "jpg", temporaryFile.toFile())) {
-                throw new IOException("Nessun encoder JPEG disponibile.");
-            }
-
-            try {
-                Files.move(temporaryFile, targetFile, StandardCopyOption.REPLACE_EXISTING,
-                        StandardCopyOption.ATOMIC_MOVE);
-            } catch (AtomicMoveNotSupportedException ignored) {
-                Files.move(temporaryFile, targetFile, StandardCopyOption.REPLACE_EXISTING);
-            }
-
-        } catch (IOException exception) {
-            if (temporaryFile != null) {
-                try {
-                    Files.deleteIfExists(temporaryFile);
-                } catch (IOException ignored) {
-                    /* cleanup best effort */ }
-            }
-            throw new UncheckedIOException("Impossibile salvare la foto del profilo.", exception);
-        }
-
-        return "/photo/profile/" + userId + ".jpg";
-
+        if (userId == null || userId <= 0)
+            throw new IllegalArgumentException("Utente non valido.");
+        String relative = "profile/" + userId + "-" + UUID.randomUUID() + ".jpg";
+        Path target = storageRoot.resolve(relative);
+        store(file, target, 5L * 1024 * 1024, 1200);
+        onCompletion(false, () -> delete(target));
+        return "/photo/" + relative;
     }
 
-    public void deleteProfilePhoto(Long userId) {
-
-        if (userId == null || userId <= 0) {
-            return;
+    public void deleteProfilePhoto(Long userId, String url) {
+        if (userId != null && userId > 0 && url != null
+                && url.matches("/photo/profile/" + userId + "(?:-[a-f0-9-]{36})?\\.jpg(?:\\?.*)?")) {
+            Path target = storageRoot.resolve(url.substring("/photo/".length()).split("\\?", 2)[0]);
+            onCompletion(true, () -> delete(target));
         }
+    }
 
-        Path profileDirectory = storageRoot.resolve("profile").normalize();
-        Path targetFile = profileDirectory.resolve(userId + ".jpg").normalize();
-        if (!targetFile.startsWith(storageRoot) || !targetFile.startsWith(profileDirectory)) {
-            throw new IllegalArgumentException("Percorso della foto non valido.");
+    public void deleteOfferPhoto(String url) {
+        if (url != null && url.matches("/photo/(activity|trip)/[0-9]+/[0-9]+\\.jpg")) {
+            Path path = storageRoot.resolve(url.substring("/photo/".length()));
+            onCompletion(true, () -> delete(path));
         }
-
-        try {
-            Files.deleteIfExists(targetFile);
-        } catch (IOException exception) {
-            throw new UncheckedIOException("Impossibile eliminare la foto del profilo.", exception);
-        }
-
     }
 
     public void validatePhotos(List<MultipartFile> files) {
-        if (files == null || files.isEmpty() || files.stream().anyMatch(file -> file == null || file.isEmpty()))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Seleziona almeno una foto valida.");
+        if (files == null || files.isEmpty() || files.size() > 10)
+            throw new IllegalArgumentException("Seleziona da una a dieci foto.");
         files.forEach(this::validatePhoto);
     }
 
     public void validatePhoto(MultipartFile file) {
-
-        if (file == null || file.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Seleziona una foto valida.");
-        }
-
-        try (var inputStream = file.getInputStream()) {
-            if (ImageIO.read(inputStream) == null) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Il file caricato non è un'immagine valida.");
+        checkSize(file, 10L * 1024 * 1024);
+        try (var input = file.getInputStream(); var image = ImageIO.createImageInputStream(input)) {
+            ImageReader reader = reader(image);
+            try {
+                checkDimensions(reader);
+            } finally {
+                reader.dispose();
             }
-
-        } catch (IOException exception) {
-            throw new UncheckedIOException("Impossibile leggere l'immagine caricata.", exception);
+        } catch (IOException error) {
+            throw invalidImage();
         }
-
     }
 
-    private String storeCover(String entityType, Long entityId, Long imageId, MultipartFile file) {
-
-        if (file == null || file.isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Seleziona un'immagine.");
-        }
-
-        BufferedImage image;
-        try (var inputStream = file.getInputStream()) {
-            image = ImageIO.read(inputStream);
-        } catch (IOException exception) {
-            throw new UncheckedIOException("Impossibile leggere l'immagine caricata.", exception);
-        }
-
-        if (image == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Il file caricato non è un'immagine valida.");
-        }
-
-        BufferedImage jpegImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_RGB);
-        Graphics2D graphics = jpegImage.createGraphics();
-        graphics.setColor(Color.WHITE);
-        graphics.fillRect(0, 0, image.getWidth(), image.getHeight());
-        graphics.drawImage(image, 0, 0, null);
-        graphics.dispose();
-
-        Path targetDirectory = storageRoot.resolve(entityType).resolve(entityId.toString()).normalize();
-        if (!targetDirectory.startsWith(storageRoot)) {
-            throw new IllegalArgumentException("Percorso immagine non valido.");
-        }
-
-        Path targetFile = targetDirectory.resolve(imageId + ".jpg");
+    private void store(MultipartFile file, Path target, long maxBytes, int maxSide) {
+        checkSize(file, maxBytes);
+        if (!decoders.tryAcquire())
+            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,
+                    "Elaborazione foto occupata. Riprova tra poco.");
+        Path temporary = null;
         try {
-            Files.createDirectories(targetDirectory);
-            if (!ImageIO.write(jpegImage, "jpg", targetFile.toFile())) {
-                throw new IOException("Nessun encoder JPEG disponibile.");
+            BufferedImage normalized;
+            try (var input = file.getInputStream(); var image = ImageIO.createImageInputStream(input)) {
+                ImageReader reader = reader(image);
+                BufferedImage source;
+                try {
+                    checkDimensions(reader);
+                    int sample = Math.max(1, Math.max(reader.getWidth(0), reader.getHeight(0)) / maxSide);
+                    var options = reader.getDefaultReadParam();
+                    options.setSourceSubsampling(sample, sample, 0, 0);
+                    source = reader.read(0, options);
+                } finally {
+                    reader.dispose();
+                }
+                if (source == null)
+                    throw invalidImage();
+                double scale = Math.min(1, (double) maxSide / Math.max(source.getWidth(), source.getHeight()));
+                int width = Math.max(1, (int) Math.round(source.getWidth() * scale));
+                int height = Math.max(1, (int) Math.round(source.getHeight() * scale));
+                normalized = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+                var graphics = normalized.createGraphics();
+                try {
+                    graphics.setColor(Color.WHITE);
+                    graphics.fillRect(0, 0, width, height);
+                    graphics.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+                            RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+                    graphics.drawImage(source, 0, 0, width, height, null);
+                } finally {
+                    graphics.dispose();
+                }
             }
-
-        } catch (IOException exception) {
-            throw new UncheckedIOException("Impossibile salvare l'immagine caricata.", exception);
+            Files.createDirectories(target.getParent());
+            temporary = Files.createTempFile(target.getParent(), "upload-", ".tmp");
+            if (!ImageIO.write(normalized, "jpg", temporary.toFile()))
+                throw new IOException("Encoder JPEG assente.");
+            try {
+                Files.move(temporary, target, StandardCopyOption.REPLACE_EXISTING,
+                        StandardCopyOption.ATOMIC_MOVE);
+            } catch (AtomicMoveNotSupportedException unsupported) {
+                Files.move(temporary, target, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } catch (IOException error) {
+            throw invalidImage();
+        } finally {
+            try {
+                if (temporary != null)
+                    delete(temporary);
+            } finally {
+                decoders.release();
+            }
         }
+    }
 
-        return "/photo/" + entityType + "/" + entityId + "/" + imageId + ".jpg";
+    private static ImageReader reader(ImageInputStream image) throws IOException {
+        if (image == null)
+            throw invalidImage();
+        var readers = ImageIO.getImageReaders(image);
+        if (!readers.hasNext())
+            throw invalidImage();
+        ImageReader reader = readers.next();
+        if (!FORMATS.contains(reader.getFormatName().toLowerCase(Locale.ROOT))) {
+            reader.dispose();
+            throw invalidImage();
+        }
+        reader.setInput(image, true, true);
+        return reader;
+    }
+
+    private static void checkDimensions(ImageReader reader) throws IOException {
+        int width = reader.getWidth(0), height = reader.getHeight(0);
+        if (width < 1 || height < 1 || width > 8000 || height > 8000 || (long) width * height > 25_000_000)
+            throw new IllegalArgumentException("La foto ha dimensioni eccessive. Riducila prima di caricarla.");
+    }
+
+    private static void checkSize(MultipartFile file, long max) {
+        if (file == null || file.isEmpty())
+            throw invalidImage();
+        if (file.getSize() > max)
+            throw new ResponseStatusException(HttpStatus.PAYLOAD_TOO_LARGE, "La foto supera il limite consentito.");
+    }
+
+    private static ResponseStatusException invalidImage() {
+        return new ResponseStatusException(HttpStatus.BAD_REQUEST, "Usa un'immagine PNG, JPEG, GIF o BMP valida.");
+    }
+
+    private static void onCompletion(boolean committed, Runnable action) {
+        if (!TransactionSynchronizationManager.isSynchronizationActive()) {
+            if (committed)
+                action.run();
+            return;
+        }
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCompletion(int status) {
+                if ((status == STATUS_COMMITTED) == committed)
+                    action.run();
+            }
+        });
+    }
+
+    private static void delete(Path path) {
+        try {
+            Files.deleteIfExists(path);
+        } catch (IOException error) {
+            throw new UncheckedIOException("Impossibile eliminare il file della foto.", error);
+        }
     }
 }

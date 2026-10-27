@@ -2,6 +2,7 @@
    1. REGOLAZIONE GLOBALE & SFONDO
    ========================================================================== */
 .root {
+    -app-accent: #d0b38b;
     -fx-font-family: "System";
     -fx-font-size: 14px;
     -fx-accent: #e7e5e4;

@@ -8,7 +8,6 @@ import it.unical.ea_project_javafx.security.TokenStorage;
 import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.service.notification.NotificationPollingService;
 import it.unical.ea_project_javafx.util.JsonCodec;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.URI;
@@ -19,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -388,23 +388,24 @@ public class ApiService {
     private static HttpRequest buildMultipartRequest(String url, List<Path> files, String formField,
             String token, Map<String, String> fields) throws IOException {
         String boundary = "----EAProjectUpload" + UUID.randomUUID();
-        ByteArrayOutputStream body = new ByteArrayOutputStream();
+        List<HttpRequest.BodyPublisher> parts = new ArrayList<>();
         for (var field : fields.entrySet()) {
             if (!field.getKey().matches("[A-Za-z][A-Za-z0-9]*"))
                 throw new IOException("Campo non valido");
-            body.write(("--" + boundary + "\r\nContent-Disposition: form-data; name=\"" + field.getKey()
-                    + "\"\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n" + field.getValue() + "\r\n")
-                    .getBytes(StandardCharsets.UTF_8));
+            parts.add(HttpRequest.BodyPublishers.ofString(
+                    "--" + boundary + "\r\nContent-Disposition: form-data; name=\"" + field.getKey()
+                            + "\"\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\n" + field.getValue() + "\r\n",
+                    StandardCharsets.UTF_8));
         }
         for (Path file : files) {
-            body.write(("--" + boundary + "\r\n"
+            parts.add(HttpRequest.BodyPublishers.ofString("--" + boundary + "\r\n"
                     + "Content-Disposition: form-data; name=\"" + formField + "\"; filename=\""
                     + file.getFileName().toString().replace("\"", "").replace("\r", "").replace("\n", "") + "\"\r\n"
-                    + "Content-Type: application/octet-stream\r\n\r\n").getBytes(StandardCharsets.UTF_8));
-            body.write(Files.readAllBytes(file));
-            body.write("\r\n".getBytes(StandardCharsets.UTF_8));
+                    + "Content-Type: application/octet-stream\r\n\r\n", StandardCharsets.UTF_8));
+            parts.add(HttpRequest.BodyPublishers.ofFile(file));
+            parts.add(HttpRequest.BodyPublishers.ofString("\r\n"));
         }
-        body.write(("--" + boundary + "--\r\n").getBytes(StandardCharsets.UTF_8));
+        parts.add(HttpRequest.BodyPublishers.ofString("--" + boundary + "--\r\n"));
 
         HttpRequest.Builder builder = HttpRequest.newBuilder()
                 .uri(URI.create(url))
@@ -413,7 +414,7 @@ public class ApiService {
         if (token != null && !token.isBlank()) {
             builder.header("Authorization", "Bearer " + token);
         }
-        return builder.POST(HttpRequest.BodyPublishers.ofByteArray(body.toByteArray())).build();
+        return builder.POST(HttpRequest.BodyPublishers.concat(parts.toArray(HttpRequest.BodyPublisher[]::new))).build();
     }
 
     private static void handleFailure(Runnable onFailure) {
@@ -438,8 +439,8 @@ public class ApiService {
                     .GET()
                     .build();
 
-            CLIENT.send(request, HttpResponse.BodyHandlers.discarding());
-            return true;
+            var response = CLIENT.send(request, HttpResponse.BodyHandlers.discarding());
+            return response.statusCode() == 200;
         } catch (Exception e) {
             return false;
         }

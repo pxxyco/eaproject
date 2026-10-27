@@ -28,8 +28,8 @@ public class ActivityImageServiceImpl implements ActivityImageService {
     @Override
     @Transactional(readOnly = true)
     public List<ActivityImage> getImagesByActivityId(Long activityId) {
-        Activity activity = activityRepository.findById(activityId)
-                .orElseThrow(() -> new RuntimeException("Attività non trovata con ID: " + activityId));
+        Activity activity = activityRepository.findByActivityIdAndDeletedAtIsNull(activityId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Attività non trovata."));
         return activityImageRepository.findByActivityOrderByOrderIndexAsc(activity);
     }
 
@@ -47,7 +47,7 @@ public class ActivityImageServiceImpl implements ActivityImageService {
 
     private List<ActivityImage> uploadPhotos(Long activityId, Long organizerId, List<MultipartFile> files,
             boolean makePrimary) {
-        Activity activity = activityRepository.findByActivityIdAndDeletedAtIsNull(activityId)
+        Activity activity = activityRepository.findActiveForUpdate(activityId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Attività non trovata."));
         User creator = activity.getCreatedBy();
         if (creator == null || !Objects.equals(creator.getId(), organizerId)) {
@@ -56,6 +56,8 @@ public class ActivityImageServiceImpl implements ActivityImageService {
         photoStorageService.validatePhotos(files);
 
         List<ActivityImage> existingImages = activityImageRepository.findByActivityOrderByOrderIndexAsc(activity);
+        if (existingImages.size() + files.size() > 50)
+            throw new IllegalArgumentException("Un'offerta può contenere al massimo 50 foto.");
         for (int index = 0; index < existingImages.size(); index++) {
             existingImages.get(index).setOrderIndex(index + (makePrimary ? 2 : 1));
         }
@@ -78,6 +80,9 @@ public class ActivityImageServiceImpl implements ActivityImageService {
         ActivityImage image = activityImageRepository.findById(imageId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Foto non trovata."));
         Activity offer = image.getActivity();
+        if (offer != null)
+            offer = activityRepository.findActiveForUpdate(offer.getActivityId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Offerta non disponibile."));
         if (offer == null
                 || offer.getDeletedAt() != null
                 || offer.getCreatedBy() == null
@@ -85,6 +90,7 @@ public class ActivityImageServiceImpl implements ActivityImageService {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Non puoi eliminare le foto di un'altra offerta.");
         }
         activityImageRepository.delete(image);
+        photoStorageService.deleteOfferPhoto(image.getImageUrl());
     }
 
 }

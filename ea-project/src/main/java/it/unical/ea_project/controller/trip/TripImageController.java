@@ -4,6 +4,8 @@ import it.unical.ea_project.domain.trip.TripImage;
 import it.unical.ea_project.dto.trip.TripImageDTO;
 import it.unical.ea_project.security.AuthUser;
 import it.unical.ea_project.service.trip.TripImageService;
+import it.unical.ea_project.service.trip.TripService;
+import java.util.Objects;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,9 +25,15 @@ import org.springframework.web.multipart.MultipartFile;
 public class TripImageController {
 
         private final TripImageService tripImageService;
+        private final TripService tripService;
 
         @GetMapping("/trip/{tripId}")
-        public ResponseEntity<List<TripImageDTO>> getImagesByTrip(@PathVariable Long tripId) {
+        public ResponseEntity<List<TripImageDTO>> getImagesByTrip(@PathVariable Long tripId,
+                        @AuthenticationPrincipal AuthUser user) {
+                var offer = tripService.getTripDtoById(tripId);
+                if (offer.isEmpty() || "DRAFT".equals(offer.get().getStatus())
+                                && (user == null || !Objects.equals(offer.get().getCreatedByUserId(), user.id())))
+                        return ResponseEntity.notFound().build();
                 List<TripImageDTO> images = tripImageService.getImagesByTripId(tripId).stream()
                                 .map(img -> TripImageDTO.builder()
                                                 .imageId(img.getImageId())

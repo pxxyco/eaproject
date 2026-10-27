@@ -7,6 +7,8 @@ import java.util.function.Consumer;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import it.unical.ea_project_javafx.ui.ViewSupport;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.StackPane;
@@ -28,6 +30,11 @@ public class ReviewController {
     private TextArea txtCommento;
     @FXML
     private StackPane root;
+
+    @FXML
+    private Label statusLabel;
+    @FXML
+    private Button btnInvia;
 
     private int value;
     private Long tripId;
@@ -76,23 +83,25 @@ public class ReviewController {
     @FXML
     void handleSendButton(ActionEvent event) {
 
-        if (value < 1)
+        ViewSupport.clear(statusLabel);
+        if (value < 1) {
+            ViewSupport.error(statusLabel, "Scegli una valutazione da una a cinque stelle.");
             return;
+        }
 
         if (editing != null) {
-            editing.setRating(value);
-            editing.setComment(txtCommento.getText());
-
+            ReviewDTO change = ReviewDTO.builder().reviewId(editing.getReviewId())
+                    .rating(value).comment(txtCommento.getText()).build();
             ReviewService.update(
-                    editing,
+                    change,
                     updated -> {
                         if (onReviewUpdated != null)
                             onReviewUpdated.accept(updated);
                         if (onClose != null)
                             onClose.run();
                     },
-                    null,
-                    null);
+                    this::showSaveError,
+                    btnInvia::setDisable);
             return;
         }
 
@@ -111,13 +120,16 @@ public class ReviewController {
                     if (onClose != null)
                         onClose.run();
                 },
-                () -> {
-                    // TODO: set error message
-                },
-                null);
+                this::showSaveError,
+                btnInvia::setDisable);
+    }
+
+    private void showSaveError() {
+        ViewSupport.error(statusLabel, "Salvataggio non riuscito. Controlla i dati e riprova.");
     }
 
     public void reset() {
+        ViewSupport.clear(statusLabel);
         editing = null;
         handleStar(0);
         txtCommento.clear();

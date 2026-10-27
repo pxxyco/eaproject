@@ -4,9 +4,7 @@ import it.unical.ea_project_javafx.service.media.WallpaperService;
 import it.unical.ea_project_javafx.ui.animation.UiEffects;
 import it.unical.ea_project_javafx.ui.scroll.SmoothScrolling;
 import java.lang.ref.WeakReference;
-import java.nio.file.Path;
 import java.time.LocalDate;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -53,15 +51,8 @@ public class BackgroundHelper {
         Image ready = future.isCompletedExceptionally() ? null : future.getNow(null);
         if (ready != null && !ready.isError())
             bgImageView.setImage(ready);
-        else if (lastImage != null)
+        else if (lastImage != null && !WallpaperService.localFallbackUrl().equals(lastImage.getUrl()))
             bgImageView.setImage(lastImage);
-        else {
-            if (fallbackImage == null)
-                fallbackImage = new Image(BackgroundHelper.class.getResource(
-                        "/it/unical/ea_project_javafx/images/experience-fallback.jpg").toExternalForm(), 1920, 1080,
-                        true, true);
-            bgImageView.setImage(fallbackImage);
-        }
         var target = new WeakReference<>(bgImageView);
         future.whenComplete((image, error) -> Platform.runLater(() -> {
             ImageView view = target.get();
@@ -73,17 +64,24 @@ public class BackgroundHelper {
         }));
     }
 
-    private static Image lastImage, fallbackImage;
+    private static Image lastImage;
     private static CompletableFuture<Image> sharedImage;
     private static LocalDate imageDay;
+
+    public static CompletableFuture<Void> prepareBackground() {
+        return sharedBackground().thenApply(image -> null);
+    }
 
     private static synchronized CompletableFuture<Image> sharedBackground() {
         if (sharedImage == null || !LocalDate.now().equals(imageDay)) {
             imageDay = LocalDate.now();
             sharedImage = CompletableFuture.supplyAsync(() -> {
-                Optional<Path> cached = WallpaperService.getTodayCachedWallpaper();
-                String url = cached.map(p -> p.toUri().toString()).orElseGet(WallpaperService::getDailyWallpaperUrl);
-                return new Image(url, 1920, 1080, true, true, false);
+                String url = WallpaperService.getDailyWallpaperUrl();
+                Image image = new Image(url, 1920, 1080, true, true, false);
+                if (image.isError())
+                    throw new IllegalStateException("Impossibile decodificare lo sfondo selezionato.",
+                            image.getException());
+                return image;
             }, EXECUTOR);
         }
 

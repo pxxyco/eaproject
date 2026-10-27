@@ -1,0 +1,1901 @@
+{
+  "date": "2026-10-27",
+  "scope": "Backend, JavaFX e file del repository; Android escluso",
+  "selection": "git ls-files -co --exclude-standard; soltanto file presenti; inventario escluso da se stesso",
+  "file_count": 375,
+  "extensions": {
+    "(no extension)": 8,
+    ".cmd": 1,
+    ".crt": 1,
+    ".css": 26,
+    ".example": 1,
+    ".fxml": 41,
+    ".iml": 1,
+    ".java": 262,
+    ".jpg": 3,
+    ".json": 2,
+    ".md": 4,
+    ".png": 4,
+    ".properties": 4,
+    ".py": 2,
+    ".xml": 14,
+    ".yaml": 1
+  },
+  "files": [
+    {
+      "path": ".env.example",
+      "bytes": 393,
+      "sha256": "9524b11bc5b1d472973edd33e3aca3fb2f42ee5bfe0ef42f3b648842a8fc7c60"
+    },
+    {
+      "path": ".gitignore",
+      "bytes": 4544,
+      "sha256": "b02fb18dbb666c86b5c129c835b4e7a4c1ce9492182e11d484601479851b66d6"
+    },
+    {
+      "path": ".vscode/launch.json",
+      "bytes": 602,
+      "sha256": "a113ee245a9ee2e41f36ad4ad965c0440d6d226e08fc342cbae8e8289a69af81"
+    },
+    {
+      "path": ".vscode/settings.json",
+      "bytes": 117,
+      "sha256": "24274c084fd5a16c16fd25eae11ac9a8c552ac2d16c989f5497a19cfb7e5b568"
+    },
+    {
+      "path": "README.md",
+      "bytes": 5007,
+      "sha256": "460838130dd44bb094012c74a18c8df9f0063722b0ea64ae6a5ac99ec97ca547"
+    },
+    {
+      "path": "compose.yaml",
+      "bytes": 1731,
+      "sha256": "3f897b1c202d68f0fd8b7e626435b5dda7b25a5194e58be5510d3a36dd4ae9f6"
+    },
+    {
+      "path": "docs/FULL_PROJECT_AUDIT.md",
+      "bytes": 10327,
+      "sha256": "0359fd5866664e1dfca61754d19c9ce49fe706c5a56867968f87296d97609806"
+    },
+    {
+      "path": "docs/RC_AUDIT.md",
+      "bytes": 8889,
+      "sha256": "b95d74ca9b9847168174e0a5638444734a29e053829a27ba2a805c772df0ac4c"
+    },
+    {
+      "path": "ea-project/.dockerignore",
+      "bytes": 227,
+      "sha256": "2a7cf05393287478c3a62f3e6061202f094ac79706b9074058452ce3beb65389"
+    },
+    {
+      "path": "ea-project/.gitattributes",
+      "bytes": 38,
+      "sha256": "5775a77ad2f6d12dde053a3fb0cca4309189163f0888f4e7e984cd0ab327028b"
+    },
+    {
+      "path": "ea-project/.gitignore",
+      "bytes": 776,
+      "sha256": "1ce34df877e9ccd3508e38c58614e20726978fd245c35fa1d55aae8bd967c5a3"
+    },
+    {
+      "path": "ea-project/.idea/compiler.xml",
+      "bytes": 858,
+      "sha256": "0a8a227a5b41a4a0faad51e7a50ccdfc4fb7757ebe451142239f2959a1444c28"
+    },
+    {
+      "path": "ea-project/.idea/encodings.xml",
+      "bytes": 186,
+      "sha256": "d2f61d3ce9654a13e858ce01d14cd0149cefcf814bc3133de4d5859f57451c66"
+    },
+    {
+      "path": "ea-project/.idea/jarRepositories.xml",
+      "bytes": 845,
+      "sha256": "621c76f7e0f49133489d31a8ea1f1f7a744e2bc03067c9ebcf5506533ae9113b"
+    },
+    {
+      "path": "ea-project/.idea/misc.xml",
+      "bytes": 429,
+      "sha256": "a0d8c5b54ddf549b29162f26ee13df220469e42a91661c6f42c638486fe6ebfa"
+    },
+    {
+      "path": "ea-project/.idea/vcs.xml",
+      "bytes": 183,
+      "sha256": "269064f5ba7307dcd31a03b5c690698b3442c0f0024c1358361542f49f5509ae"
+    },
+    {
+      "path": "ea-project/.idea/workspace.xml",
+      "bytes": 3958,
+      "sha256": "7a4a2572f7675b2fb6efbedc1c25ea0baac1d6c1fc3534bd134c3da30cef35f5"
+    },
+    {
+      "path": "ea-project/.mvn/wrapper/maven-wrapper.properties",
+      "bytes": 168,
+      "sha256": "488e1b3f2e641779d4636abf9390845f901e64607261bc3c0b0bfe4fe96e6706"
+    },
+    {
+      "path": "ea-project/Dockerfile",
+      "bytes": 1163,
+      "sha256": "42315c0aaff2aef8e2334043a4157f7e98af909f097d8e74297f6ac9141fa1b2"
+    },
+    {
+      "path": "ea-project/HELP.md",
+      "bytes": 1632,
+      "sha256": "8f7fe6b4e56abbbe30c2c9f9198a330c445e00ed773ce80ba6e50421af210d48"
+    },
+    {
+      "path": "ea-project/ea-project.iml",
+      "bytes": 376,
+      "sha256": "c29ee2041cf4685e50723dd14f6183e2d0c1a6ba212564cb80427a75b99cd9ed"
+    },
+    {
+      "path": "ea-project/mvnw",
+      "bytes": 11790,
+      "sha256": "cae96cef89ebea3531221f4ae17c23cf8edf67d00eae8306d4186ae1bbed4d02"
+    },
+    {
+      "path": "ea-project/mvnw.cmd",
+      "bytes": 8481,
+      "sha256": "46eedb8419bd14fe70d5bb2916d7b6f51806e51b39d5b76a42610384ca929c1c"
+    },
+    {
+      "path": "ea-project/photo/default/experience.jpg",
+      "bytes": 896974,
+      "sha256": "71538327bf0e13de8ff1eb75e21afad00ecc302f4fb6aaced27f9735f1a709f7"
+    },
+    {
+      "path": "ea-project/pom.xml",
+      "bytes": 6415,
+      "sha256": "b9e640661046f80530eb1b4373d5f0d42d7e057930a02c15a920b9e52f94887f"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/EaProjectApplication.java",
+      "bytes": 464,
+      "sha256": "34115d877bbf11b4a24653beb4e041aed9f5341c4a96b07b648091a8ff11d616"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/config/OpenApiConfig.java",
+      "bytes": 3813,
+      "sha256": "2f9433832d2ba810ff5f3516df3435123b74b3bc5a6221cd172402d2660b46a1"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/config/SecurityConfig.java",
+      "bytes": 9863,
+      "sha256": "7a21d54e8e7493138c155b91f5a0d0161b28044948f63e6719538da4ac155777"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/config/WebConfig.java",
+      "bytes": 3504,
+      "sha256": "6bc3b56c98f4adbec6606973a3d1bf8c94032b87c9d58373d00d7b0c8694e642"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/controller/account/AccountController.java",
+      "bytes": 7457,
+      "sha256": "17a51fb4f903292cb1c7f1543c71f06a93238b38bc61c331640c9761ef43b762"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/controller/activity/ActivityController.java",
+      "bytes": 10135,
+      "sha256": "a17b46cb9a4f83850730f096ea69b7159f75b5cfc36ff0d232dc94161740b69b"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/controller/activity/ActivityImageController.java",
+      "bytes": 4520,
+      "sha256": "f810df63643059ef8a7536d95d4c3ffcd7bcd86930e294515c524c931b82539e"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/controller/advice/ApiExceptionHandler.java",
+      "bytes": 3961,
+      "sha256": "8a25ac47bb6a9970ad21bc4124b6a796b52c6c8f85471ad936bb3160136e9dcd"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/controller/booking/BookingController.java",
+      "bytes": 5197,
+      "sha256": "111f403df36eea520e685aa7e86b597f78b76a92b7060b42b28d699fd960458d"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/controller/booking/CalendarController.java",
+      "bytes": 1664,
+      "sha256": "ac9f82708c268e05c83badc88d73133f91077b072112950e6b2df39d28c3667d"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/controller/chat/ChatController.java",
+      "bytes": 5532,
+      "sha256": "5c785943412fa2b3a369e14eef3012dd11bf38545f18e0637a8f7e22d8b9e899"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/controller/favorites/FavoriteController.java",
+      "bytes": 4449,
+      "sha256": "874b252ea25bdf711aef21f6ac93d3ffc3f1cc91860b23c37e93cf8ce748f5b6"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/controller/favorites/FavoriteListController.java",
+      "bytes": 6420,
+      "sha256": "b6257c96a49d9968e554f9e014162a80fc93748cab4afca280acdadf7cc89342"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/controller/favorites/ListActivitiesController.java",
+      "bytes": 4389,
+      "sha256": "07e674cb6c2ac497de3b282eb16825de422e2e29b8b51e32bb866f020bbec314"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/controller/favorites/ListSharingController.java",
+      "bytes": 14146,
+      "sha256": "52b7c015a34dfeafc06ae3a7c8cae908b4a39489f266bf4f1b61d8618c5e064a"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/controller/favorites/ListTripsController.java",
+      "bytes": 4700,
+      "sha256": "207c477abc01760c877f76af38f35a14b39132b3b87b48ebd923bf5d116fffff"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/controller/health/HealthController.java",
+      "bytes": 1020,
+      "sha256": "6bf2a29ec192208f6e8ae886a4d99d5b5efc6d880e076554d87fb82283681447"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/controller/itinerary/ItineraryController.java",
+      "bytes": 2263,
+      "sha256": "24c71c60905ac37ee895512c764024139a16c8be6febbf28dbd08f3adf86d883"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/controller/notification/NotificationController.java",
+      "bytes": 9638,
+      "sha256": "e3b539934924dad1a7da712d0ea8276d86d0a5f31ea65c4424e79f8175a45a98"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/controller/payment/PaymentController.java",
+      "bytes": 2894,
+      "sha256": "ab43b813e489b98c771e32a2ca8fce85b1dce30a866538e761f2dcb49b0c36e6"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/controller/recommendation/RecommendationController.java",
+      "bytes": 1049,
+      "sha256": "3b513f1205d264ab3b140440f18bd35b4dbd5fc14213cebf686af52c96a1eb4c"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/controller/review/ResponseController.java",
+      "bytes": 2041,
+      "sha256": "ba79ccce70a652bbf2fd2f89392e311e399a9675ebcec02a75a4ab833af9bcd6"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/controller/review/ReviewController.java",
+      "bytes": 2813,
+      "sha256": "2838fd28df97ad12c6a81cb22031f064fcafe7bb0accdb740f8f142a99fe93e6"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/controller/trip/StageController.java",
+      "bytes": 2848,
+      "sha256": "931ce70b403e6da1a7866578a56e6fc738b2770f45a5ad646dd13dd850253133"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/controller/trip/TripController.java",
+      "bytes": 6161,
+      "sha256": "e776005276b3bfe98460c46b2e27863e44499b3c85f31dbdeba4c4d1bb8f73f5"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/controller/trip/TripImageController.java",
+      "bytes": 4279,
+      "sha256": "c38a0c7be879624cc817f1a9773c6196ba5fa3e4a041882b62f51182c4fa12b4"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/controller/user/UserController.java",
+      "bytes": 7630,
+      "sha256": "e8f7c3703cd406a9fe18d69b4080c1632d880d381ca3095a3bfc17853d2c6577"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/domain/account/AccountSettings.java",
+      "bytes": 881,
+      "sha256": "eb531504a1fc8c97aa6c47426177e4d60e05e4e87684bf62e7b28ed5d156dda3"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/domain/activity/Activity.java",
+      "bytes": 2869,
+      "sha256": "0e8d59a2af0a5c9cb08b703f7b0deaac60627dfd3f9703cd6da757a634b3339e"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/domain/activity/ActivityImage.java",
+      "bytes": 987,
+      "sha256": "0d6cf1bea3063299fb6b3853656115b1f8e857202c39ea1fc2edb58d2ca78327"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/domain/booking/Booking.java",
+      "bytes": 3015,
+      "sha256": "9ac0abee3045d65185286d3be7e4a8a9258fceb9e0c74605b4f518f05ddc512a"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/domain/chat/ChatMessage.java",
+      "bytes": 1535,
+      "sha256": "e780fb5e5533a592e79de128603488af817425772a96f7619c443a8195b26011"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/domain/chat/Conversation.java",
+      "bytes": 1701,
+      "sha256": "f8a6ba7f2f9e36d4858959778a6fd9072f4b9aa4b5c3928b36445b8899855f57"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/domain/favorites/Favorite.java",
+      "bytes": 1789,
+      "sha256": "f88a1a2c1406ed4b577cb7fa4c8ddc0f664dd5de485f10a49466596559b6ba84"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/domain/favorites/FavoriteList.java",
+      "bytes": 1362,
+      "sha256": "e2530d3b43d12f919966d914200a7f0999649b50a44e74d12e30079046495a64"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/domain/favorites/ListActivities.java",
+      "bytes": 1205,
+      "sha256": "1eed32c1eead014ba90f0e850c683a64e5aad6ae8f006b15c18fb16739160558"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/domain/favorites/ListSharing.java",
+      "bytes": 1596,
+      "sha256": "7b5287b27cc738812db670990dd1ef276a829186f70912d59e659887ecea0a5a"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/domain/favorites/ListTrips.java",
+      "bytes": 1185,
+      "sha256": "0c26810ffcfb2154d1b35b75b0e7f61e9dee7deb9ef2396580854065fded42ac"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/domain/itinerary/ItineraryStop.java",
+      "bytes": 1429,
+      "sha256": "1f899a3feb8822496fdce28364eeb8afa40b0b5e4d6f03e1e35dc1b1d5c77bfc"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/domain/notification/Notification.java",
+      "bytes": 2198,
+      "sha256": "8038e1f4668fd2c5918a8f8a34a44d46b9701a75e65cc408b4a05a23c9fc9ec3"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/domain/payment/Payment.java",
+      "bytes": 1937,
+      "sha256": "6204aa146ab6167dcd4e0384ec8c7ad0ad8e59a535ca4881d88d7755a40f1a0a"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/domain/payment/SavedCard.java",
+      "bytes": 942,
+      "sha256": "cc38e994c6c981d6503bc221922b41aa55b8767e1e109e3b14292d3d38ac5ed8"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/domain/review/Response.java",
+      "bytes": 1353,
+      "sha256": "5f8771dc8501307f069d2de5f85a6d416590d040d303a14d4a988963805b38d9"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/domain/review/Review.java",
+      "bytes": 2548,
+      "sha256": "180e702943b3e2a5560b0ad3102c2d55ba95861a9be202bfc832b50d46ee938e"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/domain/support/SupportTicket.java",
+      "bytes": 1017,
+      "sha256": "756a3b74ce7e8d38253081ca1dfe89efe38bd414737590e7c115e8f24b1bf988"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/domain/trip/Stage.java",
+      "bytes": 2676,
+      "sha256": "26067e75ab9c4a7c05542374dc0c7939fd06684290463ab9f0322536af529502"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/domain/trip/Trip.java",
+      "bytes": 3806,
+      "sha256": "7dbca012538a070b046c5324d56dfc402d74038a165810df272af879a4abf852"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/domain/trip/TripImage.java",
+      "bytes": 945,
+      "sha256": "27d2559f82e1cc5befbb9f8ac58ea4521a78ba621b13a97612085542e6ca9eab"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/domain/user/User.java",
+      "bytes": 1983,
+      "sha256": "dfbedbc17056774155ece974272554a6a2c90325a5372dc164d5a00d907f786f"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/dto/activity/ActivityDTO.java",
+      "bytes": 1150,
+      "sha256": "961ce88ede1c5239c01e918b8124f695cc2073f97c2b737b535b4795dd07a418"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/dto/activity/ActivityImageDTO.java",
+      "bytes": 363,
+      "sha256": "67577230f53265e78ef4f2590d01bc971ed1351fb4eb7b275a6c8299bafe2968"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/dto/booking/BookingDTO.java",
+      "bytes": 1283,
+      "sha256": "425d0cf9b6ff581a8dad454582c9794c106cf8bcc8a4c6c5e00cdd96037c40ee"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/dto/favorites/FavoriteDTO.java",
+      "bytes": 435,
+      "sha256": "db8dd532a33af2c2ad2dd430a695735ac38799337af3e73babb14e9bf02fbca0"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/dto/favorites/FavoriteListDTO.java",
+      "bytes": 432,
+      "sha256": "5b87f334449224142d0cbd5afa03531dcecf6b89fe5cebb540fcc7fa3e4889e5"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/dto/favorites/ListActivitiesDTO.java",
+      "bytes": 453,
+      "sha256": "2ff93069218550596253b8ea745c88f8ad5ea6d067fb2db8900c73428f77395a"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/dto/favorites/ListTripsDTO.java",
+      "bytes": 418,
+      "sha256": "fbdc1446a9d42074ce7d47acade235da928799c0c0ce10f50719910be67d2751"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/dto/home/ActivityHomeDTO.java",
+      "bytes": 509,
+      "sha256": "bc51d385a639abd42ce3f8901e93a3f7568337c394315f6e891627198e7e53e9"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/dto/home/ActivitySuggestionDTO.java",
+      "bytes": 292,
+      "sha256": "708dab0369d5f82bb47ed22c7b94967a6f937f0caf36a3b2b33b5d0e167421a2"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/dto/home/TripHomeDTO.java",
+      "bytes": 510,
+      "sha256": "b34e43640f5b5dae8a15c788e20db317985ee6168b322336f0d43e0bf466cbf0"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/dto/home/TripSuggestionDTO.java",
+      "bytes": 288,
+      "sha256": "3b57fc979204a36c0b3c4244149487091343c9149dc28b32f934f87ccd9fdfd0"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/dto/notification/NotificationDTO.java",
+      "bytes": 668,
+      "sha256": "63fd715af3283917bc171dda95908432446af2f42633ba4dd8a251cd8cc440dd"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/dto/payment/OrganizerFinanceDTO.java",
+      "bytes": 420,
+      "sha256": "4868e7774d1e3de7954df314b24c66786e0aab5ecf02ae6dea93a1ede5218d4d"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/dto/payment/OrganizerStatisticsDTO.java",
+      "bytes": 388,
+      "sha256": "1e09d01be6be5536a4a6770543dc6522a7daaeea2013c2c2ac5e4f88f47aea31"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/dto/review/ResponseDTO.java",
+      "bytes": 478,
+      "sha256": "93255f667301f3b2bbbb46cbff09ac1acea17334f8bfaa2827671ffbf617f112"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/dto/review/ReviewDTO.java",
+      "bytes": 605,
+      "sha256": "6c0d0f2614b8ca5236d757bac5b15efa5819bb34c019a4b00dd317dee1e96304"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/dto/trip/StageDTO.java",
+      "bytes": 1999,
+      "sha256": "21fe207ed7cf652072b715a489e10b37e444e16f1691db13bf856c92b2a19182"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/dto/trip/TripDTO.java",
+      "bytes": 1184,
+      "sha256": "c5ac4d1a2112f332b47e7f1d7dba2d03e2211bfd08f00f8ab584023af22b1a36"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/dto/trip/TripImageDTO.java",
+      "bytes": 351,
+      "sha256": "ae0d83fd4d2e4462ddd1b0e6a84ef7e50ccd0aa3bb213b14dbc86635d34ea6de"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/dto/user/UserDTO.java",
+      "bytes": 648,
+      "sha256": "53aee76a5c67ebde76cd1419759b347138cd0cf69086dff5f0e2cfce51c4f7e6"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/event/chat/ChatEvents.java",
+      "bytes": 5738,
+      "sha256": "2898404823699f046be1563ec581a3ecd613542f7654f6c6c0e074f17b2b1c09"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/filter/JwtAuthenticationFilter.java",
+      "bytes": 2656,
+      "sha256": "42e4e55103ad9291ae1c3b68f967539a502069e6557c83f8a16df77886310f3a"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/filter/RateLimitFilter.java",
+      "bytes": 6253,
+      "sha256": "34aaeedf90402727e4125100018ebb7c9d1a9bce92d58d49586053b84639c039"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/filter/RequestTimingFilter.java",
+      "bytes": 1568,
+      "sha256": "f3113c47723498e3ed252b6fbcdb007d95cab502d8541e6afd82cccc9b95e379"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/mapper/favorites/FavoriteMapper.java",
+      "bytes": 1241,
+      "sha256": "cb0ba789abdcdf37b470e1996b923823fa50c42a2b40cc359ad6ea2e1600399e"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/mapper/review/ResponseMapper.java",
+      "bytes": 679,
+      "sha256": "a827df12e8d71627a950ff2fda46c824c21198ae6dd1e4e59d6559589f1cc64a"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/mapper/review/ReviewMapper.java",
+      "bytes": 1049,
+      "sha256": "da7d1c82a74a4e1aa3ebf70f5f98d17da6ea07840b3bb3c31329c74883aee9cf"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/repository/account/AccountSettingsRepository.java",
+      "bytes": 265,
+      "sha256": "f1ff3dfb55214cc83695a9c91708173ffbd45a0243baab060411e0cda103c1ba"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/repository/activity/ActivityImageRepository.java",
+      "bytes": 1040,
+      "sha256": "0d22245965a804752db2d46daa6f0e9636577a06ebc7004e45efdba5d9d9653d"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/repository/activity/ActivityRepository.java",
+      "bytes": 6915,
+      "sha256": "9a79e1574794369444d870a099482677ec61b3df369516bffedf43b5e72a79f3"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/repository/booking/BookingRepository.java",
+      "bytes": 3077,
+      "sha256": "cc36e8680e3ee3eb8171d03a4bffc938881f3b6b43f10a4090b26782af854d11"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/repository/chat/ChatMessageRepository.java",
+      "bytes": 1638,
+      "sha256": "b1c06784d44bb46c652d7fab81b0358a9081317ef8663815cf232742b6e1a7d3"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/repository/chat/ConversationRepository.java",
+      "bytes": 1194,
+      "sha256": "08968a0e04f471586bdc5428deafccb13eec9d1eefec0c56fc0eae8851f0f699"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/repository/favorites/FavoriteListRepository.java",
+      "bytes": 857,
+      "sha256": "d7126381fe4240097eed9b272e2c33613234b92438f9c0a9ac463c6d35461a3a"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/repository/favorites/FavoriteRepository.java",
+      "bytes": 722,
+      "sha256": "e2f018b4c809ed6418939a0203b6ec6b16161c97f9e81db29d93b8209f73f0cf"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/repository/favorites/ListActivitiesRepository.java",
+      "bytes": 964,
+      "sha256": "00cd043674722c16a1a5b19b881025860a4cff12acfd1f602256c77167c3e4d2"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/repository/favorites/ListSharingRepository.java",
+      "bytes": 1025,
+      "sha256": "4782dea1e575a1793ae24fcd1e6304bd50f453184c5cb0ca15e9050a095a7d75"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/repository/favorites/ListTripsRepository.java",
+      "bytes": 1034,
+      "sha256": "a8862b9a5782f29cfeb685a82c2b018b032bf4b8fd5bee0f2dad58e1f2278094"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/repository/itinerary/ItineraryStopRepository.java",
+      "bytes": 400,
+      "sha256": "9dc95a0d850a73ee8d348db365b91f6abe3ae1e38d5a234b56ab358d0f8a8eef"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/repository/notification/NotificationRepository.java",
+      "bytes": 2955,
+      "sha256": "011e3a4fcb587899034a49011979d8d1f7c295184bfb1ab45021ba8b99858aaf"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/repository/payment/PaymentRepository.java",
+      "bytes": 3601,
+      "sha256": "3dd63037cba2204574f14a49fb279c777c170b1d1e8917d800517b8dd6f6444a"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/repository/payment/SavedCardRepository.java",
+      "bytes": 451,
+      "sha256": "248bc0cc92326a37abcca8a4eb830d88982e3772bf65e304ea143a0ed49c1a38"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/repository/review/ResponseRepository.java",
+      "bytes": 579,
+      "sha256": "6c20e5e6ccba6a7b6e071e54dfb1c20c4ba14f72bde33a8a9fd65f2645d06891"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/repository/review/ReviewRepository.java",
+      "bytes": 1845,
+      "sha256": "417feb1cc097d30b4107dd25752d80fba755f1e39a1bdbc6cbbdaa5bc3cb16cf"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/repository/support/SupportTicketRepository.java",
+      "bytes": 416,
+      "sha256": "cbc8e64a356d4441b60cde820f09ecc1947a0522facab6255a212bea296bc36f"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/repository/trip/StageRepository.java",
+      "bytes": 985,
+      "sha256": "00e3d507874e6389e72d734ea4fb3cb0789344167a4ead0b14dd2af98c7a689b"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/repository/trip/TripImageRepository.java",
+      "bytes": 911,
+      "sha256": "ca5d1d1cb3d3209ffd839a88b2809749abdb21071714ed50cdbfc0bf7b3e6be5"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/repository/trip/TripRepository.java",
+      "bytes": 8710,
+      "sha256": "dc3a004d154cef2090bed3fc5afb9e61e6468c99a69da18709e0ff0f3fd4682b"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/repository/user/UserRepository.java",
+      "bytes": 1737,
+      "sha256": "c7415b2078742bc65f3d06f679e25b7cb7a90302e3d376de8853d7080218c1b4"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/security/AuthUser.java",
+      "bytes": 103,
+      "sha256": "28b38ac13bf3ae0648a373919848a6c7343c8aa882ace8d0fa043070b149635a"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/security/PasswordPolicy.java",
+      "bytes": 894,
+      "sha256": "3ac027a4b63239d0df365980dac7f7e8572970ad452fbf2957f6dc00b7e8c407"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/activity/ActivityImageService.java",
+      "bytes": 536,
+      "sha256": "eff194af5631940353e3c82d4be4934c73b15bccef4e45dd655de6ff3d403e51"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/activity/ActivityService.java",
+      "bytes": 1473,
+      "sha256": "c5be9e3669f66c71850d3a6373eac470244b9f53eee302bf05c4c32f1546e986"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/activity/impl/ActivityImageServiceImpl.java",
+      "bytes": 4719,
+      "sha256": "badebade0b6f284619a7541b2fe34e4344240e2d1de0a458ca2716d6cca14d5d"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/activity/impl/ActivityServiceImpl.java",
+      "bytes": 11873,
+      "sha256": "7ed2b2027cd9c851fe03391d130754de7db2e09a5aa2446097be5f29eccad06b"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/booking/BookingHistoryService.java",
+      "bytes": 5159,
+      "sha256": "94fee912f0ca2dd36347ca1be6af1740c4872be04707a69f6fffeee78198237c"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/booking/BookingService.java",
+      "bytes": 689,
+      "sha256": "e83f4915bd91db71ecc0da4c3eb17914ff09a7b1f52970e34b701a4b6239dfa0"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/booking/impl/BookingServiceImpl.java",
+      "bytes": 19190,
+      "sha256": "781212c44430a638c8cdb19cdd2e3caa704a071dcd39bde1d2af093803c1dfb7"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/chat/ChatPhotoStorage.java",
+      "bytes": 6212,
+      "sha256": "5b9f74e4bfb125af31746b852af6523663002dc825a5d672576681444d8dc469"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/chat/ChatService.java",
+      "bytes": 14018,
+      "sha256": "244b623edb36629ad15a4d8ccbe64af564aebf0a88305aa65893dd583aed979c"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/favorites/FavoriteListAccess.java",
+      "bytes": 1662,
+      "sha256": "30eccc9a7015518cab90a7c618d547a7693e4ac491b7876de26f57a75d599759"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/favorites/FavoriteListService.java",
+      "bytes": 517,
+      "sha256": "ba28aa024112fae95a848e3abf46bc83dc3dbfd8b757b03245a6339559ebc11b"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/favorites/FavoriteService.java",
+      "bytes": 538,
+      "sha256": "2a5f9e4b51272c35e7a3420d2a4d7d2dc4d12ef46d19a642791970951b3d6700"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/favorites/ListActivitiesService.java",
+      "bytes": 373,
+      "sha256": "7e930b2f81c42f8ecbff9a6464d3bcba82fa1d7440e7feaf358bf190791c0ffe"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/favorites/ListSharingService.java",
+      "bytes": 534,
+      "sha256": "bf54752466fac0e10063809964118861645ab15d5921d9daeeee20d01cb2f6b8"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/favorites/ListTripsService.java",
+      "bytes": 332,
+      "sha256": "d30f646ea143f305a2eb71c21febf3470c31727f5d0bb49d7dc894097f062646"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/favorites/impl/FavoriteListServiceImpl.java",
+      "bytes": 4327,
+      "sha256": "9e6f12caaaa80362b3f92dc21e663d3d4ca3292cad0223060b9d530af1d51227"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/favorites/impl/FavoriteServiceImpl.java",
+      "bytes": 4600,
+      "sha256": "abaadff561d28719bbd8391792a0ba576c2e8dd7e7500b214f27bd50ec84e678"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/favorites/impl/ListActivitiesServiceImpl.java",
+      "bytes": 2987,
+      "sha256": "3eb9e3e9684a280cdd2781ea412ec21cf9e1c100fdff6758bcf8bb35c714013d"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/favorites/impl/ListSharingServiceImpl.java",
+      "bytes": 5086,
+      "sha256": "c87cb442eb919f6d10827ae470344b47b62f6fbb75ae0f071a565371c86bc476"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/favorites/impl/ListTripsServiceImpl.java",
+      "bytes": 3001,
+      "sha256": "e77a643b6f921e55b70b6e14577894dca6c565cbcd6013fae11d2bf0589ca767"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/itinerary/ItineraryService.java",
+      "bytes": 4864,
+      "sha256": "0f31604f1c604557c636c85646d3fb833272c35e0ebfa92b4d7c5b5b28054753"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/media/PhotoStorageService.java",
+      "bytes": 9311,
+      "sha256": "77e2a058eaea1bce03ecee8afe35c885ae15267f8ffe7af484493d6ee287a75d"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/notification/NotificationService.java",
+      "bytes": 946,
+      "sha256": "9c6c89aba5c13649201bc31ee469d5957f54e22e38097e3d35f2cd6f4f27c17d"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/notification/impl/NotificationServiceImpl.java",
+      "bytes": 4038,
+      "sha256": "0b542e787185614707c784510f8e55d3d847af7b180c6e5d022cb3090c10c9dd"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/payment/MockCheckoutService.java",
+      "bytes": 4292,
+      "sha256": "7548bbeaa711c34b054b061eabc7d38a37800fc920d46502407af41b09ed3dd1"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/payment/OrganizerStatisticsService.java",
+      "bytes": 2742,
+      "sha256": "33b24b7c090c1eb73fb68945f053a46dcfd24260a493c42b62d249c0550b3e72"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/payment/PaymentService.java",
+      "bytes": 323,
+      "sha256": "a006c7ac5c1c1a9d9248cb958cac4d8e1d8ffc3db89e2b4e75e6d5ee50fa8ce9"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/payment/impl/PaymentServiceImpl.java",
+      "bytes": 2306,
+      "sha256": "d00800192ad05df03f4f74117ba661b157217746ee2412bdcc69d100a5b131e2"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/recommendation/RecommendationService.java",
+      "bytes": 10312,
+      "sha256": "49b3372a09f8b733f03c312a3c2b9aa34b91eb0f3bc01e328b0e775e81cbe170"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/review/ResponseService.java",
+      "bytes": 322,
+      "sha256": "13e3e82c667b097ed65b056001e85f9132bdc006b9907a99bb6c24c75dfb997c"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/review/ReviewService.java",
+      "bytes": 846,
+      "sha256": "1faf3f3d76f32878ec611aeeda00ca44651ffd11759f386f320880c3f5aed8cf"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/review/impl/ResponseServiceImpl.java",
+      "bytes": 4311,
+      "sha256": "2d5a10961b8e9dfca8c3b045c0c2213717c4da21000f51ad1427cc20d204cdc1"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/review/impl/ReviewServiceImpl.java",
+      "bytes": 14002,
+      "sha256": "e85d09020adf50c0858a6a1d0a6adc78fa86ffcd9686a0d064d46f22c9e33637"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/security/JwtService.java",
+      "bytes": 473,
+      "sha256": "3e4cadd19cdca6481bfac6bbe5d915f251d9637bed1e46b9b385bff5e7453556"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/security/LoginAttemptService.java",
+      "bytes": 219,
+      "sha256": "7ad4570bd628d7b635c2f7480fb3f4a9daa192bd7e59208e189d497d648c85c6"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/security/impl/JwtServiceImpl.java",
+      "bytes": 5138,
+      "sha256": "f56b3386b0e04eace6c4bdd5aaeb32f0be55f829141ab8c4eed26b9ba8cc4bf8"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/security/impl/LoginAttemptServiceImpl.java",
+      "bytes": 2865,
+      "sha256": "5250a1ff4350d7b4b90d8adda4e48a4b22a6cabdf2b4754a9ca3dcba2803298f"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/trip/StageService.java",
+      "bytes": 550,
+      "sha256": "e55d58b5aa9e7d86284166775546f7e245eef455cf266a8d677da2b69293b9da"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/trip/TripImageService.java",
+      "bytes": 492,
+      "sha256": "7545c45489627e897bdb807e297ac702e0e711420517f34e7745ee3a680ff489"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/trip/TripService.java",
+      "bytes": 1771,
+      "sha256": "73fddc9fe4318b68039eb8ed73c9c3604383c465de2f937654fe7efe25d7582e"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/trip/impl/StageServiceImpl.java",
+      "bytes": 1566,
+      "sha256": "04e04cd444660ca1ee205f1f3b3dcb0801c4dcbf3d02aeaf57e250a785ebaba1"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/trip/impl/TripImageServiceImpl.java",
+      "bytes": 4975,
+      "sha256": "6905653b01f5f5da1855d1f9f3224291c6900043c22cda1a7ad5f2e02670baf6"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/trip/impl/TripServiceImpl.java",
+      "bytes": 15717,
+      "sha256": "324d60c04edd690eef03fa7834a618c6ad847f847944a62abfd64be7732ad8e5"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/user/UserService.java",
+      "bytes": 719,
+      "sha256": "be220fa92cb479991748b30a5ede5d1c326527cbb98c5278531fc7d7856f3566"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/service/user/impl/UserServiceImpl.java",
+      "bytes": 8863,
+      "sha256": "468cccf595eb096cf0964252ab2213ad4d7587a789ca5b51873912dd00e42311"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/util/CalendarWriter.java",
+      "bytes": 2157,
+      "sha256": "12d29a365b5344442d4c24a4513dd05e0ef826acbca52b1ea5f950e853ca1ad1"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/util/PageUtils.java",
+      "bytes": 536,
+      "sha256": "011ad671aafd68d9f72614295fef629b0ee76cb92839f504ae4c499618d6d757"
+    },
+    {
+      "path": "ea-project/src/main/java/it/unical/ea_project/validation/ExperienceValidation.java",
+      "bytes": 4680,
+      "sha256": "a0b9dafe98edabb7159cfe5aaaf574e957afc5097b092fa0745384dcbafb380b"
+    },
+    {
+      "path": "ea-project/src/main/resources/application-container.properties",
+      "bytes": 628,
+      "sha256": "4133fae2ed16a655f57c46cba5f5338babb694336abe940fc5f1ae6b87d4700f"
+    },
+    {
+      "path": "ea-project/src/main/resources/application.properties",
+      "bytes": 1372,
+      "sha256": "24992f369ab23b4ffe39a7c98fc6eea74bdd77dfd4611d42818c8032e6a5466e"
+    },
+    {
+      "path": "ea-project/src/main/resources/log4j2.xml",
+      "bytes": 2796,
+      "sha256": "3adea3c29dc14c3c34a0e5863804a5a3246f2d7cb2e5bfcd2d959077e1e837e5"
+    },
+    {
+      "path": "ea-project/src/main/resources/static/experience.jpg",
+      "bytes": 896974,
+      "sha256": "71538327bf0e13de8ff1eb75e21afad00ecc302f4fb6aaced27f9735f1a709f7"
+    },
+    {
+      "path": "ea-project/src/test/java/it/unical/ea_project/EaProjectApplicationTests.java",
+      "bytes": 295,
+      "sha256": "2a42d03c8aa6d6bcabd9f9775387f5856dfe5523314a8e959da06a9716872839"
+    },
+    {
+      "path": "ea-project/src/test/java/it/unical/ea_project/config/WebConfigTest.java",
+      "bytes": 1321,
+      "sha256": "b9c7a783277865b30385a73e6fb521e4e5530dd99c934eafc4c585e2225bc8cf"
+    },
+    {
+      "path": "ea-project/src/test/java/it/unical/ea_project/controller/advice/ApiExceptionHandlerTest.java",
+      "bytes": 1436,
+      "sha256": "2e5b1bbf581b2ab2080495897121ca9dd796d586400ab33327a19c64e7ed0dd7"
+    },
+    {
+      "path": "ea-project/src/test/java/it/unical/ea_project/integration/RequiredFlowsIntegrationTest.java",
+      "bytes": 55601,
+      "sha256": "cc92ddf1d3dc84a457ad421b994035be3e235d4ae5a0e1dcbcdfb454cc9ce5bb"
+    },
+    {
+      "path": "ea-project/src/test/java/it/unical/ea_project/integration/organizer/OrganizerApiTest.java",
+      "bytes": 13008,
+      "sha256": "eabb64f6b10e3a8178a5951b13d5e6c9559d849371fc8f11d6a82bd041268f30"
+    },
+    {
+      "path": "ea-project/src/test/java/it/unical/ea_project/integration/organizer/OrganizerConcurrencyTest.java",
+      "bytes": 3538,
+      "sha256": "027b8055fafb8d3998554da11a0a91e82b3ce9cb3729589523e1f90b4d4d1495"
+    },
+    {
+      "path": "ea-project/src/test/java/it/unical/ea_project/integration/organizer/OrganizerWorkflowTest.java",
+      "bytes": 9330,
+      "sha256": "fc42174274031975d31898552664d2e09f68c4088a134b1a7121e3415bd8dd47"
+    },
+    {
+      "path": "ea-project/src/test/java/it/unical/ea_project/integration/shared/SharedDataContractTest.java",
+      "bytes": 6108,
+      "sha256": "235a2988869f1d07b95ca3b79b817590f360bbe033e2609d87d8b4589bcaac23"
+    },
+    {
+      "path": "ea-project/src/test/java/it/unical/ea_project/repository/activity/ActivityRepositoryDateSearchTest.java",
+      "bytes": 3041,
+      "sha256": "d9d77b4faf59b0567230081a874ed7b1b6040ed35c250c6a49239acec78fc9a9"
+    },
+    {
+      "path": "ea-project/src/test/java/it/unical/ea_project/service/activity/impl/ActivityServiceDateSearchTest.java",
+      "bytes": 1989,
+      "sha256": "e341d33449b416cacca13fb118205ecc64e3e2bdbb07d11a85efde68c10c231b"
+    },
+    {
+      "path": "ea-project/src/test/java/it/unical/ea_project/service/media/PhotoStorageServiceTest.java",
+      "bytes": 4299,
+      "sha256": "d0c8f4d338e35557b7b54f1db52c02414eea27019ef433e31f519ca77c4446b4"
+    },
+    {
+      "path": "ea-project/src/test/resources/application.properties",
+      "bytes": 447,
+      "sha256": "c8cff385340f7f7c21cf917165af7bba0d808ee33622249f7c1be5793e94684b"
+    },
+    {
+      "path": "ea_project_javafx/.gitignore",
+      "bytes": 699,
+      "sha256": "ce42f2e5b0c44f30e1b8167ea0702f144f51b0e12f336441705b602361b28add"
+    },
+    {
+      "path": "ea_project_javafx/.idea/.gitignore",
+      "bytes": 228,
+      "sha256": "de3dcd3b67895aa24d01485c60e342e81e37ea1530859b0756519a00f1b6d700"
+    },
+    {
+      "path": "ea_project_javafx/.idea/compiler.xml",
+      "bytes": 703,
+      "sha256": "0faf762a9043efb7b9ff96bb5ff1b286801af7a01273c0909def3b73eee3dcf6"
+    },
+    {
+      "path": "ea_project_javafx/.idea/encodings.xml",
+      "bytes": 261,
+      "sha256": "677f938f36fdec3b340000bd7935e0366061386d29f0b9c4c13f79f80ef93d71"
+    },
+    {
+      "path": "ea_project_javafx/.idea/jarRepositories.xml",
+      "bytes": 845,
+      "sha256": "621c76f7e0f49133489d31a8ea1f1f7a744e2bc03067c9ebcf5506533ae9113b"
+    },
+    {
+      "path": "ea_project_javafx/.idea/misc.xml",
+      "bytes": 524,
+      "sha256": "360dd9ebbcd816ccc5dcc9b2874df9840d342eba9c2dc97464b839e97fd13320"
+    },
+    {
+      "path": "ea_project_javafx/.idea/vcs.xml",
+      "bytes": 183,
+      "sha256": "269064f5ba7307dcd31a03b5c690698b3442c0f0024c1358361542f49f5509ae"
+    },
+    {
+      "path": "ea_project_javafx/pom.xml",
+      "bytes": 4365,
+      "sha256": "144abbbe631ae38eb718bfe3c4ee7b9b316a24b683455a2b16d2e47a4cae1b6c"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/App.java",
+      "bytes": 1361,
+      "sha256": "bc8c3b73ad11ec4235b49a234485014fc85cf1fdab89c521a0594b7c33b4ff3b"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/config/AppConfig.java",
+      "bytes": 681,
+      "sha256": "c1ed19c412d8dc7fe388003522521f58684920b13c7fd0e6281c39bad3f4e78e"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/activity/ActivityDescriptionController.java",
+      "bytes": 958,
+      "sha256": "0cb0f25e286d2f9d0225a63a048643dcd3f11f2d93abfa5d47daeafa62f4510e"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/activity/ActivityDetailsController.java",
+      "bytes": 33898,
+      "sha256": "1e7888da5ffed2bc5df90a7c7aae06c1d60d64a252d9675e4294ea11b2459649"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/activity/ActivitySectionController.java",
+      "bytes": 207,
+      "sha256": "6083de3962b6d2a61e20ad1f23efccfa67bf87fec8f66264a6d2bc720d721fba"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/activity/ItineraryController.java",
+      "bytes": 6255,
+      "sha256": "80c5bb1180745ec30c805674da553622bf6122c325132e832331ac354243d832"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/activity/TripSectionController.java",
+      "bytes": 187,
+      "sha256": "67e8b56cd70c5208559caf78ee9a91a814c426f034055c68f105998f01f8584e"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/activity/photo/FullScreenPhotoViewController.java",
+      "bytes": 870,
+      "sha256": "6e10119cdbbfa71bb475a2deca2f695df2197d92f00ad2aad123af001fffc9f8"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/activity/photo/PhotoContainerController.java",
+      "bytes": 4390,
+      "sha256": "dd15f9796aff76fda8862954100d49398e8182e5f0483ec0427b7017ad06fbd1"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/activity/photo/PhotoGalleryController.java",
+      "bytes": 2469,
+      "sha256": "ab763e74381f06ca6364b4d71e81345ced2296a817162da042d5944cb660fb83"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/activity/photo/PhotoItemController.java",
+      "bytes": 1021,
+      "sha256": "12b7466839149b09b7600e2983cc58e8018a27f5e406897ea0070c5548aa5a76"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/activity/photo/PhotoPlaceholderController.java",
+      "bytes": 428,
+      "sha256": "3a6ba49eec694dcc12e6ee6c905ba1529d9c053de95a5dd670d9561654502962"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/activity/reviews/ResponseItemController.java",
+      "bytes": 1725,
+      "sha256": "ac390da05799f20134e3359e872e5a61e5cf270c3611680eb31aa3eb00eed445"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/activity/reviews/ReviewController.java",
+      "bytes": 4757,
+      "sha256": "cf8ddd76217c3ae8fd4dff180b80134934d1d4f114159b04ac50ed8991c4e530"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/activity/reviews/ReviewItemController.java",
+      "bytes": 7233,
+      "sha256": "d56785226e68d730b421529505c212bd88f19f7bc052a16f1f5ab4fbbdcd0890"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/activity/reviews/ReviewsContainerController.java",
+      "bytes": 6171,
+      "sha256": "6cc311f34ddf9859b2add1325456eb91a5eee4794213cafa0408b33178ba4595"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/chat/ChatController.java",
+      "bytes": 33490,
+      "sha256": "8afa67b846092d37e37146caa1a2059ccd74f664c18afead259489353404fcb8"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/common/LoadingOverlayController.java",
+      "bytes": 2775,
+      "sha256": "1a92d2a98a96d009595056ad94b082a9a109d0c412c3b542b06a714f120ffa6a"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/common/NavbarController.java",
+      "bytes": 42073,
+      "sha256": "1d974b0c7e0614f43a321608c629a58ecab54cae7db9a17911f93a6b0afd96c2"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/common/SplashScreenController.java",
+      "bytes": 6989,
+      "sha256": "70a3d885f662635f4a875ced95a588a72c66c195385feefdabc8e87dc6f27c94"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/common/SupportController.java",
+      "bytes": 6780,
+      "sha256": "8bbc8443f7af02c601e9e21ab07deea7ff22ca685e782cf89059a2b20656b536"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/home/ExperienceCardController.java",
+      "bytes": 11867,
+      "sha256": "ee08fd7a299aea19be0329fcce71f571663a8cc8e7227ce20dd2cb8a67d194ef"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/home/ExperienceListController.java",
+      "bytes": 15532,
+      "sha256": "8f7f832d1ab73657d29dbd4bb88756047d374a25b64e44ae811681704b861ab8"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/home/MainViewController.java",
+      "bytes": 2759,
+      "sha256": "ed0acdbc25ab340ea4ee1c7ffd69b969985f73b335f30a216cfafd23a95756eb"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/home/SearchBarController.java",
+      "bytes": 10529,
+      "sha256": "8215152bd456dc8b0deea9e53010b6e39a52ccac5c19c2785e4a870512009f6e"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/login/AuthWizardController.java",
+      "bytes": 3998,
+      "sha256": "349f7c5f9df3da0115b3dbc834bdd4646548ac65c2fe279b8130c4ea79275c95"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/login/FeedbackOverlayController.java",
+      "bytes": 695,
+      "sha256": "bac87d89d2888cd727ccc8a0c31866e8bd87a267f49fe054a0a9cda464846b92"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/login/ForgotPasswordController.java",
+      "bytes": 2817,
+      "sha256": "d49d6dc13121d8d183a27cfc690840f13078a84455192c2712e2e93da9af6f4e"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/login/LoginStepController.java",
+      "bytes": 5719,
+      "sha256": "fcdc39137bd0fa73ecb3b34715b8147be3157529c68955120fce81167381763a"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/login/RegistrationStepController.java",
+      "bytes": 4669,
+      "sha256": "6498757000b4805151616d1dd0b0e4832585acf764f6aa8de7835d0d65442739"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/login/RoleSelectionStepController.java",
+      "bytes": 613,
+      "sha256": "0c2d2bcf9a607372842af104b38554127f738e36a2d754e2c4a95b2a0175b071"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/organizer/AttendeesController.java",
+      "bytes": 8720,
+      "sha256": "7db1d10cba4359fb365ee5052d9fdadb024d45def0e4ad278ee5cf39b88b8263"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/organizer/CreateOfferController.java",
+      "bytes": 38832,
+      "sha256": "bcb90aa3a3ffecd0ae0ccc8506e74b88f17968ccb547cd588dcc014d42930137"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/organizer/EventsController.java",
+      "bytes": 285,
+      "sha256": "61a209f953d839f857e59b66ecf6c1f970f8f98b2d04a09f40bcb449284e50a8"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/organizer/OrganizerDashboardController.java",
+      "bytes": 17771,
+      "sha256": "fc6c4b728d083452e7d8e85d0c69532e45ec55a532beab3d7cfe55dc003409c4"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/profile/DashboardViewController.java",
+      "bytes": 2245,
+      "sha256": "4b2439086e4f711b501e727023b764aa2e324ece353b5d153fc0f0ed1960a4df"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/profile/PaymentMethodsController.java",
+      "bytes": 15213,
+      "sha256": "7ba0449421e1a2d7d982880feae32a3b54aea1c04b82e397eda4c157d4cf5c7b"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/profile/ProfileController.java",
+      "bytes": 21032,
+      "sha256": "f53c13809dec5b96f8a5c8df59638fe99dc111d6d1d31730007a884f0b112dba"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/profile/ProfileDashboardController.java",
+      "bytes": 206,
+      "sha256": "b991e3e3840b642bc62b0123725b9caed2320b10ca368d88ec9ad9e5221333e2"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/profile/SettingsController.java",
+      "bytes": 8340,
+      "sha256": "dabc9ce596d8e4f6c30e5803254585b9d33d59ffc9eef4b4ffd851737f2907eb"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/traveler/BookingHistoryController.java",
+      "bytes": 30647,
+      "sha256": "175730760e7f07de6603345e9b901bd1dc86327f28a9184e56e3863069d9ba3a"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/traveler/BookingsController.java",
+      "bytes": 21051,
+      "sha256": "538632dce1d7a2ec0488bbbfd32b40954d60fc4e0fd1cc379c9cef49af99e146"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/traveler/CollaborativeItineraryController.java",
+      "bytes": 10586,
+      "sha256": "14398af9b1464ec7eeb00ecd3c03dc313bc85fce470e20becbdd8b578e33b5e2"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/traveler/FavoritesController.java",
+      "bytes": 42563,
+      "sha256": "6f72e354eabf6dbcd7fe5369994ef62173784ef2037d5c322638a6003f16e660"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/traveler/ListSharingPopupController.java",
+      "bytes": 15278,
+      "sha256": "8e2a32e2790f780407db9784b3331921e74337aa68a105b516cb738809d46c77"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/controller/traveler/TravelerDashboardController.java",
+      "bytes": 38677,
+      "sha256": "6b2d410860862a34088884d8227a980ea1e8e14e63b69a98058565c9c835721b"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/dto/activity/ActivityDTO.java",
+      "bytes": 1029,
+      "sha256": "e42e76f661b54cc81a0a418fc052c8d541bb54252e0388130aefa7180a037e57"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/dto/activity/ActivityImageDTO.java",
+      "bytes": 371,
+      "sha256": "ddd821767139c93fae2c5ae0ea2ed017081c52813f621ab3d056dfa5685c0523"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/dto/booking/BookingDTO.java",
+      "bytes": 1283,
+      "sha256": "92bbe088773096b9341ce52c0f0892d115a488ac0681261d2b3c74276b8aaeb7"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/dto/favorites/FavoriteDTO.java",
+      "bytes": 442,
+      "sha256": "7b81d0c3bb0ad08514dd28036c911ac68ee413d44a080912d649260a626f8e67"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/dto/home/ActivityHomeDTO.java",
+      "bytes": 479,
+      "sha256": "67e93fbd8719f8cc2e75643dba7eb189a04ecab300353f7720a593bdc3e20e6a"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/dto/home/ActivitySuggestionDTO.java",
+      "bytes": 333,
+      "sha256": "1144bfe91469160836f88af4d95ba57981a62a529eab4321fed38425677446c5"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/dto/home/TripHomeDTO.java",
+      "bytes": 492,
+      "sha256": "ca16e5d38e90128d3aa035f2eb406df8f1cc8e37db3c8b8bc256a503945ab9f9"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/dto/home/TripSuggestionDTO.java",
+      "bytes": 299,
+      "sha256": "e191bcb62de9e989b008dcd54a79dcfcd9efe37013cf9ad4cb1c87e3851235e4"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/dto/review/ResponseDTO.java",
+      "bytes": 492,
+      "sha256": "24026f21d898ad7b20efb1ba1122c832b54b5dfaa6d3b1b2a810de89d16752b4"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/dto/review/ReviewDTO.java",
+      "bytes": 613,
+      "sha256": "5a1a4fe753a98216494fb7ee313b8263f470c7659502a9e8a8fadad4c537401a"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/dto/trip/StageDTO.java",
+      "bytes": 922,
+      "sha256": "ce14d07fbbc3b263c879ae9e314c8e30de981fe93c2326dafdc15dc231ea389e"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/dto/trip/TripDTO.java",
+      "bytes": 1057,
+      "sha256": "3aed9c1e986e4b853cdbae2ace4582235a0aa78fe4fc49e56b73f7837c6ec14d"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/dto/trip/TripImageDTO.java",
+      "bytes": 359,
+      "sha256": "537b947e5aa4f319e60e2e0498f472361004db2b475073a25bbb54f0fff6b83c"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/dto/user/UserDTO.java",
+      "bytes": 652,
+      "sha256": "1394fc2a5db69cd36b1ce821c33d776ea69909b95ba451772b9ba59251b70b88"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/error/AppErrorCode.java",
+      "bytes": 1008,
+      "sha256": "ece6fd7967c6b2570f2684c4d04a21cd90ec3ed4b1d3cc80caa2447a205d611e"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/lifecycle/SingleInstanceLock.java",
+      "bytes": 4324,
+      "sha256": "24578d8ac981c8a5fc8743b5e38999fe3e0a509ce7ebc94ee4bf326f18c08e90"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/navigation/SceneNavigator.java",
+      "bytes": 3809,
+      "sha256": "e124f53fa19b94d34283c9d81b1a8852de8251d91b6dd0df6da942431e264c5c"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/navigation/StepNavigator.java",
+      "bytes": 373,
+      "sha256": "7d3ebda12848a13a240ca64145a238d6cf99acd53984846d0682760fcb14a434"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/security/PasswordPolicy.java",
+      "bytes": 438,
+      "sha256": "c0a2afb352e7a76c8bbfe8ca2ca7bce3ca3eee1434c67bd5ec84df7cfb699ac4"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/security/TlsSupport.java",
+      "bytes": 3562,
+      "sha256": "7112160b36d56f6611e2865e341c979985802511c35ecd3e1cf7e9f0f451a64f"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/security/TokenStorage.java",
+      "bytes": 770,
+      "sha256": "9dd4af2c68d45d7867879b7f80c2444f6f8a64539baf56d7ea35a1cf9bf18121"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/security/UserSession.java",
+      "bytes": 1973,
+      "sha256": "6a7484216f5c89b7d37e81b5e57ffe3fe77c652061a186e3e41f6e9328b24322"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/service/api/ApiService.java",
+      "bytes": 23481,
+      "sha256": "3a42da30b6f4e383cfc55d3fcaf42030e6d620e26a3d09002d981f93ef3d5fc3"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/service/chat/ChatEventHub.java",
+      "bytes": 1960,
+      "sha256": "97aeada5e78357a03bcfbd4b0a345497aaa3ebccf1876e89ffb56911896145ae"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/service/chat/ChatStream.java",
+      "bytes": 7108,
+      "sha256": "0204bd34a62b60bb8921517bf35134fe9485c1363b3c2f5b32e734c0695dc55e"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/service/favorites/FavoriteService.java",
+      "bytes": 2124,
+      "sha256": "0605266db7389f8a2f991f0694e300d24b92a0a04a36077e68630682da70f1ec"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/service/media/WallpaperService.java",
+      "bytes": 9939,
+      "sha256": "bf41744667f35d07370e20c4cf713679ae599f0e320dfb485376273b2a642389"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/service/notification/NotificationPollingService.java",
+      "bytes": 12103,
+      "sha256": "2f063ca4053157d435e3920b0369c2d8925b6586f01c3954fe9311030854a462"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/service/review/ResponseService.java",
+      "bytes": 1767,
+      "sha256": "625aecb238e3d9176833510de90be8ce15d7e0142bb464601ae08af680572812"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/service/review/ReviewService.java",
+      "bytes": 2737,
+      "sha256": "57e9374b44f69f7b48439b807f42b56376c36d6c2fecd770a4d7fb3b674fafa0"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/ui/BookingPresentation.java",
+      "bytes": 9549,
+      "sha256": "fb8d46e2d1bb93f7cde9fbdfe0c0b538d0e4052c9a2645a4c22b3d29f4da76ea"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/ui/TableSupport.java",
+      "bytes": 982,
+      "sha256": "3ee627007981ca049fc74424b5f1e7993abc8e560d7167ce1607332fe4913bd5"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/ui/UiText.java",
+      "bytes": 730,
+      "sha256": "edae8de1febac151fad3aaacb22cb5cb953054c204abcb22d1a10c7de798acc3"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/ui/ViewSupport.java",
+      "bytes": 2337,
+      "sha256": "2b66800db98f3bd0b7e0790f75918780423d9c9b0c87853bebdb489a2f8ef899"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/ui/animation/NavIndicator.java",
+      "bytes": 4585,
+      "sha256": "f5ac9abf965846423fe8920d8f0b3ff84c43132f631e8effdd76ae28d66e350f"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/ui/animation/PageTransitions.java",
+      "bytes": 1697,
+      "sha256": "b2caa0c261d177502b0e70129cbb9c23d6e89ceaa6e5a0c8ba628ddbcc02ea44"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/ui/animation/PageViewportFade.java",
+      "bytes": 1834,
+      "sha256": "f37a0f8253dfd45703bb3ffd33f00f1c1a21245a27b197e3fd5e36aedb465c31"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/ui/animation/UiEffects.java",
+      "bytes": 18828,
+      "sha256": "6ad51330cb56f3faaaf24ad247645c6e9247511a8b040ed4f78432c96d51d78d"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/ui/background/BackgroundHelper.java",
+      "bytes": 5106,
+      "sha256": "494241fe8b1bbd695a208eddeb6388f4cf45125391e21cdd447370a28fb0303b"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/ui/chart/OrganizerEconomy.java",
+      "bytes": 4592,
+      "sha256": "010745b6b9bb225d93632a1a3e1a327a9da32c11744ce9d2fcda9da68b726eb7"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/ui/control/PageNavigation.java",
+      "bytes": 3266,
+      "sha256": "6cbf6562907fa31d5eb452b631047f9eb51d55902b355f2687c69dda1b7fc61f"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/ui/dialog/FullscreenPhotoViewer.java",
+      "bytes": 1040,
+      "sha256": "401097c6b834a52ea470ed1c0811f69e66b838142432bd17a8345cd9711db53b"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/ui/dialog/PopupFactory.java",
+      "bytes": 16189,
+      "sha256": "4b1b8c4599d6651050cfe2abbdeea36d6710989bdd20f1db279e51b09b2854cc"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/ui/file/NativeFiles.java",
+      "bytes": 2209,
+      "sha256": "b485ddb1ff8e4a5f3ed67bcfa94c544e8548f62685a45b12e39a6b55f32be88d"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/ui/loading/LoadingRing.java",
+      "bytes": 4609,
+      "sha256": "2e468331a67b8eee04bd434119f759647da00f7bbf70e2b44b57498d7cef0b22"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/ui/map/MarkerLayer.java",
+      "bytes": 1241,
+      "sha256": "eaf36e007a097cc3a6deade93cbf655fd233a3344bb008dfaf667ce679bccd91"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/ui/payment/MockCheckoutDialog.java",
+      "bytes": 4308,
+      "sha256": "5d0ed6144ba4671a731db117500dd0c90c1d5062ce6866dca5d7cb9df5bfcc93"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/ui/scroll/ScrollSupport.java",
+      "bytes": 1211,
+      "sha256": "ccaae47f126640ea5955eb72c6e414485765f97a7940b8591686cc3e24d8b222"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/ui/scroll/SmoothScrolling.java",
+      "bytes": 5836,
+      "sha256": "f94d6a4288c8778e281c0e00cffbb0810d47a4cb20db6a8e8409eacbcd64abe9"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/ui/scroll/StickySearch.java",
+      "bytes": 9033,
+      "sha256": "7486b1dd3d2fae2c48bf403c02192d84baff08bc0edb6984d032da1112b661de"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/ui/text/EmojiText.java",
+      "bytes": 1960,
+      "sha256": "0833b7262e9e42a7e06f110e16b52fe5e0fa02259d561b8555c5a3cb647aa169"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/util/DateTimeUtils.java",
+      "bytes": 568,
+      "sha256": "fac0af9d76e456e3d08ecfaa67f6b52f235ca5acc2018f2b24b65f913f771e31"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/util/ImageUtils.java",
+      "bytes": 598,
+      "sha256": "5545c579b2ea4979f1b9eeef0cc03dfb01e070f269ba1caf026def8933c5535f"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/it/unical/ea_project_javafx/util/JsonCodec.java",
+      "bytes": 4021,
+      "sha256": "36bff15a6559ba9a66c489dcb716e094b46d15a3ddd09d562f51681537c62a02"
+    },
+    {
+      "path": "ea_project_javafx/src/main/java/module-info.java",
+      "bytes": 1854,
+      "sha256": "acef66a40ad7f4e67654540e673a2a6dbf54ccda74d6dbd2daa35c3c692c8e22"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/certs/dev-ca.crt",
+      "bytes": 1074,
+      "sha256": "e34bfa2534c6d76112f3632c164246ac49df4fb2e2e099fcd24ab92c874ab16b"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/css/activity/activity-common.css",
+      "bytes": 2113,
+      "sha256": "ab6b560096817db28c51ad05f5ea8310cb3f9dbf5907c4d4993b1e6652133a41"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/css/activity/activity-details.css",
+      "bytes": 6970,
+      "sha256": "f033fc3482ac1699d6b0dcacf47236410327738544eb6d580f0b96c5f3213ff7"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/css/activity/itinerary.css",
+      "bytes": 397,
+      "sha256": "7b3473b58ec1b480474db502a1b65c1e4a76e1438b3c8057e7580a823d53ae28"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/css/activity/photo/photo-gallery.css",
+      "bytes": 502,
+      "sha256": "310527278cc230eb0c4c4aa56bf5ea7d5f731daa0a6c362dfe62964cae0ac5e3"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/css/activity/photo/photo-style.css",
+      "bytes": 785,
+      "sha256": "3d7e110f5441d3b3a5387173981c38d273a8754daa6aab903c381ef520d26795"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/css/activity/reviews/review-item.css",
+      "bytes": 3496,
+      "sha256": "b34c5177412504e2b61a1675f8554849a84462b31f072bb17a06776225ba7637"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/css/activity/reviews/review-response.css",
+      "bytes": 350,
+      "sha256": "2f82d5c46309414fe3d43ccc2462b15fcb79dce36c9b424ac781348cdde5ae09"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/css/activity/reviews/review.css",
+      "bytes": 2944,
+      "sha256": "c2670bdafdf34bca58cdcd59f43f8db97993066c5d6229c4a2f17b5685bb9e0e"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/css/chat/chat.css",
+      "bytes": 4487,
+      "sha256": "3ee11b28428e87886dbd456f5141a421aa5f08e1720e1dcf710369b2cc4d2194"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/css/common/loading-screen.css",
+      "bytes": 557,
+      "sha256": "28e75a31a0b8652854fe31271ffee56e2c34144bc505e6aa6c6550a5d070052e"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/css/common/motion.css",
+      "bytes": 1248,
+      "sha256": "bb33011d293752ac33fb0f7ec584209f6c309b8b4fe7335c0831a4d6d5723c53"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/css/common/notifications.css",
+      "bytes": 4166,
+      "sha256": "e39e37a07709a006bb2c33a05a757d74df32a547aff6d36e461990dcfd4f3cf6"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/css/common/splash.css",
+      "bytes": 471,
+      "sha256": "78470493bb67ec1ca343c3c46da5cfc080a6af93299983b03323f04265905c5a"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/css/common/style.css",
+      "bytes": 38579,
+      "sha256": "802668e54d895e7d4f6999fc9c8b7a67d47655d09755f377f2d768d8eaceebf7"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/css/home/experience-card.css",
+      "bytes": 1605,
+      "sha256": "be39345fe388a723c3b867dae7ea30df7515d806f28c01623ad1c1c1cb497904"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/css/home/home.css",
+      "bytes": 2483,
+      "sha256": "84f311c8c0560ace4a3a346d39452339d2705fff3723b4b64372c9ac91900209"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/css/login/login.css",
+      "bytes": 4790,
+      "sha256": "2cafdab9c4025f8c97859effc250f8c5e9c6e91867dbc27ac807d18aeb1c0ac7"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/css/organizer/create-offer.css",
+      "bytes": 2656,
+      "sha256": "66bcc2af57f2ae10fc5f403e9976c22c5460e25f9ddd4e8bf154b1ea79ecb2ed"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/css/organizer/organizer-dashboard.css",
+      "bytes": 946,
+      "sha256": "ddc2ab70a7d4a22bf007f550a89afba546b4dc33d4600570ffbcb3294af34eea"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/css/profile/profile.css",
+      "bytes": 2450,
+      "sha256": "636ab44905846736c6496e3fb4409e68e43a5e47c366ca0d180454b36a25f56c"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/css/traveler/booking-history.css",
+      "bytes": 5915,
+      "sha256": "67bb662ba3315face1d5d23ebb13dfb10a5a913f09552d294b796acc12d71272"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/css/traveler/bookings-export-popup.css",
+      "bytes": 2142,
+      "sha256": "08b2d5395184c8de7a23d94890b58efe01033704aefcf5630f586cb6858489e0"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/css/traveler/collaborative-itinerary.css",
+      "bytes": 3989,
+      "sha256": "0849633a88553f70ce9127be4919cbb2079ce53785571f25059605c5486b99a2"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/css/traveler/favorites.css",
+      "bytes": 17947,
+      "sha256": "98994f0624391221551bb2db169cc06e39a0d0adb5bef38938856b9f2c978a3d"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/css/traveler/list-sharing-popup.css",
+      "bytes": 4005,
+      "sha256": "40b7642e127e056df6f8c93b38672fdae0c12d4456bde58b0345ec74b0039b41"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/css/traveler/traveler.css",
+      "bytes": 19063,
+      "sha256": "ffb1bf1906ae4c4dd331f4157f907eb45584e0202f4e5b8fb82a387fa5072581"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/activity/activity-description.fxml",
+      "bytes": 1489,
+      "sha256": "3ab0d3f73baa79d562138e74023c50c3e4057dffabdeb8231ecec7fc075bd2d5"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/activity/activity-details.fxml",
+      "bytes": 16229,
+      "sha256": "abe79eb3c160fe4435d15e89a68cd60a53214557f3eb5fab77526b1e3cb8dd64"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/activity/itinerary.fxml",
+      "bytes": 1642,
+      "sha256": "da6d6662599bc804a9481314152e86221fb6b90ff8d2ad9973c2c5d9720bd596"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/activity/photo/full-screen-photo-view.fxml",
+      "bytes": 997,
+      "sha256": "3f2dfc9aa47b99474687620e84627d0d59e97265f28cb07db6dc06b9ec91e2a6"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/activity/photo/photo-container.fxml",
+      "bytes": 593,
+      "sha256": "0dfcd07b16cba293af88bfd12bc57e5df4604ba37a8000f2b504f8c5cdc01ca8"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/activity/photo/photo-gallery.fxml",
+      "bytes": 5084,
+      "sha256": "2e0fdd0eaba392533dbc91f899eaa9d47fffc3471842bab13a7c7eb138854b42"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/activity/photo/photo-item.fxml",
+      "bytes": 653,
+      "sha256": "58d2512e6492d4794a42bc04c815128bc35816288c9d8cf869275031f958a4ea"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/activity/photo/photo-placeholder.fxml",
+      "bytes": 791,
+      "sha256": "cae828f79eb5ec3dff188f0fb94f29cfac6d1022751b117742c92c9aafe42fa4"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/activity/reviews/review-item.fxml",
+      "bytes": 3187,
+      "sha256": "ed6cc8317c70e0fd8527d8c2c564576e2668bf1133af1f9f633b83ece7f7e709"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/activity/reviews/review-response-item.fxml",
+      "bytes": 1305,
+      "sha256": "40aa1a84c2f75b676ff3639bd6905b2f0e291054038157c6df91813bf91cba8a"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/activity/reviews/review.fxml",
+      "bytes": 3212,
+      "sha256": "b11f88fc5997d5d47acf77d93eb44810ed258a7bfd84ed8dca9c74060af16874"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/activity/reviews/reviews-container.fxml",
+      "bytes": 2017,
+      "sha256": "23d371b4d9c8a28592c295534425c75dab8440a80b8239e0db8565d6636c5c04"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/chat/chat.fxml",
+      "bytes": 6569,
+      "sha256": "6576a5cea286a251410caa4570a3a008847cf3459667b0cc68673758580ab938"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/common/loading-screen.fxml",
+      "bytes": 1207,
+      "sha256": "598554dbe74595b16d18cd61738c4d1ab91fe54838808f7223e233a42af79415"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/common/navbar.fxml",
+      "bytes": 6461,
+      "sha256": "df1f4cf6feee7d7829b29b922c86c98042bb53a634eb193f35ce687bcdf8f72b"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/common/splash-screen.fxml",
+      "bytes": 1699,
+      "sha256": "fb0735e20516f48ec5567651fa70dc0a7f963f732c671fcc521eb9d01b638915"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/common/support.fxml",
+      "bytes": 7587,
+      "sha256": "3f0a83758be027a7661aba42fdbf5b77cb3dd5141144f43be04b72195845bfc9"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/home/experience-card.fxml",
+      "bytes": 2868,
+      "sha256": "8bbc201c40f59d62cc70cce1829aee2c4eacbc15549573180833cdfc22252271"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/home/experience-list.fxml",
+      "bytes": 2543,
+      "sha256": "b596b38e4b198d028ce507ce52167cae2977397437181283d1a749dc94d6d9e3"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/home/mainview.fxml",
+      "bytes": 1908,
+      "sha256": "2ed3a5ba6cd23740d68605db0b04f07825ae36ef296969f9c4dea696b6711fa2"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/home/search-bar.fxml",
+      "bytes": 3128,
+      "sha256": "9fc9e35e4fc35c11bd485088fd9b05f2592a1cad735854aa89d9b22654d5c73f"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/login/feedback-overlay.fxml",
+      "bytes": 742,
+      "sha256": "8f7b7136d1d1b68435c14d79813d0d01ec20592b888a5b9e8205f41497d0b451"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/login/login.fxml",
+      "bytes": 1754,
+      "sha256": "6e6420352afafda5c9a38e36d368fc67242d485b78dfbd1901cde89ea0ec0920"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/login/step-details.fxml",
+      "bytes": 2661,
+      "sha256": "15cc3d7f9522b5dea5da32e8ea944330baad23375694096a808a26129180f8ab"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/login/step-forgot-password.fxml",
+      "bytes": 1152,
+      "sha256": "af39ff87c28b1e2602022d00fb412c7030426d54c66d41c66699238820a6b651"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/login/step-login.fxml",
+      "bytes": 2476,
+      "sha256": "8ce5bac81805400d60adea9ea336b8d23106a78d2a8054da01b725863b3479a8"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/login/step-role.fxml",
+      "bytes": 1165,
+      "sha256": "6cc3255e4c5c2fc711744a547d27120204d93e3fab4501807c446fba3100da15"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/organizer/attendees.fxml",
+      "bytes": 5114,
+      "sha256": "1c18e1738bdc18aedc8ac64e34f382a2413625f12bd06241a9c489c878b29bce"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/organizer/create-offer.fxml",
+      "bytes": 19340,
+      "sha256": "5c0b92b0afeda3a0b7d736e8238586b2015a5b7dc3c298b754da13a5243f9c22"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/organizer/events.fxml",
+      "bytes": 4153,
+      "sha256": "f68cb702ffacbd4ea315fa45ea66be6b2bf05a1ec73c54c564108b8bf9588564"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/organizer/organizer-dashboard.fxml",
+      "bytes": 5797,
+      "sha256": "74586af180a73e299a5b07b8fafb3896d67af881aa5447e53d720dd06298fb44"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/profile/dashboard-view.fxml",
+      "bytes": 1484,
+      "sha256": "c4c974e2f612e9a40f859bd16feeedacdeb364455bf742d0dfe85ca2ad738f30"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/profile/payment-methods.fxml",
+      "bytes": 12781,
+      "sha256": "4215a31fc51fbd0da6a70fcf3b308c786d61b24e8e9ed84bcb32c38a5adb7480"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/profile/profile.fxml",
+      "bytes": 6685,
+      "sha256": "7381a22aeda2899f64e19b79a4077c15117a3845f86ba3e7353693ffc0baae46"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/profile/settings.fxml",
+      "bytes": 7936,
+      "sha256": "0a569e1906d86cff55b4dc5ffe8a1e71efb3642e7494718780d289aef4aec5f2"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/traveler/booking-history.fxml",
+      "bytes": 5160,
+      "sha256": "49abcc803d5e93727b2027c2d76276d5b35d7aace19873de7f89b5c23923d4d2"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/traveler/bookings.fxml",
+      "bytes": 6849,
+      "sha256": "452e60646803a9066c294581fcc675a7fbbe09472d79d787fe345a3b7e1e1dd4"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/traveler/collaborative-itinerary.fxml",
+      "bytes": 7190,
+      "sha256": "8a46b2aeb49dc226dca67cafc37c2710dfe47cd198333358bf4b508b95b7eace"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/traveler/favorites.fxml",
+      "bytes": 15557,
+      "sha256": "06499afcb03da595f911d88d0b0af8af53f2fbd696ee1d97e76714fd040067d0"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/traveler/list-sharing-popup.fxml",
+      "bytes": 3800,
+      "sha256": "bf379731ef94be5adc4874f8de6fe4884c101615a05b69d468e213e04ed4761d"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/fxml/traveler/traveler-dashboard.fxml",
+      "bytes": 9593,
+      "sha256": "85a16d027838e56b36979d69c66edfb49c4d401cb3390025295acde2b1fd75ce"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/images/experience-fallback.jpg",
+      "bytes": 896974,
+      "sha256": "71538327bf0e13de8ff1eb75e21afad00ecc302f4fb6aaced27f9735f1a709f7"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/images/logo_448x448.png",
+      "bytes": 26884,
+      "sha256": "5e0b2e4156ae0832813f038694eaba41ee9e5e225fa947c3409f9084d2f7c5e7"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/images/monogram_icon.png",
+      "bytes": 961197,
+      "sha256": "3ea738667cc4ae70d6c536a741f2b893c79fd66600a27c462f34cc0f366c4228"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/images/monogram_render.png",
+      "bytes": 308586,
+      "sha256": "351324e2716ee49d6069c1677a221f7b41b6f622f9c86d912464edfd9788de5f"
+    },
+    {
+      "path": "ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/images/sad-dino.png",
+      "bytes": 81507,
+      "sha256": "a3ec5844475db9800680b271f7b41860766a5be0ef0d682ae91f45fa2d72b6c9"
+    },
+    {
+      "path": "ea_project_javafx/src/test/java/it/unical/ea_project_javafx/service/api/ApiServiceMultipartTest.java",
+      "bytes": 3306,
+      "sha256": "6dad9ffba5c46ac266f683b3d52fd6172297656e15010e34bfc19cd73860f96c"
+    },
+    {
+      "path": "ea_project_javafx/src/test/java/it/unical/ea_project_javafx/service/media/WallpaperServiceTest.java",
+      "bytes": 3541,
+      "sha256": "3017660b2858226dd1a1d37c827003cd3f1182199daf24d0afdea7ee076a5fb1"
+    },
+    {
+      "path": "scripts/setup-local-env.py",
+      "bytes": 806,
+      "sha256": "d2250ed797338315688635f2880828f66e080090959f548138e0146051c6fe24"
+    },
+    {
+      "path": "scripts/verify-backend.py",
+      "bytes": 9642,
+      "sha256": "192e68b8a9d0c1f9136a04cac909d5beeedb076bd1e601303f12b34dd74c39c9"
+    }
+  ]
+}

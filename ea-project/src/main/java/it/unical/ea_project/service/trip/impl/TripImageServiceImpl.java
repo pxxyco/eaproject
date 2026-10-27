@@ -28,7 +28,7 @@ public class TripImageServiceImpl implements TripImageService {
     @Transactional(readOnly = true)
     public List<TripImage> getImagesByTripId(Long tripId) {
         if (!tripRepository.existsByTripIdAndDeletedAtIsNull(tripId)) {
-            throw new RuntimeException("Viaggio non trovato con ID: " + tripId);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Viaggio non trovato.");
         }
         return tripImageRepository.findByTrip_TripIdAndTrip_DeletedAtIsNullOrderByOrderIndexAsc(tripId);
     }
@@ -47,7 +47,7 @@ public class TripImageServiceImpl implements TripImageService {
 
     private List<TripImage> uploadPhotos(Long tripId, Long organizerId, List<MultipartFile> files,
             boolean makePrimary) {
-        Trip trip = tripRepository.findByTripIdAndDeletedAtIsNull(tripId)
+        Trip trip = tripRepository.findActiveForUpdate(tripId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Viaggio non trovato."));
         if (trip.getCreatedBy() == null || !Objects.equals(trip.getCreatedBy().getId(), organizerId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Non puoi modificare le foto di questo viaggio.");
@@ -55,6 +55,8 @@ public class TripImageServiceImpl implements TripImageService {
         photoStorageService.validatePhotos(files);
 
         List<TripImage> existingImages = tripImageRepository.findByTripOrderByOrderIndexAsc(trip);
+        if (existingImages.size() + files.size() > 50)
+            throw new IllegalArgumentException("Un'offerta può contenere al massimo 50 foto.");
         for (int index = 0; index < existingImages.size(); index++) {
             existingImages.get(index).setOrderIndex(index + (makePrimary ? 2 : 1));
         }
@@ -81,6 +83,9 @@ public class TripImageServiceImpl implements TripImageService {
         TripImage image = tripImageRepository.findById(imageId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Foto non trovata."));
         Trip offer = image.getTrip();
+        if (offer != null)
+            offer = tripRepository.findActiveForUpdate(offer.getTripId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Offerta non disponibile."));
         if (offer == null
                 || offer.getDeletedAt() != null
                 || offer.getCreatedBy() == null
@@ -95,6 +100,7 @@ public class TripImageServiceImpl implements TripImageService {
         }
 
         tripImageRepository.delete(image);
+        photoStorageService.deleteOfferPhoto(image.getImageUrl());
     }
 
 }

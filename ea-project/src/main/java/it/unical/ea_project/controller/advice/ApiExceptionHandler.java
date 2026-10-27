@@ -26,8 +26,13 @@ public class ApiExceptionHandler {
         body.put("status", exception.getStatusCode().value());
         body.put("message", exception.getReason() == null ? "Richiesta non valida." : exception.getReason());
         var response = ResponseEntity.status(status == null ? HttpStatus.INTERNAL_SERVER_ERROR : status);
-        if (exception.getStatusCode().value() == 429)
-            response.header("Retry-After", request.getRequestURI().startsWith("/api/chat") ? "30" : "900");
+        if (exception.getStatusCode().value() == 429) {
+            String path = request.getRequestURI();
+            boolean photoUpload = path.endsWith("/photos") || path.endsWith("/cover")
+                    || path.endsWith("/profile-photo");
+            response.header("Retry-After", photoUpload ? "2" : path.startsWith("/api/chat") ? "30" : "900");
+            response.header("Cache-Control", "no-store");
+        }
         return response.body(body);
     }
 
