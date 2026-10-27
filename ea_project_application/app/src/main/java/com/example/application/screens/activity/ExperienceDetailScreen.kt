@@ -136,7 +136,7 @@ private fun ExperienceDetailContent(detail: ExperienceDetail) {
 
             item {
                 when (selectedTab) {
-                    DetailTab.DESCRIPTION -> SectionPlaceholder("Descrizione")
+                    DetailTab.DESCRIPTION -> DescriptionSection(detail)
                     DetailTab.ITINERARY   -> SectionPlaceholder("Itinerario")
                     DetailTab.GALLERY     -> SectionPlaceholder("Galleria")
                     DetailTab.REVIEWS     -> SectionPlaceholder("Recensioni")
