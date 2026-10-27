@@ -23,6 +23,7 @@ import com.example.application.network.UserSession
 import com.example.application.screens.AppErrorDialog
 import com.example.application.screens.home.HomeScreen
 import com.example.application.screens.favorite.MyTrip
+import com.example.application.screens.favorite.LoginRequired
 import com.example.application.screens.ProfileScreen
 
 @Composable
@@ -74,7 +75,7 @@ internal fun MainNavigation(
                 when (current) {
                     AppDestinations.HOME -> homeContent(contentModifier)
                     AppDestinations.`MY-TRIP` -> {
-                        if (user == null) MyTrip(modifier = contentModifier, onLoginClick = {
+                        if (user == null) LoginRequired(modifier = contentModifier, onLoginClick = {
                             returnToPersonalTab = true
                             destination = AppDestinations.PROFILE
                         }) else tripsContent(contentModifier)

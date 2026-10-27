@@ -222,4 +222,17 @@ class OrganizerApiTest {
         mvc.perform(post("/api/trips").header("Authorization", token(owner)).contentType(MediaType.APPLICATION_JSON)
                 .content(offer.replace("\"totalPrice\":25", "\"totalPrice\":-1"))).andExpect(status().isBadRequest());
     }
+    @Test
+    void rejectsReversedStageTimesOnBothTripAndStageCreation() throws Exception {
+        User owner = user("stage-time-owner", User.Role.ORGANIZER);
+        String invalidOffer = offer.replace("\"orderInDay\":1", "\"orderInDay\":1,\"startTime\":\"18:00\",\"endTime\":\"10:00\"");
+        mvc.perform(post("/api/trips").header("Authorization", token(owner))
+                .contentType(MediaType.APPLICATION_JSON).content(invalidOffer)).andExpect(status().isBadRequest());
+        long tripId = create(owner);
+        mvc.perform(post("/api/trips/" + tripId + "/stages").header("Authorization", token(owner))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"title\":\"Museo\",\"category\":\"VISIT\",\"day\":1,\"orderInDay\":2,\"startTime\":\"18:00\",\"endTime\":\"10:00\"}"))
+                .andExpect(status().isBadRequest());
+    }
+
 }

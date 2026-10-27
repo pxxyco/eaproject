@@ -128,6 +128,7 @@ public class CreateOfferController {
     private DatePicker actStartDatePicker;
     @FXML
     private DatePicker actEndDatePicker;
+    @FXML private TextField actStartTimeField, actEndTimeField;
     @FXML
     private TextArea actDescriptionArea;
     @FXML
@@ -404,8 +405,16 @@ public class CreateOfferController {
         description.setPromptText("Descrizione tappa");
         description.setPrefRowCount(2);
         description.getStyleClass().add("custom-textarea");
-        row.getChildren().addAll(fields, description);
-        row.setUserData(new StageFields(title, place, city, day, category, description, null));
+        TextField startTime = new TextField();
+        TextField endTime = new TextField();
+        startTime.setPromptText("HH:mm (facoltativo)");
+        endTime.setPromptText("HH:mm (facoltativo)");
+        startTime.getStyleClass().add("custom-input");
+        endTime.getStyleClass().add("custom-input");
+        HBox times = new HBox(8, new VBox(4, new Label("Ora inizio"), startTime),
+                new VBox(4, new Label("Ora fine (stesso giorno)"), endTime));
+        row.getChildren().addAll(fields, times, description);
+        row.setUserData(new StageFields(title, place, city, day, category, description, startTime, endTime, null));
         stagesContainer.getChildren().add(row);
     }
 
@@ -426,8 +435,10 @@ public class CreateOfferController {
                 fields.day().setText(String.valueOf(stage.getDay()));
                 fields.category().setValue(stage.getCategory());
                 fields.description().setText(valueOrEmpty(stage.getDescription()));
+                fields.startTime().setText(stage.getStartTime() == null ? "" : stage.getStartTime().toString());
+                fields.endTime().setText(stage.getEndTime() == null ? "" : stage.getEndTime().toString());
                 row.setUserData(new StageFields(fields.title(), fields.place(), fields.city(), fields.day(),
-                        fields.category(), fields.description(), stage));
+                        fields.category(), fields.description(), fields.startTime(), fields.endTime(), stage));
             }
         stepChoose.setVisible(false);
         stepChoose.setManaged(false);
@@ -475,6 +486,8 @@ public class CreateOfferController {
         actMaxSeatsField.setText(activity.getMaxSeats() == null ? "" : String.valueOf(activity.getMaxSeats()));
         actStartDatePicker.setValue(activity.getStartDate() == null ? null : activity.getStartDate().toLocalDate());
         actEndDatePicker.setValue(activity.getEndDate() == null ? null : activity.getEndDate().toLocalDate());
+        actStartTimeField.setText(activity.getStartDate() == null ? "09:00" : activity.getStartDate().toLocalTime().toString());
+        actEndTimeField.setText(activity.getEndDate() == null ? "10:00" : activity.getEndDate().toLocalTime().toString());
         actDescriptionArea.setText(valueOrEmpty(activity.getDescription()));
         actNotesArea.setText(valueOrEmpty(activity.getNotes()));
         activityCoverFile = null;
@@ -571,12 +584,9 @@ public class CreateOfferController {
             payload.put("category", activityCategoryValue(actCategoryCombo.getValue()));
             payload.put("placeName", actPlaceField.getText().trim());
             payload.put("city", actCityField.getText().trim());
-            payload.put("startDate", start.atTime(activityToEdit != null && activityToEdit.getStartDate() != null
-                    ? activityToEdit.getStartDate().toLocalTime()
-                    : LocalTime.MIDNIGHT).toString());
-            payload.put("endDate", end.atTime(activityToEdit != null && activityToEdit.getEndDate() != null
-                    ? activityToEdit.getEndDate().toLocalTime()
-                    : LocalTime.MIDNIGHT).toString());
+            var period = OfferSchedule.activityPeriod(start, actStartTimeField.getText(), end, actEndTimeField.getText());
+            payload.put("startDate", period[0].toString());
+            payload.put("endDate", period[1].toString());
             if (activityToEdit != null) {
                 payload.put("latitude", activityToEdit.getLatitude());
                 payload.put("longitude", activityToEdit.getLongitude());
@@ -775,11 +785,15 @@ public class CreateOfferController {
                 stage.put("country", original.getCountry());
                 stage.put("latitude", original.getLatitude());
                 stage.put("longitude", original.getLongitude());
-                stage.put("startTime", original.getStartTime() == null ? null : original.getStartTime().toString());
-                stage.put("endTime", original.getEndTime() == null ? null : original.getEndTime().toString());
+
                 stage.put("photoUrl", original.getPhotoUrl());
                 stage.put("notes", original.getNotes());
             }
+            LocalTime startTime = OfferSchedule.time(fields.startTime().getText(), false);
+            LocalTime endTime = OfferSchedule.time(fields.endTime().getText(), false);
+            OfferSchedule.stageTimes(startTime, endTime);
+            stage.put("startTime", startTime == null ? null : startTime.toString());
+            stage.put("endTime", endTime == null ? null : endTime.toString());
             stage.put("title", fields.title().getText().trim());
             stage.put("locationName", emptyToNull(fields.place().getText()));
             stage.put("city", emptyToNull(fields.city().getText()));
@@ -889,6 +903,8 @@ public class CreateOfferController {
             TextField day,
             ComboBox<String> category,
             TextArea description,
+            TextField startTime,
+            TextField endTime,
             StageDTO original) {
     }
 }

@@ -272,11 +272,15 @@
                                 <Label text="Data Inizio *" styleClass="form-label" />
                                 <DatePicker fx:id="actStartDatePicker" maxWidth="Infinity"
                                     styleClass="custom-datepicker" />
+                                <Label text="Ora inizio *" styleClass="form-label" />
+                                <TextField fx:id="actStartTimeField" text="09:00" promptText="HH:mm" styleClass="custom-input" />
                             </VBox>
                             <VBox spacing="4.0" HBox.hgrow="ALWAYS">
                                 <Label text="Data Fine *" styleClass="form-label" />
                                 <DatePicker fx:id="actEndDatePicker" maxWidth="Infinity"
                                     styleClass="custom-datepicker" />
+                                <Label text="Ora fine *" styleClass="form-label" />
+                                <TextField fx:id="actEndTimeField" text="10:00" promptText="HH:mm" styleClass="custom-input" />
                             </VBox>
                         </HBox>
 

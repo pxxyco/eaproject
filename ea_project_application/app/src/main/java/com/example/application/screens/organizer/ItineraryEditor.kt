@@ -13,6 +13,30 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.temporal.ChronoUnit
 
+internal fun JsonObject.stageTime(key: String): String {
+    val value = get(key)?.takeUnless { it.isJsonNull } ?: return ""
+    return if (value.isJsonArray) {
+        val parts = value.asJsonArray.map { it.asInt }
+        LocalTime.of(parts[0], parts[1], parts.getOrElse(2) { 0 }, parts.getOrElse(3) { 0 }).toString()
+    } else value.asString
+}
+
+private fun normalizeStageTimes(stage: JsonObject) {
+    fun parse(key: String): LocalTime? {
+        val value = stage.stageTime(key).trim()
+        if (value.isBlank()) { stage.remove(key); return null }
+        val time = runCatching { LocalTime.parse(value) }.getOrNull()
+        require(time != null) { "Orario non valido: usa HH:mm." }
+        stage.addProperty(key, time.toString())
+        return time
+    }
+    val start = parse("startTime")
+    val end = parse("endTime")
+    require(start == null || end == null || end.isAfter(start)) {
+        "La fine della tappa deve essere successiva all’inizio nello stesso giorno."
+    }
+}
+
 /** Keeps identifiers and attributes from the desktop when modifying an existing stage. */
 internal fun itineraryPayload(stages: List<JsonObject>, start: String, end: String): JsonArray {
     val first = LocalDate.parse(start.trim())
@@ -31,13 +55,7 @@ internal fun itineraryPayload(stages: List<JsonObject>, start: String, end: Stri
             stage.addProperty("day", day)
             stage.addProperty("orderInDay", (orders[day] ?: 0) + 1)
             orders[day] = stage.number("orderInDay")
-            listOf("startTime", "endTime").forEach { key ->
-                val value = stage.get(key)
-                if (value != null && value.isJsonArray) {
-                    val parts = value.asJsonArray.map { it.asInt }
-                    stage.addProperty(key, LocalTime.of(parts[0], parts[1], parts.getOrElse(2) { 0 }, parts.getOrElse(3) { 0 }).toString())
-                }
-            }
+            normalizeStageTimes(stage)
             add(stage)
         }
     }
@@ -60,6 +78,7 @@ internal fun stagePayload(original: JsonObject, fields: Map<String, String>, cat
         require(lat != null && lon != null && lat.isFinite() && lon.isFinite() && lat in -90.0..90.0 && lon in -180.0..180.0) { "Inserisci entrambe le coordinate con valori validi." }
         stage.addProperty("latitude", lat); stage.addProperty("longitude", lon)
     }
+    normalizeStageTimes(stage)
     return stage
 }
 
@@ -74,6 +93,8 @@ internal fun ItineraryEditor(stages: MutableList<JsonObject>, enabled: Boolean) 
             Column(Modifier.padding(12.dp)) {
                 Text("Giorno ${stage.number("day")} · ${stage.text("title")}", style = MaterialTheme.typography.titleMedium)
                 Text(stage.text("city"))
+                if (stage.stageTime("startTime").isNotBlank() || stage.stageTime("endTime").isNotBlank())
+                    Text("${stage.stageTime("startTime").ifBlank { "—" }} – ${stage.stageTime("endTime").ifBlank { "—" }}")
                 Row {
                     TextButton(enabled = enabled, onClick = { selected = index }) { Text("Modifica tappa ${index + 1}") }
                     TextButton(enabled = enabled, onClick = { stages.removeAt(index) }) { Text("Rimuovi") }
@@ -102,8 +123,9 @@ internal fun ItineraryEditor(stages: MutableList<JsonObject>, enabled: Boolean) 
 @Composable
 private fun StageForm(original: JsonObject, onDismiss: () -> Unit, onSave: (JsonObject) -> Unit) {
     val labels = linkedMapOf("title" to "Titolo tappa", "day" to "Giorno del viaggio", "locationName" to "Luogo",
-        "city" to "Città", "description" to "Descrizione", "latitude" to "Latitudine (facoltativa)", "longitude" to "Longitudine (facoltativa)")
-    val fields = remember { mutableStateMapOf<String, String>().apply { labels.keys.forEach { put(it, original.text(it)) } } }
+        "city" to "Città", "description" to "Descrizione", "latitude" to "Latitudine (facoltativa)", "longitude" to "Longitudine (facoltativa)",
+        "startTime" to "Ora inizio HH:mm (facoltativa)", "endTime" to "Ora fine HH:mm, stesso giorno (facoltativa)")
+    val fields = remember { mutableStateMapOf<String, String>().apply { labels.keys.forEach { put(it, if (it in listOf("startTime", "endTime")) original.stageTime(it) else original.text(it)) } } }
     var category by remember { mutableStateOf(original.text("category").ifBlank { "OTHER" }) }
     var error by remember { mutableStateOf<String?>(null) }
     AlertDialog(onDismissRequest = onDismiss, title = { Text("Tappa del viaggio") }, text = {

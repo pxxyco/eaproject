@@ -30,6 +30,8 @@ class OrganizerItineraryUiTest {
         compose.onNodeWithText("+ Aggiungi tappa").performClick()
         compose.onNodeWithText("Titolo tappa").performTextInput("Museo")
         compose.onNodeWithText("Giorno del viaggio").performTextReplacement("2")
+        compose.onNodeWithText("Ora inizio HH:mm (facoltativa)").performScrollTo().performTextInput("09:00")
+        compose.onNodeWithText("Ora fine HH:mm, stesso giorno (facoltativa)").performScrollTo().performTextInput("11:00")
         compose.onNodeWithText("Conferma tappa").performClick()
         compose.onNodeWithText("Giorno 2 · Museo").assertIsDisplayed()
         compose.onNodeWithText("Modifica tappa 1").performClick()
@@ -38,6 +40,8 @@ class OrganizerItineraryUiTest {
         compose.runOnIdle {
             assertEquals("Centro storico", stages.single().get("title").asString)
             assertEquals(2, stages.single().get("day").asInt)
+            assertEquals("09:00", stages.single().get("startTime").asString)
+            assertEquals("11:00", stages.single().get("endTime").asString)
         }
         compose.onNodeWithText("Rimuovi").performClick()
         compose.runOnIdle { assertEquals(0, stages.size) }

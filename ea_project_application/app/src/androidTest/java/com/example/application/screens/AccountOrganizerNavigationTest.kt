@@ -30,7 +30,7 @@ class AccountOrganizerNavigationTest {
         }
         compose.onNodeWithText("Dashboard").performClick()
         compose.onNodeWithText("Gestione organizzatore").assertIsDisplayed()
-        compose.onNodeWithText("Viaggi").assertDoesNotExist()
+        compose.onNodeWithText("Preferiti").assertDoesNotExist()
         compose.onNodeWithText("Account").performClick()
         compose.onNodeWithText("@organizer-test").assertIsDisplayed()
         compose.onNodeWithText("Gestione organizzatore").assertDoesNotExist()
@@ -41,8 +41,8 @@ class AccountOrganizerNavigationTest {
         compose.onNodeWithText("Disconnetti").performClick()
         compose.runOnIdle { assertEquals(1, logouts) }
         compose.onNodeWithText("Dashboard").assertDoesNotExist()
-        compose.onNodeWithText("Viaggi").performClick()
-        compose.onNodeWithText("Accedi o registrati").assertIsDisplayed()
+        compose.onNodeWithText("Preferiti").performClick()
+        compose.onNodeWithText("Accedi").assertIsDisplayed()
     }
 
     @Test fun guestCanExploreAndProtectedTabOffersLoginOrReturnToExplore() {
@@ -51,13 +51,13 @@ class AccountOrganizerNavigationTest {
         }
         compose.onNodeWithText("Home di prova").assertIsDisplayed()
         compose.onNodeWithText("Dashboard").assertDoesNotExist()
-        compose.onNodeWithText("Viaggi").performClick()
-        compose.onNodeWithText("Accedi o registrati").assertIsDisplayed()
-        compose.onNodeWithText("Continua a esplorare").performClick()
+        compose.onNodeWithText("Preferiti").performClick()
+        compose.onNodeWithText("Accedi").assertIsDisplayed()
+        compose.onNodeWithText("Esplora").performClick()
         compose.onNodeWithText("Home di prova").assertIsDisplayed()
-        compose.onNodeWithText("Viaggi").performClick()
-        compose.onNodeWithText("Accedi o registrati").performClick()
-        compose.onNodeWithText("I tuoi viaggi, in un unico posto").assertDoesNotExist()
+        compose.onNodeWithText("Preferiti").performClick()
+        compose.onNodeWithText("Accedi").performClick()
+        compose.onNodeWithText("Accedi per vedere le tue liste").assertDoesNotExist()
         compose.onNodeWithText("Account").assertIsSelected()
     }
 
@@ -73,6 +73,6 @@ class AccountOrganizerNavigationTest {
         compose.onNodeWithText("Gestione organizzatore").assertDoesNotExist()
         compose.runOnIdle { user = null }
         compose.onNodeWithText("Viaggi di prova").assertDoesNotExist()
-        compose.onNodeWithText("Accedi o registrati").assertIsDisplayed()
+        compose.onNodeWithText("Accedi").assertIsDisplayed()
     }
 }

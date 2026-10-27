@@ -58,10 +58,16 @@ public final class ExperienceValidation {
                                 && stage.getCategory() != null && stage.getDay() != null && stage.getDay() >= 1
                                 && stage.getOrderInDay() != null && stage.getOrderInDay() >= 1,
                                 "Dati della tappa non validi.");
+                stageTimes(stage.getStartTime(), stage.getEndTime());
                 require(trip.getStartDate() != null && trip.getEndDate() != null
                                 && stage.getDay() <= ChronoUnit.DAYS.between(trip.getStartDate(), trip.getEndDate())
                                                 + 1,
                                 "Il giorno della tappa deve rientrare nelle date del viaggio.");
+        }
+
+        public static void stageTimes(java.time.LocalTime start, java.time.LocalTime end) {
+                require(start == null || end == null || end.isAfter(start),
+                                "L'orario finale della tappa deve essere successivo a quello iniziale nello stesso giorno.");
         }
 
         public static int available(Integer oldCapacity, Integer oldAvailable, int newCapacity) {
