@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.example.application.dto.ExperienceDetail
 import com.example.application.dto.ExperienceRef
 import com.example.application.network.ExperienceRepository
+import com.example.application.screens.activity.itinerary.ItinerarySection
 import com.example.application.screens.home.RemotePhoto
 import com.example.application.ui.theme.ScreenBackground
 import com.example.application.ui.theme.Stone200
@@ -137,7 +138,7 @@ private fun ExperienceDetailContent(detail: ExperienceDetail) {
             item {
                 when (selectedTab) {
                     DetailTab.DESCRIPTION -> DescriptionSection(detail)
-                    DetailTab.ITINERARY   -> SectionPlaceholder("Itinerario")
+                    DetailTab.ITINERARY   -> ItinerarySection(detail)
                     DetailTab.GALLERY     -> SectionPlaceholder("Galleria")
                     DetailTab.REVIEWS     -> SectionPlaceholder("Recensioni")
                 }

@@ -16,5 +16,6 @@ data class TripDetailDTO(
     val availableSeats: Int? = null,
     val status: String? = null,
     val averageRating: BigDecimal? = null,
-    val coverPhotoUrl: String? = null
+    val coverPhotoUrl: String? = null,
+    val stages: List<StageDTO>? = null
 )
