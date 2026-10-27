@@ -1,6 +1,9 @@
 package com.example.application
 
 import android.app.Activity
+import androidx.activity.compose.BackHandler
+import com.example.application.dto.UserDTO
+import com.example.application.screens.organizer.OrganizerDashboardScreen
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -43,13 +46,17 @@ internal fun MainNavigation(
 ) {
     var destination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
     var returnToPersonalTab by rememberSaveable { mutableStateOf(false) }
-    val current = destinationForUser(destination, user)
+    val organizer = user?.role?.trim().equals("ORGANIZER", ignoreCase = true)
+    val current = when (destination) {
+        AppDestinations.DASHBOARD, AppDestinations.`MY-TRIP` -> if (organizer) AppDestinations.DASHBOARD else AppDestinations.`MY-TRIP`
+        else -> destination
+    }
     BackHandler(enabled = current != AppDestinations.HOME) {
         destination = AppDestinations.HOME
         returnToPersonalTab = false
     }
     NavigationSuiteScaffold(navigationSuiteItems = {
-        destinationsFor(user).forEach { destinationItem ->
+        listOf(AppDestinations.HOME, if (organizer) AppDestinations.DASHBOARD else AppDestinations.`MY-TRIP`, AppDestinations.PROFILE).forEach { destinationItem ->
             item(
                 icon = { Icon(painterResource(destinationItem.icon), contentDescription = null) },
                 label = { Text(destinationItem.label) },
@@ -60,19 +67,33 @@ internal fun MainNavigation(
                 }
             )
         }
-    ) {
+    }) {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            key(UserSession.user?.id, UserSession.role) {
-            when (currentDestination) {
-                AppDestinations.HOME -> HomeScreen(modifier = Modifier.padding(innerPadding))
-                AppDestinations.`MY-TRIP` -> MyTrip(modifier = Modifier.padding(innerPadding), onLoginClick = { currentDestination = AppDestinations.PROFILE })
-                AppDestinations.PROFILE -> ProfileScreen(
-                    user = UserSession.user,
-                    onLoginSuccess = { },
-                    onLogoutClick = { AuthRepository.logout() },
-                    modifier = Modifier.padding(innerPadding)
-                )
-            }
+            val contentModifier = Modifier.padding(innerPadding)
+            key(user?.id, user?.role) {
+                when (current) {
+                    AppDestinations.HOME -> homeContent(contentModifier)
+                    AppDestinations.`MY-TRIP` -> {
+                        if (user == null) MyTrip(modifier = contentModifier, onLoginClick = {
+                            returnToPersonalTab = true
+                            destination = AppDestinations.PROFILE
+                        }) else tripsContent(contentModifier)
+                    }
+                    AppDestinations.DASHBOARD -> user?.id?.let { dashboardContent(it, contentModifier) }
+                    AppDestinations.PROFILE -> ProfileScreen(
+                        user = user,
+                        onLoginSuccess = {
+                            if (returnToPersonalTab) destination = AppDestinations.`MY-TRIP`
+                            returnToPersonalTab = false
+                        },
+                        onLogoutClick = {
+                            returnToPersonalTab = false
+                            destination = AppDestinations.PROFILE
+                            onLogout()
+                        },
+                        modifier = contentModifier
+                    )
+                }
             }
         }
     }
@@ -84,5 +105,6 @@ enum class AppDestinations(
 ) {
     HOME("Esplora", R.drawable.ic_home),
     `MY-TRIP`("Preferiti", R.drawable.ic_favorite), //TODO Sostituire con Preferiti e non Trip (Trip è gestito dalla home inseme ad Activity)
+    DASHBOARD("Dashboard", R.drawable.ic_dashboard),
     PROFILE("Account", R.drawable.ic_account_box),
 }
