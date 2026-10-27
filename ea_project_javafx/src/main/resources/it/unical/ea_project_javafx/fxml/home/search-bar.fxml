@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<VBox alignment="CENTER" maxWidth="1000.0" spacing="16.0" xmlns="http://javafx.com/javafx/21.0.2"
+<VBox stylesheets="@../../css/app.css" alignment="CENTER" maxWidth="1000.0" spacing="16.0" xmlns="http://javafx.com/javafx/21.0.2"
     xmlns:fx="http://javafx.com/fxml/1"
     fx:controller="it.unical.ea_project_javafx.controller.home.SearchBarController">
 

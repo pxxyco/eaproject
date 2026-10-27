@@ -102,7 +102,7 @@ public class ItineraryController implements ActivitySectionController, TripSecti
             }
         } else {
             Label lbl = new Label("Nessun itinerario disponibile!");
-            lbl.setStyle("-fx-text-fill: white");
+            lbl.getStyleClass().add("itinerary-detail-label");
             itinerarioItemsContainer.getChildren().add(lbl);
         }
 

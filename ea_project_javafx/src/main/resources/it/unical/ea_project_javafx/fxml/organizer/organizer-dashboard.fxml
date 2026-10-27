@@ -1,16 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.image.ImageView?>
-<StackPane xmlns:fx="http://javafx.com/fxml/1" fx:id="rootStackPane"
+<StackPane stylesheets="@../../css/screens/organizer/dashboard.css" xmlns:fx="http://javafx.com/fxml/1" fx:id="rootStackPane"
     fx:controller="it.unical.ea_project_javafx.controller.organizer.OrganizerDashboardController">
-    <stylesheets>
-        <URL value="@../../css/common/style.css" />
-        <URL value="@../../css/profile/profile.css" />
-        <URL value="@../../css/organizer/organizer-dashboard.css" />
-    </stylesheets>
     <VBox alignment="TOP_CENTER">
         <VBox spacing="36" maxWidth="1220"
             styleClass="organizer-workspace, organizer-dashboard-fragment">

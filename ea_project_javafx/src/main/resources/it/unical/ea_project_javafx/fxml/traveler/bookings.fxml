@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
@@ -15,15 +14,8 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<StackPane xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
+<StackPane stylesheets="@../../css/screens/traveler/bookings.css" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
     fx:controller="it.unical.ea_project_javafx.controller.traveler.BookingsController">
-    <stylesheets>
-        <URL value="@../../css/common/style.css" />
-        <URL value="@../../css/home/home.css" />
-        <URL value="@../../css/profile/profile.css" />
-        <URL value="@../../css/traveler/traveler.css" />
-        <URL value="@../../css/traveler/bookings-export-popup.css" />
-    </stylesheets>
 
     <ImageView fx:id="bgImageView" pickOnBounds="true" preserveRatio="false" />
     <Region styleClass="profile-overlay" />

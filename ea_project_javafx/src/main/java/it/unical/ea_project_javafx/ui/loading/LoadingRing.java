@@ -6,6 +6,11 @@ import javafx.animation.Animation;
 import javafx.animation.Interpolator;
 import javafx.animation.RotateTransition;
 import javafx.beans.value.ChangeListener;
+import javafx.css.CssMetaData;
+import javafx.css.Styleable;
+import javafx.css.StyleableObjectProperty;
+import javafx.css.StyleableProperty;
+import javafx.css.converter.ColorConverter;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.stage.Window;
@@ -20,6 +25,54 @@ import javafx.util.Duration;
  * pulses.
  */
 public final class LoadingRing extends Region {
+    private static final Color DEFAULT_COLOR = Color.rgb(245, 245, 244);
+    private static final CssMetaData<LoadingRing, Color> PROGRESS_COLOR = new CssMetaData<>(
+            "-fx-progress-color", ColorConverter.getInstance(), DEFAULT_COLOR) {
+        @Override
+        public boolean isSettable(LoadingRing ring) {
+            return !ring.progressColor.isBound();
+        }
+
+        @Override
+        public StyleableProperty<Color> getStyleableProperty(LoadingRing ring) {
+            return ring.progressColor;
+        }
+    };
+    private static final List<CssMetaData<? extends Styleable, ?>> CSS_META_DATA;
+    static {
+        var properties = new ArrayList<CssMetaData<? extends Styleable, ?>>(Region.getClassCssMetaData());
+        properties.add(PROGRESS_COLOR);
+        CSS_META_DATA = List.copyOf(properties);
+    }
+
+    private final StyleableObjectProperty<Color> progressColor = new StyleableObjectProperty<>(DEFAULT_COLOR) {
+        @Override
+        protected void invalidated() {
+            renderedSize = -1;
+            requestLayout();
+        }
+
+        @Override
+        public Object getBean() {
+            return LoadingRing.this;
+        }
+
+        @Override
+        public String getName() {
+            return "progressColor";
+        }
+
+        @Override
+        public CssMetaData<LoadingRing, Color> getCssMetaData() {
+            return PROGRESS_COLOR;
+        }
+    };
+
+    @Override
+    public List<CssMetaData<? extends Styleable, ?>> getCssMetaData() {
+        return CSS_META_DATA;
+    }
+
     private final Canvas canvas = new Canvas();
     private final RotateTransition rotation = new RotateTransition(Duration.millis(1150), canvas);
     private Scene observedScene;
@@ -34,6 +87,7 @@ public final class LoadingRing extends Region {
         setPrefSize(48, 48);
         setMaxSize(USE_PREF_SIZE, USE_PREF_SIZE);
         setMouseTransparent(true);
+        getStyleClass().add("loading-ring");
         getChildren().add(canvas);
         rotation.setByAngle(360);
         rotation.setInterpolator(Interpolator.LINEAR);
@@ -93,6 +147,7 @@ public final class LoadingRing extends Region {
         WritableImage image = new WritableImage(resolution, resolution);
         double radius = .415, halfStroke = .0425, end = Math.toRadians(390);
         double headX = radius * Math.cos(end), headY = -radius * Math.sin(end);
+        Color tint = progressColor.get() == null ? DEFAULT_COLOR : progressColor.get();
         for (int y = 0; y < resolution; y++) {
             for (int x = 0; x < resolution; x++) {
                 double dx = (x + .5) / resolution - .5, dy = (y + .5) / resolution - .5;
@@ -102,7 +157,8 @@ public final class LoadingRing extends Region {
                 double alpha = angle <= 300 ? coverage * (.015 + .985 * angle / 300) : 0;
                 double cap = Math.max(0, Math.min(1,
                         .5 + (halfStroke - Math.hypot(dx - headX, dy - headY)) * resolution));
-                image.getPixelWriter().setColor(x, y, Color.rgb(245, 245, 244, Math.max(alpha, cap)));
+                image.getPixelWriter().setColor(x, y, Color.color(tint.getRed(), tint.getGreen(), tint.getBlue(),
+                        tint.getOpacity() * Math.max(alpha, cap)));
             }
         }
         var g = canvas.getGraphicsContext2D();

@@ -8,9 +8,8 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<StackPane fx:id="root" disable="false" managed="false" maxHeight="-Infinity" maxWidth="400"
-    minHeight="300" minWidth="400" onMouseClicked="#handleMainFocus" styleClass="popup-overlay-root"
-    stylesheets="@../../../css/activity/reviews/review.css" visible="false"
+<StackPane stylesheets="@../../../css/screens/activity/review-editor.css" fx:id="root" disable="false" managed="false" maxHeight="-Infinity" maxWidth="400"
+    minHeight="300" minWidth="400" onMouseClicked="#handleMainFocus" styleClass="popup-overlay-root" visible="false"
     xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
     fx:controller="it.unical.ea_project_javafx.controller.activity.reviews.ReviewController">
     <children>

@@ -688,7 +688,7 @@ public class ActivityDetailsController implements AutoCloseable {
         heading.getChildren().addAll(labels, close);
 
         Label experience = new Label(lblTitolo.getText() == null ? "Esperienza" : lblTitolo.getText());
-        experience.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+        experience.getStyleClass().add("checkout-experience");
         Label date = new Label("Data: " + (datePicker.getValue() == null ? "secondo il programma dell'esperienza"
                 : datePicker.getValue().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
         date.getStyleClass().add("app-modal-subtitle");
@@ -698,7 +698,7 @@ public class ActivityDetailsController implements AutoCloseable {
         HBox totalRow = new HBox(8, new Label("Totale stimato"), new Region(), new Label(setMoneyCurrency(total)));
         totalRow.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(totalRow.getChildren().get(1), Priority.ALWAYS);
-        totalRow.getChildren().get(2).setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #e7e5e4;");
+        totalRow.getChildren().get(2).getStyleClass().add("checkout-total");
         Label note = new Label(
                 "Controlla i dati prima di confermare. La prenotazione verrà registrata sul tuo account.");
         note.setWrapText(true);

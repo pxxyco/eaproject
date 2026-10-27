@@ -1,0 +1,185 @@
+/* Screen layout: details. Theme: css/theme.css. */
+@import "../../app.css";
+
+.content-rows.experience-body {
+    -fx-background-color: linear-gradient(to bottom right, -tone-ivory-080, -tone-ivory-025), -ea-glass;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 22, 21;
+    -fx-border-radius: 22;
+    -fx-border-width: 1;
+    -fx-border-color: -ea-glass-border;
+}
+
+.experience-detail .back-link {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 4 0;
+}
+
+.experience-body .descrizione-card,
+.experience-body .itinerario,
+.experience-body .foto,
+.experience-body .recensione-container {
+    -fx-background-color: -tone-ivory-045;
+}
+
+.descrizione-card,
+.map-card {
+    -fx-control-inner-background: transparent;
+}
+
+.itinerario {
+    -fx-control-inner-background: transparent;
+    -fx-text-fill: -color-white;
+    -fx-font-size: 13px;
+}
+
+.recensione-container {
+    -fx-control-inner-background: transparent;
+    -fx-padding: 8px;
+}
+
+.section-tabs {
+    -fx-padding: 0;
+}
+
+.hero {
+    -fx-background-radius: 16px;
+    -fx-background-insets: 0;
+}
+
+.hero-content {
+    -fx-background-color: linear-gradient(to top, -tone-ink-850, -tone-ink-100 65%);
+    -fx-background-radius: 16px;
+}
+
+.hero .hero-title {
+    -fx-text-fill: -color-white;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+    -fx-effect: dropshadow(gaussian, -tone-ink-720, 8, 0, 0, 2);
+}
+
+.hero .hero-subtitle {
+    -fx-text-fill: -tone-white-850;
+    -fx-font-size: 13px;
+    -fx-effect: dropshadow(gaussian, -tone-ink-720, 6, 0, 0, 1);
+}
+
+.badge-category {
+    -fx-background-color: -tone-ink-550;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 3px 10px;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-ivory;
+    -fx-border-color: -tone-ivory-450;
+}
+
+.badge-rating {
+    -fx-background-color: -tone-ink-550;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 3px 10px;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-rating;
+    -fx-border-color: -tone-warning-450;
+}
+
+.booking-title {
+    -fx-text-fill: -color-white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.booking-subtitle {
+    -fx-text-fill: -tone-white-550;
+    -fx-font-size: 12px;
+}
+
+.booking-card .separator .line {
+    -fx-border-color: -tone-white-160;
+    -fx-border-width: 1 0 0 0;
+}
+
+.price-big {
+    -fx-text-fill: -color-white;
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+}
+
+.price-suffix {
+    -fx-text-fill: -tone-white-550;
+    -fx-font-size: 12px;
+}
+
+.price-total {
+    -fx-text-fill: -color-ivory;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.booking-card .field-label {
+    -fx-text-fill: -tone-white-850;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.hint {
+    -fx-text-fill: -tone-white-450;
+    -fx-font-size: 11px;
+}
+
+.experience-heading .hero-title {
+    -fx-font-size: 36;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text;
+}
+
+.experience-heading .hero-subtitle {
+    -fx-font-size: 16;
+    -fx-text-fill: -color-text-secondary;
+}
+
+.experience-summary {
+    -fx-font-size: 13;
+    -fx-text-fill: -color-text-secondary;
+    -fx-padding: 0 0 4 0;
+}
+
+.experience-body {
+    -fx-padding: 24;
+    -fx-background-radius: 22;
+    -fx-border-radius: 22;
+}
+
+.experience-detail .booking-title {
+    -fx-font-size: 24;
+}
+
+.experience-detail .booking-subtitle {
+    -fx-font-size: 13;
+    -fx-text-fill: -color-text-muted;
+}
+
+.experience-detail .booking-card {
+    -fx-spacing: 18;
+}
+
+.experience-detail .price-big {
+    -fx-font-size: 32;
+}
+
+.experience-detail .badge-category,
+.experience-detail .badge-rating {
+    -fx-padding: 6 12;
+    -fx-background-color: -tone-ivory-080;
+    -fx-border-color: -tone-ivory-220;
+}
+
+.experience-detail .content-scroll,
+.experience-detail .content-scroll>.viewport {
+    -fx-background-color: transparent;
+}

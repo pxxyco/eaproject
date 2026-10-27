@@ -808,7 +808,7 @@ public class NavbarController {
             anchor.localToSceneTransformProperty().removeListener(transformListener);
         });
         if (popup.getScene() != null) {
-            String css = getClass().getResource("/it/unical/ea_project_javafx/css/common/notifications.css")
+            String css = getClass().getResource("/it/unical/ea_project_javafx/css/app.css")
                     .toExternalForm();
             if (!popup.getScene().getStylesheets().contains(css))
                 popup.getScene().getStylesheets().add(css);

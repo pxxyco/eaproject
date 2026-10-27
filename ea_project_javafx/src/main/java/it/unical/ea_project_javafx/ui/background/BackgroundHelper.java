@@ -98,8 +98,8 @@ public class BackgroundHelper {
                 return;
             if (!(bgImageView.getParent() instanceof StackPane root))
                 return;
-            if (!root.getStyle().contains("-fx-background-color"))
-                root.setStyle(root.getStyle() + ";-fx-background-color: #101010;");
+            if (!root.getStyleClass().contains("app-root"))
+                root.getStyleClass().add("app-root");
             Region shade = null;
             for (var node : root.getChildren()) {
                 if (node instanceof Region region && region.getClass() == Region.class
@@ -114,7 +114,6 @@ public class BackgroundHelper {
                 root.getChildren().add(root.getChildren().indexOf(bgImageView) + 1, shade);
             }
             shade.getStyleClass().setAll("app-background-shade");
-            shade.setStyle("-fx-background-color: rgba(12,12,12,0.78);");
             shade.setMouseTransparent(true);
             bgImageView.fitWidthProperty().bind(root.widthProperty());
             bgImageView.fitHeightProperty().bind(root.heightProperty());

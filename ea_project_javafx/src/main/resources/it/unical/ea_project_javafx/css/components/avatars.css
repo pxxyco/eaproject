@@ -1,0 +1,20 @@
+/* Reusable component: avatars. Theme: css/theme.css. */
+
+.profile-avatar {
+    -fx-background-color: -tone-ivory-160;
+    -fx-border-color: -tone-white-320;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 52px;
+    -fx-background-radius: 52px;
+    -fx-alignment: center;
+}
+
+.avatar-initials {
+    -fx-text-fill: -color-white;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+}
+
+.profile-avatar .image-view {
+    -fx-background-radius: 52px;
+}

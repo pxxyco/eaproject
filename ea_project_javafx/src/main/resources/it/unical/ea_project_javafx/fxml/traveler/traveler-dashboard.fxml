@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import java.net.URL?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
@@ -11,16 +10,10 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
-<VBox xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
+<VBox stylesheets="@../../css/screens/traveler/dashboard.css" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
     fx:id="dashboardRoot"
     fx:controller="it.unical.ea_project_javafx.controller.traveler.TravelerDashboardController"
     spacing="34.0" styleClass="traveler-dashboard-content">
-    <stylesheets>
-        <URL value="@../../css/common/style.css" />
-        <URL value="@../../css/profile/profile.css" />
-        <URL value="@../../css/traveler/traveler.css" />
-        <URL value="@../../css/traveler/bookings-export-popup.css" />
-    </stylesheets>
     <!-- Introduzione + riepilogo reale, senza ripetere i contatori in una seconda sezione. -->
     <HBox alignment="CENTER_LEFT" spacing="22.0" styleClass="dashboard-welcome">
         <VBox alignment="CENTER_LEFT" spacing="13.0" minWidth="250.0" HBox.hgrow="ALWAYS"

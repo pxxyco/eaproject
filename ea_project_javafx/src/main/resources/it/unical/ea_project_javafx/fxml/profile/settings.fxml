@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import java.net.URL?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
@@ -13,13 +12,9 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<StackPane xmlns:fx="http://javafx.com/fxml/1"
+<StackPane stylesheets="@../../css/screens/profile/settings.css" xmlns:fx="http://javafx.com/fxml/1"
     fx:controller="it.unical.ea_project_javafx.controller.profile.SettingsController"
     styleClass="account-page">
-    <stylesheets>
-        <URL value="@../../css/profile/profile.css" />
-        <URL value="@../../css/common/style.css" />
-    </stylesheets>
     <ImageView fx:id="bgImageView" mouseTransparent="true" opacity="0.12" />
     <BorderPane>
         <top>

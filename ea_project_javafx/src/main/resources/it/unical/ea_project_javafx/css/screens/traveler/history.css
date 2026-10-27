@@ -1,0 +1,152 @@
+/* Screen layout: history. Theme: css/theme.css. */
+@import "../../app.css";
+
+.history-feed>.virtual-flow,
+.history-feed .clipped-container,
+.history-feed .sheet {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.history-stat-row {
+    -fx-alignment: center;
+}
+
+.history-booking-card {
+    -fx-padding: 18px;
+    -fx-spacing: 12px;
+}
+
+.history-card-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text;
+}
+
+.history-card-meta {
+    -fx-font-size: 11px;
+    -fx-text-fill: -tone-ivory-650;
+}
+
+.history-card-date {
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-ivory;
+}
+
+.history-card-price {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text;
+}
+
+.history-card-seats {
+    -fx-font-size: 11px;
+    -fx-text-fill: -tone-ivory-650;
+}
+
+.history-cancelled-card {
+    -fx-opacity: 0.75;
+    -fx-border-color: -tone-danger-220;
+}
+
+.history-review-note {
+    -fx-font-size: 11px;
+    -fx-text-fill: -color-ivory;
+}
+
+.history-empty-state {
+    -fx-padding: 40px 22px;
+    -fx-background-color: -tone-white-045;
+    -fx-background-radius: 18px;
+    -fx-border-color: -tone-ivory-160;
+    -fx-border-radius: 18px;
+    -fx-alignment: center;
+}
+
+.history-empty-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text;
+}
+
+.history-empty-description {
+    -fx-font-size: 12px;
+    -fx-text-fill: -tone-ivory-650;
+    -fx-text-alignment: center;
+    -fx-wrap-text: true;
+    -fx-max-width: 560px;
+}
+
+.history-detail-label {
+    -fx-font-weight: bold;
+    -fx-font-size: 11px;
+    -fx-text-fill: -tone-ivory-650;
+    -fx-min-width: 145px;
+}
+
+.history-detail-value {
+    -fx-font-size: 12px;
+    -fx-text-fill: -color-text;
+    -fx-wrap-text: true;
+}
+
+.history-form-counter {
+    -fx-font-size: 11px;
+    -fx-text-fill: -tone-ivory-650;
+}
+
+.history-dialog-content {
+    -fx-spacing: 12px;
+    -fx-padding: 0;
+}
+
+.history-modal-panel {
+    -fx-max-width: 660px;
+    -fx-spacing: 14px;
+}
+
+.history-modal-scroll>.viewport {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.history-modal-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.history-modal-panel .history-dialog-content {
+    -fx-padding: 0;
+}
+
+.history-modal-error {
+    -fx-text-fill: -color-danger;
+    -fx-font-size: 11px;
+    -fx-wrap-text: true;
+}
+
+.history-host {
+    -fx-padding: 28 32 36;
+}
+
+.history-feed {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.history-feed .list-cell {
+    -fx-border-color: transparent;
+    -fx-background-color: transparent;
+    -fx-padding: 12 0;
+}
+
+.history-feed .list-cell:empty {
+    -fx-padding: 0;
+}
+
+.history-header {
+    -fx-padding: 0 0 18;
+}

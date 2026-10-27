@@ -900,7 +900,7 @@ public class FavoritesController {
             oldParent.getChildren().remove(sharingPopupPanel);
         }
         var sharingCssResource = getClass()
-                .getResource("/it/unical/ea_project_javafx/css/traveler/list-sharing-popup.css");
+                .getResource("/it/unical/ea_project_javafx/css/screens/traveler/sharing.css");
         if (sharingCssResource == null) {
             ViewSupport.error(statusMessageLabel,
                     "Non è stato possibile caricare lo stile della finestra di condivisione.");

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.MenuButton?>
@@ -12,12 +11,9 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
-<BorderPane styleClass="navbar" xmlns="http://javafx.com/javafx/21.0.2"
+<BorderPane stylesheets="@../../css/app.css" styleClass="navbar" xmlns="http://javafx.com/javafx/21.0.2"
     xmlns:fx="http://javafx.com/fxml/1"
     fx:controller="it.unical.ea_project_javafx.controller.common.NavbarController">
-    <stylesheets>
-        <URL value="@../../css/common/notifications.css" />
-    </stylesheets>
     <left>
         <HBox alignment="CENTER_LEFT" spacing="16.0">
             <children>

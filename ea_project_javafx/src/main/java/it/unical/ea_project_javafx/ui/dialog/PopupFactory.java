@@ -30,7 +30,7 @@ import javafx.util.Duration;
  * Tutte le operazioni devono essere invocate dal JavaFX Application Thread.
  */
 public final class PopupFactory {
-    private static final String COMMON_CSS = "/it/unical/ea_project_javafx/css/common/style.css";
+    private static final String COMMON_CSS = "/it/unical/ea_project_javafx/css/app.css";
     private static final Map<StackPane, Handle> ACTIVE_POPUPS = new WeakHashMap<>();
 
     private PopupFactory() {

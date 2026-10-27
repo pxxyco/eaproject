@@ -256,7 +256,7 @@ public class ChatController implements AutoCloseable {
                     n.setVisible(false);
                     n.setManaged(false);
                 });
-        pageRoot.setStyle("-fx-background-color: transparent;");
+        pageRoot.getStyleClass().add("chat-compact");
         navbarContainer.getChildren().clear();
         if (connectionLabel.getParent() instanceof Pane old)
             old.getChildren().remove(connectionLabel);
@@ -568,7 +568,7 @@ public class ChatController implements AutoCloseable {
         view.fitWidthProperty()
                 .bind(messagesBox.widthProperty().multiply(.65).map(w -> Math.min(360, w.doubleValue())));
         box.getChildren().set(box.getChildren().indexOf(photo), view);
-        view.setStyle("-fx-cursor: hand;");
+        view.getStyleClass().add("media-interactive");
         view.setOnMouseClicked(click -> {
             ImageView full = new ImageView(image);
             full.setPreserveRatio(true);

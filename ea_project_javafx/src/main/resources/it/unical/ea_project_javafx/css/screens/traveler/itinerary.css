@@ -1,0 +1,31 @@
+/* Screen layout: itinerary. Theme: css/theme.css. */
+@import "../../app.css";
+
+.itinerary-editor .label {
+    -fx-text-fill: -color-ivory;
+}
+
+.itinerary-editor .split-pane {
+    -fx-background-color: -color-text-inverse;
+    -fx-padding: 0;
+}
+
+.itinerary-editor .split-pane-divider {
+    -fx-background-color: -color-stone-border;
+    -fx-padding: 0 2;
+}
+
+.itinerary-title {
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text;
+}
+
+.itinerary-panel-title {
+    -fx-font-size: 21px;
+    -fx-font-weight: bold;
+}
+
+.itinerary-panel {
+    -fx-padding: 22;
+}
