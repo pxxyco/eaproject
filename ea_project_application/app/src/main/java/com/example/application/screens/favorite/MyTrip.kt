@@ -62,7 +62,6 @@ fun MyTrip(
     var creating by remember { mutableStateOf(false) }
     var createError by remember { mutableStateOf<String?>(null) }
 
-    // Si rilancia ogni volta che l'hub torna visibile (anche uscendo da una raccolta).
     LaunchedEffect(UserSession.user?.id, retry) {
         refreshing = true
         try { MyTripRepository.refreshLists() }

@@ -209,7 +209,7 @@ object ApiService {
 
     private fun rateLimited(response: Response): ApiResult.RateLimited {
         val retry = response.header("Retry-After")?.trim()?.toIntOrNull() ?: 60
-        AppStatus.showRateLimited(retry)
+        Log.w(TAG, "Rate limited, riprova tra $retry s")
         return ApiResult.RateLimited(retry)
     }
 
