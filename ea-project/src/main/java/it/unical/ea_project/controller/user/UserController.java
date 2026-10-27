@@ -84,10 +84,12 @@ public class UserController {
         if (req == null || req.identifier() == null || req.password() == null) {
             return ResponseEntity.badRequest().build();
         }
-        Optional<User> userOpt = userService.login(req.identifier(), req.password());
+
+        Optional<User> userOpt = userService.login(req.identifier().trim(), req.password());
         if (userOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+
         User user = userOpt.get();
         return ResponseEntity.ok()
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwtService.generateAccessToken(user))

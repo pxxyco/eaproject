@@ -33,7 +33,7 @@ class ApiExceptionHandlerTest {
     }
 
     @Test
-    void loginLockoutKeepsItsLongerRetry() {
-        verify("/api/users/login", "900");
+    void loginCooldownUsesOneMinuteFallback() {
+        verify("/api/users/login", "60");
     }
 }

@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -182,8 +183,9 @@ public class ApiService {
             if (json != null) {
                 if (statusCode == 429 && json.has("code") && !json.get("code").isJsonNull()) {
                     String code = json.get("code").getAsString();
-                    if ("ERR-104".equalsIgnoreCase(code) && json.has("message") && !json.get("message").isJsonNull()) {
-                        return "ERR-104 — " + json.get("message").getAsString();
+                    if (("ERR-104".equalsIgnoreCase(code) || "ERR-105".equalsIgnoreCase(code))
+                            && json.has("message") && !json.get("message").isJsonNull()) {
+                        return code.toUpperCase(Locale.ROOT) + " — " + json.get("message").getAsString();
                     }
                 }
                 for (String key : new String[] { "message", "detail", "reason", "error" }) {
