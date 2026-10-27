@@ -1,6 +1,9 @@
 package it.unical.ea_project_javafx.controller.activity.photo;
 
-import it.unical.ea_project_javafx.util.FullscreenPhotoViewer;
+import it.unical.ea_project_javafx.ui.dialog.FullscreenPhotoViewer;
+import java.io.IOException;
+import java.util.List;
+import java.util.Objects;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -10,17 +13,17 @@ import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.StackPane;
 import lombok.Setter;
 
-import java.io.IOException;
-import java.util.List;
-
 public class PhotoGalleryController {
 
     @Setter
     private Runnable onBackLink;
-    
-    @FXML public StackPane rootStack;
-    @FXML private FlowPane imgsContainer;
-    @FXML private Button moreButton;
+
+    @FXML
+    public StackPane rootStack;
+    @FXML
+    private FlowPane imgsContainer;
+    @FXML
+    private Button moreButton;
 
     private int paging = 0;
     private static final int PAGE_SIZE = 20;
@@ -34,7 +37,7 @@ public class PhotoGalleryController {
 
     @FXML
     private void backButtonAction(ActionEvent event) throws IOException {
-        if(onBackLink != null)
+        if (onBackLink != null)
             onBackLink.run();
     }
 
@@ -45,15 +48,9 @@ public class PhotoGalleryController {
 
     public void setImages(List<String> urls) {
 
-        this.imageUrls = urls;
-
-        if (this.imageUrls.size() > PAGE_SIZE) {
-            moreButton.setManaged(true);
-            moreButton.setVisible(true);
-        } else {
-            moreButton.setManaged(false);
-            moreButton.setVisible(false);
-        }
+        paging = 0;
+        imgsContainer.getChildren().clear();
+        imageUrls = urls == null ? List.of() : urls.stream().filter(Objects::nonNull).toList();
 
         loadNextPage();
 
@@ -69,6 +66,9 @@ public class PhotoGalleryController {
         }
 
         paging++;
+        boolean more = end < imageUrls.size();
+        moreButton.setVisible(more);
+        moreButton.setManaged(more);
 
     }
 
@@ -81,12 +81,11 @@ public class PhotoGalleryController {
 
             PhotoItemController controller = loader.getController();
             controller.setFoto(url);
-            controller.setOnFotoClickedCallBack( s -> mostraFotoFullscreen(url));
+            controller.setOnFotoClickedCallBack(s -> mostraFotoFullscreen(url));
 
             imgsContainer.getChildren().add(foto);
 
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
 

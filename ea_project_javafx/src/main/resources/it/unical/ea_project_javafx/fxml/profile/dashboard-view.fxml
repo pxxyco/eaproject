@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.image.ImageView?>
@@ -8,14 +7,8 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-
-<StackPane xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="it.unical.ea_project_javafx.controller.profile.DashboardViewController">
-    <stylesheets>
-        <URL value="@../../css/common/style.css" />
-        <URL value="@../../css/profile/profile.css" />
-        <URL value="@../../css/home/home.css" />
-    </stylesheets>
+<StackPane stylesheets="@../../css/screens/profile/dashboard.css" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="it.unical.ea_project_javafx.controller.profile.DashboardViewController">
 
     <ImageView fx:id="bgImageView" pickOnBounds="true" preserveRatio="false" />
     <Region styleClass="profile-overlay" />
@@ -27,11 +20,11 @@
         <center>
             <ScrollPane fitToWidth="true" styleClass="main-scroll">
                 <content>
-                    <VBox spacing="20.0">
+                    <VBox alignment="TOP_CENTER" spacing="20.0">
                         <padding>
                             <Insets bottom="40.0" left="32.0" right="32.0" top="28.0" />
                         </padding>
-                        <VBox fx:id="dashboardContent" spacing="18.0" />
+                        <VBox fx:id="dashboardContent" maxWidth="1080" spacing="18.0" />
                     </VBox>
                 </content>
             </ScrollPane>

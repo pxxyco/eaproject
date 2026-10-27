@@ -5,12 +5,13 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
-
-<?import javafx.scene.control.TextArea?>
-<VBox minWidth="400.0" spacing="5.0" styleClass="recensione-item" stylesheets="@../../../css/activity/review/review-item.css" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.activity.reviews.ReviewItemController">
+<VBox stylesheets="@../../../css/app.css" minWidth="400.0" spacing="5.0" styleClass="recensione-item"
+    xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="it.unical.ea_project_javafx.controller.activity.reviews.ReviewItemController">
 
     <padding>
         <Insets bottom="15" left="20" right="20" top="15" />
@@ -18,15 +19,15 @@
 
     <HBox alignment="CENTER_LEFT" spacing="10" styleClass="recensione-header">
         <Label fx:id="lblNomeUtente" styleClass="recensione-nome" text="Nome utente" />
-      <HBox fx:id="containerStelle" alignment="CENTER" spacing="6.0" styleClass="rating-stelle">
-         <children>
-            <Button fx:id="star1" mnemonicParsing="false" styleClass="stella" text="☆" />
-            <Button fx:id="star2" mnemonicParsing="false" styleClass="stella" text="☆" />
-            <Button fx:id="star3" mnemonicParsing="false" styleClass="stella" text="☆" />
-            <Button fx:id="star4" mnemonicParsing="false" styleClass="stella" text="☆" />
-            <Button fx:id="star5" mnemonicParsing="false" styleClass="stella" text="☆" />
-         </children>
-      </HBox>
+        <HBox fx:id="containerStelle" alignment="CENTER" spacing="6.0" styleClass="rating-stelle">
+            <children>
+                <Button fx:id="star1" mnemonicParsing="false" styleClass="stella" text="☆" />
+                <Button fx:id="star2" mnemonicParsing="false" styleClass="stella" text="☆" />
+                <Button fx:id="star3" mnemonicParsing="false" styleClass="stella" text="☆" />
+                <Button fx:id="star4" mnemonicParsing="false" styleClass="stella" text="☆" />
+                <Button fx:id="star5" mnemonicParsing="false" styleClass="stella" text="☆" />
+            </children>
+        </HBox>
         <Region HBox.hgrow="ALWAYS" />
         <MenuButton fx:id="btnActions" mnemonicParsing="false" styleClass="btn-actions" text="⋮">
             <items>
@@ -37,28 +38,32 @@
     </HBox>
 
     <Label fx:id="lblTesto" styleClass="recensione-testo" text="testo" wrapText="true">
-      <padding>
-         <Insets bottom="5.0" top="5.0" />
-      </padding></Label>
+        <padding>
+            <Insets bottom="5.0" top="5.0" />
+        </padding>
+    </Label>
 
     <HBox alignment="CENTER_LEFT" spacing="10">
-        <Button fx:id="btnRispondi" mnemonicParsing="false" onAction="#handleReply" styleClass="btn-rispondi" text="Rispondi" />
+        <Button fx:id="btnRispondi" mnemonicParsing="false" onAction="#handleReply"
+            styleClass="btn-rispondi" text="Rispondi" />
         <Region HBox.hgrow="ALWAYS" />
         <Label fx:id="lblData" styleClass="recensione-data" text="data" />
     </HBox>
 
     <VBox fx:id="containerRisposta" styleClass="risposta-container">
-      <VBox.margin>
-         <Insets />
-      </VBox.margin>
+        <VBox.margin>
+            <Insets />
+        </VBox.margin>
     </VBox>
     <VBox fx:id="containerFormRisposta" spacing="6" styleClass="risposta-container">
-        <TextArea fx:id="txtRisposta" prefRowCount="3" promptText="Scrivi una risposta..." wrapText="true" />
+        <TextArea fx:id="txtRisposta" prefRowCount="3" promptText="Scrivi una risposta..."
+            wrapText="true" />
         <HBox alignment="CENTER_RIGHT" spacing="8">
-            <Button mnemonicParsing="false" onAction="#handleCancelResponse" styleClass="btn-annulla" text="Annulla" />
-            <Button mnemonicParsing="false" onAction="#handleSendResponse" styleClass="btn-rispondi" text="Invia" />
+            <Button mnemonicParsing="false" onAction="#handleCancelResponse"
+                styleClass="btn-annulla" text="Annulla" />
+            <Button mnemonicParsing="false" onAction="#handleSendResponse" styleClass="btn-rispondi"
+                text="Invia" />
         </HBox>
     </VBox>
-
 
 </VBox>

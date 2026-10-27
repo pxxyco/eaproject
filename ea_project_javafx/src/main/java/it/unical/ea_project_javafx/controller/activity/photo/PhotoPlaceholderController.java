@@ -11,34 +11,10 @@ public class PhotoPlaceholderController {
 
     @FXML
     void handleClick(MouseEvent event) {
-
-        if (onPlaceholderClickedCallBack != null)
+        if (onPlaceholderClickedCallBack != null) {
             onPlaceholderClickedCallBack.run();
+        }
 
     }
-
-    /*
-    @FXML
-    void navigateToGallery(MouseEvent event) {
-        FXMLLoader loader = new FXMLLoader(
-                getClass().getResource(path + "photo/photo-gallery.fxml")
-        );
-
-        try{
-            Scene scene = new Scene(loader.load());
-
-            Stage stage = (Stage) ((Node) event.getSource())
-                    .getScene()
-                    .getWindow();
-
-            stage.setScene(scene);
-            stage.show();
-        }
-        catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-     */
 
 }

@@ -1,0 +1,54 @@
+/* Screen layout: create-offer. Theme: css/theme.css. */
+@import "../../app.css";
+
+.glass-overlay {
+    -fx-background-color: -tone-ink-650;
+}
+
+.modal-header {
+    -fx-border-color: -tone-white-100;
+    -fx-border-width: 0 0 1 0;
+}
+
+.modal-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-white;
+}
+
+.transparent-scroll,
+.transparent-scroll>.viewport {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.transparent-scroll .scroll-bar:vertical,
+.transparent-scroll .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+    -fx-opacity: 0.3;
+}
+
+.section-heading {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-white;
+}
+
+.section-subheading {
+    -fx-font-size: 12px;
+    -fx-text-fill: -tone-white-650;
+}
+
+.stage-section-container {
+    -fx-background-color: -tone-ink-260;
+    -fx-border-color: -tone-white-100;
+    -fx-border-radius: 12px;
+    -fx-background-radius: 12px;
+    -fx-padding: 14px;
+}
+
+.form-footer {
+    -fx-border-color: -tone-white-100;
+    -fx-border-width: 1px 0 0 0;
+    -fx-padding: 14px 0 0 0;
+}

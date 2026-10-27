@@ -1,0 +1,54 @@
+/* Reusable component: scrolling. Theme: css/theme.css. */
+
+.profile-horizontal-scroll,
+.profile-horizontal-scroll>.viewport {
+    -fx-background-color: transparent;
+}
+
+.profile-horizontal-scroll .scroll-bar:horizontal {
+    -fx-background-color: transparent;
+    -fx-opacity: 0.45;
+}
+
+.profile-horizontal-scroll .scroll-bar:horizontal .thumb {
+    -fx-background-color: -tone-ivory-320;
+    -fx-background-radius: 5px;
+}
+
+.scroll-pane,
+.scroll-pane>.viewport,
+.scroll-pane>.corner,
+.transparent-scroll,
+.main-scroll {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+    -fx-border-color: transparent;
+}
+
+.scroll-bar,
+.scroll-bar .track,
+.scroll-bar .track-background,
+.scroll-bar .increment-button,
+.scroll-bar .decrement-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.scroll-bar .thumb {
+    -fx-background-color: -tone-ivory-260;
+    -fx-background-radius: 8;
+}
+
+.scroll-bar .increment-arrow,
+.scroll-bar .decrement-arrow {
+    -fx-background-color: -color-text-muted;
+}
+
+.scroll-pane>.scroll-bar:vertical,
+.list-view>.virtual-flow>.scroll-bar:vertical,
+.table-view>.virtual-flow>.scroll-bar:vertical {
+    -fx-min-width: 0;
+    -fx-pref-width: 0;
+    -fx-max-width: 0;
+    -fx-opacity: 0;
+}

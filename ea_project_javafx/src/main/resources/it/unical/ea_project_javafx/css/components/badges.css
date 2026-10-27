@@ -1,0 +1,65 @@
+/* Reusable component: badges. Theme: css/theme.css. */
+
+.badge {
+    -fx-padding: 6 10;
+    -fx-background-radius: 100;
+    -fx-border-radius: 100;
+    -fx-font-size: 11;
+    -fx-font-weight: bold;
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+    -fx-background-color: -tone-ivory-100;
+    -fx-text-fill: -color-text-secondary;
+}
+
+.role-badge {
+    -fx-border-color: -tone-ivory-450;
+    -fx-padding: 6 10;
+    -fx-background-radius: 100;
+    -fx-border-radius: 100;
+    -fx-font-size: 11;
+    -fx-font-weight: bold;
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+    -fx-background-color: -tone-ivory-100;
+    -fx-text-fill: -color-text-secondary;
+}
+
+.booking-status-pill,
+.history-status-pill {
+    -fx-padding: 6 10;
+    -fx-background-radius: 100;
+    -fx-border-radius: 100;
+    -fx-font-size: 11;
+    -fx-font-weight: bold;
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+    -fx-background-color: -tone-ivory-100;
+    -fx-text-fill: -color-text-secondary;
+}
+
+.booking-status-confirmed,
+.history-status-confirmed {
+    -fx-background-color: -tone-mint-160;
+    -fx-text-fill: -color-success;
+}
+
+.booking-status-pending,
+.history-status-pending {
+    -fx-background-color: -tone-warning-160;
+    -fx-text-fill: -color-warning;
+}
+
+.booking-status-cancelled,
+.history-status-cancelled {
+    -fx-background-color: -tone-danger-160;
+    -fx-text-fill: -color-danger;
+}
+
+.booking-status-completed,
+.booking-status-neutral,
+.history-status-completed,
+.history-status-neutral {
+    -fx-background-color: -tone-ivory-100;
+    -fx-text-fill: -color-text-secondary;
+}

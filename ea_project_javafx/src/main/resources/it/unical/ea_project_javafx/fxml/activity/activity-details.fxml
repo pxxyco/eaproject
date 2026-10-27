@@ -1,6 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.DatePicker?>
@@ -14,126 +12,203 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-
-<StackPane fx:id="root" prefHeight="760" prefWidth="1300" styleClass="app-root" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.activity.ActivityDetailsController">
-
-    <stylesheets>
-        <URL value="@../../css/common/style.css" />
-        <URL value="@../../css/home/home.css" />
-        <URL value="@../../css/activity/activity-details.css" />
-        <URL value="@../../css/activity/activity-common.css" />
-    </stylesheets>
-
+<?import javafx.scene.layout.FlowPane?>
+<StackPane stylesheets="@../../css/screens/activity/details.css" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:id="root"
+    prefHeight="760" prefWidth="1300" styleClass="app-root, experience-detail"
+    fx:controller="it.unical.ea_project_javafx.controller.activity.ActivityDetailsController">
     <!-- Immagine di sfondo e overlay -->
     <ImageView fx:id="bgImageView" pickOnBounds="true" preserveRatio="false" />
     <Region mouseTransparent="true" styleClass="bg-overlay" />
-
     <BorderPane styleClass="app-shell">
-
         <!-- Topbar Dinamica (caricata programmaticamente da setupNavbar) -->
         <top>
             <StackPane fx:id="navbarContainer" />
         </top>
-
         <center>
-            <StackPane fx:id="contentArea" prefHeight="150.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+            <StackPane fx:id="contentArea" BorderPane.alignment="CENTER">
                 <children>
                     <!-- Overlay di caricamento -->
-                    <StackPane fx:id="loadingOverlay" alignment="CENTER" styleClass="loading-overlay">
+                    <StackPane fx:id="loadingOverlay" alignment="CENTER" styleClass="loading-host">
                         <children>
-                            <fx:include fx:id="loadingCard" source="../common/loading-overlay.fxml" />
+                            <fx:include fx:id="loadingCard" source="../common/loading-screen.fxml" />
                         </children>
                     </StackPane>
-
                     <!-- Contenuto Principale Scrollabile -->
-                    <ScrollPane fx:id="contentScroll" fitToWidth="true" managed="false" styleClass="content-scroll" visible="false">
+                    <ScrollPane fx:id="contentScroll" fitToWidth="true" managed="false"
+                        styleClass="content-scroll" visible="false">
                         <content>
-                            <BorderPane>
-                                <center>
-                                    <VBox maxWidth="1000.0" spacing="24" styleClass="content-wrapper" BorderPane.alignment="CENTER">
-                                        <padding>
-                                            <Insets bottom="60" left="60" right="60" top="24" />
-                                        </padding>
+                            <HBox alignment="TOP_CENTER" spacing="28.0">
+                                <padding>
+                                    <Insets bottom="40.0" left="32.0" right="32.0" top="28.0" />
+                                </padding>
+                                <children>
+                                    <!-- Colonna sinistra -->
+                                    <VBox maxWidth="1120" minWidth="0" spacing="26.0"
+                                        styleClass="content-wrapper" HBox.hgrow="ALWAYS">
                                         <children>
-
-                                            <!-- Section Hero Header -->
-                                            <StackPane fx:id="hero" maxHeight="200.0" maxWidth="600.0" minHeight="200.0" prefHeight="200.0" styleClass="hero">
+                                            <Button text="← Torna alle esperienze"
+                                                onAction="#handleBackToExperiences"
+                                                styleClass="back-link" />
+                                            <VBox alignment="TOP_LEFT" spacing="8"
+                                                styleClass="experience-heading">
+                                                <padding>
+                                                    <Insets bottom="0" left="0" right="0" top="0" />
+                                                </padding>
                                                 <children>
-                                                    <ImageView fx:id="heroImage" fitHeight="200.0" fitWidth="600.0" preserveRatio="false" smooth="true" />
-                                                    <VBox alignment="BOTTOM_LEFT" spacing="8" styleClass="hero-content">
-                                                        <padding>
-                                                            <Insets bottom="20" left="28" right="28" top="20" />
-                                                        </padding>
+                                                    <HBox spacing="8">
                                                         <children>
-                                                            <HBox spacing="10">
-                                                                <children>
-                                                                    <Label fx:id="lblCategoria" styleClass="badge-category"/>
-                                                                    <Label fx:id="lblRating" styleClass="badge-rating" text="★ 4.9" />
-                                                                </children>
-                                                            </HBox>
-                                                            <Label fx:id="lblTitolo" styleClass="hero-title" text="Title" wrapText="true" />
-                                                            <Label fx:id="lblLocalita" styleClass="hero-subtitle" text="City" />
-                                                        </children>
-                                                    </VBox>
-                                                </children>
-                                            </StackPane>
-
-                                            <!-- Menu Sezioni (Descrizione, Itinerario, Foto, Recensioni) -->
-                                            <VBox spacing="10.0" styleClass="content-rows" VBox.vgrow="ALWAYS">
-                                                <children>
-                                                    <HBox alignment="CENTER_LEFT" prefHeight="50.0" prefWidth="200.0" spacing="40.0">
-                                                        <children>
-                                                            <Button fx:id="btnDescrizione" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleDescrizione" prefHeight="30.0" prefWidth="100.0" styleClass="section-button-active" text="Descrizione" />
-                                                            <Button fx:id="btnItinerario" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleItinerario" prefHeight="30.0" prefWidth="100.0" styleClass="section-button" text="Itinerario" />
-                                                            <Button fx:id="btnFoto" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleFoto" prefHeight="30.0" prefWidth="100.0" styleClass="section-button" text="Foto" />
-                                                            <Button fx:id="btnRecensioni" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleRecensioni" prefHeight="30.0" prefWidth="100.0" styleClass="section-button" text="Recensioni" />
+                                                            <Label fx:id="lblCategoria"
+                                                                styleClass="badge-category" />
+                                                            <Label fx:id="lblRating"
+                                                                styleClass="badge-rating" text="—" />
                                                         </children>
                                                     </HBox>
-                                                    <Separator opacity="0.3" prefWidth="200.0" />
-                                                    <StackPane fx:id="bodyContainer" alignment="CENTER_LEFT" prefWidth="200.0" VBox.vgrow="ALWAYS" />
+                                                    <Label fx:id="lblTitolo" styleClass="hero-title"
+                                                        text="Caricamento esperienza…"
+                                                        wrapText="true" />
+                                                    <Label fx:id="lblLocalita"
+                                                        styleClass="hero-subtitle" text="" />
+                                                </children>
+                                            </VBox>
+                                            <Label fx:id="experienceSummary" wrapText="true"
+                                                styleClass="experience-summary" />
+                                            <!-- Section Hero Header -->
+                                            <StackPane fx:id="hero" maxHeight="320.0"
+                                                maxWidth="Infinity" minHeight="320.0"
+                                                prefHeight="320.0" styleClass="hero">
+                                                <children>
+                                                    <ImageView fx:id="heroImage" fitHeight="320.0"
+                                                        fitWidth="600.0" preserveRatio="false"
+                                                        smooth="true" />
+                                                    <!-- Cuore preferiti (sopra l'hero-content per
+                                                    ricevere i click) -->
+                                                    <Button fx:id="btnFavorite" managed="false"
+                                                        mnemonicParsing="false"
+                                                        onAction="#handleFavorite"
+                                                        styleClass="btn-favorite" text="♡"
+                                                        visible="false"
+                                                        StackPane.alignment="TOP_RIGHT">
+                                                        <StackPane.margin>
+                                                            <Insets right="14.0" top="14.0" />
+                                                        </StackPane.margin>
+                                                    </Button>
+                                                </children>
+                                            </StackPane>
+                                            <!-- Menu Sezioni (Descrizione, Itinerario, Foto,
+                                            Recensioni) -->
+                                            <VBox fx:id="bookingCard" maxHeight="-Infinity"
+                                                minWidth="0" spacing="14.0"
+                                                styleClass="booking-card" maxWidth="Infinity">
+                                                <padding>
+                                                    <Insets bottom="24.0" left="24.0" right="24.0"
+                                                        top="24.0" />
+                                                </padding>
+                                                <children>
+                                                    <FlowPane hgap="24" vgap="18"
+                                                        alignment="CENTER_LEFT">
+                                                        <VBox spacing="2.0">
+                                                            <children>
+                                                                <Label styleClass="booking-title"
+                                                                    text="Prenota" />
+                                                                <Label styleClass="booking-subtitle"
+                                                                    text="Scegli data e partecipanti" />
+                                                            </children>
+                                                        </VBox>
+                                                        <HBox alignment="BASELINE_LEFT" spacing="4">
+                                                            <children>
+                                                                <Label fx:id="lblPrezzo"
+                                                                    styleClass="price-big" text="—" />
+                                                                <Label styleClass="price-suffix"
+                                                                    text="/ persona" />
+                                                            </children>
+                                                        </HBox>
+                                                        <VBox spacing="4.0" prefWidth="200">
+                                                            <children>
+                                                                <Label styleClass="field-label"
+                                                                    text="Data" />
+                                                                <DatePicker fx:id="datePicker"
+                                                                    editable="false"
+                                                                    maxWidth="Infinity" />
+                                                            </children>
+                                                        </VBox>
+                                                        <VBox spacing="4.0" prefWidth="150">
+                                                            <children>
+                                                                <Label styleClass="field-label"
+                                                                    text="Partecipanti" />
+                                                                <Spinner fx:id="spinnerPartecipanti"
+                                                                    maxWidth="Infinity"
+                                                                    styleClass="booking-spinner" />
+                                                            </children>
+                                                        </VBox>
+                                                        <VBox alignment="CENTER_LEFT" spacing="4"
+                                                            minWidth="130">
+                                                            <children>
+                                                                <Label styleClass="field-label"
+                                                                    text="Totale stimato" />
+                                                                <Label fx:id="lblTotale"
+                                                                    styleClass="price-total"
+                                                                    text="—" />
+                                                            </children>
+                                                        </VBox>
+                                                        <Button fx:id="btnPrenota"
+                                                            onAction="#handlePrenota"
+                                                            styleClass="btn-primary"
+                                                            text="Prenota Ora" />
+                                                        <Label fx:id="bookingAvailabilityLabel"
+                                                            wrapText="true"
+                                                            styleClass="section-subtitle"
+                                                            maxWidth="320" />
+                                                        <Button fx:id="btnContactOrganizer"
+                                                            onAction="#handleContactOrganizer"
+                                                            styleClass="btn-secondary"
+                                                            text="Contatta organizzatore" />
+                                                        <Label styleClass="hint"
+                                                            text="Consulta date, disponibilità e condizioni prima di confermare."
+                                                            wrapText="true" maxWidth="320" />
+                                                    </FlowPane>
+                                                </children>
+                                            </VBox>
+                                            <VBox spacing="14.0"
+                                                styleClass="content-rows, experience-body"
+                                                VBox.vgrow="ALWAYS">
+                                                <children>
+                                                    <FlowPane alignment="CENTER_LEFT" hgap="10"
+                                                        vgap="10" styleClass="section-tabs">
+                                                        <children>
+                                                            <Button fx:id="btnDescrizione"
+                                                                mnemonicParsing="false"
+                                                                onAction="#handleDescrizione"
+                                                                styleClass="section-button-active"
+                                                                text="Descrizione" />
+                                                            <Button fx:id="btnItinerario"
+                                                                mnemonicParsing="false"
+                                                                onAction="#handleItinerario"
+                                                                styleClass="section-button"
+                                                                text="Itinerario" />
+                                                            <Button fx:id="btnFoto"
+                                                                mnemonicParsing="false"
+                                                                onAction="#handleFoto"
+                                                                styleClass="section-button"
+                                                                text="Foto" />
+                                                            <Button fx:id="btnRecensioni"
+                                                                mnemonicParsing="false"
+                                                                onAction="#handleRecensioni"
+                                                                styleClass="section-button"
+                                                                text="Recensioni" />
+                                                        </children>
+                                                    </FlowPane>
+                                                    <StackPane fx:id="bodyContainer"
+                                                        alignment="TOP_LEFT" maxWidth="Infinity"
+                                                        VBox.vgrow="ALWAYS" />
                                                 </children>
                                             </VBox>
                                         </children>
                                     </VBox>
-                                </center>
-
-                                <!-- Box di Prenotazione (Lato Destro) -->
-                                <right>
-                                    <VBox fx:id="bookingCard" maxHeight="400.0" minWidth="250.0" prefWidth="320" spacing="14" styleClass="booking-card" BorderPane.alignment="TOP_CENTER">
-                                        <padding>
-                                            <Insets bottom="22" left="22" right="22" top="22" />
-                                        </padding>
-                                        <children>
-                                            <HBox alignment="BASELINE_LEFT" spacing="4">
-                                                <children>
-                                                    <Label fx:id="lblPrezzo" styleClass="price-big" text="da 45€" />
-                                                    <Label styleClass="price-suffix" text="/ persona" />
-                                                </children>
-                                            </HBox>
-                                            <Label styleClass="field-label" text="Data" />
-                                            <DatePicker fx:id="datePicker" editable="false" maxWidth="Infinity" />
-                                            <Label styleClass="field-label" text="Partecipanti" />
-                                            <Spinner fx:id="spinnerPartecipanti" maxWidth="Infinity" styleClass="booking-spinner" />
-                                            <Separator />
-                                            <HBox alignment="CENTER_LEFT">
-                                                <children>
-                                                    <Label styleClass="field-label" text="Totale stimato" />
-                                                    <Region HBox.hgrow="ALWAYS" />
-                                                    <Label fx:id="lblTotale" styleClass="price-total" text="45€" />
-                                                </children>
-                                            </HBox>
-                                            <Button fx:id="btnPrenota" maxWidth="Infinity" onAction="#handlePrenota" styleClass="btn-primary" text="Prenota Ora" />
-                                            <Label styleClass="hint" text="Cancellazione gratuita fino a 24h prima" wrapText="true" />
-                                        </children>
-                                        <BorderPane.margin>
-                                            <Insets bottom="30.0" left="30.0" right="30.0" top="50.0" />
-                                        </BorderPane.margin>
-                                    </VBox>
-                                </right>
-                            </BorderPane>
+                                    <!-- Box di Prenotazione (Lato Destro) -->
+                                </children>
+                            </HBox>
                         </content>
                     </ScrollPane>
-
                     <!-- Card Nuova Recensione -->
                     <fx:include fx:id="newRecCard" source="reviews/review.fxml" />
                 </children>

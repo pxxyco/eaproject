@@ -1,28 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<HBox maxHeight="Infinity" maxWidth="Infinity" spacing="20" styleClass="container" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.activity.ItineraryController">
-    <stylesheets>
-        <URL value="@../../css/common/style.css" />
-        <URL value="@../../css/activity/activity-common.css" />
-        <URL value="@../../css/activity/itinerary.css" />
-    </stylesheets>
+<HBox stylesheets="@../../css/screens/activity/content.css" maxWidth="Infinity" spacing="20" styleClass="container"
+   xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
+   fx:controller="it.unical.ea_project_javafx.controller.activity.ItineraryController">
 
-    <children>
-      <VBox fx:id="itinerarioContainer" minWidth="275.0" prefWidth="400.0" spacing="10.0" styleClass="itinerario">
-         <HBox.margin>
-            <Insets />
-         </HBox.margin>
+   <children>
+      <VBox minWidth="180.0" prefWidth="230.0" spacing="12.0"
+         styleClass="itinerario">
          <padding>
-            <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
-         </padding></VBox>
-      <StackPane fx:id="mapContainer" maxHeight="400.0" minHeight="300.0" minWidth="200.0" prefHeight="300.0" prefWidth="500.0" />
+            <Insets bottom="24.0" left="24.0" right="24.0" top="24.0" />
+         </padding>
+         <children>
+            <VBox spacing="2.0">
+               <children>
+                  <Label styleClass="section-card-title" text="Tappe" />
+                  <Label styleClass="section-card-subtitle"
+                     text="Clicca una tappa per vederla sulla mappa" />
+               </children>
+            </VBox>
+            <VBox fx:id="itinerarioItemsContainer" spacing="10.0" />
+         </children>
+      </VBox>
 
-    </children>
-
+      <StackPane fx:id="mapContainer" maxHeight="400.0" minHeight="300.0" minWidth="0.0"
+         prefHeight="340.0" styleClass="map-card" HBox.hgrow="ALWAYS">
+         <padding>
+            <Insets bottom="0" left="0" right="0" top="0" />
+         </padding>
+      </StackPane>
+   </children>
 </HBox>

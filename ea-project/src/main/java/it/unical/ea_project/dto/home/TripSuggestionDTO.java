@@ -7,8 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TripSuggestionDTO
-{
+public class TripSuggestionDTO {
     private Long tripId;
     private String title;
     private String location;

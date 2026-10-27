@@ -11,43 +11,54 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-
-<StackPane xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="it.unical.ea_project_javafx.controller.traveler.ListSharingPopupController"
-           styleClass="sharing-popup-overlay" pickOnBounds="true">
+<StackPane stylesheets="@../../css/screens/traveler/sharing.css" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="it.unical.ea_project_javafx.controller.traveler.ListSharingPopupController"
+    styleClass="sharing-popup-overlay" pickOnBounds="true">
     <children>
         <Region styleClass="sharing-popup-backdrop" />
         <VBox maxWidth="620.0" maxHeight="650.0" spacing="16.0" styleClass="sharing-popup-card">
-            <padding><Insets top="26.0" right="28.0" bottom="26.0" left="28.0" /></padding>
+            <padding>
+                <Insets top="26.0" right="28.0" bottom="26.0" left="28.0" />
+            </padding>
             <HBox alignment="CENTER_LEFT" spacing="12.0">
                 <VBox spacing="4.0" HBox.hgrow="ALWAYS">
                     <Label text="Gestisci condivisioni" styleClass="sharing-popup-title" />
-                    <Label fx:id="popupTitleLabel" text="Condivisioni" styleClass="sharing-popup-subtitle" />
+                    <Label fx:id="popupTitleLabel" text="Condivisioni"
+                        styleClass="sharing-popup-subtitle" />
                 </VBox>
                 <Region HBox.hgrow="ALWAYS" />
-                <Button text="✕" onAction="#handleClose" styleClass="sharing-popup-close" accessibleText="Chiudi popup" />
+                <Button text="✕" onAction="#handleClose" styleClass="sharing-popup-close"
+                    accessibleText="Chiudi popup" />
             </HBox>
             <Separator />
             <VBox spacing="8.0">
                 <Label text="Utenti che hanno accesso" styleClass="section-header" />
-                <ListView fx:id="sharingListView" prefHeight="220.0" VBox.vgrow="ALWAYS" styleClass="sharing-users-list" />
-                <Label fx:id="sharingStatusLabel" text="" wrapText="true" styleClass="sharing-status-success" />
+                <ListView fx:id="sharingListView" prefHeight="220.0" VBox.vgrow="ALWAYS"
+                    styleClass="sharing-users-list" />
+                <Label fx:id="sharingStatusLabel" text="" wrapText="true"
+                    styleClass="sharing-status-success" />
                 <HBox spacing="10.0" alignment="CENTER_RIGHT">
                     <ComboBox fx:id="permissionCombo" prefWidth="125.0" promptText="Permesso" />
-                    <Button fx:id="updatePermissionButton" text="Aggiorna permesso" onAction="#handleUpdatePermission" styleClass="btn-secondary" disable="true" />
-                    <Button fx:id="revokeAccessButton" text="Revoca accesso" onAction="#handleRevokeAccess" styleClass="btn-secondary" disable="true" />
+                    <Button fx:id="updatePermissionButton" text="Aggiorna permesso"
+                        onAction="#handleUpdatePermission" styleClass="btn-secondary" disable="true" />
+                    <Button fx:id="revokeAccessButton" text="Revoca accesso"
+                        onAction="#handleRevokeAccess" styleClass="btn-secondary" disable="true" />
                 </HBox>
             </VBox>
             <Separator />
             <VBox spacing="10.0">
                 <Label text="Condividi con un nuovo utente" styleClass="section-header" />
                 <HBox spacing="10.0" alignment="CENTER_LEFT">
-                    <TextField fx:id="userIdentifierField" promptText="Cerca username o email" HBox.hgrow="ALWAYS" />
+                    <TextField fx:id="userIdentifierField" promptText="Cerca username o email"
+                        HBox.hgrow="ALWAYS" />
                     <ComboBox fx:id="newPermissionCombo" prefWidth="105.0" promptText="Permesso" />
                     <Button text="Invia invito" onAction="#handleShare" styleClass="btn-primary" />
                 </HBox>
-                <ListView fx:id="userSearchResultsListView" prefHeight="125.0" styleClass="sharing-users-list" />
-                <Label text="Digita almeno 2 caratteri per cercare gli utenti attivi. VIEW consente la visualizzazione; EDIT consente le modifiche. L'accesso viene attivato solo dopo l'accettazione dell'invito." wrapText="true" styleClass="sharing-popup-hint" />
+                <ListView fx:id="userSearchResultsListView" prefHeight="125.0"
+                    styleClass="sharing-users-list" />
+                <Label
+                    text="Digita almeno 2 caratteri per cercare gli utenti attivi. VIEW consente la visualizzazione; EDIT consente le modifiche. L'accesso viene attivato solo dopo l'accettazione dell'invito."
+                    wrapText="true" styleClass="sharing-popup-hint" />
             </VBox>
             <HBox alignment="CENTER_RIGHT">
                 <Button text="Fatto" onAction="#handleClose" styleClass="btn-primary" />

@@ -2,8 +2,9 @@ package it.unical.ea_project;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 
-@org.springframework.test.context.ActiveProfiles("test")
+@ActiveProfiles("test")
 @SpringBootTest
 class EaProjectApplicationTests {
 

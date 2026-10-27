@@ -1,6 +1,6 @@
 package it.unical.ea_project_javafx.controller.activity;
 
-import it.unical.ea_project_javafx.dto.TripDTO;
+import it.unical.ea_project_javafx.dto.trip.TripDTO;
 
 public interface TripSectionController {
     void setData(TripDTO trip);

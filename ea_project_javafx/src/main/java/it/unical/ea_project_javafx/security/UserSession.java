@@ -1,25 +1,27 @@
 package it.unical.ea_project_javafx.security;
 
-import it.unical.ea_project_javafx.dto.UserDTO;
+import it.unical.ea_project_javafx.dto.user.UserDTO;
+import java.util.Objects;
 import lombok.Getter;
 
 @Getter
 public class UserSession {
 
     private Long id;
-    
+
     private String username;
     private String email;
     private String fullName;
     private String profilePhotoUrl;
-    private String role;    
+    private String role;
     private String jwtToken;
-    private String accessToken;
+    private volatile String accessToken;
     private String refreshToken;
-    
+
     private boolean oauthProvider;
-    private boolean loggedIn = false;
-    
+    private volatile boolean loggedIn = false;
+    private volatile long generation;
+
     private static UserSession instance;
 
     private UserSession() {
@@ -38,6 +40,8 @@ public class UserSession {
     public void setSession(UserDTO userDTO) {
 
         if (userDTO != null) {
+            if (!Objects.equals(this.id, userDTO.getId()))
+                generation++;
             this.id = userDTO.getId();
             this.username = userDTO.getUsername();
             this.email = userDTO.getEmail();
@@ -51,6 +55,7 @@ public class UserSession {
     }
 
     public void clear() {
+        generation++;
 
         this.id = null;
         this.username = null;

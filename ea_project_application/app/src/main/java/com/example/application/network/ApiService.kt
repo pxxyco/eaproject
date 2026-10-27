@@ -24,9 +24,9 @@ sealed interface ApiResult<out T> {
 
 object ApiService {
 
-    // Sviluppo: serve "adb reverse tcp:8080 tcp:8080" dopo ogni riavvio di emulatore/adb.
+    // Sviluppo: serve "adb reverse tcp:8443 tcp:8443" dopo ogni riavvio di emulatore/adb.
     // Senza, l'app mostra il popup ERR-101 (comportamento corretto).
-    const val BASE_URL = "http://localhost:8080"
+    const val BASE_URL = "https://localhost:8443"
 
     val gson = Gson()
     private val JSON = "application/json".toMediaType()
@@ -87,6 +87,20 @@ object ApiService {
     suspend fun <T> put(path: String, body: Any?, type: Class<T>) = call("PUT", path, body, type)
     suspend fun <T> delete(path: String, type: Class<T>) = call("DELETE", path, null, type)
 
+    /** Uses the same authenticated client and token refresh as ordinary API calls. */
+    suspend fun uploadPhoto(path: String, field: String, bytes: ByteArray, mimeType: String): ApiResult<Unit> =
+        withContext(Dispatchers.IO) {
+            try {
+                val body = okhttp3.MultipartBody.Builder().setType(okhttp3.MultipartBody.FORM)
+                    .addFormDataPart(field, "photo", bytes.toRequestBody(mimeType.toMediaType())).build()
+                val request = Request.Builder().url(resolveUrl(path)).post(body).build()
+                client.newCall(request).execute().use { mapResponse(it, Unit::class.java) }
+            } catch (exception: IOException) {
+                reportNetworkFailure()
+                ApiResult.NetworkError(exception)
+            }
+        }
+
     fun resolveUrl(path: String?): String {
         if (path.isNullOrBlank()) return ""
         if (path.startsWith("http://") || path.startsWith("https://")) return path
@@ -102,6 +116,8 @@ object ApiService {
             } catch (e: IOException) {
                 reportNetworkFailure()
                 ApiResult.NetworkError(e)
+            } catch (e: com.google.gson.JsonParseException) {
+                ApiResult.HttpError(502, "Risposta JSON non valida")
             }
         }
 
@@ -181,7 +197,10 @@ object ApiService {
         response.isSuccessful -> {
             val text = response.body?.string().orEmpty()
             @Suppress("UNCHECKED_CAST")
-            val data = if (type == Unit::class.java || text.isBlank()) Unit as T else gson.fromJson(text, type)
+            val data = if (type == Unit::class.java) Unit as T else {
+                if (text.isBlank() || text.trim() == "null") throw com.google.gson.JsonParseException("Risposta vuota")
+                gson.fromJson(text, type)
+            }
             ApiResult.Success(data, response)
         }
         response.code == 429 -> rateLimited(response)

@@ -1,14 +1,13 @@
 package it.unical.ea_project_javafx;
 
+import it.unical.ea_project_javafx.config.AppConfig;
+import it.unical.ea_project_javafx.lifecycle.SingleInstanceLock;
+import it.unical.ea_project_javafx.navigation.SceneNavigator;
+import it.unical.ea_project_javafx.service.api.ApiService;
+import java.io.IOException;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-
-import java.io.IOException;
-
-import it.unical.ea_project_javafx.util.AppConfig;
-import it.unical.ea_project_javafx.util.SceneNavigator;
-import it.unical.ea_project_javafx.util.SingleInstanceLock;
 
 /**
  * JavaFX App
@@ -17,6 +16,8 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
+
+        ApiService.init();
 
         if (!SingleInstanceLock.acquireLock()) {
             Platform.exit();

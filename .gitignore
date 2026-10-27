@@ -244,5 +244,20 @@ application-local.yml
 *.pem
 *.key
 
+###keystore
+/ea-project/src/main/resources/keystore.p12
+
 # Configurazione locale Docker
 /.env
+
+# Runtime photo storage; default images are initialized from backend resources.
+/photo/
+
+# Private chat attachments (never served as public photos)
+**/photo-private/
+
+# Docker certificates and private environment files
+/certs/
+/.env.*
+!/.env.example
+/scripts/__pycache__/

@@ -1,4 +1,4 @@
-package com.example.application.dto.home
+package com.example.application.dto
 
 import java.math.BigDecimal
 

@@ -1,7 +1,9 @@
 package it.unical.ea_project_javafx.controller.profile;
 
 import it.unical.ea_project_javafx.security.UserSession;
-import it.unical.ea_project_javafx.util.BackgroundHelper;
+import it.unical.ea_project_javafx.ui.ViewSupport;
+import it.unical.ea_project_javafx.ui.background.BackgroundHelper;
+import java.io.IOException;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -10,37 +12,35 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
-import java.io.IOException;
+public class DashboardViewController implements AutoCloseable {
+    private AutoCloseable child;
 
-public class DashboardViewController {
+    @Override
+    public void close() throws Exception {
+        if (child != null)
+            child.close();
+    }
 
-    @FXML private ImageView bgImageView;
-    @FXML private StackPane navbarContainer;
-    @FXML private VBox dashboardContent;
+    @FXML
+    private ImageView bgImageView;
+    @FXML
+    private StackPane navbarContainer;
+    @FXML
+    private VBox dashboardContent;
 
     private final UserSession userSession = UserSession.getInstance();
 
     @FXML
     public void initialize() {
         BackgroundHelper.setupBackground(bgImageView);
-        loadNavbar();
+        ViewSupport.loadNavbar(navbarContainer);
         loadRoleDashboard();
-    }
-
-    private void loadNavbar() {
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml")
-            );
-            Parent navbar = loader.load();
-            navbarContainer.getChildren().setAll(navbar);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     private void loadRoleDashboard() {
         String role = userSession.getRole();
+        if ("ORGANIZER".equals(role))
+            dashboardContent.setMaxWidth(1220);
         String dashboardPath = "ORGANIZER".equalsIgnoreCase(role)
                 ? "/it/unical/ea_project_javafx/fxml/organizer/organizer-dashboard.fxml"
                 : "/it/unical/ea_project_javafx/fxml/traveler/traveler-dashboard.fxml";
@@ -49,6 +49,8 @@ public class DashboardViewController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(dashboardPath));
             Parent dashboard = loader.load();
             Object controller = loader.getController();
+            if (controller instanceof AutoCloseable lifecycle)
+                child = lifecycle;
             if (controller instanceof ProfileDashboardController profileDashboardController) {
                 profileDashboardController.setUser(userSession);
             }

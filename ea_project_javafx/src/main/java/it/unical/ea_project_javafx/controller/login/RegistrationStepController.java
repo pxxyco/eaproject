@@ -1,16 +1,10 @@
 package it.unical.ea_project_javafx.controller.login;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializer;
-import it.unical.ea_project_javafx.dto.UserDTO;
+import it.unical.ea_project_javafx.dto.user.UserDTO;
 import it.unical.ea_project_javafx.navigation.StepNavigator;
-import it.unical.ea_project_javafx.util.ApiService;
-import it.unical.ea_project_javafx.util.PasswordPolicy;
-import it.unical.ea_project_javafx.util.SceneNavigator;
-import javafx.application.Platform;
+import it.unical.ea_project_javafx.security.PasswordPolicy;
+import it.unical.ea_project_javafx.service.api.ApiService;
+import it.unical.ea_project_javafx.ui.ViewSupport;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -20,18 +14,19 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import lombok.Setter;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-
 //registrazione
 public class RegistrationStepController {
 
-    @FXML private Label wizardTitle;
-    @FXML private Label errorLabel;
-    @FXML private TextField regFirstNameField, regLastNameField, regUsernameField, regEmailField;
-    @FXML private PasswordField regPasswordField, regConfirmPasswordField;
-    @FXML private Button btnRegister;
+    @FXML
+    private Label wizardTitle;
+    @FXML
+    private Label errorLabel;
+    @FXML
+    private TextField regFirstNameField, regLastNameField, regUsernameField, regEmailField;
+    @FXML
+    private PasswordField regPasswordField, regConfirmPasswordField;
+    @FXML
+    private Button btnRegister;
 
     @Setter
     private StepNavigator navigator;
@@ -40,7 +35,8 @@ public class RegistrationStepController {
     @FXML
     public void initialize() {
 
-        TextField[] fields = {regFirstNameField, regLastNameField, regUsernameField, regEmailField, regPasswordField, regConfirmPasswordField};
+        TextField[] fields = { regFirstNameField, regLastNameField, regUsernameField, regEmailField, regPasswordField,
+                regConfirmPasswordField };
         for (TextField field : fields) {
             if (field != null) {
                 field.setOnKeyPressed(event -> {
@@ -62,25 +58,11 @@ public class RegistrationStepController {
     }
 
     public void showError(String message) {
-
-        Platform.runLater(() -> {
-            if (errorLabel != null) {
-                errorLabel.setText(message);
-                errorLabel.setVisible(true);
-                errorLabel.setManaged(true);
-            }
-        });
-
+        ViewSupport.show(errorLabel, message);
     }
 
     public void clearError() {
-
-        if (errorLabel != null) {
-            errorLabel.setText("");
-            errorLabel.setVisible(false);
-            errorLabel.setManaged(false);
-        }
-
+        ViewSupport.clear(errorLabel);
     }
 
     @FXML
@@ -127,23 +109,13 @@ public class RegistrationStepController {
                 .oauthProvider(false)
                 .build();
 
-        Gson gson = new GsonBuilder()
-                .registerTypeAdapter(LocalDateTime.class, (JsonSerializer<LocalDateTime>) (src, typeOfSrc, context) ->
-                        src == null ? null : new JsonPrimitive(src.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
-                .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, typeOfT, context) ->
-                        LocalDateTime.parse(json.getAsString()))
-                .registerTypeAdapter(LocalDate.class, (JsonSerializer<LocalDate>) (src, typeOfSrc, context) ->
-                        src == null ? null : new JsonPrimitive(src.format(DateTimeFormatter.ISO_LOCAL_DATE)))
-                .registerTypeAdapter(LocalDate.class, (JsonDeserializer<LocalDate>) (json, typeOfT, context) ->
-                        LocalDate.parse(json.getAsString()))
-                .create();
+        String jsonBody = ApiService.toJson(requestDto);
 
-        String jsonBody = gson.toJson(requestDto);
-
-        ApiService.post(
+        ApiService.callDetailed(
                 ApiService.BASE_URL + "/api/users",
                 jsonBody,
-                res -> Platform.runLater(() -> {
+                ApiService.Method.POST,
+                res -> {
                     if (res.statusCode() == 200 || res.statusCode() == 201) {
                         clearFields();
                         navigator.showSuccessMessage("Puoi accedere al tuo account.");
@@ -154,12 +126,9 @@ public class RegistrationStepController {
                     } else {
                         showError("Impossibile completare la registrazione.");
                     }
-                }),
-                () -> Platform.runLater(() -> {
-                    SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/common/splash-screen.fxml", null);
-                }),
-                navigator::setLoading
-        );
+                },
+                this::showError,
+                navigator::setLoading);
 
     }
 

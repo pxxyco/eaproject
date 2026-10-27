@@ -1,143 +1,113 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<?import java.net.URL?>
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-
-<StackPane xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="it.unical.ea_project_javafx.controller.common.SupportController">
-    <stylesheets>
-        <URL value="@../../css/common/style.css" />
-        <URL value="@../../css/profile/profile.css" />
-        <URL value="@../../css/common/support.css" />
-    </stylesheets>
-
-    <ImageView fx:id="bgImageView" pickOnBounds="true" preserveRatio="false" />
-    <Region styleClass="profile-overlay" />
-
+<StackPane stylesheets="@../../css/screens/common/support.css" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="it.unical.ea_project_javafx.controller.common.SupportController"
+    styleClass="account-page">
+    <ImageView fx:id="bgImageView" mouseTransparent="true" opacity="0.12" />
     <BorderPane>
         <top>
             <StackPane fx:id="navbarContainer" />
         </top>
         <center>
             <ScrollPane fitToWidth="true" styleClass="main-scroll">
-                <content>
-                    <VBox alignment="TOP_CENTER" spacing="24.0">
-                        <padding>
-                            <Insets bottom="40.0" left="32.0" right="32.0" top="28.0" />
-                        </padding>
-
-                        <VBox maxWidth="850.0" spacing="20.0" styleClass="glass-card">
-                            <padding>
-                                <Insets bottom="28.0" left="28.0" right="28.0" top="28.0" />
-                            </padding>
-
-                            <VBox spacing="4.0">
-                                <Label fx:id="supportTitleLabel" styleClass="dash-title" text="Centro Assistenza" />
-                                <Label fx:id="supportSubtitleLabel" styleClass="dash-subtitle" text="Trova risposte immediate o invia una segnalazione." />
-                            </VBox>
-
-                            <Label fx:id="statusMessageLabel" managed="false" visible="false" wrapText="true" styleClass="dashboard-error" />
-
-                            <Separator styleClass="nav-divider" />
-
-                            <!-- FAQ TRAVELER -->
-                            <VBox fx:id="travelerFaqSection" spacing="12.0">
-                                <Label styleClass="section-header" text="Domande Frequenti - Viaggiatori" />
-                                <Accordion styleClass="custom-accordion">
-                                    <panes>
-                                        <TitledPane text="Come posso cancellare una prenotazione effettuata?">
-                                            <VBox spacing="6.0">
-                                                <Label styleClass="faq-answer" text="Puoi cancellare la tua prenotazione accedendo alla tua Dashboard nella tabella 'Le tue prenotazioni' e cliccando sul pulsante 'Cancella'." wrapText="true" />
-                                            </VBox>
-                                        </TitledPane>
-                                        <TitledPane text="Quando ricevo la conferma dell'escursione/viaggio?">
-                                            <VBox spacing="6.0">
-                                                <Label styleClass="faq-answer" text="La conferma è immediata al completamento della prenotazione. Riceverai i dettagli riepilogativi anche via e-mail." wrapText="true" />
-                                            </VBox>
-                                        </TitledPane>
-                                        <TitledPane text="Come funzionano le liste di itinerari condivisi?">
-                                            <VBox spacing="6.0">
-                                                <Label styleClass="faq-answer" text="Puoi creare liste private o condivise con specifici utenti dalla sezione 'Preferiti' per pianificare i tuoi viaggi in gruppo." wrapText="true" />
-                                            </VBox>
-                                        </TitledPane>
-                                    </panes>
-                                </Accordion>
-                            </VBox>
-
-                            <!-- FAQ ORGANIZER -->
-                            <VBox fx:id="organizerFaqSection" managed="false" visible="false" spacing="12.0">
-                                <Label styleClass="section-header" text="Domande Frequenti - Organizzatori &amp; Partner" />
-                                <Accordion styleClass="custom-accordion">
-                                    <panes>
-                                        <TitledPane text="Come posso pubblicare un nuovo viaggio multitappa o attività?">
-                                            <VBox spacing="6.0">
-                                                <Label styleClass="faq-answer" text="Dalla tua Dashboard Organizzatore, clicca sul pulsante '+ Nuova Attività' in alto a destra per aprire la procedura guidata di creazione." wrapText="true" />
-                                            </VBox>
-                                        </TitledPane>
-                                        <TitledPane text="Quando e come vengono trasferiti i guadagni delle prenotazioni?">
-                                            <VBox spacing="6.0">
-                                                <Label styleClass="faq-answer" text="Gli incassi vengono accreditati sul conto IBAN configurato nella sezione 'Incassi &amp; Payout' secondo le tempistiche di liquidazione previste." wrapText="true" />
-                                            </VBox>
-                                        </TitledPane>
-                                        <TitledPane text="Cosa succede se devo annullare un evento per maltempo?">
-                                            <VBox spacing="6.0">
-                                                <Label styleClass="faq-answer" text="Puoi eliminare l'evento o modificarne lo stato dalla Dashboard. I partecipanti iscritti verranno notificati della cancellazione." wrapText="true" />
-                                            </VBox>
-                                        </TitledPane>
-                                    </panes>
-                                </Accordion>
-                            </VBox>
-
-                            <Separator styleClass="nav-divider" />
-
-                            <!-- FORM DI CONTATTO -->
-                            <VBox spacing="14.0">
-                                <Label styleClass="section-header" text="Apri un Ticket di Supporto" />
-
-                                <VBox spacing="10.0">
-                                    <HBox spacing="12.0">
-                                        <VBox spacing="4.0" HBox.hgrow="ALWAYS">
-                                            <Label styleClass="form-label" text="Categoria della Richiesta *" />
-                                            <ComboBox fx:id="categoryCombo" maxWidth="Infinity" styleClass="custom-combo" />
-                                        </VBox>
-                                        <VBox spacing="4.0" HBox.hgrow="ALWAYS">
-                                            <Label styleClass="form-label" text="Oggetto *" />
-                                            <TextField fx:id="subjectField" promptText="Sintesi della richiesta..." styleClass="custom-input" />
-                                        </VBox>
-                                    </HBox>
-
-                                    <VBox spacing="4.0">
-                                        <Label styleClass="form-label" text="Dettaglio del Messaggio *" />
-                                        <TextArea fx:id="messageArea" prefRowCount="4" promptText="Descrivi nei dettagli come possiamo aiutarti..." styleClass="custom-textarea" />
-                                    </VBox>
-
-                                    <HBox alignment="CENTER_RIGHT">
-                                        <padding>
-                                            <Insets top="6.0" />
-                                        </padding>
-                                        <Button text="Invia Ticket" onAction="#handleSendMessage" styleClass="btn-primary" />
-                                    </HBox>
+                <VBox alignment="TOP_CENTER" styleClass="account-layout">
+                    <VBox maxWidth="1080" spacing="24">
+                        <Label text="CI SIAMO, ANCHE QUANDO SERVE AIUTO" styleClass="account-kicker"
+                            wrapText="true" />
+                        <Label text="Centro assistenza" styleClass="account-title" wrapText="true" />
+                        <Label text="Risposte pratiche e uno spazio per seguire le tue richieste."
+                            styleClass="account-subtitle" wrapText="true" />
+                        <Label fx:id="supportTitleLabel" managed="false" visible="false" />
+                        <Label fx:id="supportSubtitleLabel" managed="false" visible="false" />
+                        <Label fx:id="statusMessageLabel" visible="false" managed="false"
+                            wrapText="true" />
+                        <HBox spacing="24" alignment="TOP_LEFT">
+                            <VBox spacing="18" prefWidth="460" HBox.hgrow="ALWAYS"
+                                styleClass="account-panel">
+                                <Label text="Trova una risposta" styleClass="section-header"
+                                    wrapText="true" />
+                                <VBox fx:id="travelerFaqSection">
+                                    <Accordion>
+                                        <panes>
+                                            <TitledPane text="Come cancello una prenotazione?">
+                                                <Label
+                                                    text="Apri la Dashboard e usa Cancella nella tabella. L’azione è disponibile prima dell’inizio dell’esperienza."
+                                                    wrapText="true" />
+                                            </TitledPane>
+                                            <TitledPane text="Preferiti o itinerari?">
+                                                <Label
+                                                    text="Nei Preferiti raccogli viaggi e attività. Negli Itinerari organizzi le tappe per giorno e orario. Una lista condivisa con permesso EDIT permette di pianificare insieme."
+                                                    wrapText="true" />
+                                            </TitledPane>
+                                            <TitledPane text="Come contatto l’organizzatore?">
+                                                <Label
+                                                    text="Apri un’esperienza e scegli Contatta organizzatore. Puoi continuare la conversazione anche dal Centro messaggi."
+                                                    wrapText="true" />
+                                            </TitledPane>
+                                        </panes>
+                                    </Accordion>
+                                </VBox>
+                                <VBox fx:id="organizerFaqSection">
+                                    <Accordion>
+                                        <panes>
+                                            <TitledPane text="Come gestisco le mie offerte?">
+                                                <Label
+                                                    text="Dalla Dashboard puoi creare e modificare le offerte e consultare le prenotazioni ricevute."
+                                                    wrapText="true" />
+                                            </TitledPane>
+                                            <TitledPane text="Sono previsti accrediti reali?">
+                                                <Label
+                                                    text="I pagamenti del progetto sono dimostrativi. Le coordinate vengono salvate ma non vengono eseguiti bonifici."
+                                                    wrapText="true" />
+                                            </TitledPane>
+                                        </panes>
+                                    </Accordion>
                                 </VBox>
                             </VBox>
-
+                            <VBox spacing="18" prefWidth="570" HBox.hgrow="ALWAYS"
+                                styleClass="account-panel">
+                                <Label text="Descrivi il problema" styleClass="section-header"
+                                    wrapText="true" />
+                                <Label
+                                    text="Conserva qui le tue richieste e consulta i dettagli in qualsiasi momento."
+                                    styleClass="section-subtitle" wrapText="true" />
+                                <ComboBox fx:id="categoryCombo" maxWidth="Infinity" />
+                                <VBox spacing="7">
+                                    <Label text="Oggetto" styleClass="form-label" wrapText="true" />
+                                    <TextField fx:id="subjectField"
+                                        promptText="Una breve descrizione" styleClass="custom-input" />
+                                </VBox>
+                                <VBox spacing="7">
+                                    <Label text="Messaggio" styleClass="form-label" wrapText="true" />
+                                    <TextArea fx:id="messageArea" prefRowCount="5"
+                                        promptText="Cosa è successo?" styleClass="custom-input" />
+                                </VBox>
+                                <Button fx:id="sendTicketButton" text="Registra richiesta"
+                                    onAction="#handleSendMessage" styleClass="btn-primary" />
+                            </VBox>
+                        </HBox>
+                        <VBox spacing="16" styleClass="account-panel">
+                            <Label text="Le tue richieste" styleClass="section-header"
+                                wrapText="true" />
+                            <ListView fx:id="ticketsList" prefHeight="230" />
+                            <Button fx:id="moreTicketsButton" text="Richieste precedenti"
+                                onAction="#handleMoreTickets" styleClass="btn-secondary" />
                         </VBox>
                     </VBox>
-                </content>
+                </VBox>
             </ScrollPane>
         </center>
     </BorderPane>

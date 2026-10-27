@@ -2,13 +2,12 @@ package it.unical.ea_project_javafx.controller.login;
 
 import it.unical.ea_project_javafx.navigation.StepNavigator;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 
 public class FeedbackOverlayController {
 
-    @FXML private Label messageLabel;
-    @FXML private Button btnAction;
+    @FXML
+    private Label messageLabel;
 
     private StepNavigator navigator;
 

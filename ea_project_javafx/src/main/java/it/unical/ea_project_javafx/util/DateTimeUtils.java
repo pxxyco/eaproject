@@ -5,10 +5,11 @@ import java.util.regex.Pattern;
 
 public final class DateTimeUtils {
 
-    private static final Pattern DATE_TIME_PATTERN =
-            Pattern.compile("^(\\d{4}-\\d{2}-\\d{2})T(\\d{2}:\\d{2}(?::\\d{2})?)");
+    private static final Pattern DATE_TIME_PATTERN = Pattern
+            .compile("^(\\d{4}-\\d{2}-\\d{2})T(\\d{2}:\\d{2}(?::\\d{2})?)");
 
-    private DateTimeUtils() {}
+    private DateTimeUtils() {
+    }
 
     public static String formatDateTime(String input) {
         Matcher matcher = DATE_TIME_PATTERN.matcher(input);

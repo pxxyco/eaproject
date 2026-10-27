@@ -2,13 +2,14 @@ package it.unical.ea_project_javafx.controller.activity.reviews;
 
 import it.unical.ea_project_javafx.controller.activity.ActivitySectionController;
 import it.unical.ea_project_javafx.controller.activity.TripSectionController;
-import it.unical.ea_project_javafx.dto.ActivityDTO;
-import it.unical.ea_project_javafx.dto.ReviewDTO;
-import it.unical.ea_project_javafx.dto.TripDTO;
-
+import it.unical.ea_project_javafx.dto.activity.ActivityDTO;
+import it.unical.ea_project_javafx.dto.review.ReviewDTO;
+import it.unical.ea_project_javafx.dto.trip.TripDTO;
 import it.unical.ea_project_javafx.security.UserSession;
-import it.unical.ea_project_javafx.service.ReviewService;
-import it.unical.ea_project_javafx.util.PopupFactory;
+import it.unical.ea_project_javafx.service.review.ReviewService;
+import it.unical.ea_project_javafx.ui.dialog.PopupFactory;
+import java.util.List;
+import java.util.function.Consumer;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -17,15 +18,16 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
 import lombok.Setter;
 
-import java.util.List;
-import java.util.function.Consumer;
+public class ReviewsContainerController implements ActivitySectionController, TripSectionController {
 
-public class ReviewsContainerController implements ActivitySectionController, TripSectionController{
-
-    @FXML private Button btnNew;
-    @FXML private VBox bodyContainer;
-    @FXML private Button previousButton;
-    @FXML private Button nextButton;
+    @FXML
+    private Button btnNew;
+    @FXML
+    private VBox bodyContainer;
+    @FXML
+    private Button previousButton;
+    @FXML
+    private Button nextButton;
 
     final private String path = "/it/unical/ea_project_javafx/fxml";
     private TripDTO trip;
@@ -37,12 +39,15 @@ public class ReviewsContainerController implements ActivitySectionController, Tr
 
     @Setter
     private Runnable onNewReviewRequested;
-    @Setter private Consumer<ReviewDTO> onEditReviewRequested;
-    @Setter private Consumer<ReviewDTO> onReplyRequested;
-    @Setter private Runnable onReviewsChanged;
+    @Setter
+    private Consumer<ReviewDTO> onEditReviewRequested;
+    @Setter
+    private Consumer<ReviewDTO> onReplyRequested;
+    @Setter
+    private Runnable onReviewsChanged;
 
     @FXML
-    public void initialize(){
+    public void initialize() {
         page = 0;
 
         UserSession session = UserSession.getInstance();
@@ -64,27 +69,27 @@ public class ReviewsContainerController implements ActivitySectionController, Tr
     }
 
     private void getReviews() {
-        if(trip != null){
+        if (trip != null) {
             ReviewService.getTripReview(
                     trip.getTripId(),
                     reviews -> {
                         this.reviews = reviews;
-                        if (reviews != null) setReviews();
+                        if (reviews != null)
+                            setReviews();
                     },
                     null,
-                    null
-            );
+                    null);
         }
-        if(activity != null){
+        if (activity != null) {
             ReviewService.getActivityReview(
                     activity.getActivityId(),
                     reviews -> {
                         this.reviews = reviews;
-                        if(reviews != null) setReviews();
+                        if (reviews != null)
+                            setReviews();
                     },
                     null,
-                    null
-            );
+                    null);
         }
     }
 
@@ -92,7 +97,7 @@ public class ReviewsContainerController implements ActivitySectionController, Tr
 
         bodyContainer.getChildren().clear();
 
-        int startIndex = page*PAGE_SIZE;
+        int startIndex = page * PAGE_SIZE;
         int endIndex = Math.min(startIndex + PAGE_SIZE, reviews.size());
 
         boolean isFirstPage = page <= 0;
@@ -104,15 +109,17 @@ public class ReviewsContainerController implements ActivitySectionController, Tr
         nextButton.setDisable(isLastPage);
         nextButton.setVisible(!isLastPage);
 
-
-        for(int i = startIndex; i < endIndex; i++){
+        for (int i = startIndex; i < endIndex; i++) {
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource(path + "/activity/reviews/review-item.fxml"));
                 Node node = loader.load();
 
                 ReviewItemController controller = loader.getController();
                 controller.setData(reviews.get(i), getPlaceOwnerId());
-                controller.setOnEdit(r -> { if (onEditReviewRequested != null) onEditReviewRequested.accept(r); });
+                controller.setOnEdit(r -> {
+                    if (onEditReviewRequested != null)
+                        onEditReviewRequested.accept(r);
+                });
                 controller.setOnDelete(this::deleteReview);
 
                 bodyContainer.getChildren().add(node);
@@ -125,14 +132,15 @@ public class ReviewsContainerController implements ActivitySectionController, Tr
 
     @FXML
     public void handleNewButton(ActionEvent actionEvent) {
-        if(onNewReviewRequested!=null){
+        if (onNewReviewRequested != null) {
             onNewReviewRequested.run();
         }
     }
 
     @FXML
     public void handlePreviousPage(ActionEvent actionEvent) {
-        if(page > 0) page--;
+        if (page > 0)
+            page--;
         setReviews();
     }
 
@@ -150,7 +158,8 @@ public class ReviewsContainerController implements ActivitySectionController, Tr
 
     private void deleteReview(ReviewDTO review) {
         var root = PopupFactory.resolveRoot(bodyContainer);
-        if (root == null) return;
+        if (root == null)
+            return;
         PopupFactory.showConfirmation(root, "Elimina recensione",
                 "Vuoi eliminare questa recensione? L'operazione non può essere annullata.",
                 PopupFactory.Size.COMPACT,
@@ -158,13 +167,14 @@ public class ReviewsContainerController implements ActivitySectionController, Tr
                         review.getReviewId(),
                         () -> {
                             reviews.removeIf(r -> r.getReviewId().equals(review.getReviewId()));
-                            if (page > 0 && page * PAGE_SIZE >= reviews.size()) page--;
+                            if (page > 0 && page * PAGE_SIZE >= reviews.size())
+                                page--;
                             setReviews();
-                            if (onReviewsChanged != null) onReviewsChanged.run();
+                            if (onReviewsChanged != null)
+                                onReviewsChanged.run();
                         },
                         null,
-                        null
-                ));
+                        null));
     }
 
     public void updateReview(ReviewDTO updated) {
@@ -178,8 +188,10 @@ public class ReviewsContainerController implements ActivitySectionController, Tr
     }
 
     private Long getPlaceOwnerId() {
-        if (activity != null) return activity.getCreatedByUserId();
-        if (trip != null) return trip.getCreatedByUserId();
+        if (activity != null)
+            return activity.getCreatedByUserId();
+        if (trip != null)
+            return trip.getCreatedByUserId();
         return null;
     }
 }
