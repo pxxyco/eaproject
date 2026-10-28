@@ -4,6 +4,7 @@ import com.google.gson.reflect.TypeToken;
 import it.unical.ea_project_javafx.dto.booking.BookingDTO;
 import it.unical.ea_project_javafx.service.api.ApiService;
 import it.unical.ea_project_javafx.ui.UiText;
+import it.unical.ea_project_javafx.ui.BookingPresentation;
 import it.unical.ea_project_javafx.ui.ViewSupport;
 import it.unical.ea_project_javafx.ui.background.BackgroundHelper;
 import it.unical.ea_project_javafx.ui.dialog.PopupFactory;
@@ -43,7 +44,6 @@ import static it.unical.ea_project_javafx.ui.BookingPresentation.compareBookings
 import static it.unical.ea_project_javafx.ui.BookingPresentation.displayStatus;
 import static it.unical.ea_project_javafx.ui.BookingPresentation.formatBookedAt;
 import static it.unical.ea_project_javafx.ui.BookingPresentation.formatEventPeriod;
-import static it.unical.ea_project_javafx.ui.BookingPresentation.hasEventStarted;
 import static it.unical.ea_project_javafx.ui.BookingPresentation.isCancelled;
 import static it.unical.ea_project_javafx.ui.BookingPresentation.isEventEnded;
 import static it.unical.ea_project_javafx.ui.BookingPresentation.isHistorical;
@@ -112,7 +112,7 @@ public class BookingsController {
         periodFilterCombo.getItems().setAll("Tutte", "In programma", "Storico");
         periodFilterCombo.getSelectionModel().selectFirst();
         statusFilterCombo.getItems().setAll(
-                "Tutti", "In attesa", "Confermate", "Completate / terminate", "Cancellate");
+                "Tutti", "Da pagare", "Confermate", "In corso", "Concluse", "Scadute", "Cancellate");
         statusFilterCombo.getSelectionModel().selectFirst();
 
         searchFilterField.textProperty().addListener((obs, oldV, newV) -> filterTable());
@@ -166,9 +166,7 @@ public class BookingsController {
                     return;
                 }
                 boolean cancelled = isCancelled(dto);
-                boolean canCancel = !cancelled && !isHistorical(dto, evaluationTime)
-                        && !hasEventStarted(dto, evaluationTime)
-                        && !"COMPLETED".equalsIgnoreCase(dto.getBookingStatus());
+                boolean canCancel = BookingPresentation.canCancel(dto, evaluationTime);
                 exportIcsBtn.setVisible(!cancelled);
                 exportIcsBtn.setManaged(!cancelled);
                 cancelBtn.setVisible(canCancel);
@@ -272,16 +270,13 @@ public class BookingsController {
     private boolean matchesStatus(BookingDTO booking, String selectedStatus) {
         if (selectedStatus == null || "Tutti".equalsIgnoreCase(selectedStatus))
             return true;
-        String status = booking.getBookingStatus() == null ? "" : booking.getBookingStatus().toUpperCase(Locale.ROOT);
+        String display = displayStatus(booking, evaluationTime);
         return switch (selectedStatus) {
-            case "In attesa" -> "PENDING".equals(status)
-                    && !isCancelled(booking) && !isHistorical(booking, evaluationTime);
-            case "Confermate" -> "CONFIRMED".equals(status)
-                    && !isCancelled(booking) && !isHistorical(booking, evaluationTime);
-            case "Completate / terminate" -> !isCancelled(booking)
-                    && ("COMPLETED".equals(status)
-                            || "COMPLETED".equalsIgnoreCase(booking.getItemStatus())
-                            || isEventEnded(booking, evaluationTime));
+            case "Da pagare" -> "Da pagare".equals(display);
+            case "Confermate" -> "Confermata".equals(display);
+            case "In corso" -> "In corso".equals(display);
+            case "Concluse" -> "Conclusa".equals(display);
+            case "Scadute" -> "Scaduta".equals(display);
             case "Cancellate" -> isCancelled(booking);
             default -> true;
         };
@@ -422,8 +417,7 @@ public class BookingsController {
             return;
         }
         LocalDateTime now = LocalDateTime.now();
-        if (isCancelled(dto) || isHistorical(dto, now) || hasEventStarted(dto, now)
-                || "COMPLETED".equalsIgnoreCase(dto.getBookingStatus())) {
+        if (!BookingPresentation.canCancel(dto, now)) {
             ViewSupport.error(statusMessageLabel,
                     "Questa prenotazione non può più essere cancellata perché è già iniziata, terminata o annullata.");
             return;

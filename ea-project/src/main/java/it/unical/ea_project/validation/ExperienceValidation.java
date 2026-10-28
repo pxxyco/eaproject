@@ -32,6 +32,7 @@ public final class ExperienceValidation {
         }
 
         public static void activity(Activity activity) {
+                coordinates(activity.getLatitude(), activity.getLongitude());
                 require(activity.getPrice() != null && Double.isFinite(activity.getPrice()), "Il prezzo non è valido.");
                 common(activity.getTitle(), activity.getCity(), activity.getMaxSeats(),
                                 BigDecimal.valueOf(activity.getPrice()));
@@ -58,10 +59,25 @@ public final class ExperienceValidation {
                                 && stage.getCategory() != null && stage.getDay() != null && stage.getDay() >= 1
                                 && stage.getOrderInDay() != null && stage.getOrderInDay() >= 1,
                                 "Dati della tappa non validi.");
+                coordinates(stage.getLatitude(), stage.getLongitude());
+                stageTimes(stage.getStartTime(), stage.getEndTime());
                 require(trip.getStartDate() != null && trip.getEndDate() != null
                                 && stage.getDay() <= ChronoUnit.DAYS.between(trip.getStartDate(), trip.getEndDate())
                                                 + 1,
                                 "Il giorno della tappa deve rientrare nelle date del viaggio.");
+        }
+
+        public static void coordinates(Double latitude, Double longitude) {
+                if (latitude == null && longitude == null) return;
+                require(latitude != null && longitude != null
+                                && Double.isFinite(latitude) && Double.isFinite(longitude)
+                                && latitude >= -90 && latitude <= 90 && longitude >= -180 && longitude <= 180,
+                                "Coordinate non valide: inserisci latitudine tra -90 e 90 e longitudine tra -180 e 180.");
+        }
+
+        public static void stageTimes(java.time.LocalTime start, java.time.LocalTime end) {
+                require(start == null || end == null || end.isAfter(start),
+                                "L'orario finale della tappa deve essere successivo a quello iniziale nello stesso giorno.");
         }
 
         public static int available(Integer oldCapacity, Integer oldAvailable, int newCapacity) {

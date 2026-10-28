@@ -31,7 +31,7 @@
                             styleClass="transparent-input" />
                     </children>
                 </VBox>
-                <VBox minWidth="130.0" prefHeight="59.0" prefWidth="286.0" styleClass="search-field"
+                <VBox minWidth="130.0" prefWidth="286.0" styleClass="search-field"
                     HBox.hgrow="NEVER">
                     <children>
                         <Label styleClass="field-label" text="CATEGORIA" />
@@ -41,7 +41,7 @@
                 </VBox>
                 <VBox minWidth="130.0" styleClass="search-field" HBox.hgrow="ALWAYS">
                     <children>
-                        <HBox prefHeight="0.0" prefWidth="200.0" spacing="10.0">
+                        <HBox minHeight="20.0" prefHeight="20.0" alignment="CENTER_LEFT" spacing="10.0">
                             <children>
                                 <Label styleClass="field-label" text="IMPORTA DATA" />
                                 <CheckBox fx:id="SetData" styleClass="checkbox"

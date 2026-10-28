@@ -232,8 +232,7 @@ public class OrganizerDashboardController implements ProfileDashboardController,
                     if (rows == null)
                         rows = List.of();
                     totalSubscribersLabel
-                            .setText(String.valueOf(rows.stream().filter(b -> !BookingPresentation.isCancelled(b))
-                                    .mapToInt(b -> b.getSeats() == null ? 0 : b.getSeats()).sum()));
+                            .setText(String.valueOf(OfferSchedule.activeSeats(rows, LocalDateTime.now())));
                     subscribersTable
                             .getItems().setAll(
                                     rows.stream()
@@ -276,7 +275,7 @@ public class OrganizerDashboardController implements ProfileDashboardController,
         }
         String query = offerSearchField == null ? "" : offerSearchField.getText().strip().toLowerCase(Locale.ROOT);
         filtered = all.stream().filter(o -> catalog()
-                || ("PUBLISHED".equals(o.status()) && o.start() != null && !o.start().isBefore(LocalDateTime.now())))
+                || ("PUBLISHED".equals(o.status()) && OfferSchedule.upcoming(o.type().equals("TRIP"), o.start(), LocalDateTime.now())))
                 .filter(o -> query.isBlank() || (o.title() + " " + o.place()).toLowerCase(Locale.ROOT).contains(query))
                 .filter(o -> offerStatusFilter == null || offerStatusFilter.getSelectionModel().getSelectedIndex() == 0
                         || state(o.status()).equals(offerStatusFilter.getValue()))

@@ -5,19 +5,20 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import com.example.application.dto.SearchSuggestion
 import com.example.application.dto.ActivityHomeDTO
-import com.example.application.dto.TripHomeDTO
 import com.example.application.dto.ExperienceRef
+import com.example.application.dto.SearchSuggestion
+import com.example.application.dto.TripHomeDTO
 import com.example.application.network.AppStatus
 import com.example.application.network.HomeRepository
 import com.example.application.screens.common.LoadingOverlay
-import com.example.application.ui.theme.ScreenBackground
+import com.example.application.screens.common.publishScreenLoading
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 @Composable
 fun HomeScreen(
@@ -34,7 +35,9 @@ fun HomeScreen(
     var homeError by remember { mutableStateOf<String?>(null) }
 
     var searchQuery by remember { mutableStateOf("") }
+    var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     var searchedQuery by remember { mutableStateOf("") }
+    var searchedDate by remember { mutableStateOf<LocalDate?>(null) }
     var hasSearched by remember { mutableStateOf(false) }
     var searchActivityResults by remember { mutableStateOf(PagedList<ActivityHomeDTO>()) }
     var searchTripResults by remember { mutableStateOf(PagedList<TripHomeDTO>()) }
@@ -122,7 +125,9 @@ fun HomeScreen(
         suggestionsEnabled = false
         suggestions = emptyList()
         searchQuery = ""
+        selectedDate = null
         searchedQuery = ""
+        searchedDate = null
         searchActivityResults = PagedList()
         searchTripResults = PagedList()
         searchError = null
@@ -135,7 +140,8 @@ fun HomeScreen(
         suggestions = emptyList()
 
         val query = searchQuery.trim()
-        if (query.isBlank()) {
+        val date = selectedDate
+        if (query.isBlank() && date == null) {
             resetSearch()
             return
         }
@@ -143,6 +149,7 @@ fun HomeScreen(
         searchRequestId++
         val requestId = searchRequestId
         searchedQuery = query
+        searchedDate = date
         hasSearched = true
         searchLoading = true
         searchError = null
@@ -152,8 +159,8 @@ fun HomeScreen(
         scope.launch {
             try {
                 val (foundActivities, foundTrips) = coroutineScope {
-                    val activitiesDeferred = async { HomeRepository.searchActivities(query) }
-                    val tripsDeferred = async { HomeRepository.searchTrips(query) }
+                    val activitiesDeferred = async { HomeRepository.searchActivities(query, 0, date) }
+                    val tripsDeferred = async { HomeRepository.searchTrips(query, 0, date) }
                     activitiesDeferred.await() to tripsDeferred.await()
                 }
 
@@ -191,19 +198,21 @@ fun HomeScreen(
         }
     }
 
+    val loadingMessage = when {
+        appError != null -> "Connessione persa. Riconnessione in corso..."
+        homeLoading -> "Caricamento in corso..."
+        searchLoading -> "Ricerca in corso..."
+        else -> null
+    }
+    val hostedLoading = publishScreenLoading(loadingMessage)
+
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(ScreenBackground)
+            .background(androidx.compose.ui.graphics.Color.Transparent)
     ) {
         if (homeLoading || appError != null) {
-            LoadingOverlay(
-                message = if (appError != null) {
-                    "Connessione persa. Riconnessione in corso..."
-                } else {
-                    "Caricamento in corso..."
-                }
-            )
+            if (!hostedLoading) LoadingOverlay(message = loadingMessage.orEmpty())
         } else {
             HomeScreenContent(
                 activities = activities,
@@ -215,6 +224,8 @@ fun HomeScreen(
                     suggestionsEnabled = true
                     searchQuery = it
                 },
+                selectedDate = selectedDate,
+                onDateChange = { selectedDate = it },
                 suggestions = suggestions,
                 onSuggestionClick = {
                     suggestionsEnabled = false
@@ -255,7 +266,7 @@ fun HomeScreen(
                         get = { searchActivityResults }, set = { searchActivityResults = it },
                         key = { it.stableKey() },
                         isStale = { id != searchRequestId }
-                    ) { page -> HomeRepository.searchActivities(searchedQuery, page) }
+                    ) { page -> HomeRepository.searchActivities(searchedQuery, page, searchedDate) }
                 },
                 onLoadMoreSearchTrips = {
                     val id = searchRequestId
@@ -263,16 +274,17 @@ fun HomeScreen(
                         get = { searchTripResults }, set = { searchTripResults = it },
                         key = { it.stableKey() },
                         isStale = { id != searchRequestId }
-                    ) { page -> HomeRepository.searchTrips(searchedQuery, page) }
+                    ) { page -> HomeRepository.searchTrips(searchedQuery, page, searchedDate) }
                 }
             )
 
-            if (searchLoading) {
+            if (searchLoading && !hostedLoading) {
                 LoadingOverlay(message = "Ricerca in corso...")
             }
         }
     }
 }
+
 private fun errorMessage(e: Exception, fallback: String): String {
     val message = e.message.orEmpty()
     return if (

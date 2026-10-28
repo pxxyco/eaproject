@@ -1,5 +1,6 @@
 package com.example.application.screens.organizer
 
+import com.example.application.ui.effects.LocalNavigationTail
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.background
@@ -80,12 +81,16 @@ private fun Dashboard(userId: Long, modifier: Modifier) {
             }
         } finally { loading = false }
     }
-    LazyColumn(modifier.fillMaxSize().background(ScreenBackground), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    LazyColumn(modifier.fillMaxSize().background(androidx.compose.ui.graphics.Color.Transparent), contentPadding = PaddingValues(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 16.dp + LocalNavigationTail.current), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item {
             Text("Dashboard Organizzatore", style = MaterialTheme.typography.headlineMedium)
             Text("Gestisci le tue offerte e controlla le prenotazioni", color = Stone400)
             Spacer(Modifier.height(16.dp))
-            Button(onClick = { choosing = true }, enabled = !busy && !loading, modifier = Modifier.fillMaxWidth()) { Text("+ Nuova offerta") }
+            Button(onClick = { choosing = true }, enabled = !busy && !loading,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp), shape = RoundedCornerShape(18.dp),
+                border = BorderStroke(1.dp, GlassBorder),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer)) { Text("+ Nuova offerta") }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 TextButton(onClick = { refresh++ }, enabled = !loading && !busy) { Text("Aggiorna") }
             }
@@ -98,7 +103,7 @@ private fun Dashboard(userId: Long, modifier: Modifier) {
                 Metric("Iscritti totali", if (bookingsLoaded) bookings.sumOf { it.number("seats") }.toString() else "—", Modifier.weight(1f))
             }
             Spacer(Modifier.height(12.dp))
-            Metric("Incassi da pagamenti", revenue?.let(::money) ?: "—", Modifier.fillMaxWidth(), Color(0xFF34D399))
+            Metric("Incassi da pagamenti", revenue?.let(::money) ?: "—", Modifier.fillMaxWidth(), SuccessColor)
         }
         item {
             OutlinedTextField(query, { query = it }, label = { Text("Cerca offerte per titolo o città") }, singleLine = true, modifier = Modifier.fillMaxWidth())
@@ -117,7 +122,7 @@ private fun Dashboard(userId: Long, modifier: Modifier) {
             items(filtered, key = { "${it.trip}:${it.id}" }) { offer ->
                 DashboardCard {
                     OfferImage(offer)
-                    Text(when (offer.data.text("status")) { "PUBLISHED" -> "Pubblicata"; "DRAFT" -> "Bozza"; "CANCELLED" -> "Annullata"; "COMPLETED" -> "Conclusa"; else -> "" }, color = Color(0xFF6EE7B7))
+                    Text(when (offer.data.text("status")) { "PUBLISHED" -> "Pubblicata"; "DRAFT" -> "Bozza"; "CANCELLED" -> "Annullata"; "COMPLETED" -> "Conclusa"; else -> "" }, color = SuccessColor)
                     Text(offer.title, style = MaterialTheme.typography.titleLarge)
                     Text(offer.city, color = Stone400)
                     Text("${dateLabel(offer.data.text("startDate"))} – ${dateLabel(offer.data.text("endDate"))}", style = MaterialTheme.typography.bodySmall)
@@ -178,7 +183,7 @@ private fun DashboardCard(content: @Composable ColumnScope.() -> Unit) {
 }
 
 @Composable
-private fun Metric(label: String, value: String, modifier: Modifier, color: Color = Color.White) {
+private fun Metric(label: String, value: String, modifier: Modifier, color: Color = MaterialTheme.colorScheme.onSurface) {
     Surface(modifier, shape = RoundedCornerShape(12.dp), color = GlassFill, border = BorderStroke(1.dp, GlassBorder)) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(label, color = Stone400, style = MaterialTheme.typography.labelMedium)
@@ -197,7 +202,7 @@ internal fun OfferEditor(offer: OrganizerOffer, onDismiss: () -> Unit, onSaved: 
         "startDate" to (if (offer.trip) "Data di inizio" else "Data e ora di inizio"),
         "endDate" to (if (offer.trip) "Data di fine" else "Data e ora di fine"),
         (if (offer.trip) "totalPrice" else "price") to "Prezzo (€)", "maxSeats" to "Posti totali"
-    ).apply { if (!offer.trip) { put("durationMinutes", "Durata (minuti)"); put("notes", "Note (facoltative)") } } }
+    ).apply { if (!offer.trip) { put("durationMinutes", "Durata (minuti)"); put("latitude", "Latitudine (facoltativa)"); put("longitude", "Longitudine (facoltativa)"); put("notes", "Note (facoltative)") } } }
     val fields = remember(offer) { mutableStateMapOf<String, String>().apply { labels.keys.forEach { put(it, offer.data.text(it)) } } }
     var category by remember { mutableStateOf(offer.data.text("category").ifBlank { "EXCURSION" }) }
     var status by remember { mutableStateOf(offer.data.text("status").ifBlank { "PUBLISHED" }) }

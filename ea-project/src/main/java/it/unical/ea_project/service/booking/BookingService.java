@@ -13,6 +13,8 @@ public interface BookingService {
 
     List<BookingDTO> getPrenotazioniUtente(Long userId);
 
+    List<BookingDTO> getExperienceBookings(Long userId, Long tripId, Long activityId);
+
     List<BookingDTO> getBookingsByIds(Long userId, List<Long> ids);
 
     List<BookingDTO> getPrenotazioniOrganizzatore(Long organizerId);

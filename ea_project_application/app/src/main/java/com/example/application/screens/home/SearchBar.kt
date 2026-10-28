@@ -58,7 +58,7 @@ fun SearchTopBar(
     LaunchedEffect(Unit) { appeared = true }
 
     val iconTint by animateColorAsState(
-        targetValue = if (isFocused) Stone200 else Color.Gray,
+        targetValue = if (isFocused) Stone200 else MaterialTheme.colorScheme.onSurfaceVariant,
         animationSpec = tween(250),
         label = "iconTint"
     )
@@ -100,7 +100,7 @@ fun SearchTopBar(
                     onValueChange = onQueryChange,
                     interactionSource = fieldInteraction,
                     placeholder = {
-                        Text("Cerca attività...", color = Color.Gray)
+                        Text("Cerca attività...", color = MaterialTheme.colorScheme.onSurfaceVariant)
                     },
                     leadingIcon = {
                         Icon(
@@ -125,7 +125,7 @@ fun SearchTopBar(
                             Icon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = "Cancella",
-                                tint = Color.Gray
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     },
@@ -140,8 +140,8 @@ fun SearchTopBar(
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Stone200,
                         unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                         cursorColor = Stone200
                     )
                 )
@@ -154,7 +154,6 @@ fun SearchTopBar(
                     modifier = Modifier.width(fieldWidth)
                 ) {
                     suggestions.forEachIndexed { index, suggestion ->
-                        // Ogni voce entra con un leggero ritardo (effetto a cascata)
                         var visible by remember(suggestion) { mutableStateOf(false) }
                         LaunchedEffect(suggestion) {
                             delay(index * 40L)

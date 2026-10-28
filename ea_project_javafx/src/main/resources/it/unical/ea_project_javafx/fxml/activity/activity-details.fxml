@@ -111,7 +111,7 @@
                                                                 <Label styleClass="booking-title"
                                                                     text="Prenota" />
                                                                 <Label styleClass="booking-subtitle"
-                                                                    text="Scegli data e partecipanti" />
+                                                                    text="Data prevista e partecipanti" />
                                                             </children>
                                                         </VBox>
                                                         <HBox alignment="BASELINE_LEFT" spacing="4">
@@ -143,8 +143,8 @@
                                                         <VBox alignment="CENTER_LEFT" spacing="4"
                                                             minWidth="130">
                                                             <children>
-                                                                <Label styleClass="field-label"
-                                                                    text="Totale stimato" />
+                                                                <Label fx:id="bookingTotalCaption" styleClass="field-label"
+                                                                    text="Totale" />
                                                                 <Label fx:id="lblTotale"
                                                                     styleClass="price-total"
                                                                     text="—" />
@@ -154,6 +154,9 @@
                                                             onAction="#handlePrenota"
                                                             styleClass="btn-primary"
                                                             text="Prenota Ora" />
+                                                        <Button fx:id="btnManageBookings" onAction="#handleManageBookings" styleClass="btn-secondary" text="Gestisci prenotazioni precedenti" visible="false" managed="false" />
+                                                        <Button fx:id="btnPayBooking" onAction="#handlePayBooking" styleClass="btn-primary" text="Completa pagamento" visible="false" managed="false" />
+                                                        <Button fx:id="btnCancelBooking" onAction="#handleCancelBooking" styleClass="btn-secondary" text="Annulla prenotazione" visible="false" managed="false" />
                                                         <Label fx:id="bookingAvailabilityLabel"
                                                             wrapText="true"
                                                             styleClass="section-subtitle"

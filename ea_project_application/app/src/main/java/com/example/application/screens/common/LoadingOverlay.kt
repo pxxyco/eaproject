@@ -8,10 +8,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -23,9 +25,9 @@ fun LoadingOverlay(
 ) {
     Box(
         modifier = modifier
-            .fillMaxSize()
-            .background(Color(0xD10C0C0C),
-            ),
+            .fillMaxSize().testTag("screen_loading_overlay")
+            .pointerInput(Unit) { awaitPointerEventScope { while (true) { awaitPointerEvent().changes.forEach { it.consume() } } } }
+            .background(MaterialTheme.colorScheme.background.copy(alpha = .92f)),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -33,13 +35,13 @@ fun LoadingOverlay(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             CircularProgressIndicator(
-                color = Color(0xFFE7E5E4),
+                color = MaterialTheme.colorScheme.primary,
                 strokeWidth = 4.dp
             )
 
             Text(
                 text = message,
-                color = Color(0xFFE7E5E4),
+                color = MaterialTheme.colorScheme.primary,
                 fontSize = 14.sp,
                 fontWeight = FontWeight.Bold
             )

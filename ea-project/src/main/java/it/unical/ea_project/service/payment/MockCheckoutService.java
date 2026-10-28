@@ -1,6 +1,7 @@
 package it.unical.ea_project.service.payment;
 
 import it.unical.ea_project.domain.booking.Booking;
+import it.unical.ea_project.service.booking.BookingLockService;
 import it.unical.ea_project.domain.trip.Trip;
 import it.unical.ea_project.domain.activity.Activity;
 import it.unical.ea_project.domain.payment.Payment;
@@ -24,17 +25,18 @@ public class MockCheckoutService {
     }
 
     private final BookingRepository bookings;
+    private final BookingLockService locks;
     private final PaymentRepository payments;
 
-    public MockCheckoutService(BookingRepository bookings, PaymentRepository payments) {
+    public MockCheckoutService(BookingRepository bookings, PaymentRepository payments, BookingLockService locks) {
         this.bookings = bookings;
+        this.locks = locks;
         this.payments = payments;
     }
 
     @Transactional
     public Receipt pay(Long bookingId, Long traveler) {
-        Booking booking = bookings.findByBookingIdForUpdate(bookingId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Prenotazione non disponibile."));
+        Booking booking = locks.owned(bookingId, traveler);
         if (!booking.getUser().getId().equals(traveler))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Puoi pagare soltanto le tue prenotazioni.");
         if (booking.getDeletedAt() != null || booking.getBookingStatus() == Booking.BookingStatus.CANCELLED)
@@ -44,6 +46,14 @@ public class MockCheckoutService {
                 || p.getStatus() == Payment.PaymentStatus.CONFIRMED).findFirst();
         if (paid.isPresent())
             return receipt(paid.get());
+        var others = bookings.findForExperience(traveler,
+                booking.getTrip() == null ? null : booking.getTrip().getTripId(),
+                booking.getActivity() == null ? null : booking.getActivity().getActivityId()).stream()
+                .filter(b -> !java.util.Objects.equals(b.getBookingId(), bookingId) && b.getBookingStatus() != Booking.BookingStatus.CANCELLED)
+                .map(Booking::getBookingId).toList();
+        if (!others.isEmpty() && payments.findBookingPaymentsBatch(others).stream()
+                .anyMatch(p -> p.getStatus() == Payment.PaymentStatus.COMPLETED || p.getStatus() == Payment.PaymentStatus.CONFIRMED))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Hai già una prenotazione pagata per questa esperienza. Gestisci prima le prenotazioni precedenti.");
         LocalDateTime start;
         if (booking.getTrip() != null) {
             var trip = booking.getTrip();

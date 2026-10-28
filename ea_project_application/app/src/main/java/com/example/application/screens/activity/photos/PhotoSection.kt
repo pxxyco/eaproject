@@ -1,7 +1,6 @@
 package com.example.application.screens.activity.photos
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -33,7 +32,6 @@ import com.example.application.dto.ExperienceDetail
 import com.example.application.network.ExperienceRepository
 import com.example.application.screens.home.RemotePhoto
 import com.example.application.ui.theme.GlassBorder
-import com.example.application.ui.theme.ScreenBackground
 import com.example.application.ui.theme.Stone200
 import com.example.application.ui.theme.Stone400
 import kotlinx.coroutines.CancellationException
@@ -65,7 +63,6 @@ internal fun PhotoSection(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(ScreenBackground)
             .padding(20.dp)
     ) {
         val current = photos

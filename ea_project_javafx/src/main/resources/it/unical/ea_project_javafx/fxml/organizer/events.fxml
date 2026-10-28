@@ -26,7 +26,7 @@
                             <Button text="Aggiorna" onAction="#handleRefresh"
                                 styleClass="btn-secondary" />
                             <Button text="+ Crea offerta" onAction="#handleOpenCreateOffer"
-                                styleClass="btn-primary" />
+                                styleClass="btn-primary, btn-create-offer" />
                         </HBox>
                         <Label fx:id="dashboardErrorLabel" visible="false" managed="false"
                             wrapText="true" />

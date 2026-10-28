@@ -218,7 +218,9 @@ public class ExperienceListController {
         loading = false;
         if (cardsContainer.getChildren().isEmpty()) {
             Label empty = new Label(
-                    "Nessuna esperienza corrisponde alla ricerca. Prova un'altra destinazione o modifica i filtri.");
+                    mode == SearchMode.TOP
+                        ? "Non ci sono attività prenotabili al momento. Qui compaiono le attività pubblicate, non ancora iniziate e con posti disponibili."
+                        : "Nessuna esperienza corrisponde alla ricerca. Prova un'altra destinazione o modifica i filtri.");
             empty.setWrapText(true);
             empty.getStyleClass().add("section-subtitle");
             cardsContainer.getChildren().add(empty);

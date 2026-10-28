@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.*
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -34,7 +35,7 @@ fun RemotePhoto(
     }
 
     Box(
-        modifier = modifier.background(Color(0xFF424242))
+        modifier = modifier.background(MaterialTheme.colorScheme.surfaceVariant)
     ) {
         AsyncImage(
             model = fullUrl,
