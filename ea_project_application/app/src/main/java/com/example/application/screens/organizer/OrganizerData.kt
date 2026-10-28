@@ -93,6 +93,8 @@ internal fun offerPayload(offer: OrganizerOffer, fields: Map<String, String>): J
         val startDate = runCatching { LocalDateTime.parse(start) }.getOrNull()
         val endDate = runCatching { LocalDateTime.parse(end) }.getOrNull()
         require(startDate != null && endDate != null && !endDate.isBefore(startDate)) { "Date non valide: usa AAAA-MM-GGTHH:MM e una fine successiva o uguale all'inizio." }
+        if (fields.containsKey("latitude") || fields.containsKey("longitude"))
+            applyCoordinates(payload, fields["latitude"].orEmpty(), fields["longitude"].orEmpty())
         val duration = fields.getValue("durationMinutes").toIntOrNull()
         require(duration != null && duration > 0) { "Inserisci una durata positiva in minuti." }
         payload.addProperty("durationMinutes", duration)

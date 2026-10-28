@@ -197,7 +197,7 @@ internal fun OfferEditor(offer: OrganizerOffer, onDismiss: () -> Unit, onSaved: 
         "startDate" to (if (offer.trip) "Data di inizio" else "Data e ora di inizio"),
         "endDate" to (if (offer.trip) "Data di fine" else "Data e ora di fine"),
         (if (offer.trip) "totalPrice" else "price") to "Prezzo (€)", "maxSeats" to "Posti totali"
-    ).apply { if (!offer.trip) { put("durationMinutes", "Durata (minuti)"); put("notes", "Note (facoltative)") } } }
+    ).apply { if (!offer.trip) { put("durationMinutes", "Durata (minuti)"); put("latitude", "Latitudine (facoltativa)"); put("longitude", "Longitudine (facoltativa)"); put("notes", "Note (facoltative)") } } }
     val fields = remember(offer) { mutableStateMapOf<String, String>().apply { labels.keys.forEach { put(it, offer.data.text(it)) } } }
     var category by remember { mutableStateOf(offer.data.text("category").ifBlank { "EXCURSION" }) }
     var status by remember { mutableStateOf(offer.data.text("status").ifBlank { "PUBLISHED" }) }

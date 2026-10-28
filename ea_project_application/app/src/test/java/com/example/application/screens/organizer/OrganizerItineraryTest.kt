@@ -46,4 +46,21 @@ class OrganizerItineraryTest {
         assertTrue(offer.matches("calabria", "ALL"))
         assertFalse(offerStatuses(false).any { it.first == "DRAFT" })
     }
+    @Test fun stageHoursCanBeEditedClearedAndValidated() {
+        val original = stage(1, "Museo")
+        val fields = mapOf("title" to "Museo", "day" to "1", "latitude" to "", "longitude" to "", "startTime" to "09:00", "endTime" to "11:30")
+        val saved = stagePayload(original, fields, "VISIT")
+        assertEquals("09:00", saved.text("startTime"))
+        assertEquals("11:30", saved.text("endTime"))
+        val cleared = stagePayload(saved, fields + mapOf("startTime" to "", "endTime" to ""), "VISIT")
+        assertFalse(cleared.has("startTime")); assertFalse(cleared.has("endTime"))
+        listOf("08:00", "09:00", "25:00").forEach { end ->
+            assertThrows(IllegalArgumentException::class.java) { stagePayload(original, fields + ("endTime" to end), "VISIT") }
+        }
+    }
+    @Test fun savingWholeItineraryRejectsReversedTimesFromExistingData() {
+        val bad = stage(1, "Museo").apply { addProperty("startTime", "18:00"); addProperty("endTime", "10:00") }
+        assertThrows(IllegalArgumentException::class.java) { itineraryPayload(listOf(bad), "2027-06-01", "2027-06-03") }
+    }
+
 }
