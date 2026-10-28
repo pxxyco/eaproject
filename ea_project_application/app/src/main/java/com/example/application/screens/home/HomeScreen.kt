@@ -22,17 +22,18 @@ import kotlinx.coroutines.launch
 fun HomeScreen(modifier: Modifier = Modifier) {
     val appError by AppStatus::error
 
-    var activities by remember { mutableStateOf<List<ActivityHomeDTO>>(emptyList()) }
-    var trips by remember { mutableStateOf<List<TripHomeDTO>>(emptyList()) }
+    var activities by remember { mutableStateOf(PagedList<ActivityHomeDTO>()) }
+    var trips by remember { mutableStateOf(PagedList<TripHomeDTO>()) }
     var activitiesByCategory by remember {
-        mutableStateOf<Map<String, List<ActivityHomeDTO>>>(emptyMap())
+        mutableStateOf<Map<String, PagedList<ActivityHomeDTO>>>(emptyMap())
     }
     var homeError by remember { mutableStateOf<String?>(null) }
 
     var searchQuery by remember { mutableStateOf("") }
+    var searchedQuery by remember { mutableStateOf("") }
     var hasSearched by remember { mutableStateOf(false) }
-    var searchActivityResults by remember { mutableStateOf<List<ActivityHomeDTO>>(emptyList()) }
-    var searchTripResults by remember { mutableStateOf<List<TripHomeDTO>>(emptyList()) }
+    var searchActivityResults by remember { mutableStateOf(PagedList<ActivityHomeDTO>()) }
+    var searchTripResults by remember { mutableStateOf(PagedList<TripHomeDTO>()) }
     var searchError by remember { mutableStateOf<String?>(null) }
     var searchRequestId by remember { mutableStateOf(0) }
     var searchLoading by remember { mutableStateOf(false) }
@@ -65,11 +66,11 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                 val loadedActivities = activitiesDeferred.await()
                 val loadedTrips = tripsDeferred.await()
                 val loadedCategories = categoriesDeferred.associate { (category, deferred) ->
-                    category to deferred.await()
+                    category to PagedList.first(deferred.await())
                 }
 
-                activities = loadedActivities
-                trips = loadedTrips
+                activities = PagedList.first(loadedActivities)
+                trips = PagedList.first(loadedTrips)
                 activitiesByCategory = loadedCategories
             }
         } catch (e: CancellationException) {
@@ -81,13 +82,45 @@ fun HomeScreen(modifier: Modifier = Modifier) {
         }
     }
 
+    fun <T> loadMore(
+        get: () -> PagedList<T>,
+        set: (PagedList<T>) -> Unit,
+        key: (T) -> Any,
+        isStale: () -> Boolean = { false },
+        fetch: suspend (Int) -> List<T>
+    ) {
+        val current = get()
+        if (current.loadingMore || !current.hasMore) return
+        set(current.copy(loadingMore = true, error = null))
+
+        scope.launch {
+            try {
+                val page = fetch(current.nextPage)
+                if (isStale()) return@launch
+                set(get().appended(page, key))
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                if (!isStale()) {
+                    set(
+                        get().copy(
+                            loadingMore = false,
+                            error = errorMessage(e, "Impossibile caricare altri risultati.")
+                        )
+                    )
+                }
+            }
+        }
+    }
+
     fun resetSearch() {
         searchRequestId++
         suggestionsEnabled = false
         suggestions = emptyList()
         searchQuery = ""
-        searchActivityResults = emptyList()
-        searchTripResults = emptyList()
+        searchedQuery = ""
+        searchActivityResults = PagedList()
+        searchTripResults = PagedList()
         searchError = null
         hasSearched = false
         searchLoading = false
@@ -105,9 +138,12 @@ fun HomeScreen(modifier: Modifier = Modifier) {
 
         searchRequestId++
         val requestId = searchRequestId
+        searchedQuery = query
         hasSearched = true
         searchLoading = true
         searchError = null
+        searchActivityResults = PagedList()
+        searchTripResults = PagedList()
 
         scope.launch {
             try {
@@ -118,14 +154,14 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                 }
 
                 if (requestId != searchRequestId) return@launch
-                searchActivityResults = foundActivities
-                searchTripResults = foundTrips
+                searchActivityResults = PagedList.first(foundActivities)
+                searchTripResults = PagedList.first(foundTrips)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 if (requestId == searchRequestId) {
-                    searchActivityResults = emptyList()
-                    searchTripResults = emptyList()
+                    searchActivityResults = PagedList()
+                    searchTripResults = PagedList()
                     searchError = errorMessage(e, "Errore durante la ricerca.")
                 }
             } finally {
@@ -189,9 +225,44 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                 searchActivityResults = searchActivityResults,
                 searchTripResults = searchTripResults,
                 searchError = searchError,
-                onResetSearch = { resetSearch() }
-            )
+                onResetSearch = { resetSearch() },
 
+                onLoadMoreTopActivities = {
+                    loadMore(
+                        get = { activities }, set = { activities = it },
+                        key = { it.stableKey() }
+                    ) { page -> HomeRepository.getTopActivities(page) }
+                },
+                onLoadMoreTrips = {
+                    loadMore(
+                        get = { trips }, set = { trips = it },
+                        key = { it.stableKey() }
+                    ) { page -> HomeRepository.getFeaturedTrips(page) }
+                },
+                onLoadMoreCategory = { category ->
+                    loadMore(
+                        get = { activitiesByCategory[category] ?: PagedList() },
+                        set = { activitiesByCategory = activitiesByCategory + (category to it) },
+                        key = { it.stableKey() }
+                    ) { page -> HomeRepository.getActivitiesByCategory(category, page) }
+                },
+                onLoadMoreSearchActivities = {
+                    val id = searchRequestId
+                    loadMore(
+                        get = { searchActivityResults }, set = { searchActivityResults = it },
+                        key = { it.stableKey() },
+                        isStale = { id != searchRequestId }
+                    ) { page -> HomeRepository.searchActivities(searchedQuery, page) }
+                },
+                onLoadMoreSearchTrips = {
+                    val id = searchRequestId
+                    loadMore(
+                        get = { searchTripResults }, set = { searchTripResults = it },
+                        key = { it.stableKey() },
+                        isStale = { id != searchRequestId }
+                    ) { page -> HomeRepository.searchTrips(searchedQuery, page) }
+                }
+            )
 
             if (searchLoading && !hostedLoading) {
                 LoadingOverlay(message = "Ricerca in corso...")
@@ -199,7 +270,6 @@ fun HomeScreen(modifier: Modifier = Modifier) {
         }
     }
 }
-
 private fun errorMessage(e: Exception, fallback: String): String {
     val message = e.message.orEmpty()
     return if (

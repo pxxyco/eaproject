@@ -39,6 +39,7 @@ android {
 dependencies {
     implementation("com.squareup.okhttp3:okhttp:5.5.1")
     implementation("com.google.code.gson:gson:2.14.0")
+    implementation(libs.androidx.compose.foundation)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.11.0")
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation(libs.emv.nfc)

@@ -44,7 +44,7 @@ class CollectionsActionsTest {
         compose.setContent { MaterialTheme {
             CollectionScreen(MyTripRepository.HubTarget.Bookings, {}, load = { CollectionItemsDTO(bookings = listOf(
                 BookingItemDTO(bookingId = 42, activityId = 7, bookingStatus = "CONFIRMED", itemDate = "2099-01-01T12:00:00")
-            )) }, remove = { _, id, _ -> removed = id })
+            )) }, cancelBooking = { id -> removed = id })
         } }
         compose.onNodeWithText("Annulla prenotazione").performClick()
         compose.onNodeWithText("Conferma").performClick()

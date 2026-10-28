@@ -19,7 +19,6 @@ import kotlin.math.roundToInt
 fun AppErrorDialog(onExit: () -> Unit) {
     val state = AppStatus.error ?: return
     val scope = rememberCoroutineScope()
-    var secondsLeft by remember(state) { mutableIntStateOf(state.retryAfterSeconds) }
     var checking by remember(state) { mutableStateOf(false) }
 
     var shakeTrigger by remember { mutableIntStateOf(0) }
@@ -27,23 +26,21 @@ fun AppErrorDialog(onExit: () -> Unit) {
     val shakeController = remember { Animatable(0f) }
 
     LaunchedEffect(state, shakeTrigger) {
-        if (shakeTrigger > 0 || state != null) {
-            shakeController.animateTo(
-                targetValue = 0f,
-                animationSpec = keyframes {
-                    durationMillis = 400
-                    0f at 0
-                    -15f at 50
-                    15f at 100
-                    -15f at 150
-                    15f at 200
-                    -10f at 250
-                    10f at 300
-                    -5f at 350
-                    0f at 400
-                }
-            )
-        }
+        shakeController.animateTo(
+            targetValue = 0f,
+            animationSpec = keyframes {
+                durationMillis = 400
+                0f at 0
+                -15f at 50
+                15f at 100
+                -15f at 150
+                15f at 200
+                -10f at 250
+                10f at 300
+                -5f at 350
+                0f at 400
+            }
+        )
     }
 
     fun recovered() {
@@ -52,23 +49,15 @@ fun AppErrorDialog(onExit: () -> Unit) {
     }
 
     LaunchedEffect(state) {
-        when (state.code) {
-            AppErrorCode.ERR_RATE_LIMITED -> {
-                while (secondsLeft > 0) { delay(1000); secondsLeft-- }
-                recovered()
+        if (state.code == AppErrorCode.ERR_NETWORK_UNREACHABLE) {
+            while (true) {
+                delay(3000)
+                if (ApiService.isBackendReachable()) { recovered(); break }
             }
-            AppErrorCode.ERR_NETWORK_UNREACHABLE -> {
-                while (true) {
-                    delay(3000)
-                    if (ApiService.isBackendReachable()) { recovered(); break }
-                }
-            }
-            else -> Unit
         }
     }
 
     val isAuthExpired = state.code == AppErrorCode.ERR_AUTH_EXPIRED
-    val isRateLimited = state.code == AppErrorCode.ERR_RATE_LIMITED
 
     AlertDialog(
         onDismissRequest = { },
@@ -80,14 +69,11 @@ fun AppErrorDialog(onExit: () -> Unit) {
             Text("Oops, qualcosa è andato storto...")
         },
         text = {
-            Text(
-                "Codice Errore: ${state.code.code}. ${state.code.description}" +
-                        if (isRateLimited) " Riprova tra $secondsLeft s." else ""
-            )
+            Text("Codice Errore: ${state.code.code}. ${state.code.description}")
         },
         confirmButton = {
             TextButton(
-                enabled = !checking && !(isRateLimited && secondsLeft > 0),
+                enabled = !checking,
                 onClick = {
                     if (isAuthExpired) {
                         AppStatus.dismiss()
@@ -107,7 +93,6 @@ fun AppErrorDialog(onExit: () -> Unit) {
                 Text(
                     when {
                         isAuthExpired -> "OK"
-                        isRateLimited && secondsLeft > 0 -> "Riprova tra $secondsLeft s"
                         checking -> "Controllo..."
                         else -> "Riprova"
                     }
