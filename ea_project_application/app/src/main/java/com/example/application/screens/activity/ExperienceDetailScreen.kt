@@ -30,6 +30,9 @@ import com.example.application.dto.ExperienceDetail
 import com.example.application.dto.ExperienceRef
 import com.example.application.network.ExperienceRepository
 import com.example.application.screens.activity.itinerary.ItinerarySection
+import com.example.application.screens.activity.photos.PhotoSection
+import com.example.application.screens.activity.photos.PhotoViewer
+import com.example.application.screens.activity.photos.PhotoViewerRequest
 import com.example.application.screens.home.RemotePhoto
 import com.example.application.ui.theme.ScreenBackground
 import com.example.application.ui.theme.Stone200
@@ -94,6 +97,7 @@ private val HEADER_HEIGHT = 250.dp
 private fun ExperienceDetailContent(detail: ExperienceDetail) {
     val listState = rememberLazyListState()
     var selectedTab by rememberSaveable { mutableStateOf(DetailTab.DESCRIPTION) }
+    var openPhoto by remember { mutableStateOf<PhotoViewerRequest?>(null) }
     val headerHeightPx = with(LocalDensity.current) { HEADER_HEIGHT.toPx() }
 
     val headerOffset by remember {
@@ -139,7 +143,10 @@ private fun ExperienceDetailContent(detail: ExperienceDetail) {
                 when (selectedTab) {
                     DetailTab.DESCRIPTION -> DescriptionSection(detail)
                     DetailTab.ITINERARY   -> ItinerarySection(detail)
-                    DetailTab.GALLERY     -> SectionPlaceholder("Galleria")
+                    DetailTab.GALLERY     -> PhotoSection(
+                        detail,
+                        onPhotoClick = { photos, index -> openPhoto = PhotoViewerRequest(photos, index) }
+                    )
                     DetailTab.REVIEWS     -> SectionPlaceholder("Recensioni")
                 }
             }
@@ -151,5 +158,9 @@ private fun ExperienceDetailContent(detail: ExperienceDetail) {
             onBookClick = { /* TODO prenotazione */ },
             modifier = Modifier.align(Alignment.BottomCenter)
         )
+
+        openPhoto?.let { request ->
+            PhotoViewer(request = request, onDismiss = { openPhoto = null })
+        }
     }
 }

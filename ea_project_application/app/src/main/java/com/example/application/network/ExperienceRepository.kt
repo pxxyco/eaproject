@@ -5,6 +5,7 @@ import com.example.application.dto.ExperienceDetail
 import com.example.application.dto.ExperienceRef
 import com.example.application.dto.ExperienceType
 import com.example.application.dto.TripDetailDTO
+import com.example.application.dto.TripImageDTO
 
 object ExperienceRepository {
 
@@ -23,4 +24,10 @@ object ExperienceRepository {
             is ApiResult.RateLimited -> throw IllegalStateException("Troppe richieste. Riprova tra ${result.retryAfterSeconds} secondi.")
             is ApiResult.NetworkError -> throw result.cause
         }
+
+
+    suspend fun getTripImages(tripId: Long): List<String> =
+        fetch("/api/trip-images/trip/$tripId", Array<TripImageDTO>::class.java)
+            .sortedBy { it.orderIndex ?: Int.MAX_VALUE }
+            .mapNotNull { it.imageUrl?.takeIf { url -> url.isNotBlank() } }
 }
