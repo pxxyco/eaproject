@@ -24,7 +24,10 @@ import com.example.application.ui.theme.Stone400
 import java.util.Locale
 
 @Composable
-internal fun ExperienceHeaderSheet(detail: ExperienceDetail) {
+internal fun ExperienceHeaderSheet(
+    detail: ExperienceDetail,
+    rating: Double? = detail.averageRating
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -62,7 +65,7 @@ internal fun ExperienceHeaderSheet(detail: ExperienceDetail) {
         }
 
         Text(
-            text = "⭐ " + (detail.averageRating?.let { "%.1f".format(Locale.ITALY, it) } ?: "-"),
+            text = "⭐ " + (rating?.let { "%.1f".format(Locale.ITALY, it) } ?: "-"),
             style = MaterialTheme.typography.bodyMedium,
             color = RatingAmber,
             fontWeight = FontWeight.Bold

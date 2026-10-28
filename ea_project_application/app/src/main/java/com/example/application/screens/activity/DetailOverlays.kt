@@ -9,6 +9,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -23,6 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.application.ui.theme.FavoriteRed
 import com.example.application.ui.theme.OverlayDark
 import com.example.application.ui.theme.PopupSurface
 import com.example.application.ui.theme.Stone200
@@ -44,6 +48,47 @@ internal fun BackButton(
         Icon(
             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
             contentDescription = "Indietro",
+            tint = Color.White
+        )
+    }
+}
+
+@Composable
+internal fun FavoriteButton(
+    favorite: Boolean,
+    enabled: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    IconButton(
+        onClick = onToggle,
+        enabled = enabled,
+        modifier = modifier
+            .clip(CircleShape)
+            .background(OverlayDark)
+    ) {
+        Icon(
+            imageVector = if (favorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+            contentDescription = if (favorite) "Rimuovi dai preferiti" else "Aggiungi ai preferiti",
+            tint = if (favorite) FavoriteRed else Color.White
+        )
+    }
+}
+
+@Composable
+internal fun AddToListButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    IconButton(
+        onClick = onClick,
+        modifier = modifier
+            .clip(CircleShape)
+            .background(OverlayDark)
+    ) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.List,
+            contentDescription = "Aggiungi a una lista",
             tint = Color.White
         )
     }
