@@ -12,6 +12,7 @@ val Stone900 = Color(0xFF1C1917)
 val PopupSurface = Color(0xFF242423)
 val ScreenBackground = Color(0xFF0C0C0C)
 val RatingAmber = Color(0xFFF59E0B)
+val FavoriteRed = Color(0xFFEF4444)
 
 val GlassFill = Color.White.copy(alpha = 0.07f)
 val GlassFillStrong = Color.White.copy(alpha = 0.12f)

@@ -8,6 +8,8 @@ import com.example.application.dto.TripHomeDTO
 import java.io.IOException
 
 private data class CreateListRequest(val name: String, val visibility: String)
+private data class AddActivityRequest(val listId: Long, val activityId: Long)
+private data class AddTripRequest(val listId: Long, val tripId: Long)
 
 data class BookingSummary(val id: Long, val upcoming: Boolean)
 data class FavoriteSummary(val id: Long, val type: String, val itemId: Long)
@@ -63,12 +65,25 @@ object MyTripRepository {
         }
     }
 
-    suspend fun createList(name: String) {
+    suspend fun createList(name: String): FavoriteList? {
         val clean = name.trim()
-        if (clean.isEmpty()) return
+        if (clean.isEmpty()) return null
         val request = CreateListRequest(clean, ListVisibility.PRIVATE.name)
-        when (val result = ApiService.post("/api/favorite-lists", request, FavoriteListItemDTO::class.java)) {
-            is ApiResult.Success -> result.data.toUi()?.let { _lists.add(it) }
+        return when (val result = ApiService.post("/api/favorite-lists", request, FavoriteListItemDTO::class.java)) {
+            is ApiResult.Success -> result.data.toUi()?.also { _lists.add(it) }
+            is ApiResult.HttpError -> throw IOException(myTripHttpError(result.code))
+            is ApiResult.RateLimited -> throw IOException("Troppe richieste, riprova tra poco.")
+            is ApiResult.NetworkError -> throw IOException("Impossibile raggiungere il server.")
+        }
+    }
+
+    suspend fun addToList(listId: Long, ref: ExperienceRef) {
+        val (path, body) = when (ref.type) {
+            ExperienceType.ACTIVITY -> "/api/list-activities" to AddActivityRequest(listId, ref.id)
+            ExperienceType.TRIP -> "/api/list-trips" to AddTripRequest(listId, ref.id)
+        }
+        when (val result = ApiService.post(path, body, Unit::class.java)) {
+            is ApiResult.Success -> Unit
             is ApiResult.HttpError -> throw IOException(myTripHttpError(result.code))
             is ApiResult.RateLimited -> throw IOException("Troppe richieste, riprova tra poco.")
             is ApiResult.NetworkError -> throw IOException("Impossibile raggiungere il server.")
