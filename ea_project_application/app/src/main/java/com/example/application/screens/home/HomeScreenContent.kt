@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.application.dto.ActivityHomeDTO
+import com.example.application.dto.ExperienceRef
 import com.example.application.dto.SearchSuggestion
 import com.example.application.dto.TripHomeDTO
 import kotlinx.coroutines.launch
@@ -40,6 +41,7 @@ internal fun HomeScreenContent(
     searchTripResults: PagedList<TripHomeDTO>,
     searchError: String?,
     onResetSearch: () -> Unit,
+    onExperienceClick: (ExperienceRef) -> Unit,
     onLoadMoreTopActivities: () -> Unit,
     onLoadMoreTrips: () -> Unit,
     onLoadMoreCategory: (String) -> Unit,
@@ -111,7 +113,7 @@ internal fun HomeScreenContent(
                     }
                 }
                 item(key = "search_trips_row") {
-                    TripRow(searchTripResults, onLoadMoreSearchTrips)
+                    TripRow(searchTripResults, onExperienceClick, onLoadMoreSearchTrips)
                 }
 
                 item(key = "search_activities_title") {
@@ -131,7 +133,7 @@ internal fun HomeScreenContent(
                         )
                     }
                 } else {
-                    activityGridItems(searchActivityResults, onLoadMoreSearchActivities)
+                    activityGridItems(searchActivityResults, onExperienceClick, onLoadMoreSearchActivities)
                 }
 
             } else if (homeError == null) {
@@ -143,7 +145,7 @@ internal fun HomeScreenContent(
                     }
                 }
                 item(key = "top_activities_row") {
-                    ActivityRow(activities, onLoadMoreTopActivities)
+                    ActivityRow(activities, onExperienceClick, onLoadMoreTopActivities)
                 }
 
                 item(key = "trips_title") {
@@ -154,7 +156,7 @@ internal fun HomeScreenContent(
                     }
                 }
                 item(key = "trips_row") {
-                    TripRow(trips, onLoadMoreTrips)
+                    TripRow(trips, onExperienceClick, onLoadMoreTrips)
                 }
 
                 activityCategories.forEach { category ->
@@ -169,7 +171,7 @@ internal fun HomeScreenContent(
                             }
                         }
                         item(key = "row_${category.backendCategory}") {
-                            ActivityRow(list) { onLoadMoreCategory(category.backendCategory) }
+                            ActivityRow(list, onExperienceClick) { onLoadMoreCategory(category.backendCategory) }
                         }
                     }
                 }
