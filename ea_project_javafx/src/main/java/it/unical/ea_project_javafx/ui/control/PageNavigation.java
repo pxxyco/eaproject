@@ -9,7 +9,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-/** Uses the same controls and stylesheet as the home pagination. */
+/** Reusable pager styled by the shared pagination component. */
 public final class PageNavigation extends VBox {
     private final IntegerProperty currentPageIndex = new SimpleIntegerProperty();
     private final IntegerProperty pageCount = new SimpleIntegerProperty(1);
@@ -21,10 +21,10 @@ public final class PageNavigation extends VBox {
         super(12);
         setAlignment(Pos.CENTER);
         numbers.setAlignment(Pos.CENTER);
-        getStyleClass().add("home-pagination");
-        getStylesheets().add(getClass().getResource("/it/unical/ea_project_javafx/css/home/home.css").toExternalForm());
-        previous.getStyleClass().add("home-page-nav");
-        next.getStyleClass().add("home-page-nav");
+        getStyleClass().add("page-navigation");
+        getStylesheets().add(getClass().getResource("/it/unical/ea_project_javafx/css/app.css").toExternalForm());
+        previous.getStyleClass().add("page-nav");
+        next.getStyleClass().add("page-nav");
         summary.getStyleClass().add("section-subtitle");
         HBox row = new HBox(10, previous, numbers, next);
         row.setAlignment(Pos.CENTER);
@@ -70,7 +70,7 @@ public final class PageNavigation extends VBox {
             }
             int target = p;
             ToggleButton button = new ToggleButton(Integer.toString(p + 1));
-            button.getStyleClass().add("home-page-button");
+            button.getStyleClass().add("page-button");
             button.setSelected(p == current);
             button.setOnAction(e -> {
                 setCurrentPageIndex(target);

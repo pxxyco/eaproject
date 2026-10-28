@@ -15,10 +15,14 @@ import it.unical.ea_project.repository.trip.TripRepository;
 import it.unical.ea_project.repository.user.UserRepository;
 import it.unical.ea_project.service.review.ReviewService;
 import java.math.BigDecimal;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
+import it.unical.ea_project.service.booking.BookingLifecycle;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ReviewServiceImpl implements ReviewService {
 
+    private final EntityManager entities;
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final TripRepository tripRepository;
@@ -42,7 +47,8 @@ public class ReviewServiceImpl implements ReviewService {
             TripRepository tripRepository,
             ActivityRepository activityRepository,
             ResponseRepository responseRepository,
-            BookingRepository bookingRepository) {
+            BookingRepository bookingRepository, EntityManager entities) {
+        this.entities = entities;
         this.reviewRepository = reviewRepository;
         this.userRepository = userRepository;
         this.tripRepository = tripRepository;
@@ -65,6 +71,7 @@ public class ReviewServiceImpl implements ReviewService {
             throw new IllegalArgumentException("La recensione deve riferirsi a un solo viaggio o a una sola attività.");
         }
 
+        lockOffer(review.getTripId(), review.getActivityId());
         if (!hasEligibleCompletedBooking(review.getUserId(), review.getTripId(), review.getActivityId())) {
             throw new IllegalArgumentException(
                     "Puoi recensire soltanto un'esperienza prenotata e terminata, non cancellata.");
@@ -99,7 +106,7 @@ public class ReviewServiceImpl implements ReviewService {
     @Transactional(readOnly = true)
     public Review findById(Long id) {
         return reviewRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Review non trovata"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recensione non trovata."));
     }
 
     @Transactional(readOnly = true)
@@ -144,6 +151,8 @@ public class ReviewServiceImpl implements ReviewService {
     @Transactional
     public ReviewDTO update(Long id, ReviewDTO data, Long userId) {
         Review review = findOwnedReview(id, userId);
+        lockOffer(review.getTrip() == null ? null : review.getTrip().getTripId(),
+                review.getActivity() == null ? null : review.getActivity().getActivityId());
         if (data == null)
             throw new IllegalArgumentException("Dati della recensione mancanti.");
         if (data.getRating() != null)
@@ -171,6 +180,8 @@ public class ReviewServiceImpl implements ReviewService {
     @Transactional
     public void delete(Long id, Long userId) {
         Review review = findOwnedReview(id, userId);
+        lockOffer(review.getTrip() == null ? null : review.getTrip().getTripId(),
+                review.getActivity() == null ? null : review.getActivity().getActivityId());
 
         Long tripId = review.getTrip() != null ? review.getTrip().getTripId() : null;
         Long activityId = review.getActivity() != null ? review.getActivity().getActivityId() : null;
@@ -206,54 +217,11 @@ public class ReviewServiceImpl implements ReviewService {
 
     private boolean hasEligibleCompletedBooking(Long userId, Long tripId, Long activityId) {
         LocalDateTime now = LocalDateTime.now();
-        return bookingRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(userId).stream()
-                .filter(booking -> booking.getBookingStatus() != Booking.BookingStatus.CANCELLED)
-                .filter(booking -> booking.getBookingStatus() == Booking.BookingStatus.CONFIRMED
-                        || booking.getBookingStatus() == Booking.BookingStatus.COMPLETED)
-                .filter(booking -> !isEventCancelled(booking))
+        return bookingRepository.findForExperience(userId, tripId, activityId).stream()
                 .filter(booking -> tripId != null
                         ? booking.getTrip() != null && tripId.equals(booking.getTrip().getTripId())
                         : booking.getActivity() != null && activityId.equals(booking.getActivity().getActivityId()))
-                .anyMatch(booking -> booking.getBookingStatus() == Booking.BookingStatus.COMPLETED
-                        || isEventCompleted(booking)
-                        || eventEndDateTime(booking) != null && !eventEndDateTime(booking).isAfter(now));
-    }
-
-    private boolean isEventCompleted(Booking booking) {
-        if (booking.getTrip() != null) {
-            return booking.getTrip().getStatus() == Trip.TripStatus.COMPLETED;
-        }
-        return booking.getActivity() != null
-                && booking.getActivity().getStatus() == Activity.Status.COMPLETED;
-    }
-
-    private boolean isEventCancelled(Booking booking) {
-        if (booking.getTrip() != null) {
-            return booking.getTrip().getStatus() == Trip.TripStatus.CANCELLED;
-        }
-        return booking.getActivity() != null
-                && booking.getActivity().getStatus() == Activity.Status.CANCELLED;
-    }
-
-    private LocalDateTime eventEndDateTime(Booking booking) {
-        if (booking.getTrip() != null) {
-            LocalDate end = booking.getTrip().getEndDate() != null
-                    ? booking.getTrip().getEndDate()
-                    : booking.getTrip().getStartDate();
-            return end == null ? null : end.atTime(LocalTime.MAX);
-        }
-        if (booking.getActivity() != null) {
-            Activity activity = booking.getActivity();
-            if (activity.getEndDate() != null)
-                return activity.getEndDate();
-            if (activity.getStartDate() == null)
-                return null;
-            int minutes = activity.getDurationMinutes() == null || activity.getDurationMinutes() < 1
-                    ? 60
-                    : activity.getDurationMinutes();
-            return activity.getStartDate().plusMinutes(minutes);
-        }
-        return null;
+                .anyMatch(booking -> BookingLifecycle.reviewable(booking, now));
     }
 
     private void updateAverageRating(Long tripId, Long activityId) {
@@ -274,9 +242,17 @@ public class ReviewServiceImpl implements ReviewService {
         }
     }
 
+    private void lockOffer(Long tripId, Long activityId) {
+        Object offer = tripId != null ? entities.find(Trip.class, tripId, LockModeType.PESSIMISTIC_WRITE)
+                : entities.find(Activity.class, activityId, LockModeType.PESSIMISTIC_WRITE);
+        if (offer == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Esperienza non trovata.");
+    }
+
     private Review findOwnedReview(Long id, Long userId) {
-        Review review = reviewRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Review non trovata"));
+        Review review = entities.find(Review.class, id, LockModeType.PESSIMISTIC_WRITE);
+        if (review == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Recensione non trovata.");
 
         if (!review.getUser().getId().equals(userId)) {
             throw new AccessDeniedException("La recensione non appartiene all'utente autenticato.");

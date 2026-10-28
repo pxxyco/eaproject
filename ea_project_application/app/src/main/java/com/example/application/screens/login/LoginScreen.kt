@@ -9,14 +9,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.application.ui.theme.ScreenBackground
 import com.example.application.ui.theme.Stone200
 import com.example.application.ui.theme.Stone900
 
 @Composable
 fun LoginScreen(onLoginClick: () -> Unit, onSkipClick: () -> Unit)
 {
-    Box(modifier = Modifier.fillMaxSize().background(ScreenBackground).padding(24.dp),
+    Box(modifier = Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Color.Transparent).padding(24.dp),
         contentAlignment = Alignment.Center)
     {
         Column(modifier = Modifier.fillMaxWidth(),
@@ -25,7 +24,7 @@ fun LoginScreen(onLoginClick: () -> Unit, onSkipClick: () -> Unit)
         {
             Text(text = "Benvenuto",
                 style = MaterialTheme.typography.headlineMedium,
-                color = Color.White
+                color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(8.dp))
 

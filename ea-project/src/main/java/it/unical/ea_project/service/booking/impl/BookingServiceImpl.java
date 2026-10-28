@@ -4,6 +4,7 @@ import it.unical.ea_project.domain.activity.Activity;
 import it.unical.ea_project.domain.booking.Booking;
 import it.unical.ea_project.domain.payment.Payment;
 import it.unical.ea_project.domain.trip.Trip;
+import it.unical.ea_project.domain.user.User;
 import it.unical.ea_project.dto.booking.BookingDTO;
 import it.unical.ea_project.repository.activity.ActivityRepository;
 import it.unical.ea_project.repository.booking.BookingRepository;
@@ -11,12 +12,11 @@ import it.unical.ea_project.repository.payment.PaymentRepository;
 import it.unical.ea_project.repository.trip.TripRepository;
 import it.unical.ea_project.repository.user.UserRepository;
 import it.unical.ea_project.service.booking.BookingService;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import it.unical.ea_project.service.booking.BookingLockService;
 import java.math.BigDecimal;
+import it.unical.ea_project.util.CalendarWriter;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,15 +26,16 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
+    private final BookingLockService bookingLocks;
 
-    @PersistenceContext
-    private EntityManager entityManager;
     private final UserRepository userRepository;
     private final TripRepository tripRepository;
     private final ActivityRepository activityRepository;
@@ -44,13 +45,14 @@ public class BookingServiceImpl implements BookingService {
             UserRepository userRepository,
             TripRepository tripRepository,
             ActivityRepository activityRepository,
-            PaymentRepository paymentRepository) {
+            PaymentRepository paymentRepository, BookingLockService bookingLocks) {
 
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.tripRepository = tripRepository;
         this.activityRepository = activityRepository;
         this.paymentRepository = paymentRepository;
+        this.bookingLocks = bookingLocks;
 
     }
 
@@ -58,21 +60,23 @@ public class BookingServiceImpl implements BookingService {
     public BookingDTO creaPrenotazioneTrip(Long userId, Long tripId, Integer seats) {
 
         validateSeats(seats);
+        User traveler = requireTraveler(userId);
         Trip trip = tripRepository.findActiveForUpdate(tripId)
                 .orElseThrow(() -> new IllegalArgumentException("Viaggio non trovato"));
         if (trip.getStatus() != Trip.TripStatus.PUBLISHED || trip.getStartDate() == null
                 || !trip.getStartDate().isAfter(LocalDate.now())) {
             throw new IllegalArgumentException("Il viaggio non è prenotabile: deve essere pubblicato e futuro.");
         }
+        rejectDuplicate(userId, tripId, null);
         reserveSeats(trip.getAvailableSeats(), seats);
         trip.setAvailableSeats(trip.getAvailableSeats() - seats);
 
         Booking b = new Booking();
-        b.setUser(userRepository.getReferenceById(userId));
+        b.setUser(traveler);
         b.setTrip(trip);
         b.setSeats(seats);
         b.setBookingType(Booking.BookingType.TRIP);
-        b.setBookingStatus(Booking.BookingStatus.CONFIRMED);
+        b.setBookingStatus(trip.getTotalPrice().signum() == 0 ? Booking.BookingStatus.CONFIRMED : Booking.BookingStatus.PENDING);
         b.setPrice(trip.getTotalPrice().multiply(BigDecimal.valueOf(seats)));
         return toDto(bookingRepository.save(b));
 
@@ -82,21 +86,23 @@ public class BookingServiceImpl implements BookingService {
     public BookingDTO creaPrenotazioneActivity(Long userId, Long activityId, Integer seats) {
 
         validateSeats(seats);
+        User traveler = requireTraveler(userId);
         Activity activity = activityRepository.findActiveForUpdate(activityId)
                 .orElseThrow(() -> new IllegalArgumentException("Attività non trovata"));
         if (activity.getStatus() != Activity.Status.PUBLISHED || activity.getStartDate() == null
                 || !activity.getStartDate().isAfter(LocalDateTime.now())) {
             throw new IllegalArgumentException("L'attività non è prenotabile: deve essere pubblicata e futura.");
         }
+        rejectDuplicate(userId, null, activityId);
         reserveSeats(activity.getAvailableSeats(), seats);
         activity.setAvailableSeats(activity.getAvailableSeats() - seats);
 
         Booking b = new Booking();
-        b.setUser(userRepository.getReferenceById(userId));
+        b.setUser(traveler);
         b.setActivity(activity);
         b.setSeats(seats);
         b.setBookingType(Booking.BookingType.ACTIVITY);
-        b.setBookingStatus(Booking.BookingStatus.CONFIRMED);
+        b.setBookingStatus(activity.getPrice() == 0 ? Booking.BookingStatus.CONFIRMED : Booking.BookingStatus.PENDING);
         b.setPrice(BigDecimal.valueOf(activity.getPrice()).multiply(BigDecimal.valueOf(seats)));
         return toDto(bookingRepository.save(b));
 
@@ -105,8 +111,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional
     public void cancella(Long bookingId, Long userId) {
 
-        Booking b = bookingRepository.findByBookingIdForUpdate(bookingId)
-                .orElseThrow(() -> new IllegalArgumentException("Prenotazione non trovata."));
+        Booking b = bookingLocks.owned(bookingId, userId);
         if (b.getUser() == null || !Objects.equals(b.getUser().getId(), userId)) {
             throw new AccessDeniedException(
                     "Prenotazione non appartenente all'utente");
@@ -141,17 +146,11 @@ public class BookingServiceImpl implements BookingService {
         b.setBookingStatus(Booking.BookingStatus.CANCELLED);
         int seatsToRestore = b.getSeats() == null ? 0 : Math.max(0, b.getSeats());
         if (seatsToRestore > 0 && b.getTrip() != null) {
-            Trip locked = tripRepository.findActiveForUpdate(b.getTrip().getTripId())
-                    .orElseThrow(() -> new IllegalArgumentException("Viaggio non disponibile."));
-            entityManager.refresh(locked);
-            Integer available = locked.getAvailableSeats();
-            locked.setAvailableSeats((available == null ? 0 : available) + seatsToRestore);
+            Trip locked = b.getTrip();
+            locked.setAvailableSeats(restoredSeats(locked.getAvailableSeats(), locked.getMaxSeats(), seatsToRestore));
         } else if (seatsToRestore > 0 && b.getActivity() != null) {
-            Activity locked = activityRepository.findActiveForUpdate(b.getActivity().getActivityId())
-                    .orElseThrow(() -> new IllegalArgumentException("Attività non disponibile."));
-            entityManager.refresh(locked);
-            Integer available = locked.getAvailableSeats();
-            locked.setAvailableSeats((available == null ? 0 : available) + seatsToRestore);
+            Activity locked = b.getActivity();
+            locked.setAvailableSeats(restoredSeats(locked.getAvailableSeats(), locked.getMaxSeats(), seatsToRestore));
         }
 
         bookingRepository.save(b);
@@ -168,6 +167,16 @@ public class BookingServiceImpl implements BookingService {
                 .map(booking -> toDto(booking, paymentStatuses.get(booking.getBookingId())))
                 .toList();
 
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BookingDTO> getExperienceBookings(Long userId, Long tripId, Long activityId) {
+        if ((tripId == null) == (activityId == null))
+            throw new IllegalArgumentException("Indica un solo viaggio o una sola attività.");
+        List<Booking> bookings = bookingRepository.findForExperience(userId, tripId, activityId);
+        Map<Long, String> payments = loadLatestPaymentStatuses(bookings);
+        return bookings.stream().map(b -> toDto(b, payments.get(b.getBookingId()))).toList();
     }
 
     @Override
@@ -264,41 +273,7 @@ public class BookingServiceImpl implements BookingService {
         String dtStart = allDay ? "DTSTART;VALUE=DATE:" + start : "DTSTART;TZID=Europe/Rome:" + start;
         String dtEnd = allDay ? "DTEND;VALUE=DATE:" + end : "DTEND;TZID=Europe/Rome:" + end;
         String uid = "booking-" + booking.getBookingId() + "-" + stableId + "@ea-project";
-        String now = LocalDateTime.now(ZoneId.of("UTC"))
-                .format(DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'"));
-
-        return "BEGIN:VCALENDAR\r\n" +
-                "VERSION:2.0\r\n" +
-                "PRODID:-//EA Project//Prenotazioni//IT\r\n" +
-                "CALSCALE:GREGORIAN\r\n" +
-                "METHOD:PUBLISH\r\n" +
-                "BEGIN:VEVENT\r\n" +
-                "UID:" + escapeIcs(uid) + "\r\n" +
-                "DTSTAMP:" + now + "\r\n" +
-                dtStart + "\r\n" +
-                dtEnd + "\r\n" +
-                "SUMMARY:" + escapeIcs(title) + "\r\n" +
-                (location.isBlank() ? "" : "LOCATION:" + escapeIcs(location) + "\r\n") +
-                "DESCRIPTION:" + escapeIcs(description) + "\r\n" +
-                "STATUS:CONFIRMED\r\n" +
-                "END:VEVENT\r\n" +
-                "END:VCALENDAR\r\n";
-
-    }
-
-    private String escapeIcs(String value) {
-
-        if (value == null) {
-            return "";
-        }
-
-        return value.replace("\\", "\\\\")
-                .replace(";", "\\;")
-                .replace(",", "\\,")
-                .replace("\r\n", "\\n")
-                .replace("\n", "\\n")
-                .replace("\r", "");
-
+        return CalendarWriter.event(uid, title, location, description, dtStart, dtEnd, "CONFIRMED");
     }
 
     private String safeTitle(String title) {
@@ -333,6 +308,24 @@ public class BookingServiceImpl implements BookingService {
             return booking.getActivity().getStartDate();
         }
         return null;
+    }
+
+    private int restoredSeats(Integer available, Integer capacity, int seats) {
+        long restored = Math.max(0, available == null ? 0 : available) + (long) seats;
+        return (int) Math.min(capacity == null ? Integer.MAX_VALUE : Math.max(0, capacity), restored);
+    }
+
+    private User requireTraveler(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("Utente non disponibile."));
+        if (user.getDeletedAt() != null || user.getRole() != User.Role.TRAVELER)
+            throw new AccessDeniedException("Le prenotazioni sono riservate agli account Traveler.");
+        return user;
+    }
+
+    private void rejectDuplicate(Long userId, Long tripId, Long activityId) {
+        if (bookingRepository.existsReservation(userId, tripId, activityId))
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Hai già una prenotazione per questa esperienza e questa data. Gestiscila dalle tue prenotazioni.");
     }
 
     private void validateSeats(Integer seats) {

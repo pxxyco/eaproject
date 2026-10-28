@@ -117,7 +117,7 @@ public final class UiEffects {
             });
         }
         scene.getStylesheets().add(
-                UiEffects.class.getResource("/it/unical/ea_project_javafx/css/common/motion.css").toExternalForm());
+                UiEffects.class.getResource("/it/unical/ea_project_javafx/css/app.css").toExternalForm());
         watch(scene.getRoot());
         scene.rootProperty().addListener((o, old, root) -> {
             watch(root);

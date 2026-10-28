@@ -20,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -49,7 +50,7 @@ class OrganizerConcurrencyTest {
         Callable<Boolean> reserve = () -> {
             ready.countDown(); start.await();
             try { bookings.creaPrenotazioneTrip(ids[1], ids[0], 7); return true; }
-            catch (IllegalArgumentException expected) { return false; }
+            catch (IllegalArgumentException | ResponseStatusException expected) { return false; }
         };
         try {
             var first = executor.submit(reserve); var second = executor.submit(reserve);

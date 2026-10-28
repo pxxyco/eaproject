@@ -122,8 +122,8 @@ public class FavoritesController {
 
         BackgroundHelper.setupBackground(bgImageView);
         ViewSupport.loadNavbar(navbarContainer);
-        newListVisibilityCombo.getItems().setAll("PRIVATE", "SHARED", "PUBLIC");
-        editListVisibilityCombo.getItems().setAll("PRIVATE", "SHARED", "PUBLIC");
+        newListVisibilityCombo.getItems().setAll("PRIVATE", "SHARED");
+        editListVisibilityCombo.getItems().setAll("PRIVATE", "SHARED");
         StringConverter<String> visibilityConverter = new StringConverter<>() {
             @Override
             public String toString(String value) {
@@ -132,7 +132,7 @@ public class FavoritesController {
                 return switch (value) {
                     case "PRIVATE" -> "Solo io";
                     case "SHARED" -> "Persone invitate";
-                    case "PUBLIC" -> "Tutti";
+                    case "PUBLIC" -> "Solo io (raccolta precedente)";
                     default -> value;
                 };
             }
@@ -153,7 +153,7 @@ public class FavoritesController {
                     super.updateItem(item, empty);
                     String display = empty || item == null ? null
                             : ID_PATTERN.matcher(item).replaceFirst("").strip().replace("[PRIVATE]", "· Solo io")
-                                    .replace("[SHARED]", "· Persone invitate").replace("[PUBLIC]", "· Tutti");
+                                    .replace("[SHARED]", "· Persone invitate").replace("[PUBLIC]", "· Solo io");
                     setText(display);
                     setAccessibleText(display);
                 }
@@ -900,7 +900,7 @@ public class FavoritesController {
             oldParent.getChildren().remove(sharingPopupPanel);
         }
         var sharingCssResource = getClass()
-                .getResource("/it/unical/ea_project_javafx/css/traveler/list-sharing-popup.css");
+                .getResource("/it/unical/ea_project_javafx/css/screens/traveler/sharing.css");
         if (sharingCssResource == null) {
             ViewSupport.error(statusMessageLabel,
                     "Non è stato possibile caricare lo stile della finestra di condivisione.");

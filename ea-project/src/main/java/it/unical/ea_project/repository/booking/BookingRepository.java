@@ -54,6 +54,13 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
       @Param("tripCancelled") Trip.TripStatus tripCancelled,
       @Param("activityCancelled") Activity.Status activityCancelled);
 
+  @EntityGraph(attributePaths = { "trip", "activity", "user" })
+  @Query("select b from Booking b left join b.trip t left join b.activity a where b.user.id=:user and b.deletedAt is null and ((:trip is not null and t.tripId=:trip) or (:activity is not null and a.activityId=:activity)) order by b.createdAt desc, b.bookingId desc")
+  List<Booking> findForExperience(@Param("user") Long user, @Param("trip") Long trip, @Param("activity") Long activity);
+
+  @Query("select count(b)>0 from Booking b where b.user.id=:user and b.deletedAt is null and b.bookingStatus<>it.unical.ea_project.domain.booking.Booking.BookingStatus.CANCELLED and ((:trip is not null and b.trip.tripId=:trip) or (:activity is not null and b.activity.activityId=:activity))")
+  boolean existsReservation(@Param("user") Long user, @Param("trip") Long trip, @Param("activity") Long activity);
+
   // soft delete tramite campo deleted_at
   @Modifying
   @Transactional

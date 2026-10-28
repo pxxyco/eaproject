@@ -9,14 +9,10 @@ import java.io.IOException
 
 private data class CreateListRequest(val name: String, val visibility: String)
 
-/** Riepiloghi delle risposte del server. */
 data class BookingSummary(val id: Long, val upcoming: Boolean)
 data class FavoriteSummary(val id: Long, val type: String, val itemId: Long)
 
 object MyTripRepository {
-
-    // ---------- Hub ----------
-
 
     private val _bookings = mutableStateListOf<BookingSummary>()
     private val _favorites = mutableStateListOf<FavoriteSummary>()
@@ -39,7 +35,6 @@ object MyTripRepository {
         return FavoriteList(listId, name.orEmpty().ifBlank { "Senza nome" }, vis)
     }
 
-    /** Ricarica le liste dell'utente dal server. */
     suspend fun refreshLists() {
         _lists.clear()
         _bookings.clear()
@@ -68,7 +63,6 @@ object MyTripRepository {
         }
     }
 
-    /** Crea la lista sul server; aggiunge all'hub solo se il salvataggio riesce. */
     suspend fun createList(name: String) {
         val clean = name.trim()
         if (clean.isEmpty()) return
@@ -80,8 +74,6 @@ object MyTripRepository {
             is ApiResult.NetworkError -> throw IOException("Impossibile raggiungere il server.")
         }
     }
-
-    // ---------- Contenuto delle raccolte (backend reale) ----------
 
     sealed class HubTarget(val title: String, val path: String) {
         data object Bookings : HubTarget("Le mie prenotazioni", "/api/bookings/mine")
@@ -128,14 +120,19 @@ object MyTripRepository {
         _lists.removeAll { it.id == id }
     }
 
+    suspend fun cancelBooking(id: Long) {
+        delete("/api/bookings/$id")
+        _bookings.removeAll { it.id == id }
+    }
+
     suspend fun removeItem(target: HubTarget, id: Long, trip: Boolean) {
         val kind = if (trip) "trips" else "activities"
-        val path = when (target) {
-            HubTarget.Favorites -> "/api/favorites/$kind/$id"
-            is HubTarget.Custom -> "/api/list-$kind/list/${target.list.id}/${if (trip) "trip" else "activity"}/$id"
-            HubTarget.Bookings -> "/api/bookings/$id"
+        when (target) {
+            HubTarget.Favorites -> delete("/api/favorites/$kind/$id")
+            is HubTarget.Custom ->
+                delete("/api/list-$kind/list/${target.list.id}/${if (trip) "trip" else "activity"}/$id")
+            HubTarget.Bookings -> cancelBooking(id)
         }
-        delete(path)
     }
 
     private suspend fun delete(path: String) {
@@ -154,10 +151,6 @@ object MyTripRepository {
             is ApiResult.RateLimited -> throw IOException("Troppe richieste, riprova tra poco.")
             is ApiResult.NetworkError -> throw IOException("Impossibile raggiungere il server.")
         }
-
-    // ---------- Conversione verso i DTO della home ----------
-    // Costruisce un JSON con i nomi dei campi della home e lo fa leggere a Gson,
-    // così non serve conoscere i costruttori di TripHomeDTO e ActivityHomeDTO.
 
     private fun <T> build(type: Class<T>, fields: Map<String, Any?>): T =
         ApiService.gson.fromJson(ApiService.gson.toJson(fields), type)

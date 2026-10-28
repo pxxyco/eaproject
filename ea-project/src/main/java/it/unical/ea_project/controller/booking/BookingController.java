@@ -44,6 +44,12 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.getPrenotazioniUtente(user.id()));
     }
 
+    @GetMapping("/mine/experience")
+    public List<BookingDTO> experienceBookings(@AuthenticationPrincipal AuthUser user,
+            @RequestParam(required = false) Long tripId, @RequestParam(required = false) Long activityId) {
+        return bookingService.getExperienceBookings(user.id(), tripId, activityId);
+    }
+
     @GetMapping("/organizer/mine")
     public ResponseEntity<List<BookingDTO>> getOrganizerBookings(@AuthenticationPrincipal AuthUser user) {
         return ResponseEntity.ok(bookingService.getPrenotazioniOrganizzatore(user.id()));

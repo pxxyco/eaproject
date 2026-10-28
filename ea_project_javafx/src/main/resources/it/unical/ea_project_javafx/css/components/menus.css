@@ -1,0 +1,127 @@
+/* Reusable component: menus. Theme: css/theme.css. */
+
+.context-menu,
+.combo-box-popup,
+.combo-box-popup .list-view {
+    -fx-background-color: -color-menu;
+    -fx-control-inner-background: -color-menu;
+    -fx-control-inner-background-alt: -color-menu;
+    -fx-border-color: -tone-ivory-220;
+    -fx-border-width: 1;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-padding: 8;
+    -fx-effect: dropshadow(gaussian,-tone-ink-550,16,0,0,8);
+}
+
+.context-menu .menu-item,
+.combo-box-popup .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-text;
+    -fx-background-radius: 10;
+    -fx-padding: 10 14;
+    -fx-cursor: hand;
+}
+
+.context-menu .menu-item>.label {
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-text;
+    -fx-font-size: 13;
+}
+
+.context-menu .menu-item:focused,
+.context-menu .menu-item:hover,
+.combo-box-popup .list-cell:filled:hover,
+.combo-box-popup .list-cell:filled:selected {
+    -fx-background-color: -color-menu-hover;
+    -fx-text-fill: -color-white;
+}
+
+.context-menu .menu-item.menu-delete>.label {
+    -fx-text-fill: -color-danger;
+}
+
+.context-menu .menu-item.menu-delete:focused {
+    -fx-background-color: -tone-danger-260;
+}
+
+.date-picker-popup {
+    -fx-background-color: -color-menu;
+    -fx-background-radius: 18;
+    -fx-border-radius: 18;
+    -fx-border-color: -tone-ivory-260;
+    -fx-padding: 12;
+    -fx-effect: dropshadow(gaussian,-tone-ink-550,16,0,0,8);
+}
+
+.date-picker-popup .month-year-pane,
+.date-picker-popup>.date-picker-content {
+    -fx-background-color: transparent;
+}
+
+.date-picker-popup .calendar-grid {
+    -fx-background-color: transparent;
+    -fx-hgap: 4;
+    -fx-vgap: 4;
+    -fx-padding: 8 0 0;
+}
+
+.date-picker-popup .month-year-pane .label {
+    -fx-text-fill: -color-text;
+    -fx-font-weight: bold;
+}
+
+.date-picker-popup .month-year-pane .button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 5 8;
+}
+
+.date-picker-popup .day-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-text-secondary;
+    -fx-background-radius: 8;
+    -fx-border-radius: 8;
+    -fx-border-color: transparent;
+    -fx-pref-width: 36;
+    -fx-pref-height: 36;
+    -fx-min-width: 36;
+    -fx-min-height: 36;
+    -fx-padding: 0;
+    -fx-alignment: center;
+}
+
+.date-picker-popup .day-cell:hover,
+.date-picker-popup .day-cell:selected {
+    -fx-background-color: -color-menu-hover;
+    -fx-text-fill: -color-white;
+}
+
+.date-picker-popup .today {
+    -fx-border-color: -app-accent;
+}
+
+.date-picker-popup .day-name-cell {
+    -fx-text-fill: -color-text-muted;
+    -fx-font-size: 12;
+    -fx-font-weight: bold;
+}
+
+.date-picker-popup .previous-month,
+.date-picker-popup .next-month {
+    -fx-text-fill: -color-stone-muted;
+    -fx-opacity: .55;
+}
+
+.date-picker-popup .week-number-cell {
+    -fx-pref-width: 0;
+    -fx-min-width: 0;
+    -fx-max-width: 0;
+    -fx-padding: 0;
+    -fx-opacity: 0;
+}
+
+.date-picker-popup .left-arrow,
+.date-picker-popup .right-arrow {
+    -fx-background-color: -color-text-secondary;
+}

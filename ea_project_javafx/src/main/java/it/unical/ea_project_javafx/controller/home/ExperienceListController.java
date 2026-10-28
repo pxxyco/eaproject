@@ -281,7 +281,7 @@ public class ExperienceListController {
                 pageNumbers.getChildren().add(gap);
             }
             ToggleButton button = new ToggleButton(Integer.toString(page + 1));
-            button.getStyleClass().add("home-page-button");
+            button.getStyleClass().add("page-button");
             button.setSelected(page == currentPage);
             button.setAccessibleText("Pagina " + (page + 1) + (page == currentPage ? ", attuale" : ""));
             button.setDisable(loading);

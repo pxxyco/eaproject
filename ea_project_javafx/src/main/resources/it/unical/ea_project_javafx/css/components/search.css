@@ -1,0 +1,47 @@
+/* Reusable component: search. Theme: css/theme.css. */
+
+.search-field {
+    -fx-background-color: -tone-ink-260;
+    -fx-border-color: -tone-white-160;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 6px 10px;
+}
+
+.search-field:hover {
+    -fx-background-color: -tone-ink-320;
+    -fx-border-color: -tone-ivory-320;
+}
+
+.date-picker.search-field,
+.combo-box.search-field {
+    -fx-background-color: transparent;
+}
+
+.search-field .search-field .field-label {
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -tone-white-720;
+}
+
+.traveler-search-bar {
+    -fx-padding: 4px 0;
+}
+
+.traveler-search-type {
+    -fx-background-color: -tone-white-100;
+    -fx-background-radius: 8px;
+    -fx-border-color: -tone-white-220;
+    -fx-border-radius: 8px;
+    -fx-padding: 2px 5px;
+}
+
+.traveler-search-type .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-ivory;
+    -fx-padding: 7px 8px;
+}
+
+.traveler-search-type .arrow {
+    -fx-background-color: -color-text-secondary;
+}

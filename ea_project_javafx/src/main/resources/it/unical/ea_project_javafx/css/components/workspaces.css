@@ -1,0 +1,42 @@
+/* Reusable component: workspaces. Theme: css/theme.css. */
+
+.organizer-workspace {
+    -fx-padding: 30 32 44 32;
+}
+
+.kpi-card {
+    -fx-padding: 20 22;
+    -fx-min-width: 175;
+}
+
+.kpi-title {
+    -fx-font-size: 12;
+    -fx-text-fill: -color-text-muted;
+}
+
+.kpi-value {
+    -fx-font-size: 29;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text;
+}
+
+.organizer-selection {
+    -fx-padding: 18 22;
+}
+
+.organizer-selection .label {
+    -fx-text-fill: -color-text;
+}
+
+.organizer-workspace .pagination .pagination-control .number-button,
+.organizer-workspace .pagination .pagination-control .bullet-button {
+    -fx-background-radius: 12;
+}
+
+.organizer-workspace .pagination .page-information {
+    -fx-text-fill: -color-text-muted;
+}
+
+.organizer-dashboard-fragment {
+    -fx-padding: 0;
+}

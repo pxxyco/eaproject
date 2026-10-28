@@ -35,10 +35,11 @@ public class BookingHistoryService {
         SELECT b.*, b.id AS booking_id, b.status AS booking_status, b.type AS booking_type, coalesce(t.title,a.title,'') AS title,
         concat_ws(' ',t.destination_city,t.destination_country,a.city,a.place_name) AS location,
         coalesce(cast(t.start_date AS timestamp),a.start_date) AS starts,
-        coalesce(cast(coalesce(t.end_date,t.start_date) AS timestamp)+interval '1 day',a.end_date,a.start_date) AS ends,
+        coalesce(cast(coalesce(t.end_date,t.start_date) AS timestamp)+interval '1' day,a.end_date,a.start_date + (CASE WHEN a.duration_minutes>0 THEN a.duration_minutes ELSE 60 END)*interval '1' minute) AS ends,
         (b.status='CANCELLED' OR coalesce(t.status,a.status,'')='CANCELLED') AS cancelled,
         (b.status='COMPLETED' OR coalesce(t.status,a.status,'')='COMPLETED'
-          OR coalesce(cast(coalesce(t.end_date,t.start_date) AS timestamp)+interval '1 day',a.end_date,a.start_date)<=:now) AS ended,
+          OR (b.status='PENDING' AND coalesce(cast(t.start_date AS timestamp),a.start_date)<=:now)
+          OR coalesce(cast(coalesce(t.end_date,t.start_date) AS timestamp)+interval '1' day,a.end_date,a.start_date + (CASE WHEN a.duration_minutes>0 THEN a.duration_minutes ELSE 60 END)*interval '1' minute)<=:now) AS ended,
         EXISTS(SELECT 1 FROM "REVIEW" r WHERE r.user_id=:user AND r.deleted_at=false
                AND (r.trip_id=b.trip_id OR r.activity_id=b.activity_id)) AS reviewed
         FROM "BOOKING" b LEFT JOIN "TRIP" t ON t.trip_id=b.trip_id
@@ -65,7 +66,8 @@ public class BookingHistoryService {
                 + "%")
         .addValue("limit", size).addValue("offset", (long) page * size);
     String condition = switch (filter == null ? "ALL" : filter) {
-      case "COMPLETED" -> "NOT cancelled AND ended";
+      case "COMPLETED" -> "NOT cancelled AND ended AND booking_status IN ('CONFIRMED','COMPLETED')";
+      case "EXPIRED" -> "NOT cancelled AND ended AND booking_status='PENDING'";
       case "CANCELLED" -> "cancelled";
       case "REVIEWABLE" -> "eligible AND NOT reviewed";
       case "REVIEWED" -> "reviewed";
@@ -77,7 +79,7 @@ public class BookingHistoryService {
         + ") AND lower(concat_ws(' ',title,location,to_char(starts,'DD/MM/YYYY'),to_char(ends,'DD/MM/YYYY'),booking_type)) LIKE :query";
     Map<String, Object> counts = jdbc.queryForMap(
         BASE + """
-            SELECT count(*) AS total, count(*) FILTER(WHERE NOT cancelled AND ended) AS completed,
+            SELECT count(*) AS total, count(*) FILTER(WHERE NOT cancelled AND ended AND booking_status IN ('CONFIRMED','COMPLETED')) AS completed,
               count(*) FILTER(WHERE cancelled) AS cancelled,
               count(DISTINCT coalesce('T'||trip_id::text,'A'||activity_id::text)) FILTER(WHERE eligible AND NOT reviewed) AS reviewable
             FROM history

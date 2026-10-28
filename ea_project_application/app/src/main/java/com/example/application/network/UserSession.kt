@@ -27,6 +27,7 @@ object UserSession {
     }
 
     fun clear() {
+        RecommendationRepository.invalidate()
         user = null
         accessToken = null
         refreshToken = null

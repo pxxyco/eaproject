@@ -1,6 +1,9 @@
 package com.example.application.screens.login
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import com.example.application.ui.effects.LocalNavigationTail
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -15,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import com.example.application.network.AuthRepository
 import com.example.application.network.PasswordPolicy
 import com.example.application.network.RegisterRequest
-import com.example.application.ui.theme.ScreenBackground
 import com.example.application.ui.theme.Stone200
 import com.example.application.ui.theme.Stone900
 import kotlinx.coroutines.launch
@@ -35,7 +37,7 @@ fun AuthWizardScreen(onLoginSuccess: () -> Unit, onBackToHome: () -> Unit) {
     }
 
     Box(
-        modifier = Modifier.fillMaxSize().background(ScreenBackground).padding(24.dp),
+        modifier = Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Color.Transparent).padding(24.dp),
         contentAlignment = Alignment.Center
     ) {
         Card(
@@ -43,7 +45,7 @@ fun AuthWizardScreen(onLoginSuccess: () -> Unit, onBackToHome: () -> Unit) {
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Column(
-                modifier = Modifier.padding(24.dp).fillMaxWidth(),
+                modifier = Modifier.verticalScroll(rememberScrollState()).padding(24.dp).padding(bottom = LocalNavigationTail.current).fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 if (currentStep != AuthStep.LOGIN) {
@@ -135,7 +137,7 @@ fun LoginStepContent(
     var password by remember { mutableStateOf("") }
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        Text("Login", style = MaterialTheme.typography.headlineMedium, color = Color.White)
+        Text("Login", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onSurface)
         Spacer(modifier = Modifier.height(16.dp))
 
         if (errorMessage != null) {
@@ -217,7 +219,7 @@ fun ForgotPasswordStepContent(onSendReset: (String) -> Unit) {
     var email by remember { mutableStateOf("") }
 
     Column(modifier = Modifier.fillMaxWidth()) {
-        Text("Recupera Password", style = MaterialTheme.typography.headlineMedium, color = Color.White)
+        Text("Recupera Password", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onSurface)
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedTextField(
@@ -245,7 +247,7 @@ fun RoleSelectionStepContent(onSelectRole: (String) -> Unit) {
         Text(
             "Seleziona Account",
             style = MaterialTheme.typography.headlineMedium,
-            color = Color.White
+            color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.height(24.dp))
 
@@ -289,7 +291,7 @@ fun RegistrationStepContent(
         Text(
             text = if (role == "ORGANIZER") "Profilo Business" else "Profilo Personal",
             style = MaterialTheme.typography.headlineMedium,
-            color = Color.White
+            color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(modifier = Modifier.height(16.dp))
 

@@ -1,5 +1,6 @@
 package it.unical.ea_project.controller.advice;
 
+import it.unical.ea_project.security.LoginBlockedException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -18,6 +19,14 @@ import org.springframework.web.server.ResponseStatusException;
 @RestControllerAdvice
 public class ApiExceptionHandler {
 
+    @ExceptionHandler(LoginBlockedException.class)
+    public ResponseEntity<Map<String, Object>> handleLoginBlocked(LoginBlockedException exception) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header("Retry-After", Long.toString(exception.retryAfterSeconds()))
+                .header("Cache-Control", "no-store")
+                .body(Map.of("status", 429, "code", "ERR-105", "message", exception.getReason()));
+    }
+
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<Map<String, Object>> handleResponseStatus(ResponseStatusException exception,
             HttpServletRequest request) {
@@ -26,8 +35,14 @@ public class ApiExceptionHandler {
         body.put("status", exception.getStatusCode().value());
         body.put("message", exception.getReason() == null ? "Richiesta non valida." : exception.getReason());
         var response = ResponseEntity.status(status == null ? HttpStatus.INTERNAL_SERVER_ERROR : status);
-        if (exception.getStatusCode().value() == 429)
-            response.header("Retry-After", request.getRequestURI().startsWith("/api/chat") ? "30" : "900");
+        if (exception.getStatusCode().value() == 429) {
+            String path = request.getRequestURI();
+            boolean photoUpload = path.endsWith("/photos") || path.endsWith("/cover")
+                    || path.endsWith("/profile-photo");
+            response.header("Retry-After", photoUpload ? "2" : path.startsWith("/api/chat") ? "30"
+                    : path.equals("/api/users/login") ? "60" : "900");
+            response.header("Cache-Control", "no-store");
+        }
         return response.body(body);
     }
 

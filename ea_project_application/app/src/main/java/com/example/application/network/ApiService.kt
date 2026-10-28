@@ -89,15 +89,20 @@ object ApiService {
 
     /** Uses the same authenticated client and token refresh as ordinary API calls. */
     suspend fun uploadPhoto(path: String, field: String, bytes: ByteArray, mimeType: String): ApiResult<Unit> =
+        uploadPhoto(path, field, bytes, mimeType, Unit::class.java)
+
+    suspend fun <T> uploadPhoto(path: String, field: String, bytes: ByteArray, mimeType: String, type: Class<T>): ApiResult<T> =
         withContext(Dispatchers.IO) {
             try {
                 val body = okhttp3.MultipartBody.Builder().setType(okhttp3.MultipartBody.FORM)
                     .addFormDataPart(field, "photo", bytes.toRequestBody(mimeType.toMediaType())).build()
                 val request = Request.Builder().url(resolveUrl(path)).post(body).build()
-                client.newCall(request).execute().use { mapResponse(it, Unit::class.java) }
+                client.newCall(request).execute().use { mapResponse(it, type) }
             } catch (exception: IOException) {
                 reportNetworkFailure()
                 ApiResult.NetworkError(exception)
+            } catch (exception: com.google.gson.JsonParseException) {
+                ApiResult.HttpError(502, "Risposta JSON non valida")
             }
         }
 
@@ -209,7 +214,7 @@ object ApiService {
 
     private fun rateLimited(response: Response): ApiResult.RateLimited {
         val retry = response.header("Retry-After")?.trim()?.toIntOrNull() ?: 60
-        AppStatus.showRateLimited(retry)
+        Log.w(TAG, "Rate limited, riprova tra $retry s")
         return ApiResult.RateLimited(retry)
     }
 

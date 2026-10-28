@@ -1,20 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<HBox maxWidth="Infinity" spacing="20" styleClass="container"
+<HBox stylesheets="@../../css/screens/activity/content.css" maxWidth="Infinity" spacing="20" styleClass="container"
    xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
    fx:controller="it.unical.ea_project_javafx.controller.activity.ItineraryController">
-   <stylesheets>
-      <URL value="@../../css/common/style.css" />
-      <URL value="@../../css/activity/activity-common.css" />
-      <URL value="@../../css/activity/itinerary.css" />
-   </stylesheets>
 
    <children>
       <VBox minWidth="180.0" prefWidth="230.0" spacing="12.0"

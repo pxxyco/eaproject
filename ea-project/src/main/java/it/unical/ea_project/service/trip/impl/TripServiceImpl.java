@@ -14,6 +14,8 @@ import it.unical.ea_project.repository.trip.TripRepository;
 import it.unical.ea_project.repository.user.UserRepository;
 import it.unical.ea_project.service.trip.TripService;
 import it.unical.ea_project.util.PageUtils;
+import it.unical.ea_project.util.CalendarWriter;
+import java.time.format.DateTimeFormatter;
 import it.unical.ea_project.validation.ExperienceValidation;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,6 +25,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Objects;
+import java.util.stream.Stream;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -268,9 +272,22 @@ public class TripServiceImpl implements TripService {
     }
 
     @Override
-    public String exportTripToIcs(Long tripId) {
-        // TODO: Implementare esportazione file ICS
-        throw new UnsupportedOperationException("Unimplemented method 'exportTripToIcs'");
+    public String exportTripToIcs(Long tripId, Long requester) {
+        Trip trip = getTripById(tripId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Viaggio non disponibile."));
+        if (trip.getStatus() != TripStatus.PUBLISHED && !trip.getCreatedBy().getId().equals(requester))
+            throw new AccessDeniedException("Viaggio non pubblicato.");
+        if (trip.getStartDate() == null)
+            throw new IllegalArgumentException("Il viaggio non ha una data valida.");
+        LocalDate end = (trip.getEndDate() == null ? trip.getStartDate() : trip.getEndDate()).plusDays(1);
+        return CalendarWriter.event("trip-" + tripId + "@ea-project", trip.getTitle(),
+                String.join(", ",
+                        Stream.of(trip.getDestinationCity(), trip.getDestinationCountry()).filter(Objects::nonNull)
+                                .toList()),
+                trip.getDescription(),
+                "DTSTART;VALUE=DATE:" + trip.getStartDate().format(DateTimeFormatter.BASIC_ISO_DATE),
+                "DTEND;VALUE=DATE:" + end.format(DateTimeFormatter.BASIC_ISO_DATE),
+                trip.getStatus() == TripStatus.CANCELLED ? "CANCELLED" : "CONFIRMED");
     }
 
     @Override

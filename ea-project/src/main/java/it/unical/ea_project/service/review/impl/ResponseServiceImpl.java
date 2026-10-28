@@ -10,6 +10,8 @@ import it.unical.ea_project.repository.review.ReviewRepository;
 import it.unical.ea_project.repository.user.UserRepository;
 import it.unical.ea_project.service.review.ResponseService;
 import java.time.LocalDateTime;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.AccessDeniedException;
@@ -21,6 +23,7 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 public class ResponseServiceImpl implements ResponseService {
 
+    private final EntityManager entities;
     private final ResponseRepository responseRepository;
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
@@ -29,8 +32,12 @@ public class ResponseServiceImpl implements ResponseService {
     @Transactional
     public ResponseDTO create(Long reviewId, String comment, Long organizerId) {
 
-        Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Recensione non trovata"));
+        comment = validateComment(comment);
+        if (reviewId == null)
+            throw new IllegalArgumentException("Recensione obbligatoria.");
+        Review review = entities.find(Review.class, reviewId, LockModeType.PESSIMISTIC_WRITE);
+        if (review == null)
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Recensione non trovata.");
 
         checkPlaceOwner(review, organizerId);
 
@@ -53,7 +60,7 @@ public class ResponseServiceImpl implements ResponseService {
     public ResponseDTO update(Long id, String comment, Long organizerId) {
         Response response = findOwnedResponse(id, organizerId);
 
-        response.setComment(comment);
+        response.setComment(validateComment(comment));
         response.setUpdatedAt(LocalDateTime.now());
 
         return ResponseMapper.toResponseDTO(response);
@@ -75,7 +82,15 @@ public class ResponseServiceImpl implements ResponseService {
         if (!response.getOrganizer().getId().equals(organizerId)) {
             throw new AccessDeniedException("La risposta non appartiene all'organizzatore autenticato.");
         }
+        if (!reviewRepository.existsById(response.getReview().getReviewId()))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Recensione non più disponibile.");
         return response;
+    }
+
+    private String validateComment(String comment) {
+        if (comment == null || comment.isBlank() || comment.length() > 255)
+            throw new IllegalArgumentException("La risposta deve contenere da 1 a 255 caratteri.");
+        return comment.strip();
     }
 
     private void checkPlaceOwner(Review review, Long organizerId) {

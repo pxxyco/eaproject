@@ -5,7 +5,6 @@ import com.gluonhq.maps.MapPoint;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
 public class MarkerLayer extends MapLayer {
@@ -15,13 +14,11 @@ public class MarkerLayer extends MapLayer {
 
     public MarkerLayer(MapPoint point, String testo) {
         this.point = point;
-        Circle marker = new Circle(10, Color.BLACK);
-        marker.setStroke(Color.WHITE);
-        marker.setStrokeWidth(2);
+        Circle marker = new Circle(10);
+        marker.getStyleClass().add("map-marker");
 
         Label label = new Label(testo);
-        label.setStyle(
-                "-fx-background-color: transparent; -fx-padding: 2 6; -fx-background-radius: 4; -fx-text-fill: white; -fx-font-size: 11px;");
+        label.getStyleClass().add("map-marker-label");
 
         this.container = new StackPane(marker, label);
         container.setAlignment(Pos.CENTER);

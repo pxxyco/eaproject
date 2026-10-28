@@ -209,11 +209,7 @@ public class CollaborativeItineraryController {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION, "Eliminare questa tappa dall'itinerario condiviso?",
                 ButtonType.CANCEL, ButtonType.OK);
         confirm.getDialogPane().getStylesheets()
-                .add(getClass().getResource("/it/unical/ea_project_javafx/css/common/style.css").toExternalForm());
-        confirm.getDialogPane().setStyle("-fx-background-color:#292524;");
-        var content = confirm.getDialogPane().lookup(".content.label");
-        if (content != null)
-            content.setStyle("-fx-text-fill:#e7e5e4;");
+                .add(getClass().getResource("/it/unical/ea_project_javafx/css/app.css").toExternalForm());
         confirm.initOwner(stops.getScene().getWindow());
         if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK)
             return;

@@ -1,5 +1,6 @@
 package com.example.application.screens
 
+import com.example.application.ui.effects.LocalNavigationTail
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -16,11 +17,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.application.dto.UserDTO
+import com.example.application.screens.account.TravelerAccountScreen
 import com.example.application.screens.login.AuthWizardScreen
 import com.example.application.ui.theme.*
 
 @Composable
 fun ProfileScreen(user: UserDTO?, onLoginSuccess: () -> Unit, onLogoutClick: () -> Unit, modifier: Modifier = Modifier) {
+    if (user?.role.equals("TRAVELER", ignoreCase = true)) {
+        key(user?.id) { TravelerAccountScreen(user!!, onLogoutClick, modifier) }
+        return
+    }
     Crossfade(targetState = user, modifier = modifier.fillMaxSize(), label = "profile_state") { current ->
         if (current == null) {
             AuthWizardScreen(onLoginSuccess = onLoginSuccess, onBackToHome = {})
@@ -58,8 +64,8 @@ private fun ProfileContent(user: UserDTO, onLogoutClick: () -> Unit, modifier: M
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(ScreenBackground)
-            .verticalScroll(rememberScrollState())
+            .background(androidx.compose.ui.graphics.Color.Transparent)
+            .verticalScroll(rememberScrollState()).padding(bottom = LocalNavigationTail.current)
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -73,7 +79,7 @@ private fun ProfileContent(user: UserDTO, onLogoutClick: () -> Unit, modifier: M
             Text(
                 text = initials,
                 style = MaterialTheme.typography.headlineMedium,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -83,7 +89,7 @@ private fun ProfileContent(user: UserDTO, onLogoutClick: () -> Unit, modifier: M
         Text(
             text = displayName,
             style = MaterialTheme.typography.titleLarge,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Bold
         )
         Text(
@@ -141,6 +147,6 @@ private fun InfoRow(label: String, value: String) {
     Column {
         Text(text = label, style = MaterialTheme.typography.labelMedium, color = Stone400)
         Spacer(modifier = Modifier.height(2.dp))
-        Text(text = value, style = MaterialTheme.typography.bodyLarge, color = Color.White)
+        Text(text = value, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
     }
 }

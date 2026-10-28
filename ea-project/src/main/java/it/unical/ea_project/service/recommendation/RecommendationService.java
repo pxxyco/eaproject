@@ -69,6 +69,7 @@ public class RecommendationService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN,
                         "Consigli disponibili per i viaggiatori."));
         int limit = Math.max(1, Math.min(24, requested));
+        boolean personalized = preferences.findById(userId).map(AccountSettings::isPersonalized).orElse(true);
         Map<String, Double> affinity = new HashMap<>();
         Set<Long> bookedTrips = new HashSet<>(), bookedActivities = new HashSet<>();
         var history = bookings.recommendationHistory(userId, PageRequest.of(0, 200));
@@ -80,41 +81,44 @@ public class RecommendationService {
             double weight = 3 * Math.pow(.5, days / 180.0);
             if (b.getTrip() != null) {
                 bookedTrips.add(b.getTrip().getTripId());
-                signal(affinity, "city", b.getTrip().getDestinationCity(), weight);
-                signal(affinity, "country", b.getTrip().getDestinationCountry(), weight);
+                if (personalized) {
+                    signal(affinity, "city", b.getTrip().getDestinationCity(), weight);
+                    signal(affinity, "country", b.getTrip().getDestinationCountry(), weight);
+                }
             }
             if (b.getActivity() != null) {
                 bookedActivities.add(b.getActivity().getActivityId());
-                signal(affinity, "city", b.getActivity().getCity(), weight);
-                signal(affinity, "category",
-                        b.getActivity().getCategory() == null ? null : b.getActivity().getCategory().name(), weight);
+                if (personalized) {
+                    signal(affinity, "city", b.getActivity().getCity(), weight);
+                    signal(affinity, "category",
+                            b.getActivity().getCategory() == null ? null : b.getActivity().getCategory().name(), weight);
+                }
             }
         }
-        for (var t : favoriteTrips.preferenceTrips(userId, PageRequest.of(0, 200))) {
-            signal(affinity, "city", t.getDestinationCity(), 2);
-            signal(affinity, "country", t.getDestinationCountry(), 2);
-        }
-        for (var a : favoriteActivities.preferenceActivities(userId, PageRequest.of(0, 200))) {
-            signal(affinity, "city", a.getCity(), 2);
-            signal(affinity, "category", a.getCategory() == null ? null : a.getCategory().name(), 2);
-        }
-        for (var r : reviews.preferenceReviews(userId, PageRequest.of(0, 100))) {
-            if (r.getRating() == null)
-                continue;
-            double weight = r.getRating() - 3d;
-            if (r.getTrip() != null) {
-                signal(affinity, "city", r.getTrip().getDestinationCity(), weight);
-                signal(affinity, "country", r.getTrip().getDestinationCountry(), weight);
+        if (personalized) {
+            for (var t : favoriteTrips.preferenceTrips(userId, PageRequest.of(0, 200))) {
+                signal(affinity, "city", t.getDestinationCity(), 2);
+                signal(affinity, "country", t.getDestinationCountry(), 2);
             }
-            if (r.getActivity() != null) {
-                signal(affinity, "city", r.getActivity().getCity(), weight);
-                signal(affinity, "category",
-                        r.getActivity().getCategory() == null ? null : r.getActivity().getCategory().name(), weight);
+            for (var a : favoriteActivities.preferenceActivities(userId, PageRequest.of(0, 200))) {
+                signal(affinity, "city", a.getCity(), 2);
+                signal(affinity, "category", a.getCategory() == null ? null : a.getCategory().name(), 2);
+            }
+            for (var r : reviews.preferenceReviews(userId, PageRequest.of(0, 100))) {
+                if (r.getRating() == null)
+                    continue;
+                double weight = r.getRating() - 3d;
+                if (r.getTrip() != null) {
+                    signal(affinity, "city", r.getTrip().getDestinationCity(), weight);
+                    signal(affinity, "country", r.getTrip().getDestinationCountry(), weight);
+                }
+                if (r.getActivity() != null) {
+                    signal(affinity, "city", r.getActivity().getCity(), weight);
+                    signal(affinity, "category",
+                            r.getActivity().getCategory() == null ? null : r.getActivity().getCategory().name(), weight);
+                }
             }
         }
-        if (!preferences.findById(userId).map(AccountSettings::isPersonalized)
-                .orElse(true))
-            affinity.clear();
         List<Candidate<Trip>> tripCandidates = new ArrayList<>();
         for (var t : trips.recommendationCandidates(LocalDate.now(), userId, PageRequest.of(0, 200))) {
             if (bookedTrips.contains(t.getTripId()))
@@ -160,7 +164,7 @@ public class RecommendationService {
                 chosenActivities.stream().map(c -> {
                     var a = c.item();
                     return new ActivityPick(new ActivityHomeDTO(a.getActivityId(), a.getTitle(), a.getCity(),
-                            a.getCategory().name(), a.getPrice(), a.getAverageRating(), covers.get(a.getActivityId()),
+                            a.getCategory() == null ? "OTHER" : a.getCategory().name(), a.getPrice(), a.getAverageRating(), covers.get(a.getActivityId()),
                             a.getStartDate(), a.getEndDate()), c.reason());
                 }).toList());
     }

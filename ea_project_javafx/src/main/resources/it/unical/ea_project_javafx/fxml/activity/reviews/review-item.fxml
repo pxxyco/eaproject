@@ -9,8 +9,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
-<VBox minWidth="400.0" spacing="5.0" styleClass="recensione-item"
-    stylesheets="@../../../css/activity/reviews/review-item.css"
+<VBox stylesheets="@../../../css/app.css" minWidth="400.0" spacing="5.0" styleClass="recensione-item"
     xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
     fx:controller="it.unical.ea_project_javafx.controller.activity.reviews.ReviewItemController">
 

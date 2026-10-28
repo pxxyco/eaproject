@@ -3,6 +3,7 @@ package it.unical.ea_project_javafx.controller.common;
 import it.unical.ea_project_javafx.error.AppErrorCode;
 import it.unical.ea_project_javafx.navigation.SceneNavigator;
 import it.unical.ea_project_javafx.service.api.ApiService;
+import it.unical.ea_project_javafx.ui.background.BackgroundHelper;
 import java.io.InputStream;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -71,6 +72,7 @@ public class SplashScreenController {
         stopAutoRecoveryMonitor();
         setLoadingState();
 
+        BackgroundHelper.prepareBackground();
         Task<Boolean> healthCheck = createHealthCheckTask();
 
         Thread thread = new Thread(healthCheck);
@@ -84,7 +86,10 @@ public class SplashScreenController {
         Task<Boolean> healthCheck = new Task<>() {
             @Override
             protected Boolean call() {
-                return ApiService.isBackendReachable();
+                if (!ApiService.isBackendReachable())
+                    return false;
+                BackgroundHelper.prepareBackground().join();
+                return true;
             }
 
         };

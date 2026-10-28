@@ -1,16 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.net.URL?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox maxWidth="Infinity" spacing="20.0" styleClass="descrizione-card" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.activity.ActivityDescriptionController">
-    <stylesheets>
-        <URL value="@../../css/common/style.css" />
-        <URL value="@../../css/activity/activity-common.css" />
-    </stylesheets>
+<VBox stylesheets="@../../css/screens/activity/content.css" maxWidth="Infinity" spacing="20.0" styleClass="descrizione-card" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.activity.ActivityDescriptionController">
     <padding>
         <Insets bottom="28.0" left="28.0" right="28.0" top="28.0" />
     </padding>

@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -21,70 +20,121 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.util.HexFormat;
 import java.util.Optional;
+import javax.imageio.ImageIO;
 
 public class WallpaperService {
 
     private static final String BING_API_URL = "https://www.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=it-IT";
-    private static final String LOCAL_FALLBACK_RESOURCE = "/it/unical/ea_project_javafx/images/fallback_bg.avif";
+    private static final String LOCAL_FALLBACK_RESOURCE = "/it/unical/ea_project_javafx/images/experience-fallback.jpg";
     private static final String CACHE_FILE_PREFIX = "bing_wallpaper_";
     private static final String CACHE_FILE_SUFFIX = ".jpg";
 
+    private static final int MAX_ATTEMPTS = 3;
+    private static final int MAX_IMAGE_BYTES = 8 * 1024 * 1024;
+
+    @FunctionalInterface
+    interface StreamOpener {
+        InputStream open(URL url) throws IOException;
+    }
+
     public static synchronized String getDailyWallpaperUrl() {
+        return resolveDailyWallpaper(getSystemCacheDir(), LocalDate.now(), WallpaperService::openWithTimeout);
+    }
 
-        String todayStr = LocalDate.now().toString();
-        Path cacheDir = getSystemCacheDir();
+    static String resolveDailyWallpaper(Path cacheDir, LocalDate day, StreamOpener opener) {
+        String todayStr = day.toString();
         String todayPrefix = CACHE_FILE_PREFIX + todayStr + "_";
+        Optional<Path> cached = findCachedWallpaper(cacheDir, todayPrefix);
+        if (cached.isPresent())
+            return cached.get().toUri().toString();
 
-        try {
-            Files.createDirectories(cacheDir);
-            cleanOldCacheFiles(cacheDir, todayStr);
-
-            URL apiUrl = URI.create(BING_API_URL).toURL();
-            try (InputStream is = apiUrl.openStream();
-                    InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
-
-                JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
-                JsonArray imagesArray = jsonObject.getAsJsonArray("images");
-
-                if (imagesArray != null && imagesArray.size() > 0) {
-                    JsonObject firstImage = imagesArray.get(0).getAsJsonObject();
-                    String relativeUrl = firstImage.get("url").getAsString();
-                    String bingImageUrl = "https://www.bing.com" + relativeUrl;
-                    Path targetFile = cacheDir.resolve(todayPrefix + hashUrl(bingImageUrl) + CACHE_FILE_SUFFIX);
-
-                    if (!Files.exists(targetFile)) {
-                        Path temporaryFile = cacheDir.resolve(targetFile.getFileName() + ".part");
-                        try (InputStream imageStream = URI.create(bingImageUrl).toURL().openStream()) {
-                            Files.copy(imageStream, temporaryFile, StandardCopyOption.REPLACE_EXISTING);
-                        }
-                        try {
-                            Files.move(temporaryFile, targetFile,
-                                    StandardCopyOption.ATOMIC_MOVE,
-                                    StandardCopyOption.REPLACE_EXISTING);
-                        } catch (AtomicMoveNotSupportedException e) {
-                            Files.move(temporaryFile, targetFile, StandardCopyOption.REPLACE_EXISTING);
-                        }
+        for (int attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+            Path temporaryFile = null;
+            try {
+                Files.createDirectories(cacheDir);
+                String relativeUrl;
+                try (InputStream stream = opener.open(URI.create(BING_API_URL).toURL())) {
+                    byte[] body = stream.readNBytes(64 * 1024 + 1);
+                    if (body.length > 64 * 1024)
+                        throw new IOException("Risposta Bing troppo grande.");
+                    JsonObject json = JsonParser.parseString(new String(body, StandardCharsets.UTF_8))
+                            .getAsJsonObject();
+                    JsonArray images = json.getAsJsonArray("images");
+                    if (images == null || images.isEmpty())
+                        throw new IOException("Bing non ha restituito immagini.");
+                    relativeUrl = images.get(0).getAsJsonObject().get("url").getAsString();
+                }
+                if (relativeUrl == null || !relativeUrl.startsWith("/") || relativeUrl.startsWith("//"))
+                    throw new IOException("URL dello sfondo Bing non valido.");
+                String imageUrl = "https://www.bing.com" + relativeUrl;
+                Path targetFile = cacheDir.resolve(todayPrefix + hashUrl(imageUrl) + CACHE_FILE_SUFFIX);
+                temporaryFile = Files.createTempFile(cacheDir, "bing-download-", ".part");
+                try (InputStream stream = opener.open(URI.create(imageUrl).toURL());
+                        var output = Files.newOutputStream(temporaryFile)) {
+                    byte[] buffer = new byte[8192];
+                    int total = 0, length;
+                    while ((length = stream.read(buffer)) != -1) {
+                        total += length;
+                        if (total > MAX_IMAGE_BYTES)
+                            throw new IOException("Sfondo Bing troppo grande.");
+                        output.write(buffer, 0, length);
                     }
+                }
+                if (!validImage(temporaryFile))
+                    throw new IOException("Immagine Bing vuota o danneggiata.");
+                try {
+                    Files.move(temporaryFile, targetFile, StandardCopyOption.ATOMIC_MOVE,
+                            StandardCopyOption.REPLACE_EXISTING);
+                } catch (AtomicMoveNotSupportedException unsupported) {
+                    Files.move(temporaryFile, targetFile, StandardCopyOption.REPLACE_EXISTING);
+                }
+                cleanOldCacheFiles(cacheDir, todayStr);
+                return targetFile.toUri().toString();
+            } catch (Exception error) {
+                System.err.println("Sfondo Bing: tentativo " + attempt + "/" + MAX_ATTEMPTS
+                        + " fallito: " + error.getMessage());
+            } finally {
+                if (temporaryFile != null)
+                    try {
+                        Files.deleteIfExists(temporaryFile);
+                    } catch (IOException error) {
+                        System.err.println("Impossibile eliminare il download temporaneo: " + error.getMessage());
+                    }
+            }
+        }
+        return localFallbackUrl();
+    }
 
-                    return targetFile.toUri().toString();
+    public static String localFallbackUrl() {
+        URL resource = WallpaperService.class.getResource(LOCAL_FALLBACK_RESOURCE);
+        if (resource == null)
+            throw new IllegalStateException("Sfondo di fallback mancante.");
+        return resource.toExternalForm();
+    }
+
+    private static boolean validImage(Path path) {
+        try {
+            if (!Files.isRegularFile(path) || Files.size(path) == 0 || Files.size(path) > MAX_IMAGE_BYTES)
+                return false;
+            try (var input = ImageIO.createImageInputStream(path.toFile())) {
+                if (input == null)
+                    return false;
+                var readers = ImageIO.getImageReaders(input);
+                if (!readers.hasNext())
+                    return false;
+                var reader = readers.next();
+                try {
+                    reader.setInput(input, true, true);
+                    int width = reader.getWidth(0), height = reader.getHeight(0);
+                    return width > 0 && height > 0 && (long) width * height <= 16_000_000
+                            && reader.read(0) != null;
+                } finally {
+                    reader.dispose();
                 }
             }
-        } catch (Exception e) {
-            System.err.println("Impossibile scaricare lo sfondo da Bing, uso il fallback locale: " + e.getMessage());
+        } catch (IOException | RuntimeException invalid) {
+            return false;
         }
-
-        Optional<Path> cachedWallpaper = findCachedWallpaper(cacheDir, todayPrefix);
-        if (cachedWallpaper.isPresent()) {
-            return cachedWallpaper.get().toUri().toString();
-        }
-
-        URL resourceUrl = WallpaperService.class.getResource(LOCAL_FALLBACK_RESOURCE);
-        if (resourceUrl != null) {
-            return resourceUrl.toExternalForm();
-        }
-
-        return "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1920&q=80";
-
     }
 
     /**
@@ -125,7 +175,7 @@ public class WallpaperService {
 
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(cacheDir, todayPrefix + "*" + CACHE_FILE_SUFFIX)) {
             for (Path entry : stream) {
-                if (Files.isRegularFile(entry)) {
+                if (validImage(entry)) {
                     return Optional.of(entry);
                 }
             }
@@ -135,6 +185,13 @@ public class WallpaperService {
 
         return Optional.empty();
 
+    }
+
+    private static InputStream openWithTimeout(URL url) throws IOException {
+        var connection = url.openConnection();
+        connection.setConnectTimeout(2000);
+        connection.setReadTimeout(3000);
+        return connection.getInputStream();
     }
 
     private static String hashUrl(String url) {

@@ -1,6 +1,10 @@
 package it.unical.ea_project.controller.booking;
 
 import it.unical.ea_project.service.trip.TripService;
+import it.unical.ea_project.security.AuthUser;
+import java.nio.charset.StandardCharsets;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -21,13 +25,14 @@ public class CalendarController {
     }
 
     @GetMapping("/{tripId}/export/ics")
-    public ResponseEntity<byte[]> exportTripToIcs(@PathVariable Long tripId) {
-        String icsContent = tripService.exportTripToIcs(tripId);
-        byte[] bytes = icsContent.getBytes();
+    public ResponseEntity<byte[]> exportTripToIcs(@PathVariable Long tripId, @AuthenticationPrincipal AuthUser user) {
+        String icsContent = tripService.exportTripToIcs(tripId, user.id());
+        byte[] bytes = icsContent.getBytes(StandardCharsets.UTF_8);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.parseMediaType("text/calendar"));
-        headers.setContentDispositionFormData("attachment", "viaggio_" + tripId + ".ics");
+        headers.setContentType(MediaType.parseMediaType("text/calendar;charset=UTF-8"));
+        headers.setContentDisposition(ContentDisposition.attachment().filename("viaggio_" + tripId + ".ics").build());
+        headers.setCacheControl("no-store");
 
         return new ResponseEntity<>(bytes, headers, HttpStatus.OK);
     }

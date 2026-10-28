@@ -12,11 +12,12 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import java.lang.reflect.Type
 import java.net.URLEncoder
+import java.time.LocalDate
 import java.util.concurrent.ConcurrentHashMap
 
 object HomeRepository {
 
-    private const val PAGE_SIZE = 9
+    const val PAGE_SIZE = 9
     private const val CACHE_TTL_MS = 60_000L
     private const val MAX_CACHE_ENTRIES = 64
 
@@ -27,11 +28,18 @@ object HomeRepository {
 
     private val cache = ConcurrentHashMap<String, CacheEntry>()
     private val cacheLock = Any()
+
     private val activityListType =
         object : TypeToken<List<ActivityHomeDTO>>() {}.type
 
     private val tripListType =
         object : TypeToken<List<TripHomeDTO>>() {}.type
+
+    suspend fun getTopActivities(page: Int = 0): List<ActivityHomeDTO> =
+        getList("/api/activities/top/cards?page=$page&size=$PAGE_SIZE", activityListType)
+
+    suspend fun getFeaturedTrips(page: Int = 0): List<TripHomeDTO> =
+        getList("/api/trips/search?page=$page&size=$PAGE_SIZE", tripListType)
 
     private val activitySuggestionListType =
         object : TypeToken<List<ActivitySuggestionDTO>>() {}.type
@@ -49,7 +57,7 @@ object HomeRepository {
     )
 
     //Home
-
+/*
     suspend fun getTopActivities(): List<ActivityHomeDTO> {
         return getList(
             "/api/activities/top/cards?page=0&size=$PAGE_SIZE",
@@ -63,49 +71,32 @@ object HomeRepository {
             tripListType
         )
     }
-
-    suspend fun getActivitiesByCategory(
-        category: String
-    ): List<ActivityHomeDTO> {
-        require(
-            category in setOf(
-                "EXCURSION",
-                "VISIT",
-                "TRANSPORT",
-                "HOTEL",
-                "MEAL",
-                "OTHER"
-            )
-        ) {
+*/
+    suspend fun getActivitiesByCategory(category: String, page: Int = 0): List<ActivityHomeDTO> {
+        require(category in setOf("EXCURSION", "VISIT", "TRANSPORT", "HOTEL", "MEAL", "OTHER")) {
             "Categoria attività non valida: $category"
         }
-
-        return getList("/api/activities/category/$category", activityListType)
+        return getList(
+            "/api/activities/search?query=&category=$category&page=$page&size=$PAGE_SIZE",
+            activityListType
+        )
     }
 
     //Ricerca
 
-    suspend fun searchActivities(query: String): List<ActivityHomeDTO> {
+    suspend fun searchActivities(query: String, page: Int = 0): List<ActivityHomeDTO> {
         val path = buildString {
-            append("/api/activities/search?page=0&size=$PAGE_SIZE")
-            if (query.isNotBlank()) {
-                append("&query=")
-                append(encode(query.trim()))
-            }
+            append("/api/activities/search?page=$page&size=$PAGE_SIZE")
+            if (query.isNotBlank()) append("&query=").append(encode(query.trim()))
         }
-
         return getList(path, activityListType)
     }
 
-    suspend fun searchTrips(query: String): List<TripHomeDTO> {
+    suspend fun searchTrips(query: String, page: Int = 0): List<TripHomeDTO> {
         val path = buildString {
-            append("/api/trips/search?page=0&size=$PAGE_SIZE")
-            if (query.isNotBlank()) {
-                append("&query=")
-                append(encode(query.trim()))
-            }
+            append("/api/trips/search?page=$page&size=$PAGE_SIZE")
+            if (query.isNotBlank()) append("&query=").append(encode(query.trim()))
         }
-
         return getList(path, tripListType)
     }
 
@@ -173,8 +164,6 @@ object HomeRepository {
     ): List<T> {
         val now = SystemClock.elapsedRealtime()
         pruneCache(now)
-
-        // Riutilizza i dati se la cache è ancora valida.
         cache[path]?.let { entry ->
             if (now - entry.timestamp < CACHE_TTL_MS) {
                 @Suppress("UNCHECKED_CAST")
@@ -220,11 +209,6 @@ object HomeRepository {
         }
     }
 
-
-    /**
-     * Elimina le entry scadute e limita la cache per evitare crescita senza limiti
-     * quando vengono eseguite ricerche con query sempre diverse.
-     */
     private fun pruneCache(now: Long) {
         cache.forEach { (key, entry) ->
             if (now - entry.timestamp >= CACHE_TTL_MS) {
@@ -241,5 +225,22 @@ object HomeRepository {
                     cache.remove(entry.key, entry.value)
                 }
         }
+    }
+    suspend fun searchActivities(query: String, page: Int = 0, date: LocalDate? = null): List<ActivityHomeDTO> {
+        val path = buildString {
+            append("/api/activities/search?page=$page&size=$PAGE_SIZE")
+            append("&query=").append(encode(query.trim()))
+            if (date != null) append("&date=").append(date)
+        }
+        return getList(path, activityListType)
+    }
+
+    suspend fun searchTrips(query: String, page: Int = 0, date: LocalDate? = null): List<TripHomeDTO> {
+        val path = buildString {
+            append("/api/trips/search?page=$page&size=$PAGE_SIZE")
+            append("&query=").append(encode(query.trim()))
+            if (date != null) append("&date=").append(date)
+        }
+        return getList(path, tripListType)
     }
 }

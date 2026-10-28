@@ -1,0 +1,6 @@
+/* Screen layout: home. Theme: css/theme.css. */
+@import "../../app.css";
+
+.cards-row {
+    -fx-alignment: center-left;
+}

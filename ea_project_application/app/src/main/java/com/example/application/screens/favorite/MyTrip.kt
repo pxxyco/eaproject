@@ -1,5 +1,6 @@
 package com.example.application.screens.favorite
 
+import com.example.application.ui.effects.LocalNavigationTail
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.application.dto.ExperienceRef
 import com.example.application.network.MyTripRepository
 import com.example.application.network.UserSession
 import com.example.application.screens.home.SectionTitle
@@ -31,6 +33,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyTrip(
+    onExperienceClick: (ExperienceRef) -> Unit = {},
     modifier: Modifier = Modifier,
     onLoginClick: () -> Unit = {}
 ) {
@@ -45,6 +48,7 @@ fun MyTrip(
         CollectionScreen(
             target = target,
             onBack = { selected = null },
+            onExperienceClick = onExperienceClick,
             modifier = modifier
         )
         return
@@ -62,7 +66,6 @@ fun MyTrip(
     var creating by remember { mutableStateOf(false) }
     var createError by remember { mutableStateOf<String?>(null) }
 
-    // Si rilancia ogni volta che l'hub torna visibile (anche uscendo da una raccolta).
     LaunchedEffect(UserSession.user?.id, retry) {
         refreshing = true
         try { MyTripRepository.refreshLists() }
@@ -72,7 +75,7 @@ fun MyTrip(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(ScreenBackground)
+            .background(androidx.compose.ui.graphics.Color.Transparent)
             .padding(horizontal = 16.dp)
     ) {
         Spacer(Modifier.height(16.dp))
@@ -92,7 +95,7 @@ fun MyTrip(
 
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(12.dp),
-            contentPadding = PaddingValues(bottom = 24.dp)
+            contentPadding = PaddingValues(bottom = 24.dp + LocalNavigationTail.current)
         ) {
             if (UserSession.role.equals("TRAVELER", true)) item(key = "bookings") {
                 ListRow(
@@ -175,7 +178,7 @@ private fun ListRow(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = if (muted) OverlayDark else PopupSurface)
+        colors = CardDefaults.cardColors(containerColor = if (muted) MaterialTheme.colorScheme.surfaceVariant else PopupSurface)
     ) {
         Row(
             modifier = Modifier
@@ -190,7 +193,7 @@ private fun ListRow(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -257,7 +260,7 @@ internal fun LoginRequired(modifier: Modifier = Modifier, onLoginClick: () -> Un
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(ScreenBackground)
+            .background(androidx.compose.ui.graphics.Color.Transparent)
             .padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -266,7 +269,7 @@ internal fun LoginRequired(modifier: Modifier = Modifier, onLoginClick: () -> Un
             text = "Accedi per vedere le tue liste",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
-            color = Color.White
+            color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(Modifier.height(8.dp))
         Text(

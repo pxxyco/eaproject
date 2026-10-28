@@ -1,16 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import java.net.URL?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.image.ImageView?>
-<StackPane xmlns:fx="http://javafx.com/fxml/1"
+<StackPane stylesheets="@../../css/screens/traveler/favorites.css" xmlns:fx="http://javafx.com/fxml/1"
     fx:controller="it.unical.ea_project_javafx.controller.traveler.FavoritesController"
     styleClass="favorites-page-root, favorites-simple">
-    <stylesheets>
-        <URL value="@../../css/common/style.css" />
-        <URL value="@../../css/profile/profile.css" />
-        <URL value="@../../css/traveler/favorites.css" />
-    </stylesheets>
     <ImageView fx:id="bgImageView" preserveRatio="false" mouseTransparent="true" />
     <BorderPane>
         <top>

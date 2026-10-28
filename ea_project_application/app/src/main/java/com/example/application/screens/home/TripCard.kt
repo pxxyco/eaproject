@@ -77,7 +77,7 @@ fun TripCard(
                         Text(
                             text = location,
                             style = MaterialTheme.typography.bodySmall,
-                            color = Stone400,
+                            color = Color(0xFFD3DED6),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -111,13 +111,13 @@ fun TripCard(
                         Text(
                             text = dateRange,
                             style = MaterialTheme.typography.bodySmall,
-                            color = Stone300
+                            color = Color(0xFFD3DED6)
                         )
 
                         Text(
                             text = "da $price",
                             style = MaterialTheme.typography.titleSmall,
-                            color = Stone200,
+                            color = Color.White,
                             fontWeight = FontWeight.Bold
                         )
                     }

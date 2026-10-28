@@ -23,7 +23,7 @@ public final class MockCheckoutDialog {
     }
 
     public static boolean eligible(BookingDTO b) {
-        return b != null && b.getBookingId() != null && !BookingPresentation.isCancelled(b)
+        return b != null && b.getPrice() != null && b.getPrice().signum() > 0 && b.getBookingId() != null && !BookingPresentation.isCancelled(b)
                 && !BookingPresentation.isHistorical(b, LocalDateTime.now())
                 && !BookingPresentation.hasEventStarted(b, LocalDateTime.now())
                 && !"COMPLETED".equals(b.getPaymentStatus()) && !"CONFIRMED".equals(b.getPaymentStatus());

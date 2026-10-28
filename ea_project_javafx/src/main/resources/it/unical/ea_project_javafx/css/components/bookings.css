@@ -1,0 +1,22 @@
+/* Reusable component: bookings. Theme: css/theme.css. */
+
+.cancelled-booking-row {
+    -fx-opacity: 0.68;
+}
+
+.cancelled-booking-row .text {
+    -fx-fill: -color-stone-muted;
+    -fx-font-style: italic;
+}
+
+.cancelled-booking-row .button {
+    -fx-opacity: 0.8;
+}
+
+.historical-booking-row {
+    -fx-opacity: 0.88;
+}
+
+.historical-booking-row .text {
+    -fx-fill: -tone-ivory-850;
+}
