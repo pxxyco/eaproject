@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import com.example.application.dto.SearchSuggestion
 import com.example.application.dto.ActivityHomeDTO
 import com.example.application.dto.TripHomeDTO
+import com.example.application.dto.ExperienceRef
 import com.example.application.network.AppStatus
 import com.example.application.network.HomeRepository
 import com.example.application.screens.common.LoadingOverlay
@@ -19,7 +20,10 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
+fun HomeScreen(
+    onExperienceClick: (ExperienceRef) -> Unit = {},
+    modifier: Modifier = Modifier
+) {
     val appError by AppStatus::error
 
     var activities by remember { mutableStateOf(PagedList<ActivityHomeDTO>()) }
@@ -226,6 +230,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                 searchTripResults = searchTripResults,
                 searchError = searchError,
                 onResetSearch = { resetSearch() },
+                onExperienceClick = onExperienceClick,
 
                 onLoadMoreTopActivities = {
                     loadMore(

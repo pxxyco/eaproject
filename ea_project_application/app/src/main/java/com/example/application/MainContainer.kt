@@ -2,7 +2,9 @@ package com.example.application
 
 import android.app.Activity
 import androidx.activity.compose.BackHandler
+import com.example.application.dto.ExperienceRef
 import com.example.application.dto.UserDTO
+import com.example.application.screens.activity.ExperienceDetailScreen
 import com.example.application.screens.organizer.OrganizerDashboardScreen
 import androidx.compose.foundation.layout.*
 import com.example.application.ui.background.BackgroundHelper
@@ -43,12 +45,15 @@ fun MainContainer() {
 internal fun MainNavigation(
     user: UserDTO?,
     onLogout: () -> Unit,
-    homeContent: @Composable (Modifier) -> Unit = { HomeScreen(it) },
-    tripsContent: @Composable (Modifier) -> Unit = { MyTrip(it) },
+    homeContent: (@Composable (Modifier) -> Unit)? = null,
+    tripsContent: (@Composable (Modifier) -> Unit)? = null,
     dashboardContent: @Composable (Long, Modifier) -> Unit = { id, modifier -> OrganizerDashboardScreen(id, modifier) }
 ) {
     var destination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
     var returnToPersonalTab by rememberSaveable { mutableStateOf(false) }
+    var openExperience by rememberSaveable(user?.id, user?.role, stateSaver = ExperienceRef.Saver) {
+        mutableStateOf<ExperienceRef?>(null)
+    }
     val organizer = user?.role?.trim().equals("ORGANIZER", ignoreCase = true)
     val current = when (destination) {
         AppDestinations.DASHBOARD, AppDestinations.`MY-TRIP` -> if (organizer) AppDestinations.DASHBOARD else AppDestinations.`MY-TRIP`
@@ -58,20 +63,30 @@ internal fun MainNavigation(
         destination = AppDestinations.HOME
         returnToPersonalTab = false
     }
+    BackHandler(enabled = openExperience != null) { openExperience = null }
     val loadingHost = remember { ScreenLoadingHost() }
     Box(Modifier.fillMaxSize()) {
         val bottomInset = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
         Box(Modifier.fillMaxSize().padding(bottom = 70.dp + bottomInset).navigationFade()) {
             val contentModifier = Modifier.windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal))
             CompositionLocalProvider(LocalNavigationTail provides 72.dp, LocalScreenLoadingHost provides loadingHost) {
-                key(user?.id, user?.role) {
+                val experience = openExperience
+                if (experience != null) {
+                    key(experience) {
+                        ExperienceDetailScreen(experience, onBack = { openExperience = null }, modifier = contentModifier)
+                    }
+                } else key(user?.id, user?.role) {
                     when (current) {
-                        AppDestinations.HOME -> homeContent(contentModifier)
+                        AppDestinations.HOME -> {
+                            if (homeContent != null) homeContent(contentModifier)
+                            else HomeScreen(onExperienceClick = { openExperience = it }, modifier = contentModifier)
+                        }
                         AppDestinations.`MY-TRIP` -> {
                             if (user == null) MyTrip(modifier = contentModifier, onLoginClick = {
                                 returnToPersonalTab = true
                                 destination = AppDestinations.PROFILE
-                            }) else tripsContent(contentModifier)
+                            }) else if (tripsContent != null) tripsContent(contentModifier)
+                            else MyTrip(onExperienceClick = { openExperience = it }, modifier = contentModifier)
                         }
                         AppDestinations.DASHBOARD -> user?.id?.let { dashboardContent(it, contentModifier) }
                         AppDestinations.PROFILE -> ProfileScreen(
@@ -94,7 +109,7 @@ internal fun MainNavigation(
         com.example.application.ui.navigation.FloatingNavigation(
             destinations = listOf(AppDestinations.HOME, if (organizer) AppDestinations.DASHBOARD else AppDestinations.`MY-TRIP`, AppDestinations.PROFILE),
             selected = current,
-            onSelect = { destination = it; returnToPersonalTab = false },
+            onSelect = { openExperience = null; destination = it; returnToPersonalTab = false },
             modifier = Modifier.align(androidx.compose.ui.Alignment.BottomCenter).navigationBarsPadding()
                 .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal)).padding(horizontal = 18.dp, vertical = 12.dp))
         loadingHost.message?.let { LoadingOverlay(message = it, modifier = Modifier.fillMaxSize()) }

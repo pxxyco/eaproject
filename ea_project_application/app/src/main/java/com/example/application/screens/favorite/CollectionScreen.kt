@@ -1,6 +1,7 @@
 package com.example.application.screens.favorite
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,7 +14,10 @@ import com.example.application.ui.effects.LocalNavigationTail
 import com.example.application.dto.canCancel
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.example.application.dto.BookingItemDTO
 import com.example.application.dto.CollectionItemsDTO
+import com.example.application.dto.ExperienceRef
+import com.example.application.dto.ExperienceType
 import com.example.application.network.MyTripRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
@@ -25,11 +29,16 @@ private data class CollectionAction(
     val leave: Boolean = false
 )
 
+private fun BookingItemDTO.experienceRef(): ExperienceRef? =
+    tripId?.let { ExperienceRef(ExperienceType.TRIP, it) }
+        ?: activityId?.let { ExperienceRef(ExperienceType.ACTIVITY, it) }
+
 @Composable
 fun CollectionScreen(
     target: MyTripRepository.HubTarget,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    onExperienceClick: (ExperienceRef) -> Unit = {},
     load: suspend (MyTripRepository.HubTarget) -> CollectionItemsDTO = { MyTripRepository.loadItems(it) },
     deleteList: suspend (Long) -> Unit = { MyTripRepository.deleteList(it) },
     cancelBooking: suspend (Long) -> Unit = { MyTripRepository.cancelBooking(it) },
@@ -99,6 +108,7 @@ fun CollectionScreen(
                         action = "Annulla prenotazione",
                         enabled = !busy && cancellable,
                         note = if (cancellable) null else "Questa prenotazione non può essere annullata",
+                        onOpen = booking.experienceRef()?.let { ref -> { onExperienceClick(ref) } },
                         onAction = {
                             pending = CollectionAction(
                                 title = "Annullare la prenotazione?",
@@ -122,6 +132,7 @@ fun CollectionScreen(
                         location = trip.location.orEmpty(),
                         action = "Rimuovi dalla lista",
                         enabled = !busy && trip.tripId != null,
+                        onOpen = trip.tripId?.let { id -> { onExperienceClick(ExperienceRef(ExperienceType.TRIP, id)) } },
                         onAction = {
                             pending = CollectionAction(
                                 title = "Rimuovere il viaggio dalla lista?",
@@ -137,6 +148,7 @@ fun CollectionScreen(
                         location = activity.city.orEmpty(),
                         action = "Rimuovi dalla lista",
                         enabled = !busy && activity.activityId != null,
+                        onOpen = activity.activityId?.let { id -> { onExperienceClick(ExperienceRef(ExperienceType.ACTIVITY, id)) } },
                         onAction = {
                             pending = CollectionAction(
                                 title = "Rimuovere l’attività dalla lista?",
@@ -196,9 +208,14 @@ private fun CollectionEntry(
     action: String,
     enabled: Boolean,
     onAction: () -> Unit,
-    note: String? = null
+    note: String? = null,
+    onOpen: (() -> Unit)? = null
 ) {
-    Card(Modifier.fillMaxWidth()) {
+    Card(
+        Modifier
+            .fillMaxWidth()
+            .then(if (onOpen != null) Modifier.clickable(onClick = onOpen) else Modifier)
+    ) {
         Column(Modifier.padding(16.dp)) {
             Text(title, style = MaterialTheme.typography.titleMedium)
             if (location.isNotBlank()) Text(location)

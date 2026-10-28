@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.example.application.dto.ExperienceRef
 import com.example.application.network.MyTripRepository
 import com.example.application.network.UserSession
 import com.example.application.screens.home.SectionTitle
@@ -32,6 +33,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyTrip(
+    onExperienceClick: (ExperienceRef) -> Unit = {},
     modifier: Modifier = Modifier,
     onLoginClick: () -> Unit = {}
 ) {
@@ -46,6 +48,7 @@ fun MyTrip(
         CollectionScreen(
             target = target,
             onBack = { selected = null },
+            onExperienceClick = onExperienceClick,
             modifier = modifier
         )
         return
