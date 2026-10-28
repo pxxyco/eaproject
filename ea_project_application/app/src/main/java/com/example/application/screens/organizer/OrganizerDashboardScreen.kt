@@ -86,7 +86,11 @@ private fun Dashboard(userId: Long, modifier: Modifier) {
             Text("Dashboard Organizzatore", style = MaterialTheme.typography.headlineMedium)
             Text("Gestisci le tue offerte e controlla le prenotazioni", color = Stone400)
             Spacer(Modifier.height(16.dp))
-            Button(onClick = { choosing = true }, enabled = !busy && !loading, modifier = Modifier.fillMaxWidth()) { Text("+ Nuova offerta") }
+            Button(onClick = { choosing = true }, enabled = !busy && !loading,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp), shape = RoundedCornerShape(18.dp),
+                border = BorderStroke(1.dp, GlassBorder),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer)) { Text("+ Nuova offerta") }
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 TextButton(onClick = { refresh++ }, enabled = !loading && !busy) { Text("Aggiorna") }
             }

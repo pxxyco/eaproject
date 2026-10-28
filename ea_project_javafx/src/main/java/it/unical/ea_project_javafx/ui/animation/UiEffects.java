@@ -372,7 +372,7 @@ public final class UiEffects {
                 for (BackgroundFill fill : background.getFills()) {
                     var paint = fill.getFill();
                     if (paint instanceof Color c) {
-                        if (node.getStyleClass().stream().anyMatch(name -> name.endsWith("-card") || name.endsWith("-panel"))) c = alpha(tintedSurface(), c.getOpacity());
+                        if (node.getStyleClass().stream().anyMatch(name -> name.endsWith("-card") || name.endsWith("-panel") || name.equals("btn-create-offer"))) c = alpha(tintedSurface(), c.getOpacity());
                         paint = node.getStyleClass().contains("menu-item")
                                 ? c.interpolate(alpha(accent, .18), amount)
                                 : c.interpolate(alpha(accent, Math.max(c.getOpacity(), .08)), amount * .13);

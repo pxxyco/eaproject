@@ -12,6 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.application.ui.theme.Stone200
+import com.example.application.ui.theme.GlassFill
+import com.example.application.ui.theme.GlassBorder
+import androidx.compose.foundation.BorderStroke
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -37,7 +40,8 @@ fun DateFilterBar(
     OutlinedCard(
         onClick = { showPicker = true },
         shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.outlinedCardColors(containerColor = Color.Transparent),
+        border = BorderStroke(1.dp, GlassBorder),
+        colors = CardDefaults.outlinedCardColors(containerColor = GlassFill),
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
@@ -52,12 +56,12 @@ fun DateFilterBar(
             Icon(
                 imageVector = Icons.Default.DateRange,
                 contentDescription = null,
-                tint = if (date != null) Stone200 else Color.Gray
+                tint = MaterialTheme.colorScheme.onSurface
             )
             Spacer(Modifier.width(12.dp))
             Text(
                 text = date?.format(dateFormatter) ?: "Filtra per data",
-                color = if (date != null) Color.White else Color.Gray,
+                color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.weight(1f)
             )
@@ -66,7 +70,7 @@ fun DateFilterBar(
                     Icon(
                         imageVector = Icons.Default.Close,
                         contentDescription = "Rimuovi data",
-                        tint = Color.Gray
+                        tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
             }
