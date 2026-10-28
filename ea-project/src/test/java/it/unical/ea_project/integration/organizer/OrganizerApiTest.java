@@ -235,4 +235,50 @@ class OrganizerApiTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    void coordinatesArePersistedUpdatedAndClearedForActivitiesAndStages() throws Exception {
+        User owner = user("coordinate-owner", User.Role.ORGANIZER);
+        String activity = """
+                {"title":"Museo","city":"Roma","category":"VISIT","price":10,"maxSeats":10,
+                 "startDate":"2027-06-01T09:00:00","endDate":"2027-06-01T11:00:00",
+                 "durationMinutes":120,"latitude":39.3,"longitude":16.2}
+                """;
+        var result = mvc.perform(post("/api/activities").header("Authorization", token(owner))
+                .contentType(MediaType.APPLICATION_JSON).content(activity)).andExpect(status().isCreated())
+                .andExpect(jsonPath("$.latitude").value(39.3)).andReturn();
+        long activityId = json.readTree(result.getResponse().getContentAsString()).get("activityId").asLong();
+        String moved = activity.replace("39.3", "40.5").replace("16.2", "17.5");
+        mvc.perform(put("/api/activities/" + activityId).header("Authorization", token(owner))
+                .contentType(MediaType.APPLICATION_JSON).content(moved)).andExpect(status().isOk());
+        mvc.perform(get("/api/activities/" + activityId)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.latitude").value(40.5)).andExpect(jsonPath("$.longitude").value(17.5));
+        mvc.perform(put("/api/activities/" + activityId).header("Authorization", token(owner))
+                .contentType(MediaType.APPLICATION_JSON).content(activity.replace("39.3", "null").replace("16.2", "null")))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.latitude").isEmpty()).andExpect(jsonPath("$.longitude").isEmpty());
+
+        String locatedTrip = offer.replace("\"orderInDay\":1", "\"orderInDay\":1,\"latitude\":39.3,\"longitude\":16.2");
+        var created = mvc.perform(post("/api/trips").header("Authorization", token(owner))
+                .contentType(MediaType.APPLICATION_JSON).content(locatedTrip)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.stages[0].latitude").value(39.3)).andReturn();
+        var tree = json.readTree(created.getResponse().getContentAsString());
+        long tripId = tree.get("tripId").asLong();
+        long stageId = tree.get("stages").get(0).get("stageId").asLong();
+        String updated = locatedTrip.replace("\"orderInDay\":1", "\"orderInDay\":1,\"stageId\":" + stageId).replace("39.3", "40.5");
+        mvc.perform(put("/api/trips/" + tripId).header("Authorization", token(owner))
+                .contentType(MediaType.APPLICATION_JSON).content(updated)).andExpect(status().isOk());
+        mvc.perform(get("/api/trips/" + tripId)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.stages[0].stageId").value(stageId))
+                .andExpect(jsonPath("$.stages[0].latitude").value(40.5));
+        mvc.perform(put("/api/trips/" + tripId).header("Authorization", token(owner))
+                .contentType(MediaType.APPLICATION_JSON).content(updated.replace("40.5", "null").replace("16.2", "null")))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.stages[0].latitude").isEmpty())
+                .andExpect(jsonPath("$.stages[0].longitude").isEmpty());
+        mvc.perform(post("/api/activities").header("Authorization", token(owner))
+                .contentType(MediaType.APPLICATION_JSON).content(activity.replace("39.3", "91")))
+                .andExpect(status().isBadRequest());
+        mvc.perform(post("/api/trips").header("Authorization", token(owner))
+                .contentType(MediaType.APPLICATION_JSON).content(locatedTrip.replace("16.2", "181")))
+                .andExpect(status().isBadRequest());
+    }
+
 }

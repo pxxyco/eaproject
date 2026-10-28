@@ -110,6 +110,7 @@ public class CreateOfferController {
     private TextField actPlaceField;
     @FXML
     private TextField actCityField;
+    @FXML private TextField actLatitudeField, actLongitudeField;
     @FXML
     private TextField actDurationField;
     @FXML
@@ -413,8 +414,16 @@ public class CreateOfferController {
         endTime.getStyleClass().add("custom-input");
         HBox times = new HBox(8, new VBox(4, new Label("Ora inizio"), startTime),
                 new VBox(4, new Label("Ora fine (stesso giorno)"), endTime));
-        row.getChildren().addAll(fields, times, description);
-        row.setUserData(new StageFields(title, place, city, day, category, description, startTime, endTime, null));
+        TextField latitude = new TextField();
+        TextField longitude = new TextField();
+        latitude.setPromptText("Es. 39.3 (facoltativa)");
+        longitude.setPromptText("Es. 16.2 (facoltativa)");
+        latitude.getStyleClass().add("custom-input");
+        longitude.getStyleClass().add("custom-input");
+        HBox coordinates = new HBox(8, new VBox(4, new Label("Latitudine"), latitude),
+                new VBox(4, new Label("Longitudine"), longitude));
+        row.getChildren().addAll(fields, coordinates, times, description);
+        row.setUserData(new StageFields(title, place, city, day, category, description, startTime, endTime, latitude, longitude, null));
         stagesContainer.getChildren().add(row);
     }
 
@@ -433,12 +442,14 @@ public class CreateOfferController {
                 fields.place().setText(valueOrEmpty(stage.getLocationName()));
                 fields.city().setText(valueOrEmpty(stage.getCity()));
                 fields.day().setText(String.valueOf(stage.getDay()));
+                fields.latitude().setText(stage.getLatitude() == null ? "" : stage.getLatitude().toString());
+                fields.longitude().setText(stage.getLongitude() == null ? "" : stage.getLongitude().toString());
                 fields.category().setValue(stage.getCategory());
                 fields.description().setText(valueOrEmpty(stage.getDescription()));
                 fields.startTime().setText(stage.getStartTime() == null ? "" : stage.getStartTime().toString());
                 fields.endTime().setText(stage.getEndTime() == null ? "" : stage.getEndTime().toString());
                 row.setUserData(new StageFields(fields.title(), fields.place(), fields.city(), fields.day(),
-                        fields.category(), fields.description(), fields.startTime(), fields.endTime(), stage));
+                        fields.category(), fields.description(), fields.startTime(), fields.endTime(), fields.latitude(), fields.longitude(), stage));
             }
         stepChoose.setVisible(false);
         stepChoose.setManaged(false);
@@ -480,6 +491,8 @@ public class CreateOfferController {
         actCategoryCombo.setValue(activityCategoryLabel(activity.getCategory()));
         actPlaceField.setText(valueOrEmpty(activity.getPlaceName()));
         actCityField.setText(valueOrEmpty(activity.getCity()));
+        actLatitudeField.setText(activity.getLatitude() == null ? "" : activity.getLatitude().toString());
+        actLongitudeField.setText(activity.getLongitude() == null ? "" : activity.getLongitude().toString());
         actDurationField
                 .setText(activity.getDurationMinutes() == null ? "" : String.valueOf(activity.getDurationMinutes()));
         actPriceField.setText(activity.getPrice() == null ? "" : String.valueOf(activity.getPrice()));
@@ -587,10 +600,9 @@ public class CreateOfferController {
             var period = OfferSchedule.activityPeriod(start, actStartTimeField.getText(), end, actEndTimeField.getText());
             payload.put("startDate", period[0].toString());
             payload.put("endDate", period[1].toString());
-            if (activityToEdit != null) {
-                payload.put("latitude", activityToEdit.getLatitude());
-                payload.put("longitude", activityToEdit.getLongitude());
-            }
+            Double[] coordinates = OfferCoordinates.parse(actLatitudeField.getText(), actLongitudeField.getText());
+            payload.put("latitude", coordinates[0]);
+            payload.put("longitude", coordinates[1]);
             payload.put("durationMinutes", duration);
             payload.put("price", price);
             payload.put("maxSeats", maxSeats);
@@ -783,12 +795,14 @@ public class CreateOfferController {
                 var original = fields.original();
                 stage.put("stageId", original.getStageId());
                 stage.put("country", original.getCountry());
-                stage.put("latitude", original.getLatitude());
-                stage.put("longitude", original.getLongitude());
+
 
                 stage.put("photoUrl", original.getPhotoUrl());
                 stage.put("notes", original.getNotes());
             }
+            Double[] coordinates = OfferCoordinates.parse(fields.latitude().getText(), fields.longitude().getText());
+            stage.put("latitude", coordinates[0]);
+            stage.put("longitude", coordinates[1]);
             LocalTime startTime = OfferSchedule.time(fields.startTime().getText(), false);
             LocalTime endTime = OfferSchedule.time(fields.endTime().getText(), false);
             OfferSchedule.stageTimes(startTime, endTime);
@@ -905,6 +919,8 @@ public class CreateOfferController {
             TextArea description,
             TextField startTime,
             TextField endTime,
+            TextField latitude,
+            TextField longitude,
             StageDTO original) {
     }
 }

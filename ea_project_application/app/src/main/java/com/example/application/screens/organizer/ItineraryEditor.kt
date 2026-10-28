@@ -69,15 +69,7 @@ internal fun stagePayload(original: JsonObject, fields: Map<String, String>, cat
     fields.forEach { (key, value) -> stage.addProperty(key, value.trim()) }
     stage.addProperty("day", day)
     stage.addProperty("category", category)
-    val latitude = fields.getValue("latitude").trim().replace(',', '.')
-    val longitude = fields.getValue("longitude").trim().replace(',', '.')
-    if (latitude.isBlank() && longitude.isBlank()) {
-        stage.remove("latitude"); stage.remove("longitude")
-    } else {
-        val lat = latitude.toDoubleOrNull(); val lon = longitude.toDoubleOrNull()
-        require(lat != null && lon != null && lat.isFinite() && lon.isFinite() && lat in -90.0..90.0 && lon in -180.0..180.0) { "Inserisci entrambe le coordinate con valori validi." }
-        stage.addProperty("latitude", lat); stage.addProperty("longitude", lon)
-    }
+    applyCoordinates(stage, fields.getValue("latitude"), fields.getValue("longitude"))
     normalizeStageTimes(stage)
     return stage
 }

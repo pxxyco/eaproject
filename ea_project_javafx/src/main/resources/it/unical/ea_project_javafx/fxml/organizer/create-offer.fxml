@@ -284,6 +284,17 @@
                             </VBox>
                         </HBox>
 
+                        <HBox spacing="14.0">
+                            <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                <Label text="Latitudine (facoltativa)" styleClass="form-label" />
+                                <TextField fx:id="actLatitudeField" promptText="Es. 39.3" styleClass="custom-input" />
+                            </VBox>
+                            <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                <Label text="Longitudine (facoltativa)" styleClass="form-label" />
+                                <TextField fx:id="actLongitudeField" promptText="Es. 16.2" styleClass="custom-input" />
+                            </VBox>
+                        </HBox>
+
                         <VBox spacing="4.0">
                             <Label text="Copertina dell'attività" styleClass="form-label" />
                             <HBox alignment="CENTER_LEFT" spacing="8.0">
