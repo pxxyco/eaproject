@@ -1,6 +1,5 @@
 package com.example.application.screens.activity
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import com.example.application.dto.ExperienceDetail
 import com.example.application.ui.theme.OverlayDark
 import com.example.application.ui.theme.RatingAmber
-import com.example.application.ui.theme.ScreenBackground
 import com.example.application.ui.theme.Stone400
 import java.util.Locale
 
@@ -29,7 +27,6 @@ internal fun ExperienceHeaderSheet(detail: ExperienceDetail) {
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-            .background(ScreenBackground)
             .padding(20.dp)
     ) {
         Surface(
@@ -48,7 +45,7 @@ internal fun ExperienceHeaderSheet(detail: ExperienceDetail) {
         Text(
             text = detail.title,
             style = MaterialTheme.typography.headlineSmall,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Bold
         )
 

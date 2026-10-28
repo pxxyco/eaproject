@@ -47,7 +47,7 @@ private fun formatTripPrice(price: BigDecimal?): String =
     price?.setScale(2, RoundingMode.HALF_UP)?.let { "€$it" } ?: "N/D"
 
 @Composable
-private fun ActivityCardItem(
+internal fun ActivityCardItem(
     item: ActivityHomeDTO,
     onExperienceClick: (ExperienceRef) -> Unit,
     modifier: Modifier = Modifier.width(180.dp)
@@ -68,7 +68,7 @@ private fun ActivityCardItem(
 }
 
 @Composable
-private fun TripCardItem(
+internal fun TripCardItem(
     item: TripHomeDTO,
     onExperienceClick: (ExperienceRef) -> Unit
 ) {

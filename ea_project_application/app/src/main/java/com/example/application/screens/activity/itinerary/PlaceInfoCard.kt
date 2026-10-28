@@ -22,7 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.example.application.dto.ActivityDetailDTO
@@ -79,7 +78,7 @@ private fun InfoRow(icon: ImageVector, label: String, value: String) {
         Spacer(Modifier.width(12.dp))
         Column {
             Text(text = label, style = MaterialTheme.typography.labelSmall, color = Stone400)
-            Text(text = value, style = MaterialTheme.typography.bodyMedium, color = Color.White)
+            Text(text = value, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
         }
     }
 }

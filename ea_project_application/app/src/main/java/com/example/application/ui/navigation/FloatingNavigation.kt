@@ -18,6 +18,7 @@ import androidx.compose.ui.graphics.shadow.Shadow
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.example.application.AppDestinations
@@ -31,7 +32,7 @@ import com.example.application.ui.theme.NavigationOutline
 internal fun FloatingNavigation(destinations: List<AppDestinations>, selected: AppDestinations, onSelect: (AppDestinations) -> Unit,
     modifier: Modifier = Modifier) {
     val shape = RoundedCornerShape(32.dp)
-    Box(modifier.widthIn(max = 560.dp).fillMaxWidth()) {
+    Box(modifier.widthIn(max = 560.dp).fillMaxWidth().testTag("floating_navigation")) {
         // Paint the soft shadow without an elevated RenderNode: translucent elevation can
         // leave a bright rectangular strip behind the labels on Android.
         Box(Modifier.matchParentSize().dropShadow(shape, Shadow(radius = 12.dp, color = Color.Black.copy(alpha = .18f), offset = DpOffset(0.dp, 4.dp))).clip(shape).background(GlassFill).border(1.dp, GlassBorder, shape))

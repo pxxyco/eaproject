@@ -88,7 +88,7 @@ class ThemeAndDeviceTest {
     @Test fun recommendationPreferenceInvalidatesTheShownPersonalizedFeed() {
         UserSession.setSession(user)
         var calls = 0
-        compose.setContent { ApplicationTheme { RecommendationsSection(load = {
+        compose.setContent { ApplicationTheme { RecommendationsSection(onExperienceClick = {}, load = {
             calls++
             ApiResult.Success(Recommendations(calls == 1, emptyList(), emptyList()))
         }) } }

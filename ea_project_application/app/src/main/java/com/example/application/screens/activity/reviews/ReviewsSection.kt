@@ -1,6 +1,5 @@
 package com.example.application.screens.activity.reviews
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -13,9 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.application.ui.theme.ScreenBackground
 import com.example.application.ui.theme.Stone200
 import com.example.application.ui.theme.Stone400
 
@@ -69,7 +66,6 @@ private fun ReviewsBlock(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(ScreenBackground)
             .padding(start = 20.dp, end = 20.dp, top = top, bottom = 6.dp),
         content = content
     )
@@ -82,7 +78,7 @@ private fun ReviewsSummary(count: Int?) {
             Text(
                 text = if (count == 1) "1 recensione" else "$count recensioni",
                 style = MaterialTheme.typography.bodyMedium,
-                color = Color.White
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
     }

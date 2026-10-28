@@ -63,6 +63,7 @@ public final class BookingPresentation {
         if (booking == null)
             return false;
         return isCancelled(booking)
+                || "PENDING".equalsIgnoreCase(booking.getBookingStatus()) && hasEventStarted(booking, now)
                 || "COMPLETED".equalsIgnoreCase(booking.getBookingStatus())
                 || "COMPLETED".equalsIgnoreCase(booking.getItemStatus())
                 || isEventEnded(booking, now);
@@ -158,15 +159,32 @@ public final class BookingPresentation {
             return "Prenotazione cancellata";
         if ("CANCELLED".equalsIgnoreCase(booking.getItemStatus()))
             return "Esperienza annullata";
-        if ("COMPLETED".equals(status) || "COMPLETED".equalsIgnoreCase(booking.getItemStatus()))
-            return "Completata";
-        if (isEventEnded(booking, evaluationTime))
-            return "PENDING".equals(status) ? "Terminata · in attesa" : "Terminata";
+        boolean pending = "PENDING".equals(status);
+        if (isHistorical(booking, evaluationTime))
+            return pending ? "Scaduta" : "Conclusa";
+        if (hasEventStarted(booking, evaluationTime))
+            return pending ? "Scaduta" : "In corso";
+        if (pending || booking.getPrice() != null && booking.getPrice().signum() > 0
+                && !"COMPLETED".equalsIgnoreCase(booking.getPaymentStatus())
+                && !"CONFIRMED".equalsIgnoreCase(booking.getPaymentStatus()))
+            return "Da pagare";
         if ("CONFIRMED".equals(status))
             return "Confermata";
-        if ("PENDING".equals(status))
-            return "In attesa";
         return status.isBlank() ? "Stato non disponibile" : status;
+    }
+
+    public static boolean canCancel(BookingDTO booking, LocalDateTime now) {
+        return booking != null && booking.getBookingId() != null && !isHistorical(booking, now)
+                && !hasEventStarted(booking, now)
+                && ("PENDING".equalsIgnoreCase(booking.getBookingStatus())
+                    || "CONFIRMED".equalsIgnoreCase(booking.getBookingStatus()));
+    }
+
+    public static boolean canReview(BookingDTO booking, LocalDateTime now) {
+        return booking != null && !isCancelled(booking)
+                && ("CONFIRMED".equalsIgnoreCase(booking.getBookingStatus())
+                    || "COMPLETED".equalsIgnoreCase(booking.getBookingStatus()))
+                && isHistorical(booking, now);
     }
 
     public static String paymentStatus(String status) {
@@ -183,9 +201,9 @@ public final class BookingPresentation {
     public static String statusStyleClass(String status) {
         return switch (status) {
             case "Cancellata", "Prenotazione cancellata", "Esperienza annullata" -> "booking-status-cancelled";
-            case "Completata", "Terminata" -> "booking-status-completed";
-            case "Confermata" -> "booking-status-confirmed";
-            case "In attesa", "Terminata · in attesa" -> "booking-status-pending";
+            case "Conclusa" -> "booking-status-completed";
+            case "Confermata", "In corso" -> "booking-status-confirmed";
+            case "In attesa", "Da pagare", "Scaduta" -> "booking-status-pending";
             default -> "booking-status-neutral";
         };
     }

@@ -15,6 +15,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.Tooltip;
+import java.util.Objects;
 import javafx.scene.layout.VBox;
 import lombok.Setter;
 
@@ -35,6 +37,8 @@ public class ReviewsContainerController implements ActivitySectionController, Tr
     List<ReviewDTO> reviews;
 
     private int page;
+    private boolean reviewEligible;
+    private ReviewDTO ownReview;
     final private int PAGE_SIZE = 5;
 
     @Setter
@@ -54,6 +58,7 @@ public class ReviewsContainerController implements ActivitySectionController, Tr
         boolean canReview = session.isLoggedIn() && "TRAVELER".equalsIgnoreCase(session.getRole());
         btnNew.setVisible(canReview);
         btnNew.setManaged(canReview);
+        updateReviewAction();
     }
 
     @Override
@@ -95,6 +100,8 @@ public class ReviewsContainerController implements ActivitySectionController, Tr
 
     private void setReviews() {
 
+        ownReview = reviews.stream().filter(review -> Objects.equals(review.getUserId(), UserSession.getInstance().getId())).findFirst().orElse(null);
+        updateReviewAction();
         bodyContainer.getChildren().clear();
 
         int startIndex = page * PAGE_SIZE;
@@ -130,8 +137,23 @@ public class ReviewsContainerController implements ActivitySectionController, Tr
         }
     }
 
+    public void setReviewEligible(boolean eligible) {
+        reviewEligible = eligible;
+        updateReviewAction();
+    }
+
+    private void updateReviewAction() {
+        if (btnNew == null) return;
+        btnNew.setText(ownReview != null ? "Modifica la tua recensione" : "Scrivi una recensione");
+        btnNew.setDisable(ownReview == null && !reviewEligible);
+        btnNew.setTooltip(new Tooltip(ownReview != null ? "Puoi aggiornare la tua recensione anche dopo altre partecipazioni."
+            : "Serve almeno una prenotazione conclusa e non annullata per questa esperienza."));
+    }
+
     @FXML
     public void handleNewButton(ActionEvent actionEvent) {
+        if (ownReview != null && onEditReviewRequested != null) { onEditReviewRequested.accept(ownReview); return; }
+        if (!reviewEligible) return;
         if (onNewReviewRequested != null) {
             onNewReviewRequested.run();
         }

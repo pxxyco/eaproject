@@ -8,12 +8,33 @@ import com.example.application.dto.ActivityHomeDTO
 import com.example.application.dto.ExperienceRef
 import com.example.application.dto.ExperienceType
 import com.example.application.dto.TripHomeDTO
+import com.example.application.dto.UserDTO
+import com.example.application.network.*
+import org.junit.After
 import org.junit.Assert.*
 import org.junit.Rule
 import org.junit.Test
 
 class HomeMergeNavigationTest {
     @get:Rule val compose = createComposeRule()
+
+    @After fun clearSession() { UserSession.clear() }
+
+    @Test fun recommendedCardsOpenTheSameTypedExperienceRouteAsHome() {
+        UserSession.setSession(UserDTO(id = 71, username = "mario", role = "TRAVELER"))
+        var opened: ExperienceRef? = null
+        val data = Recommendations(true,
+            trips = listOf(RecommendedTrip(TripHomeDTO(tripId = 7, title = "Viaggio consigliato"), "Tra i tuoi interessi")),
+            activities = listOf(RecommendedActivity(ActivityHomeDTO(activityId = 7, title = "Attività consigliata"), "Vicino alle tue preferenze")))
+        compose.setContent { MaterialTheme {
+            RecommendationsSection(onExperienceClick = { opened = it }, load = { ApiResult.Success(data) })
+        } }
+        compose.onNodeWithText("Viaggio consigliato").performClick()
+        compose.runOnIdle { assertEquals(ExperienceRef(ExperienceType.TRIP, 7), opened) }
+        compose.onNodeWithText("Attività consigliata").performScrollTo().performClick()
+        compose.runOnIdle { assertEquals(ExperienceRef(ExperienceType.ACTIVITY, 7), opened) }
+        compose.onNodeWithText("Chiudi").assertDoesNotExist()
+    }
 
     @Test fun pagedRowsOpenCorrectExperienceAndKeepLoadMoreSeparate() {
         var opened: ExperienceRef? = null

@@ -15,6 +15,9 @@ import androidx.compose.ui.unit.dp
 /** Extra scrollable space keeps the last action above the fading region at the end of a page. */
 internal val LocalNavigationTail = staticCompositionLocalOf { 0.dp }
 
+/** Visible overlap between the page viewport and the top of the floating navigation capsule. */
+internal val LocalNavigationOverlap = staticCompositionLocalOf { 0.dp }
+
 private const val SHADER = """
     uniform shader content;
     uniform float height;

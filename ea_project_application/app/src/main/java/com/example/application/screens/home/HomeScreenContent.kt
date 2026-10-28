@@ -140,7 +140,7 @@ internal fun HomeScreenContent(
             } else if (homeError == null) {
                 item(key = "recommendations") {
                     Column {
-                        RecommendationsSection()
+                        RecommendationsSection(onExperienceClick = onExperienceClick)
                         Spacer(Modifier.height(28.dp))
                     }
                 }
