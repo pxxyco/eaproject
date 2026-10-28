@@ -74,7 +74,7 @@ public class ReviewServiceImpl implements ReviewService {
         lockOffer(review.getTripId(), review.getActivityId());
         if (!hasEligibleCompletedBooking(review.getUserId(), review.getTripId(), review.getActivityId())) {
             throw new IllegalArgumentException(
-                    "Puoi recensire soltanto un'esperienza prenotata e terminata, non cancellata.");
+                    "Puoi recensire un'esperienza con prenotazione confermata, non annullata.");
         }
 
         boolean alreadyReviewed = reviewRepository.findAllByUserId(review.getUserId()).stream()

@@ -44,13 +44,13 @@ fun TripCard(
             // Badge in alto a destra
             Surface(
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
+                    .align(Alignment.TopStart)
                     .padding(10.dp),
                 shape = RoundedCornerShape(8.dp),
                 color = OverlayDark
             ) {
                 Text(
-                    text = "📷 + Foto",
+                    text = "Viaggio",
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.White,
                     modifier = Modifier.padding(
@@ -65,7 +65,7 @@ fun TripCard(
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .background(Color.Black.copy(alpha = 0.75f))
+                    .background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.92f))))
                     .padding(12.dp)
             ) {
                 Column {
@@ -77,7 +77,7 @@ fun TripCard(
                         Text(
                             text = location,
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color(0xFFD3DED6),
+                            color = Color.White.copy(alpha = .85f),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -111,7 +111,7 @@ fun TripCard(
                         Text(
                             text = dateRange,
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color(0xFFD3DED6)
+                            color = Color.White.copy(alpha = .85f)
                         )
 
                         Text(

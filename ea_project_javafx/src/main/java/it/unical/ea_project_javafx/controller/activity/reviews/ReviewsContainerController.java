@@ -144,10 +144,11 @@ public class ReviewsContainerController implements ActivitySectionController, Tr
 
     private void updateReviewAction() {
         if (btnNew == null) return;
-        btnNew.setText(ownReview != null ? "Modifica la tua recensione" : "Scrivi una recensione");
+        btnNew.setText("+");
+        btnNew.setAccessibleText(ownReview != null ? "Modifica la tua recensione" : "Aggiungi recensione");
         btnNew.setDisable(ownReview == null && !reviewEligible);
         btnNew.setTooltip(new Tooltip(ownReview != null ? "Puoi aggiornare la tua recensione anche dopo altre partecipazioni."
-            : "Serve almeno una prenotazione conclusa e non annullata per questa esperienza."));
+            : "Serve una prenotazione confermata e non annullata per questa esperienza."));
     }
 
     @FXML

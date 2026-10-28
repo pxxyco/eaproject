@@ -1007,4 +1007,39 @@ class RequiredFlowsIntegrationTest {
                         assertEquals(name, users.findByUsernameIgnoreCase(name).orElseThrow().getUsername());
                 }
         }
+        @Test
+        void paymentUnlocksReviewWithoutWaitingForDepartureAndDuplicateReviewIsRejected() throws Exception {
+                Trip t = trip(6);
+                String review = "{\"tripId\":" + t.getTripId() + ",\"rating\":5,\"comment\":\"Prenotazione confermata\"}";
+                var reserved = call("POST", "/api/bookings/trips/" + t.getTripId() + "?seats=2", null, traveler);
+                assertEquals(200, reserved.statusCode(), reserved.body());
+                long booking = id(reserved, "bookingId");
+                assertEquals(400, call("POST", "/api/reviews", review, traveler).statusCode());
+                assertEquals(200, call("POST", "/api/payments/mock/bookings/" + booking, null, traveler).statusCode());
+                assertEquals(200, call("POST", "/api/payments/mock/bookings/" + booking, null, traveler).statusCode());
+                assertEquals(4, trips.findById(t.getTripId()).orElseThrow().getAvailableSeats());
+                assertEquals(409, call("POST", "/api/bookings/trips/" + t.getTripId() + "?seats=1", null, traveler).statusCode());
+                var created = call("POST", "/api/reviews", review, traveler);
+                assertEquals(200, created.statusCode(), created.body());
+                assertEquals(400, call("POST", "/api/reviews", review, traveler).statusCode());
+                assertEquals(204, call("DELETE", "/api/bookings/" + booking, null, traveler).statusCode());
+                assertEquals(6, trips.findById(t.getTripId()).orElseThrow().getAvailableSeats());
+                assertEquals(400, call("POST", "/api/reviews", review, traveler).statusCode());
+        }
+        @Test
+        void activityDuplicatesAreRejectedAndCancellationAllowsRebooking() throws Exception {
+                Activity a = new Activity(); a.setCreatedBy(owner); a.setTitle("Museo"); a.setCity("Roma");
+                a.setCategory(Activity.Category.VISIT); a.setPrice(10d); a.setMaxSeats(20); a.setAvailableSeats(20);
+                a.setStartDate(LocalDateTime.now().plusDays(2)); a.setEndDate(LocalDateTime.now().plusDays(2).plusHours(2));
+                a.setStatus(Activity.Status.PUBLISHED); a = activities.save(a);
+                String path = "/api/bookings/activities/" + a.getActivityId() + "?seats=2";
+                var first = call("POST", path, null, traveler); assertEquals(200, first.statusCode(), first.body());
+                assertEquals(409, call("POST", path, null, traveler).statusCode());
+                assertEquals(18, activities.findById(a.getActivityId()).orElseThrow().getAvailableSeats());
+                assertEquals(204, call("DELETE", "/api/bookings/" + id(first, "bookingId"), null, traveler).statusCode());
+                assertEquals(20, activities.findById(a.getActivityId()).orElseThrow().getAvailableSeats());
+                assertEquals(200, call("POST", path, null, traveler).statusCode());
+                assertEquals(18, activities.findById(a.getActivityId()).orElseThrow().getAvailableSeats());
+        }
+
 }

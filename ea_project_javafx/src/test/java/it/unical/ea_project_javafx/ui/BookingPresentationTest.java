@@ -30,4 +30,10 @@ class BookingPresentationTest {
         assertEquals("Confermata", BookingPresentation.displayStatus(b, now));
         b.setBookingStatus("CANCELLED"); assertFalse(BookingPresentation.canReview(b, now));
     }
+    @Test void confirmedFutureBookingCanBeReviewedButPendingCannot() {
+        assertTrue(BookingPresentation.canReview(booking("CONFIRMED", false), now));
+        assertFalse(BookingPresentation.canReview(booking("PENDING", false), now));
+        assertFalse(BookingPresentation.canReview(booking("CANCELLED", false), now));
+    }
+
 }

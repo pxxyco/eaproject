@@ -183,8 +183,7 @@ public final class BookingPresentation {
     public static boolean canReview(BookingDTO booking, LocalDateTime now) {
         return booking != null && !isCancelled(booking)
                 && ("CONFIRMED".equalsIgnoreCase(booking.getBookingStatus())
-                    || "COMPLETED".equalsIgnoreCase(booking.getBookingStatus()))
-                && isHistorical(booking, now);
+                    || "COMPLETED".equalsIgnoreCase(booking.getBookingStatus()));
     }
 
     public static String paymentStatus(String status) {

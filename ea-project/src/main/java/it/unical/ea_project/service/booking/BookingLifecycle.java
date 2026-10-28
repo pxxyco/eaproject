@@ -39,7 +39,6 @@ public final class BookingLifecycle {
 
     public static boolean reviewable(Booking b, LocalDateTime now) {
         return b.getDeletedAt() == null && !cancelled(b)
-            && (b.getBookingStatus() == Booking.BookingStatus.CONFIRMED || b.getBookingStatus() == Booking.BookingStatus.COMPLETED)
-            && ended(b, now);
+            && (b.getBookingStatus() == Booking.BookingStatus.CONFIRMED || b.getBookingStatus() == Booking.BookingStatus.COMPLETED);
     }
 }

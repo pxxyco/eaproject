@@ -29,6 +29,8 @@ class HomeMergeNavigationTest {
         compose.setContent { MaterialTheme {
             RecommendationsSection(onExperienceClick = { opened = it }, load = { ApiResult.Success(data) })
         } }
+        compose.onNodeWithText("Tra i tuoi interessi").assertDoesNotExist()
+        compose.onNodeWithText("Vicino alle tue preferenze").assertDoesNotExist()
         compose.onNodeWithText("Viaggio consigliato").performClick()
         compose.runOnIdle { assertEquals(ExperienceRef(ExperienceType.TRIP, 7), opened) }
         compose.onNodeWithText("Attività consigliata").performScrollTo().performClick()

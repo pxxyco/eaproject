@@ -163,3 +163,10 @@
     -fx-alignment: center-left;
     -fx-padding: 0;
 }
+
+/* Virtualized list cells must never use Modena's white hover/selection fill. */
+.history-feed, .history-feed .list-cell, .history-feed .list-cell:hover,
+.history-feed .list-cell:selected, .history-feed .list-cell:focused,
+.history-feed .list-cell:filled:hover, .history-feed .list-cell:filled:selected {
+    -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent;
+}

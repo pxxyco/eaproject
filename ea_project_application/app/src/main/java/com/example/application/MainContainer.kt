@@ -16,6 +16,7 @@ import com.example.application.screens.AppErrorDialog
 import com.example.application.screens.ProfileScreen
 import com.example.application.screens.activity.ExperienceDetailScreen
 import com.example.application.screens.favorite.MyTrip
+import com.example.application.screens.favorite.LoginRequired
 import com.example.application.screens.home.HomeScreen
 import com.example.application.screens.organizer.OrganizerDashboardScreen
 import com.example.application.ui.background.BackgroundHelper
@@ -73,7 +74,7 @@ internal fun MainNavigation(
                     else HomeScreen(onExperienceClick = { openExperience = it }, modifier = contentModifier)
                 }
                 AppDestinations.`MY-TRIP` -> {
-                    if (user == null) MyTrip(modifier = contentModifier, onLoginClick = {
+                    if (user == null) LoginRequired(modifier = contentModifier, onLoginClick = {
                         returnToPersonalTab = true
                         destination = AppDestinations.PROFILE
                     }) else if (tripsContent != null) tripsContent(contentModifier)

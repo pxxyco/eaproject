@@ -1,5 +1,9 @@
 package com.example.application.ui.background
 
+import com.example.application.ui.theme.WallpaperPalette
+import com.example.application.ui.theme.dominantWallpaperColor
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -25,6 +29,16 @@ internal fun BackgroundHelper(content: @Composable BoxScope.() -> Unit) {
     var wallpaper by remember { mutableStateOf(WallpaperService.readyImage()) }
     LaunchedEffect(context, lifecycle) {
         lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) { wallpaper = WallpaperService.daily(context) }
+    }
+    LaunchedEffect(wallpaper) {
+        wallpaper?.let { bitmap ->
+            WallpaperPalette.accent = withContext(Dispatchers.Default) {
+                val samples = IntArray(32 * 24)
+                for (y in 0 until 24) for (x in 0 until 32)
+                    samples[y * 32 + x] = bitmap.getPixel((x * bitmap.width / 32).coerceAtMost(bitmap.width - 1), (y * bitmap.height / 24).coerceAtMost(bitmap.height - 1))
+                dominantWallpaperColor(samples)
+            }
+        }
     }
     Box(Modifier.fillMaxSize().background(ScreenBackground)) {
         wallpaper?.let { bitmap ->

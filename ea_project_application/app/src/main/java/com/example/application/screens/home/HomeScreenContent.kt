@@ -165,7 +165,10 @@ internal fun HomeScreenContent(
                     }
                 }
                 item(key = "top_activities_row") {
-                    ActivityRow(activities, onExperienceClick, onLoadMoreTopActivities)
+                    if (activities.items.isEmpty()) {
+                        Text("Non ci sono attività prenotabili al momento. Qui compaiono le attività pubblicate, non ancora iniziate e con posti disponibili.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
+                    } else ActivityRow(activities, onExperienceClick, onLoadMoreTopActivities)
                 }
 
                 item(key = "trips_title") {

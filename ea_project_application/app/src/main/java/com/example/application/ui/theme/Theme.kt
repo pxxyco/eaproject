@@ -54,7 +54,7 @@ val AppTypography = Typography(
 
 @Composable
 fun ApplicationTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-    val colors = if (darkTheme) DarkAppColors else LightAppColors
+    val colors = (if (darkTheme) DarkAppColors else LightAppColors).withWallpaper(WallpaperPalette.accent, darkTheme)
     val view = LocalView.current
     if (!view.isInEditMode) SideEffect {
         view.context.findActivity()?.window?.let { window ->

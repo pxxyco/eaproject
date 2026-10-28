@@ -91,7 +91,7 @@ class BookingBarLayoutTest {
             }
         } }
         compose.waitUntil(10_000) { compose.onAllNodesWithTag("experience_cover").fetchSemanticsNodes().isNotEmpty() }
-        val back = compose.onNodeWithText("Indietro").fetchSemanticsNode().boundsInRoot
+        val back = compose.onNodeWithContentDescription("Indietro").fetchSemanticsNode().boundsInRoot
         val cover = compose.onNodeWithTag("experience_cover").fetchSemanticsNode().boundsInRoot
         assertTrue("Back must remain outside the cover photo", back.bottom <= cover.top)
         compose.onNodeWithText("Itinerario").performScrollTo().performClick()
@@ -101,7 +101,7 @@ class BookingBarLayoutTest {
         compose.onNodeWithText("Nessuna foto disponibile.").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("Foto").assertIsSelected()
         screenshot("activity-modern-sections")
-        compose.onNodeWithText("Indietro").performClick()
+        compose.onNodeWithContentDescription("Indietro").performClick()
         compose.runOnIdle { assertEquals(1, backClicks) }
     }
 

@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.application.dto.ExperienceRef
 import com.example.application.network.*
@@ -47,13 +46,11 @@ internal fun RecommendationsSection(
             items(trips, key = { "trip-${it.item.tripId}" }) { pick ->
                 Column(Modifier.width(280.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     TripCardItem(pick.item, onExperienceClick)
-                    RecommendationReason(pick.reason)
                 }
             }
             items(activities, key = { "activity-${it.item.activityId}" }) { pick ->
                 Column(Modifier.width(180.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     ActivityCardItem(pick.item, onExperienceClick)
-                    RecommendationReason(pick.reason)
                 }
             }
         }
@@ -61,13 +58,4 @@ internal fun RecommendationsSection(
             Text("Non ci sono altre esperienze disponibili al momento.")
         }
     }
-}
-
-@Composable
-private fun RecommendationReason(reason: String) {
-    if (reason.isNotBlank()) Text(
-        reason, style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        maxLines = 2, overflow = TextOverflow.Ellipsis
-    )
 }

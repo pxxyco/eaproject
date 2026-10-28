@@ -35,15 +35,13 @@ internal fun BackButton(
 ) {
     OutlinedButton(
         onClick = onBack,
-        modifier = modifier.heightIn(min = 48.dp),
+        modifier = modifier.size(48.dp),
         shape = RoundedCornerShape(18.dp),
         border = BorderStroke(1.dp, GlassBorder),
         colors = ButtonDefaults.outlinedButtonColors(containerColor = GlassFill, contentColor = MaterialTheme.colorScheme.onSurface),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
+        contentPadding = PaddingValues(0.dp)
     ) {
-        Icon(Icons.AutoMirrored.Filled.ArrowBack, null, Modifier.size(20.dp))
-        Spacer(Modifier.width(8.dp))
-        Text("Indietro", style = MaterialTheme.typography.labelLarge)
+        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Indietro", Modifier.size(22.dp))
     }
 }
 

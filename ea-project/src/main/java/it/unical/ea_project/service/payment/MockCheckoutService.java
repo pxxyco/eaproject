@@ -49,7 +49,7 @@ public class MockCheckoutService {
         var others = bookings.findForExperience(traveler,
                 booking.getTrip() == null ? null : booking.getTrip().getTripId(),
                 booking.getActivity() == null ? null : booking.getActivity().getActivityId()).stream()
-                .filter(b -> b.getBookingId() != bookingId && b.getBookingStatus() != Booking.BookingStatus.CANCELLED)
+                .filter(b -> !java.util.Objects.equals(b.getBookingId(), bookingId) && b.getBookingStatus() != Booking.BookingStatus.CANCELLED)
                 .map(Booking::getBookingId).toList();
         if (!others.isEmpty() && payments.findBookingPaymentsBatch(others).stream()
                 .anyMatch(p -> p.getStatus() == Payment.PaymentStatus.COMPLETED || p.getStatus() == Payment.PaymentStatus.CONFIRMED))
