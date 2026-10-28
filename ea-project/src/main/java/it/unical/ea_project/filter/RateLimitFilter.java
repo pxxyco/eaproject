@@ -60,10 +60,13 @@ public class RateLimitFilter extends OncePerRequestFilter {
         String bucket = "general";
         int capacity = 180;
         int seconds = 60;
-        if (path.equals("/api/users/login") || path.equals("/api/users") || path.equals("/api/users/exists")) {
+        if (path.equals("/api/users/login") || path.equals("/api/users")) {
             bucket = "auth";
             capacity = 10;
-        } else if (path.equals("/api/users/refresh")) {
+        } else if (path.equals("/api/users/exists")) {
+            bucket = "exists";
+            capacity = 30;
+        } else if (path.equals("/api/users/refresh"))  {
             bucket = "refresh";
             capacity = 30;
         } else if (path.equals("/api/account/tickets") && method.equals("POST")) {
