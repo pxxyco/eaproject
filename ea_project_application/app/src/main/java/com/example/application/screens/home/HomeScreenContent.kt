@@ -23,6 +23,7 @@ import com.example.application.dto.ExperienceRef
 import com.example.application.dto.SearchSuggestion
 import com.example.application.dto.TripHomeDTO
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 @Composable
 internal fun HomeScreenContent(
@@ -32,6 +33,8 @@ internal fun HomeScreenContent(
     homeError: String?,
     searchQuery: String,
     onQueryChange: (String) -> Unit,
+    selectedDate: LocalDate?,
+    onDateChange: (LocalDate?) -> Unit,
     suggestions: List<SearchSuggestion>,
     onSuggestionClick: (SearchSuggestion) -> Unit,
     onDismissSuggestions: () -> Unit,
@@ -77,6 +80,12 @@ internal fun HomeScreenContent(
             },
             onClear = { resetSearchAndScroll() }
         )
+
+        DateFilterBar(
+            date = selectedDate,
+            onDateChange = onDateChange
+        )
+        Spacer(Modifier.height(4.dp))
 
         val shownError = if (hasSearched) searchError else homeError
 
@@ -127,7 +136,11 @@ internal fun HomeScreenContent(
                 if (searchActivityResults.items.isEmpty() && searchError == null) {
                     item(key = "search_activities_empty") {
                         Text(
-                            text = "Attività con titolo \"$submittedQuery\" non trovata",
+                            text = if (submittedQuery.isBlank()) {
+                                "Nessuna attività trovata per la data selezionata"
+                            } else {
+                                "Attività con titolo \"$submittedQuery\" non trovata"
+                            },
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
