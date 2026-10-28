@@ -33,6 +33,8 @@ import com.example.application.screens.activity.itinerary.ItinerarySection
 import com.example.application.screens.activity.photos.PhotoSection
 import com.example.application.screens.activity.photos.PhotoViewer
 import com.example.application.screens.activity.photos.PhotoViewerRequest
+import com.example.application.screens.activity.reviews.rememberReviewsState
+import com.example.application.screens.activity.reviews.reviewsSection
 import com.example.application.screens.home.RemotePhoto
 import com.example.application.ui.theme.ScreenBackground
 import com.example.application.ui.theme.Stone200
@@ -98,6 +100,7 @@ private fun ExperienceDetailContent(detail: ExperienceDetail) {
     val listState = rememberLazyListState()
     var selectedTab by rememberSaveable { mutableStateOf(DetailTab.DESCRIPTION) }
     var openPhoto by remember { mutableStateOf<PhotoViewerRequest?>(null) }
+    val reviewsState = rememberReviewsState(detail.ref)
     val headerHeightPx = with(LocalDensity.current) { HEADER_HEIGHT.toPx() }
 
     val headerOffset by remember {
@@ -111,6 +114,10 @@ private fun ExperienceDetailContent(detail: ExperienceDetail) {
 
     val tabsPinned by remember {
         derivedStateOf { listState.firstVisibleItemIndex >= 2 }
+    }
+
+    LaunchedEffect(reviewsState, selectedTab) {
+        if (selectedTab == DetailTab.REVIEWS) reviewsState.loadIfNeeded()
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -139,16 +146,16 @@ private fun ExperienceDetailContent(detail: ExperienceDetail) {
                 )
             }
 
-            item {
-                when (selectedTab) {
-                    DetailTab.DESCRIPTION -> DescriptionSection(detail)
-                    DetailTab.ITINERARY   -> ItinerarySection(detail)
-                    DetailTab.GALLERY     -> PhotoSection(
-                        detail,
+            when (selectedTab) {
+                DetailTab.DESCRIPTION -> item { DescriptionSection(detail) }
+                DetailTab.ITINERARY   -> item { ItinerarySection(detail) }
+                DetailTab.GALLERY     -> item {
+                    PhotoSection(
+                        detail = detail,
                         onPhotoClick = { photos, index -> openPhoto = PhotoViewerRequest(photos, index) }
                     )
-                    DetailTab.REVIEWS     -> SectionPlaceholder("Recensioni")
                 }
+                DetailTab.REVIEWS -> reviewsSection(reviewsState, detail.averageRating)
             }
         }
 
