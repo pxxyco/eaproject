@@ -1,80 +1,137 @@
 package it.unical.ea_project_javafx.controller.organizer;
 
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.Node;
-import javafx.scene.layout.FlowPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
-import javafx.scene.shape.Rectangle;
-import javafx.stage.FileChooser;
-import javafx.stage.Stage;
-import it.unical.ea_project_javafx.util.ApiService;
-import it.unical.ea_project_javafx.util.BackgroundHelper;
-import it.unical.ea_project_javafx.dto.ActivityDTO;
-import it.unical.ea_project_javafx.dto.ActivityImageDTO;
-import it.unical.ea_project_javafx.dto.TripDTO;
-import it.unical.ea_project_javafx.dto.TripImageDTO;
+import it.unical.ea_project_javafx.dto.activity.ActivityDTO;
+import it.unical.ea_project_javafx.dto.activity.ActivityImageDTO;
+import it.unical.ea_project_javafx.dto.trip.StageDTO;
+import it.unical.ea_project_javafx.dto.trip.TripDTO;
+import it.unical.ea_project_javafx.dto.trip.TripImageDTO;
+import it.unical.ea_project_javafx.service.api.ApiService;
+import it.unical.ea_project_javafx.ui.UiText;
+import it.unical.ea_project_javafx.ui.background.BackgroundHelper;
 import it.unical.ea_project_javafx.util.ImageUtils;
-
-import java.math.BigDecimal;
 import java.io.File;
+import java.math.BigDecimal;
+import java.net.http.HttpResponse;
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
+import javafx.stage.FileChooser;
+import it.unical.ea_project_javafx.ui.file.NativeFiles;
+import javafx.stage.Stage;
 
 public class CreateOfferController {
 
-    @FXML private StackPane rootPane;
-    @FXML private ImageView bgImageView;
-    @FXML private VBox modalCard;
-    @FXML private Label headerTitleLabel;
-    @FXML private VBox stepChoose;
-    @FXML private VBox stepTrip;
-    @FXML private VBox stepActivity;
-    @FXML private VBox stagesContainer;
-    @FXML private Label offerErrorLabel;
+    @FXML
+    private StackPane rootPane;
+    @FXML
+    private ImageView bgImageView;
+    @FXML
+    private VBox modalCard;
+    @FXML
+    private Label headerTitleLabel;
+    @FXML
+    private VBox stepChoose;
+    @FXML
+    private VBox stepTrip;
+    @FXML
+    private VBox stepActivity;
+    @FXML
+    private VBox stagesContainer;
+    @FXML
+    private Label offerErrorLabel;
 
-    @FXML private TextField tripTitleField;
-    @FXML private TextField tripCountryField;
-    @FXML private TextField tripCityField;
-    @FXML private DatePicker tripStartDatePicker;
-    @FXML private DatePicker tripEndDatePicker;
-    @FXML private TextField tripPriceField;
-    @FXML private TextField tripMaxSeatsField;
-    @FXML private Label tripCoverFileLabel;
-    @FXML private Label tripSecondaryPhotosLabel;
-    @FXML private ImageView tripCoverPreview;
-    @FXML private FlowPane tripSecondaryPhotoPreview;
-    @FXML private TextArea tripDescriptionArea;
+    @FXML
+    private ComboBox<String> tripStatusCombo;
+    @FXML
+    private ComboBox<String> actStatusCombo;
+    @FXML
+    private TextField tripTitleField;
+    @FXML
+    private TextField tripCountryField;
+    @FXML
+    private TextField tripCityField;
+    @FXML
+    private DatePicker tripStartDatePicker;
+    @FXML
+    private DatePicker tripEndDatePicker;
+    @FXML
+    private TextField tripPriceField;
+    @FXML
+    private TextField tripMaxSeatsField;
+    @FXML
+    private Label tripCoverFileLabel;
+    @FXML
+    private Label tripSecondaryPhotosLabel;
+    @FXML
+    private ImageView tripCoverPreview;
+    @FXML
+    private FlowPane tripSecondaryPhotoPreview;
+    @FXML
+    private TextArea tripDescriptionArea;
 
-    @FXML private Button saveTripButton;
-    @FXML private Button saveActivityButton;
-    @FXML private Button activityBackButton;
+    @FXML
+    private Button saveTripButton;
+    @FXML
+    private Button saveActivityButton;
+    @FXML
+    private Button activityBackButton;
+    @FXML
+    private Button tripBackButton;
 
-    @FXML private TextField actTitleField;
-    @FXML private ComboBox<String> actCategoryCombo;
-    @FXML private TextField actPlaceField;
-    @FXML private TextField actCityField;
-    @FXML private TextField actDurationField;
-    @FXML private TextField actPriceField;
-    @FXML private TextField actMaxSeatsField;
-    @FXML private Label actCoverFileLabel;
-    @FXML private Label actSecondaryPhotosLabel;
-    @FXML private ImageView actCoverPreview;
-    @FXML private FlowPane actSecondaryPhotoPreview;
-    @FXML private DatePicker actStartDatePicker;
-    @FXML private DatePicker actEndDatePicker;
-    @FXML private TextArea actDescriptionArea;
-    @FXML private TextArea actNotesArea;
+    @FXML
+    private TextField actTitleField;
+    @FXML
+    private ComboBox<String> actCategoryCombo;
+    @FXML
+    private TextField actPlaceField;
+    @FXML
+    private TextField actCityField;
+    @FXML
+    private TextField actDurationField;
+    @FXML
+    private TextField actPriceField;
+    @FXML
+    private TextField actMaxSeatsField;
+    @FXML
+    private Label actCoverFileLabel;
+    @FXML
+    private Label actSecondaryPhotosLabel;
+    @FXML
+    private ImageView actCoverPreview;
+    @FXML
+    private FlowPane actSecondaryPhotoPreview;
+    @FXML
+    private DatePicker actStartDatePicker;
+    @FXML
+    private DatePicker actEndDatePicker;
+    @FXML
+    private TextArea actDescriptionArea;
+    @FXML
+    private TextArea actNotesArea;
 
     private TripDTO tripToEdit;
     private ActivityDTO activityToEdit;
@@ -88,6 +145,10 @@ public class CreateOfferController {
     public void initialize() {
 
         BackgroundHelper.setupBackground(bgImageView);
+        tripStatusCombo.getItems().setAll("Pubblicata", "Bozza", "Annullata", "Conclusa");
+        actStatusCombo.getItems().setAll("Pubblicata", "Annullata", "Conclusa");
+        tripStatusCombo.setValue("Pubblicata");
+        actStatusCombo.setValue("Pubblicata");
 
         Rectangle rootClip = new Rectangle();
         rootClip.setArcWidth(36);
@@ -117,15 +178,25 @@ public class CreateOfferController {
 
     }
 
-    /** Consente al form di essere ospitato dalla PopupFactory senza creare un nuovo Stage. */
+    /**
+     * Consente al form di essere ospitato dalla PopupFactory senza creare un nuovo
+     * Stage.
+     */
     public void setCloseAction(Runnable closeAction) {
         this.closeAction = closeAction;
         if (closeAction != null) {
-            if (bgImageView != null) { bgImageView.setVisible(false); bgImageView.setManaged(false); }
+            if (bgImageView != null) {
+                bgImageView.setVisible(false);
+                bgImageView.setManaged(false);
+            }
             if (rootPane != null) {
                 rootPane.getChildren().stream()
-                        .filter(node -> node.getStyleClass().contains("glass-overlay"))
-                        .forEach(node -> { node.setVisible(false); node.setManaged(false); });
+                        .filter(node -> node.getStyleClass().contains("glass-overlay")
+                                || node.getStyleClass().contains("app-background-shade"))
+                        .forEach(node -> {
+                            node.setVisible(false);
+                            node.setManaged(false);
+                        });
                 rootPane.getStyleClass().add("popup-factory-transparent-surface");
             }
         }
@@ -178,8 +249,9 @@ public class CreateOfferController {
 
     @FXML
     private void handleChooseTripCover() {
-        tripCoverFile = chooseCover();
-        if (tripCoverFile != null) {
+        File selected = chooseCover();
+        if (selected != null) {
+            tripCoverFile = selected;
             tripCoverFileLabel.setText(tripCoverFile.getName());
             showLocalPreview(tripCoverPreview, tripCoverFile);
         }
@@ -187,8 +259,9 @@ public class CreateOfferController {
 
     @FXML
     private void handleChooseActivityCover() {
-        activityCoverFile = chooseCover();
-        if (activityCoverFile != null) {
+        File selected = chooseCover();
+        if (selected != null) {
+            activityCoverFile = selected;
             actCoverFileLabel.setText(activityCoverFile.getName());
             showLocalPreview(actCoverPreview, activityCoverFile);
         }
@@ -199,7 +272,8 @@ public class CreateOfferController {
         List<File> selectedFiles = choosePhotos();
         tripSecondaryPhotoFiles.addAll(selectedFiles);
         updateSecondaryPhotosLabel(tripSecondaryPhotosLabel, tripSecondaryPhotoFiles);
-        selectedFiles.forEach(file -> addPhotoPreview(tripSecondaryPhotoPreview, file.toURI().toString(), "Nuova foto"));
+        selectedFiles
+                .forEach(file -> addPhotoPreview(tripSecondaryPhotoPreview, file.toURI().toString(), "Nuova foto"));
     }
 
     @FXML
@@ -212,12 +286,12 @@ public class CreateOfferController {
 
     private File chooseCover() {
         FileChooser chooser = createImageChooser("Seleziona la foto di copertina");
-        return chooser.showOpenDialog(rootPane.getScene().getWindow());
+        return NativeFiles.open(chooser, rootPane.getScene().getWindow());
     }
 
     private List<File> choosePhotos() {
         FileChooser chooser = createImageChooser("Seleziona una o più foto secondarie");
-        List<File> selectedFiles = chooser.showOpenMultipleDialog(rootPane.getScene().getWindow());
+        List<File> selectedFiles = NativeFiles.openMultiple(chooser, rootPane.getScene().getWindow());
         return selectedFiles == null ? List.of() : List.copyOf(selectedFiles);
     }
 
@@ -225,8 +299,7 @@ public class CreateOfferController {
         FileChooser chooser = new FileChooser();
         chooser.setTitle(title);
         chooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("Immagini", "*.jpg", "*.jpeg", "*.png")
-        );
+                new FileChooser.ExtensionFilter("Immagini", "*.jpg", "*.jpeg", "*.png"));
         return chooser;
     }
 
@@ -239,27 +312,31 @@ public class CreateOfferController {
     }
 
     private void loadExistingTripPhotoPreviews(TripDTO trip) {
-        if (trip.getTripId() == null) return;
+        if (trip.getTripId() == null)
+            return;
         ApiService.get(ApiService.BASE_URL + "/api/trip-images/trip/" + trip.getTripId(),
                 response -> {
                     TripImageDTO[] images = ApiService.fromJson(response.body(), TripImageDTO[].class);
-                    if (images == null) return;
+                    if (images == null)
+                        return;
                     List<TripImageDTO> orderedImages = Arrays.stream(images)
                             .filter(image -> image != null && image.getImageUrl() != null)
                             .sorted(Comparator.comparing(TripImageDTO::getOrderIndex,
                                     Comparator.nullsLast(Comparator.naturalOrder())))
                             .toList();
-                    javafx.application.Platform.runLater(() -> {
-                        if (tripCoverFile == null && (trip.getCoverPhotoUrl() == null || trip.getCoverPhotoUrl().isBlank())
+                    Platform.runLater(() -> {
+                        if (tripCoverFile == null
+                                && (trip.getCoverPhotoUrl() == null || trip.getCoverPhotoUrl().isBlank())
                                 && !orderedImages.isEmpty()) {
                             showRemotePreview(tripCoverPreview, orderedImages.getFirst().getImageUrl());
                         }
                         orderedImages.stream().skip(1)
-                                .forEach(image -> addPhotoPreview(tripSecondaryPhotoPreview, image.getImageUrl(), "Foto attuale"));
+                                .forEach(image -> addPhotoPreview(tripSecondaryPhotoPreview, image.getImageUrl(),
+                                        "Foto attuale"));
                     });
                 },
-                () -> javafx.application.Platform.runLater(() ->
-                        showOfferError("Anteprima delle foto del viaggio non disponibile; puoi comunque modificarlo.")),
+                () -> Platform.runLater(() -> showOfferError(
+                        "Anteprima delle foto del viaggio non disponibile; puoi comunque modificarlo.")),
                 null);
     }
 
@@ -319,21 +396,39 @@ public class CreateOfferController {
         remove.getStyleClass().add("btn-remove-stage");
         remove.setMinWidth(88);
         remove.setOnAction(event -> stagesContainer.getChildren().remove(row));
-        HBox.setHgrow(title, javafx.scene.layout.Priority.ALWAYS);
-        HBox.setHgrow(place, javafx.scene.layout.Priority.ALWAYS);
-        HBox.setHgrow(city, javafx.scene.layout.Priority.ALWAYS);
+        HBox.setHgrow(title, Priority.ALWAYS);
+        HBox.setHgrow(place, Priority.ALWAYS);
+        HBox.setHgrow(city, Priority.ALWAYS);
         fields.getChildren().addAll(title, place, city, day, category, remove);
         TextArea description = new TextArea();
         description.setPromptText("Descrizione tappa");
         description.setPrefRowCount(2);
         description.getStyleClass().add("custom-textarea");
         row.getChildren().addAll(fields, description);
-        row.setUserData(new StageFields(title, place, city, day, category, description));
+        row.setUserData(new StageFields(title, place, city, day, category, description, null));
         stagesContainer.getChildren().add(row);
     }
 
     public void setTripToEdit(TripDTO trip) {
         tripToEdit = trip;
+        tripStatusCombo.setValue(statusLabel(trip.getStatus()));
+        tripBackButton.setVisible(false);
+        tripBackButton.setManaged(false);
+        stagesContainer.getChildren().clear();
+        if (trip.getStages() != null)
+            for (var stage : trip.getStages()) {
+                handleAddStageRow();
+                var row = stagesContainer.getChildren().getLast();
+                StageFields fields = (StageFields) row.getUserData();
+                fields.title().setText(valueOrEmpty(stage.getTitle()));
+                fields.place().setText(valueOrEmpty(stage.getLocationName()));
+                fields.city().setText(valueOrEmpty(stage.getCity()));
+                fields.day().setText(String.valueOf(stage.getDay()));
+                fields.category().setValue(stage.getCategory());
+                fields.description().setText(valueOrEmpty(stage.getDescription()));
+                row.setUserData(new StageFields(fields.title(), fields.place(), fields.city(), fields.day(),
+                        fields.category(), fields.description(), stage));
+            }
         stepChoose.setVisible(false);
         stepChoose.setManaged(false);
         stepTrip.setVisible(true);
@@ -356,11 +451,13 @@ public class CreateOfferController {
         loadExistingTripPhotoPreviews(trip);
         updateSecondaryPhotosLabel(tripSecondaryPhotosLabel, tripSecondaryPhotoFiles);
         tripDescriptionArea.setText(valueOrEmpty(trip.getDescription()));
-        if (saveTripButton != null) saveTripButton.setText("Salva modifiche");
+        if (saveTripButton != null)
+            saveTripButton.setText("Salva modifiche");
     }
 
     public void setActivityToEdit(ActivityDTO activity) {
         activityToEdit = activity;
+        actStatusCombo.setValue(statusLabel(activity.getStatus()));
         activityBackButton.setVisible(false);
         activityBackButton.setManaged(false);
         stepChoose.setVisible(false);
@@ -372,7 +469,8 @@ public class CreateOfferController {
         actCategoryCombo.setValue(activityCategoryLabel(activity.getCategory()));
         actPlaceField.setText(valueOrEmpty(activity.getPlaceName()));
         actCityField.setText(valueOrEmpty(activity.getCity()));
-        actDurationField.setText(activity.getDurationMinutes() == null ? "" : String.valueOf(activity.getDurationMinutes()));
+        actDurationField
+                .setText(activity.getDurationMinutes() == null ? "" : String.valueOf(activity.getDurationMinutes()));
         actPriceField.setText(activity.getPrice() == null ? "" : String.valueOf(activity.getPrice()));
         actMaxSeatsField.setText(activity.getMaxSeats() == null ? "" : String.valueOf(activity.getMaxSeats()));
         actStartDatePicker.setValue(activity.getStartDate() == null ? null : activity.getStartDate().toLocalDate());
@@ -387,15 +485,16 @@ public class CreateOfferController {
         List<ActivityImageDTO> images = activity.getImages() == null
                 ? List.of()
                 : activity.getImages().stream()
-                .sorted(Comparator.comparing(ActivityImageDTO::getOrderIndex,
-                        Comparator.nullsLast(Comparator.naturalOrder())))
-                .toList();
+                        .sorted(Comparator.comparing(ActivityImageDTO::getOrderIndex,
+                                Comparator.nullsLast(Comparator.naturalOrder())))
+                        .toList();
         showRemotePreview(actCoverPreview, images.isEmpty() ? null : images.getFirst().getImageUrl());
         actSecondaryPhotoPreview.getChildren().clear();
         images.stream().skip(1)
                 .forEach(image -> addPhotoPreview(actSecondaryPhotoPreview, image.getImageUrl(), "Foto attuale"));
         updateSecondaryPhotosLabel(actSecondaryPhotosLabel, activitySecondaryPhotoFiles);
-        if (saveActivityButton != null) saveActivityButton.setText("Salva modifiche");
+        if (saveActivityButton != null)
+            saveActivityButton.setText("Salva modifiche");
     }
 
     @FXML
@@ -404,12 +503,13 @@ public class CreateOfferController {
         try {
             LocalDate start = tripStartDatePicker.getValue();
             LocalDate end = tripEndDatePicker.getValue();
-            BigDecimal price = new BigDecimal(tripPriceField.getText().trim());
+            BigDecimal price = new BigDecimal(tripPriceField.getText().trim().replace(',', '.'));
             int maxSeats = Integer.parseInt(tripMaxSeatsField.getText().trim());
-            if (blank(tripTitleField.getText()) || blank(tripCountryField.getText())
-                    || blank(tripCityField.getText()) || start == null || end == null
-                    || start.isAfter(end) || price.signum() <= 0 || maxSeats < 1) {
-                showValidationError("Compila i campi obbligatori con valori validi e controlla l'intervallo delle date.");
+            if (UiText.isBlank(tripTitleField.getText()) || UiText.isBlank(tripCountryField.getText())
+                    || UiText.isBlank(tripCityField.getText()) || start == null || end == null
+                    || start.isAfter(end) || price.signum() < 0 || maxSeats < 1) {
+                showValidationError(
+                        "Compila i campi obbligatori con valori validi e controlla l'intervallo delle date.");
                 return;
             }
 
@@ -421,27 +521,26 @@ public class CreateOfferController {
             payload.put("endDate", end.toString());
             payload.put("totalPrice", price);
             payload.put("maxSeats", maxSeats);
-            payload.put("availableSeats", tripToEdit != null && tripToEdit.getAvailableSeats() != null
-                    ? tripToEdit.getAvailableSeats()
-                    : maxSeats);
-            payload.put("status", tripToEdit != null && tripToEdit.getStatus() != null
-                    ? tripToEdit.getStatus()
-                    : "PUBLISHED");
+            payload.put("availableSeats", availableSeatsAfterResize(maxSeats,
+                    tripToEdit == null ? null : tripToEdit.getMaxSeats(),
+                    tripToEdit == null ? null : tripToEdit.getAvailableSeats()));
+            payload.put("status", statusValue(tripStatusCombo.getValue()));
             payload.put("description", emptyToNull(tripDescriptionArea.getText()));
             payload.put("stages", collectStages());
 
-            if (saveTripButton != null) saveTripButton.setDisable(true);
+            if (saveTripButton != null)
+                saveTripButton.setDisable(true);
             ApiService.call(
                     ApiService.BASE_URL + (tripToEdit == null ? "/api/trips" : "/api/trips/" + tripToEdit.getTripId()),
                     ApiService.toJson(payload),
                     tripToEdit == null ? ApiService.Method.POST : ApiService.Method.PUT,
                     this::handleTripSaved,
                     () -> {
-                        if (saveTripButton != null) saveTripButton.setDisable(false);
+                        if (saveTripButton != null)
+                            saveTripButton.setDisable(false);
                         showSaveError("Impossibile pubblicare il viaggio. Verifica i dati e riprova.");
                     },
-                    null
-            );
+                    null);
         } catch (IllegalArgumentException exception) {
             showValidationError(exception.getMessage() == null
                     ? "Inserisci un prezzo e un numero di posti validi."
@@ -458,11 +557,12 @@ public class CreateOfferController {
             double price = Double.parseDouble(actPriceField.getText().trim().replace(',', '.'));
             int duration = Integer.parseInt(actDurationField.getText().trim());
             int maxSeats = Integer.parseInt(actMaxSeatsField.getText().trim());
-            if (blank(actTitleField.getText()) || actCategoryCombo.getValue() == null
-                    || blank(actPlaceField.getText()) || blank(actCityField.getText())
+            if (UiText.isBlank(actTitleField.getText()) || actCategoryCombo.getValue() == null
+                    || UiText.isBlank(actPlaceField.getText()) || UiText.isBlank(actCityField.getText())
                     || start == null || end == null || start.isAfter(end)
-                    || !Double.isFinite(price) || price <= 0 || duration < 1 || maxSeats < 1) {
-                showValidationError("Compila i campi obbligatori con valori validi e controlla l'intervallo delle date.");
+                    || !Double.isFinite(price) || price < 0 || duration < 1 || maxSeats < 1) {
+                showValidationError(
+                        "Compila i campi obbligatori con valori validi e controlla l'intervallo delle date.");
                 return;
             }
 
@@ -471,21 +571,28 @@ public class CreateOfferController {
             payload.put("category", activityCategoryValue(actCategoryCombo.getValue()));
             payload.put("placeName", actPlaceField.getText().trim());
             payload.put("city", actCityField.getText().trim());
-            payload.put("startDate", start.atStartOfDay().toString());
-            payload.put("endDate", end.atStartOfDay().toString());
+            payload.put("startDate", start.atTime(activityToEdit != null && activityToEdit.getStartDate() != null
+                    ? activityToEdit.getStartDate().toLocalTime()
+                    : LocalTime.MIDNIGHT).toString());
+            payload.put("endDate", end.atTime(activityToEdit != null && activityToEdit.getEndDate() != null
+                    ? activityToEdit.getEndDate().toLocalTime()
+                    : LocalTime.MIDNIGHT).toString());
+            if (activityToEdit != null) {
+                payload.put("latitude", activityToEdit.getLatitude());
+                payload.put("longitude", activityToEdit.getLongitude());
+            }
             payload.put("durationMinutes", duration);
             payload.put("price", price);
             payload.put("maxSeats", maxSeats);
             payload.put("description", emptyToNull(actDescriptionArea.getText()));
             payload.put("notes", emptyToNull(actNotesArea.getText()));
 
-            if (saveActivityButton != null) saveActivityButton.setDisable(true);
-            payload.put("availableSeats", activityToEdit != null && activityToEdit.getAvailableSeats() != null
-                    ? activityToEdit.getAvailableSeats()
-                    : maxSeats);
-            payload.put("status", activityToEdit != null && activityToEdit.getStatus() != null
-                    ? activityToEdit.getStatus()
-                    : "PUBLISHED");
+            payload.put("availableSeats", availableSeatsAfterResize(maxSeats,
+                    activityToEdit == null ? null : activityToEdit.getMaxSeats(),
+                    activityToEdit == null ? null : activityToEdit.getAvailableSeats()));
+            payload.put("status", statusValue(actStatusCombo.getValue()));
+            if (saveActivityButton != null)
+                saveActivityButton.setDisable(true);
             ApiService.call(
                     ApiService.BASE_URL + (activityToEdit == null
                             ? "/api/activities"
@@ -494,25 +601,29 @@ public class CreateOfferController {
                     activityToEdit == null ? ApiService.Method.POST : ApiService.Method.PUT,
                     this::handleActivitySaved,
                     () -> {
-                        if (saveActivityButton != null) saveActivityButton.setDisable(false);
+                        if (saveActivityButton != null)
+                            saveActivityButton.setDisable(false);
                         showSaveError("Impossibile pubblicare l'attività. Verifica i dati e riprova.");
                     },
-                    null
-            );
-        } catch (NumberFormatException exception) {
-            showValidationError("Inserisci prezzo, durata e posti con valori validi.");
+                    null);
+        } catch (IllegalArgumentException exception) {
+            showValidationError(exception instanceof NumberFormatException
+                    ? "Inserisci prezzo, durata e posti con valori validi."
+                    : exception.getMessage());
         }
     }
 
-    private void handleTripSaved(java.net.http.HttpResponse<String> response) {
+    private void handleTripSaved(HttpResponse<String> response) {
         if (tripCoverFile == null && tripSecondaryPhotoFiles.isEmpty()) {
             closeAfterSave();
             return;
         }
         TripDTO savedTrip = ApiService.fromJson(response.body(), TripDTO.class);
         if (savedTrip == null || savedTrip.getTripId() == null) {
-            if (saveTripButton != null) saveTripButton.setDisable(false);
-            showSaveError("Il viaggio è stato salvato, ma non è stato possibile recuperare l'ID per caricare la copertina.");
+            if (saveTripButton != null)
+                saveTripButton.setDisable(false);
+            showSaveError(
+                    "Il viaggio è stato salvato, ma non è stato possibile recuperare l'ID per caricare la copertina.");
             return;
         }
         boolean isNewTrip = tripToEdit == null;
@@ -520,15 +631,17 @@ public class CreateOfferController {
         uploadTripPhotos(savedTrip, isNewTrip);
     }
 
-    private void handleActivitySaved(java.net.http.HttpResponse<String> response) {
+    private void handleActivitySaved(HttpResponse<String> response) {
         if (activityCoverFile == null && activitySecondaryPhotoFiles.isEmpty()) {
             closeAfterSave();
             return;
         }
         ActivityDTO savedActivity = ApiService.fromJson(response.body(), ActivityDTO.class);
         if (savedActivity == null || savedActivity.getActivityId() == null) {
-            if (saveActivityButton != null) saveActivityButton.setDisable(false);
-            showSaveError("L'attività è stata salvata, ma non è stato possibile recuperare l'ID per caricare la copertina.");
+            if (saveActivityButton != null)
+                saveActivityButton.setDisable(false);
+            showSaveError(
+                    "L'attività è stata salvata, ma non è stato possibile recuperare l'ID per caricare la copertina.");
             return;
         }
         boolean isNewActivity = activityToEdit == null;
@@ -539,7 +652,8 @@ public class CreateOfferController {
     private void uploadTripPhotos(TripDTO trip, boolean isNewTrip) {
         String imageBaseUrl = ApiService.BASE_URL + "/api/trip-images/trip/" + trip.getTripId();
         Runnable onFailure = () -> {
-            if (saveTripButton != null) saveTripButton.setDisable(false);
+            if (saveTripButton != null)
+                saveTripButton.setDisable(false);
             showSaveError("Il viaggio è stato salvato, ma non è stato possibile caricare tutte le foto. Riprova.");
         };
         Runnable uploadSecondaryPhotos = () -> {
@@ -555,7 +669,8 @@ public class CreateOfferController {
         if (tripCoverFile == null) {
             if (isNewTrip && !tripSecondaryPhotoFiles.isEmpty()) {
                 List<File> initialPhotos = new ArrayList<>(tripSecondaryPhotoFiles);
-                ApiService.uploadFilesDetailed(imageBaseUrl + "/photos", initialPhotos.stream().map(File::toPath).toList(),
+                ApiService.uploadFilesDetailed(imageBaseUrl + "/photos",
+                        initialPhotos.stream().map(File::toPath).toList(),
                         ignored -> closeAfterSave(), onFailure,
                         details -> showPhotoUploadError(true, "foto", details), null);
             } else {
@@ -573,14 +688,18 @@ public class CreateOfferController {
             return;
         }
         ApiService.uploadFileDetailed(imageBaseUrl + "/cover", tripCoverFile.toPath(),
-                ignored -> uploadSecondaryPhotos.run(), onFailure,
+                ignored -> {
+                    tripCoverFile = null;
+                    uploadSecondaryPhotos.run();
+                }, onFailure,
                 details -> showPhotoUploadError(true, "copertina", details), null);
     }
 
     private void uploadActivityPhotos(ActivityDTO activity, boolean isNewActivity) {
         String imageBaseUrl = ApiService.BASE_URL + "/api/activity-images/activity/" + activity.getActivityId();
         Runnable onFailure = () -> {
-            if (saveActivityButton != null) saveActivityButton.setDisable(false);
+            if (saveActivityButton != null)
+                saveActivityButton.setDisable(false);
             showSaveError("L'attività è stata salvata, ma non è stato possibile caricare tutte le foto. Riprova.");
         };
         Runnable uploadSecondaryPhotos = () -> {
@@ -614,16 +733,21 @@ public class CreateOfferController {
             return;
         }
         ApiService.uploadFileDetailed(imageBaseUrl + "/cover", activityCoverFile.toPath(),
-                ignored -> uploadSecondaryPhotos.run(), onFailure,
+                ignored -> {
+                    activityCoverFile = null;
+                    uploadSecondaryPhotos.run();
+                }, onFailure,
                 details -> showPhotoUploadError(false, "copertina", details), null);
     }
 
     private void showPhotoUploadError(boolean isTrip, String photoType, String details) {
         if (isTrip) {
-            if (saveTripButton != null) saveTripButton.setDisable(false);
+            if (saveTripButton != null)
+                saveTripButton.setDisable(false);
             showSaveError("Viaggio salvato, ma caricamento " + photoType + " fallito: " + details);
         } else {
-            if (saveActivityButton != null) saveActivityButton.setDisable(false);
+            if (saveActivityButton != null)
+                saveActivityButton.setDisable(false);
             showSaveError("Attività salvata, ma caricamento " + photoType + " fallito: " + details);
         }
     }
@@ -631,16 +755,31 @@ public class CreateOfferController {
     private List<Map<String, Object>> collectStages() {
         List<Map<String, Object>> stages = new ArrayList<>();
         int order = 1;
-        for (javafx.scene.Node node : stagesContainer.getChildren()) {
+        for (Node node : stagesContainer.getChildren()) {
             StageFields fields = (StageFields) node.getUserData();
-            if (blank(fields.title().getText())) {
+            if (UiText.isBlank(fields.title().getText())) {
                 throw new IllegalArgumentException("Ogni tappa deve avere un titolo.");
             }
             int day = Integer.parseInt(fields.day().getText().trim());
             if (day < 1) {
                 throw new IllegalArgumentException("Il giorno della tappa deve essere positivo.");
             }
+            long days = ChronoUnit.DAYS.between(tripStartDatePicker.getValue(),
+                    tripEndDatePicker.getValue()) + 1;
+            if (day > days)
+                throw new IllegalArgumentException("Il giorno della tappa supera la durata del viaggio.");
             Map<String, Object> stage = new LinkedHashMap<>();
+            if (fields.original() != null) {
+                var original = fields.original();
+                stage.put("stageId", original.getStageId());
+                stage.put("country", original.getCountry());
+                stage.put("latitude", original.getLatitude());
+                stage.put("longitude", original.getLongitude());
+                stage.put("startTime", original.getStartTime() == null ? null : original.getStartTime().toString());
+                stage.put("endTime", original.getEndTime() == null ? null : original.getEndTime().toString());
+                stage.put("photoUrl", original.getPhotoUrl());
+                stage.put("notes", original.getNotes());
+            }
             stage.put("title", fields.title().getText().trim());
             stage.put("locationName", emptyToNull(fields.place().getText()));
             stage.put("city", emptyToNull(fields.city().getText()));
@@ -651,6 +790,28 @@ public class CreateOfferController {
             stages.add(stage);
         }
         return stages;
+    }
+
+    private String statusValue(String label) {
+        if (label == null)
+            return "PUBLISHED";
+        return switch (label) {
+            case "Bozza" -> "DRAFT";
+            case "Annullata" -> "CANCELLED";
+            case "Conclusa" -> "COMPLETED";
+            default -> "PUBLISHED";
+        };
+    }
+
+    private String statusLabel(String value) {
+        if (value == null)
+            return "Pubblicata";
+        return switch (value) {
+            case "DRAFT" -> "Bozza";
+            case "CANCELLED" -> "Annullata";
+            case "COMPLETED" -> "Conclusa";
+            default -> "Pubblicata";
+        };
     }
 
     private String activityCategoryValue(String label) {
@@ -665,7 +826,8 @@ public class CreateOfferController {
     }
 
     private String activityCategoryLabel(String category) {
-        if (category == null) return null;
+        if (category == null)
+            return null;
         return switch (category) {
             case "EXCURSION" -> "Escursione";
             case "VISIT" -> "Visita guidata";
@@ -676,12 +838,16 @@ public class CreateOfferController {
         };
     }
 
-    private boolean blank(String value) {
-        return value == null || value.isBlank();
+    private static int availableSeatsAfterResize(int capacity, Integer previousCapacity, Integer available) {
+        int booked = previousCapacity == null || available == null ? 0 : Math.max(0, previousCapacity - available);
+        if (capacity < booked)
+            throw new IllegalArgumentException(
+                    "I posti totali non possono essere inferiori ai posti già prenotati (" + booked + ").");
+        return capacity - booked;
     }
 
     private String emptyToNull(String value) {
-        return blank(value) ? null : value.trim();
+        return UiText.isBlank(value) ? null : value.trim();
     }
 
     private String valueOrEmpty(String value) {
@@ -722,7 +888,7 @@ public class CreateOfferController {
             TextField city,
             TextField day,
             ComboBox<String> category,
-            TextArea description
-    ) {
+            TextArea description,
+            StageDTO original) {
     }
 }

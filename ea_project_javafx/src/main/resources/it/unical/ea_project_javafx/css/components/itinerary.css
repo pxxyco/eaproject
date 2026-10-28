@@ -1,0 +1,23 @@
+/* Reusable component: itinerary. Theme: css/theme.css. */
+
+.itinerario-box {
+    -fx-padding: 8px 10px;
+    -fx-background-radius: 10px;
+    -fx-cursor: hand;
+}
+
+.itinerario-box:hover {
+    -fx-background-color: -tone-ivory-120;
+}
+
+.location-text {
+    -fx-text-fill: -tone-white-940;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.number-label {
+    -fx-text-fill: -color-white;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}

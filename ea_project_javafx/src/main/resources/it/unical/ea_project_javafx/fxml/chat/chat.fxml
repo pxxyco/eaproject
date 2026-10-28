@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<StackPane stylesheets="@../../css/screens/chat/chat.css" xmlns:fx="http://javafx.com/fxml/1" fx:id="pageRoot"
+    fx:controller="it.unical.ea_project_javafx.controller.chat.ChatController"
+    styleClass="chat-root">
+    <ImageView fx:id="bgImageView" preserveRatio="false" mouseTransparent="true" />
+    <BorderPane>
+        <top>
+            <StackPane fx:id="navbarContainer" />
+        </top>
+        <center>
+            <BorderPane styleClass="chat-panel" BorderPane.alignment="CENTER">
+                <BorderPane.margin>
+                    <Insets top="18" right="30" bottom="26" left="30" />
+                </BorderPane.margin>
+                <left>
+                    <VBox spacing="14" prefWidth="330" minWidth="280" maxWidth="380"
+                        styleClass="chat-sidebar">
+                        <Label text="Messaggi" styleClass="chat-title" />
+                        <Label fx:id="connectionLabel" text="Connessione…" wrapText="true"
+                            styleClass="chat-meta" />
+                        <ListView fx:id="conversations" VBox.vgrow="ALWAYS"
+                            styleClass="chat-conversations" />
+                        <HBox spacing="8">
+                            <Button text="Aggiorna" onAction="#handleRefresh"
+                                styleClass="btn-secondary" />
+                            <Button fx:id="moreConversations" text="Altre"
+                                onAction="#handleMoreConversations" styleClass="btn-secondary" />
+                        </HBox>
+                    </VBox>
+                </left>
+                <center>
+                    <BorderPane styleClass="chat-thread">
+                        <top>
+                            <VBox spacing="6">
+                                <Label fx:id="conversationTitle" text="Le tue conversazioni"
+                                    styleClass="chat-title" />
+                                <Label fx:id="conversationSubtitle"
+                                    text="Scegli una conversazione per iniziare."
+                                    styleClass="chat-meta" />
+                                <HBox spacing="10">
+                                    <Button fx:id="olderButton" text="Messaggi precedenti"
+                                        onAction="#handleOlder" disable="true"
+                                        styleClass="btn-secondary" />
+                                    <Button fx:id="latestButton" text="Più recenti"
+                                        onAction="#handleLatest" disable="true"
+                                        styleClass="btn-secondary" />
+                                </HBox>
+                            </VBox>
+                        </top>
+                        <center>
+                            <ScrollPane fx:id="messagesScroll" fitToWidth="true" hbarPolicy="NEVER"
+                                styleClass="main-scroll, chat-scroll">
+                                <VBox fx:id="messagesBox" spacing="12">
+                                    <padding>
+                                        <Insets top="18" right="10" bottom="18" left="10" />
+                                    </padding>
+                                </VBox>
+                            </ScrollPane>
+                        </center>
+                        <bottom>
+                            <VBox spacing="10">
+                                <Label fx:id="statusLabel" wrapText="true" styleClass="chat-status" />
+                                <HBox fx:id="replyBanner" spacing="8" alignment="CENTER_LEFT"
+                                    visible="false" managed="false" styleClass="chat-quote">
+                                    <Label fx:id="replyLabel" maxWidth="Infinity"
+                                        HBox.hgrow="ALWAYS" textOverrun="ELLIPSIS" />
+                                    <Button text="×" onAction="#handleCancelReply"
+                                        styleClass="btn-secondary" />
+                                </HBox>
+                                <HBox fx:id="attachmentBanner" spacing="8" alignment="CENTER_LEFT"
+                                    visible="false" managed="false" styleClass="chat-quote">
+                                    <Label fx:id="attachmentLabel" maxWidth="Infinity"
+                                        HBox.hgrow="ALWAYS" textOverrun="ELLIPSIS" />
+                                    <Button text="×" onAction="#handleRemoveAttachment"
+                                        styleClass="btn-secondary" />
+                                </HBox>
+                                <TextArea fx:id="composer" promptText="Scrivi un messaggio…"
+                                    wrapText="true" prefRowCount="3" styleClass="chat-composer" />
+                                <HBox alignment="CENTER_RIGHT" spacing="12">
+                                    <Button fx:id="attachButton" text="Foto"
+                                        onAction="#handleAttach" styleClass="btn-secondary" />
+                                    <Button fx:id="emojiButton" text="☺" onAction="#handleEmoji"
+                                        styleClass="btn-secondary" />
+                                    <Region HBox.hgrow="ALWAYS" />
+                                    <Label fx:id="characterCount" text="0 / 4000"
+                                        styleClass="chat-meta" />
+                                    <Button fx:id="sendButton" text="Invia messaggio"
+                                        onAction="#handleSend" styleClass="btn-primary"
+                                        defaultButton="false" />
+                                </HBox>
+                            </VBox>
+                        </bottom>
+                    </BorderPane>
+                </center>
+            </BorderPane>
+        </center>
+    </BorderPane>
+</StackPane>

@@ -1,0 +1,218 @@
+/* Reusable component: forms. Theme: css/theme.css. */
+
+.text-field,
+.password-field,
+.text-area,
+.custom-input,
+.custom-textarea,
+.custom-combo,
+.custom-datepicker,
+.favorites-field,
+.favorites-visibility,
+.textarea-recensione,
+.chat-composer {
+    -fx-background-color: -tone-ivory-080;
+    -fx-control-inner-background: transparent;
+    -fx-border-color: -tone-ivory-220;
+    -fx-border-width: 1;
+    -fx-background-insets: 0;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-padding: 10 12;
+    -fx-text-fill: -color-text;
+    -fx-prompt-text-fill: -color-text-muted;
+    -fx-highlight-fill: -tone-mint-320;
+    -fx-highlight-text-fill: -color-white;
+    -fx-font-size: 13;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+}
+
+.text-field:focused,
+.password-field:focused,
+.text-area:focused,
+.combo-box:focused,
+.combo-box:showing,
+.date-picker:focused,
+.date-picker:showing,
+.spinner:focused,
+.choice-box:focused,
+.favorites-field:focused,
+.favorites-visibility:focused,
+.textarea-recensione:focused,
+.chat-composer:focused {
+    -fx-border-color: -app-accent;
+}
+
+.text-input:disabled,
+.combo-box:disabled,
+.date-picker:disabled,
+.spinner:disabled {
+    -fx-opacity: .45;
+}
+
+.combo-box,
+.date-picker,
+.spinner,
+.choice-box {
+    -fx-background-color: -tone-ivory-080;
+    -fx-control-inner-background: transparent;
+    -fx-border-color: -tone-ivory-220;
+    -fx-border-width: 1;
+    -fx-background-insets: 0;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-text-fill: -color-text;
+    -fx-prompt-text-fill: -color-text-muted;
+    -fx-highlight-fill: -tone-mint-320;
+    -fx-highlight-text-fill: -color-white;
+    -fx-font-size: 13;
+    -fx-focus-color: transparent;
+    -fx-faint-focus-color: transparent;
+    -fx-padding: 3 8;
+}
+
+.combo-box>.list-cell,
+.combo-box .arrow-button,
+.choice-box>.label {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-insets: 0;
+    -fx-text-fill: -color-text;
+}
+
+.date-picker>.text-field,
+.spinner>.text-field {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-insets: 0;
+    -fx-text-fill: -color-text;
+    -fx-padding: 7 4;
+}
+
+.date-picker>.arrow-button,
+.spinner>.increment-arrow-button,
+.spinner>.decrement-arrow-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-insets: 0;
+    -fx-text-fill: -color-text;
+    -fx-background-radius: 8;
+    -fx-cursor: hand;
+}
+
+.date-picker>.arrow-button:hover,
+.spinner>.increment-arrow-button:hover,
+.spinner>.decrement-arrow-button:hover {
+    -fx-background-color: -tone-ivory-120;
+}
+
+.combo-box .arrow,
+.date-picker .arrow,
+.spinner .increment-arrow,
+.spinner .decrement-arrow,
+.choice-box .arrow {
+    -fx-background-color: -color-text-secondary;
+}
+
+.text-area .content,
+.text-area .viewport,
+.text-area .scroll-pane {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+}
+
+.transparent-input,
+.transparent-input:focused,
+.transparent-combo,
+.transparent-datepicker,
+.transparent-combo:showing,
+.transparent-datepicker:showing {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+    -fx-text-fill: -color-text;
+    -fx-prompt-text-fill: -color-text-muted;
+}
+
+.transparent-combo>.list-cell,
+.transparent-datepicker>.text-field {
+    -fx-background-color: transparent;
+    -fx-padding: 4 0;
+}
+
+.transparent-combo .arrow-button {
+    -fx-padding: 5 10;
+}
+
+.password-input {
+    -fx-padding: 12 48 12 14;
+}
+
+.check-box,
+.checkbox,
+.radio-button {
+    -fx-text-fill: -color-text-secondary;
+    -fx-cursor: hand;
+    -fx-label-padding: 0 0 0 6;
+}
+
+.check-box .box,
+.checkbox .box {
+    -fx-background-color: -tone-ink-260;
+    -fx-border-color: -tone-ivory-260;
+    -fx-background-radius: 6;
+    -fx-border-radius: 6;
+    -fx-padding: 4;
+}
+
+.radio-button .radio {
+    -fx-background-color: -tone-ink-260;
+    -fx-border-color: -tone-ivory-260;
+    -fx-padding: 4;
+    -fx-background-radius: 100;
+    -fx-border-radius: 100;
+}
+
+.check-box:selected .box,
+.checkbox:selected .box {
+    -fx-background-color: -color-ivory;
+}
+
+.check-box:selected .mark,
+.checkbox:selected .mark {
+    -fx-background-color: -color-text-inverse;
+}
+
+.radio-button:selected .dot {
+    -fx-background-color: -color-ivory;
+}
+
+.check-box:focused .box,
+.radio-button:focused .radio {
+    -fx-border-color: -app-accent;
+}
+
+.titled-pane {
+    -fx-text-fill: -color-text;
+    -fx-background-color: transparent;
+}
+
+.titled-pane>.title {
+    -fx-background-color: -tone-ivory-080;
+    -fx-background-radius: 15;
+    -fx-border-radius: 15;
+    -fx-border-color: -tone-ivory-160;
+    -fx-padding: 14 18;
+}
+
+.titled-pane>.content {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 18 4;
+}
+
+.titled-pane .arrow {
+    -fx-background-color: -color-text-secondary;
+}

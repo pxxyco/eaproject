@@ -1,25 +1,25 @@
 package it.unical.ea_project_javafx.controller.login;
 
 import it.unical.ea_project_javafx.navigation.StepNavigator;
-import it.unical.ea_project_javafx.util.ApiService;
-import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-
+import it.unical.ea_project_javafx.service.api.ApiService;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 
 public class ForgotPasswordController {
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
 
-    @FXML private TextField emailField;
-    @FXML private Button btnResetPassword;
-    @FXML private Label messageLabel;
+    @FXML
+    private TextField emailField;
+
+    @FXML
+    private Label messageLabel;
 
     private StepNavigator navigator;
 
@@ -51,8 +51,7 @@ public class ForgotPasswordController {
                     }
                 }),
                 () -> Platform.runLater(() -> showError("Errore di connessione al server.")),
-                navigator::setLoading
-        );
+                navigator::setLoading);
 
     }
 

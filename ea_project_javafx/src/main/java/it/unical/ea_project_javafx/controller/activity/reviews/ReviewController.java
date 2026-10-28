@@ -1,28 +1,40 @@
 package it.unical.ea_project_javafx.controller.activity.reviews;
 
-import it.unical.ea_project_javafx.dto.ReviewDTO;
-import it.unical.ea_project_javafx.service.ReviewService;
+import it.unical.ea_project_javafx.dto.review.ReviewDTO;
+import it.unical.ea_project_javafx.service.review.ReviewService;
+import java.util.List;
+import java.util.function.Consumer;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import it.unical.ea_project_javafx.ui.ViewSupport;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import lombok.Setter;
 
-import java.util.List;
-import java.util.function.Consumer;
-
 public class ReviewController {
-    @FXML private HBox containerStelle;
-    @FXML private Button star1;
-    @FXML private Button star2;
-    @FXML private Button star3;
-    @FXML private Button star4;
-    @FXML private Button star5;
-    @FXML private TextArea txtCommento;
-    @FXML private StackPane root;
+
+    @FXML
+    private Button star1;
+    @FXML
+    private Button star2;
+    @FXML
+    private Button star3;
+    @FXML
+    private Button star4;
+    @FXML
+    private Button star5;
+    @FXML
+    private TextArea txtCommento;
+    @FXML
+    private StackPane root;
+
+    @FXML
+    private Label statusLabel;
+    @FXML
+    private Button btnInvia;
 
     private int value;
     private Long tripId;
@@ -33,7 +45,7 @@ public class ReviewController {
     private Consumer<ReviewDTO> onReviewCreated;
     @Setter
     private Consumer<ReviewDTO> onReviewUpdated;
-    List<Button> stars ;
+    List<Button> stars;
     final private String FULL_STAR = "★";
     final private String EMPTY_STAR = "☆";
 
@@ -59,7 +71,6 @@ public class ReviewController {
         txtCommento.setText(review.getComment());
     }
 
-
     @FXML
     void handleCloseButton(ActionEvent event) {
 
@@ -72,25 +83,27 @@ public class ReviewController {
     @FXML
     void handleSendButton(ActionEvent event) {
 
-        if(value < 1)
-            return;
-
-        if (editing != null) {
-            editing.setRating(value);
-            editing.setComment(txtCommento.getText());
-
-            ReviewService.update(
-                    editing,
-                    updated -> {
-                        if (onReviewUpdated != null) onReviewUpdated.accept(updated);
-                        if (onClose != null) onClose.run();
-                    },
-                    null,
-                    null
-            );
+        ViewSupport.clear(statusLabel);
+        if (value < 1) {
+            ViewSupport.error(statusLabel, "Scegli una valutazione da una a cinque stelle.");
             return;
         }
 
+        if (editing != null) {
+            ReviewDTO change = ReviewDTO.builder().reviewId(editing.getReviewId())
+                    .rating(value).comment(txtCommento.getText()).build();
+            ReviewService.update(
+                    change,
+                    updated -> {
+                        if (onReviewUpdated != null)
+                            onReviewUpdated.accept(updated);
+                        if (onClose != null)
+                            onClose.run();
+                    },
+                    this::showSaveError,
+                    btnInvia::setDisable);
+            return;
+        }
 
         ReviewDTO review = ReviewDTO.builder()
                 .rating(value)
@@ -102,16 +115,21 @@ public class ReviewController {
         ReviewService.create(
                 review,
                 created -> {
-                    if(onReviewCreated != null) onReviewCreated.accept(created);
-                    if(onClose != null) onClose.run();
+                    if (onReviewCreated != null)
+                        onReviewCreated.accept(created);
+                    if (onClose != null)
+                        onClose.run();
                 },
-                () -> {
-                    // TODO: set error message
-                },
-                null);
+                this::showSaveError,
+                btnInvia::setDisable);
     }
 
-    public void reset(){
+    private void showSaveError() {
+        ViewSupport.error(statusLabel, "Salvataggio non riuscito. Controlla i dati e riprova.");
+    }
+
+    public void reset() {
+        ViewSupport.clear(statusLabel);
         editing = null;
         handleStar(0);
         txtCommento.clear();
@@ -146,15 +164,14 @@ public class ReviewController {
 
         this.value = value;
 
-        for(int i = 0; i < stars.size(); i++) {
-            if(i+1 <= value){
+        for (int i = 0; i < stars.size(); i++) {
+            if (i + 1 <= value) {
                 if (!stars.get(i).getStyleClass().contains("stella-piena")) {
                     stars.get(i).getStyleClass().add("stella-piena");
                 }
                 stars.get(i).setText(FULL_STAR);
 
-            }
-            else {
+            } else {
                 stars.get(i).getStyleClass().clear();
                 stars.get(i).getStyleClass().add("stella");
                 stars.get(i).setText(EMPTY_STAR);

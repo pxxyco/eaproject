@@ -1,76 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
-<?import java.net.URL?>
+<?import it.unical.ea_project_javafx.ui.control.PageNavigation?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.FlowPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
-
-<StackPane xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
-           fx:controller="it.unical.ea_project_javafx.controller.organizer.EventsController">
-    <stylesheets>
-        <URL value="@../../css/common/style.css" />
-        <URL value="@../../css/home/home.css" />
-        <URL value="@../../css/profile/profile.css" />
-        <URL value="@../../css/organizer/organizer-dashboard.css" />
-    </stylesheets>
-
-    <ImageView fx:id="bgImageView" pickOnBounds="true" preserveRatio="false" />
-    <Region styleClass="profile-overlay" />
-
+<StackPane stylesheets="@../../css/screens/organizer/events.css" xmlns:fx="http://javafx.com/fxml/1" fx:id="rootStackPane"
+    fx:controller="it.unical.ea_project_javafx.controller.organizer.EventsController">
+    <ImageView fx:id="bgImageView" preserveRatio="false" mouseTransparent="true" />
     <BorderPane>
         <top>
             <StackPane fx:id="navbarContainer" />
         </top>
         <center>
             <ScrollPane fitToWidth="true" styleClass="main-scroll">
-                <content>
-                    <VBox alignment="TOP_CENTER" spacing="24.0">
-                        <padding>
-                            <Insets bottom="40.0" left="32.0" right="32.0" top="28.0" />
-                        </padding>
-
-                        <VBox maxWidth="1100.0" spacing="20.0" styleClass="glass-card">
-                            <padding>
-                                <Insets bottom="28.0" left="28.0" right="28.0" top="28.0" />
-                            </padding>
-
-                            <HBox alignment="CENTER_LEFT" spacing="16.0">
-                                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
-                                    <Label styleClass="dash-title" text="Gestione Offerte ed Eventi" />
-                                    <Label styleClass="dash-subtitle" text="Visualizza, crea, modifica e cancella le tue offerte per i viaggiatori." />
-                                </VBox>
-                                <Button text="+ Nuova Offerta / Viaggio" onAction="#handleCreateNewOffer" styleClass="btn-card-action" />
-                            </HBox>
-
-                            <Label fx:id="statusMessageLabel" managed="false" visible="false" wrapText="true" />
-
-                            <Separator styleClass="nav-divider" />
-
-                            <HBox alignment="CENTER_LEFT" spacing="12.0">
-                                <TextField fx:id="searchField" promptText="Cerca tra i tuoi eventi o viaggi..." styleClass="custom-input" HBox.hgrow="ALWAYS" />
-                                <ComboBox fx:id="typeFilterCombo" promptText="Tipo" styleClass="traveler-search-type" prefWidth="140.0" />
-                                <ComboBox fx:id="statusFilterCombo" promptText="Stato" styleClass="traveler-search-type" prefWidth="140.0" />
-                            </HBox>
-
-                            <VBox spacing="12.0">
-                                <Label styleClass="section-header" text="Elenco Offerte Pubblicate" />
-                                <FlowPane fx:id="offersFlowPane" hgap="16.0" vgap="16.0" />
+                <VBox alignment="TOP_CENTER">
+                    <VBox spacing="26" maxWidth="1220" styleClass="organizer-workspace">
+                        <HBox alignment="CENTER_LEFT" spacing="18">
+                            <VBox spacing="8" HBox.hgrow="ALWAYS">
+                                <Label text="AREA ORGANIZER" styleClass="account-kicker" />
+                                <Label text="Offerte ed eventi" styleClass="dash-title" />
+                                <Label
+                                    text="Un catalogo operativo: controlla disponibilità e stato, modifica i contenuti oppure crea una nuova esperienza."
+                                    styleClass="dash-subtitle" wrapText="true" />
                             </VBox>
-
-                        </VBox>
+                            <Button text="Aggiorna" onAction="#handleRefresh"
+                                styleClass="btn-secondary" />
+                            <Button text="+ Crea offerta" onAction="#handleOpenCreateOffer"
+                                styleClass="btn-primary" />
+                        </HBox>
+                        <Label fx:id="dashboardErrorLabel" visible="false" managed="false"
+                            wrapText="true" />
+                        <HBox spacing="12">
+                            <TextField fx:id="offerSearchField" promptText="Cerca titolo o luogo"
+                                HBox.hgrow="ALWAYS" styleClass="custom-input" />
+                            <ComboBox fx:id="offerTypeFilter" prefWidth="150" />
+                            <ComboBox fx:id="offerStatusFilter" prefWidth="170" />
+                        </HBox>
+                        <TableView fx:id="offersTable" prefHeight="590" minHeight="250"
+                            styleClass="custom-table, organizer-offers-table">
+                            <columns>
+                                <TableColumn fx:id="titleColumn" text="Offerta" prefWidth="245" />
+                                <TableColumn fx:id="typeColumn" text="Tipo" prefWidth="90" />
+                                <TableColumn fx:id="placeColumn" text="Luogo" prefWidth="105" />
+                                <TableColumn fx:id="periodColumn" text="Date" prefWidth="180" />
+                                <TableColumn fx:id="stateColumn" text="Stato" prefWidth="100" />
+                                <TableColumn fx:id="seatsColumn" text="Posti liberi / totali"
+                                    prefWidth="120" />
+                                <TableColumn fx:id="priceColumn" text="Prezzo" prefWidth="90" />
+                                <TableColumn fx:id="actionsColumn" text="Azioni" prefWidth="190"
+                                    sortable="false" />
+                            </columns>
+                        </TableView>
+                        <PageNavigation fx:id="pagination" />
+                        <Label
+                            text="Apri un’offerta per visualizzarla; Modifica permette di gestire anche immagini, tappe, date e disponibilità."
+                            styleClass="dash-subtitle" wrapText="true" />
                     </VBox>
-                </content>
+                </VBox>
             </ScrollPane>
         </center>
     </BorderPane>

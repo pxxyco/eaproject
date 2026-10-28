@@ -1,68 +1,103 @@
 package it.unical.ea_project_javafx.controller.login;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonObject;
-import it.unical.ea_project_javafx.dto.UserDTO;
+import it.unical.ea_project_javafx.dto.user.UserDTO;
 import it.unical.ea_project_javafx.navigation.StepNavigator;
-import it.unical.ea_project_javafx.util.ApiService;
+import it.unical.ea_project_javafx.security.TokenStorage;
 import it.unical.ea_project_javafx.security.UserSession;
-import it.unical.ea_project_javafx.util.TokenStorage;
-import javafx.application.Platform;
+import it.unical.ea_project_javafx.service.api.ApiService;
+import it.unical.ea_project_javafx.ui.ViewSupport;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputControl;
 import javafx.scene.input.KeyCode;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.SVGPath;
 
 public class LoginStepController {
 
-    @FXML private TextField loginUsernameField;
-    @FXML private PasswordField loginPasswordField;
-    @FXML private Button btnLogin;
-    @FXML private Label errorLabel;
-    @FXML private CheckBox rememberMeCheckBox;
+    @FXML
+    private TextField loginUsernameField;
+    @FXML
+    private PasswordField loginPasswordField;
+    @FXML
+    private TextField visiblePasswordField;
+    @FXML
+    private Button revealPasswordButton;
+    @FXML
+    private Button btnLogin;
+    @FXML
+    private Label errorLabel;
+    @FXML
+    private CheckBox rememberMeCheckBox;
 
     private StepNavigator navigator;
 
     @FXML
     public void initialize() {
 
-        loginUsernameField.setOnKeyPressed(event -> { if (event.getCode() == KeyCode.ENTER) handleLoginSubmit(null); });
-        loginPasswordField.setOnKeyPressed(event -> { if (event.getCode() == KeyCode.ENTER) handleLoginSubmit(null); });
+        updatePasswordEye(false);
+        visiblePasswordField.textProperty().bindBidirectional(loginPasswordField.textProperty());
+        visiblePasswordField.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER)
+                handleLoginSubmit(null);
+        });
+        loginUsernameField.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER)
+                handleLoginSubmit(null);
+        });
+        loginPasswordField.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ENTER)
+                handleLoginSubmit(null);
+        });
 
     }
 
+    @FXML
+    private void togglePassword() {
+        boolean reveal = !visiblePasswordField.isVisible();
+        TextInputControl from = reveal ? loginPasswordField : visiblePasswordField;
+        TextInputControl to = reveal ? visiblePasswordField : loginPasswordField;
+        int caret = from.getCaretPosition();
+        loginPasswordField.setVisible(!reveal);
+        loginPasswordField.setManaged(!reveal);
+        visiblePasswordField.setVisible(reveal);
+        visiblePasswordField.setManaged(reveal);
+        revealPasswordButton.setAccessibleText(reveal ? "Nascondi password" : "Mostra password");
+        updatePasswordEye(reveal);
+        to.requestFocus();
+        to.positionCaret(caret);
+    }
+
+    private void updatePasswordEye(boolean revealed) {
+        SVGPath eye = new SVGPath();
+        eye.setContent("M1 8 Q10 -4 19 8 Q10 20 1 8 Z M13 8 A3 3 0 1 1 7 8 A3 3 0 1 1 13 8"
+                + (revealed ? " M2 1 L18 15" : ""));
+        eye.setFill(Color.TRANSPARENT);
+        eye.setStroke(Color.web("#d6d3d1"));
+        eye.setStrokeWidth(1.5);
+        revealPasswordButton.setText("");
+        revealPasswordButton.setGraphic(eye);
+    }
+
     public void setNavigator(StepNavigator navigator) {
-    
+
         this.navigator = navigator;
         btnLogin.setDefaultButton(true);
 
     }
 
     public void showError(String message) {
-
-        Platform.runLater(() -> {
-            if (errorLabel != null) {
-                errorLabel.setText(message);
-                errorLabel.setVisible(true);
-                errorLabel.setManaged(true);
-            }
-        });
-
+        ViewSupport.show(errorLabel, message);
     }
 
     public void clearError() {
-
-        if (errorLabel != null) {
-            errorLabel.setText("");
-            errorLabel.setVisible(false);
-            errorLabel.setManaged(false);
-        }
-
+        ViewSupport.clear(errorLabel);
     }
 
     @FXML
@@ -81,54 +116,38 @@ public class LoginStepController {
         body.addProperty("identifier", identifier);
         body.addProperty("password", password);
 
-        ApiService.post(
+        ApiService.callDetailed(
                 ApiService.BASE_URL + "/api/users/login",
                 body.toString(),
-                res -> Platform.runLater(() -> {
-                    if (res.statusCode() == 200) {
-                        try {
-                            String authHeader = res.headers().firstValue("Authorization").orElse("");
-                            String accessToken = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : null;
-                            String refreshToken = res.headers().firstValue("X-Refresh-Token").orElse(null);
+                ApiService.Method.POST,
+                res -> {
+                    try {
+                        String authHeader = res.headers().firstValue("Authorization").orElse("");
+                        String accessToken = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : null;
+                        String refreshToken = res.headers().firstValue("X-Refresh-Token").orElse(null);
 
-                            Gson gson = new GsonBuilder()
-                                    .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, typeOfT, context) -> LocalDateTime.parse(json.getAsString()))
-                                    .registerTypeAdapter(LocalDate.class, (JsonDeserializer<LocalDate>) (json, typeOfT, context) -> LocalDate.parse(json.getAsString()))
-                                    .create();
+                            UserDTO user = ApiService.fromJson(res.body(), UserDTO.class);
 
-                            UserDTO user = gson.fromJson(res.body(), UserDTO.class);
+                        if (user != null) {
+                            UserSession.getInstance().setSession(user);
+                            UserSession.getInstance().setTokens(accessToken, refreshToken);
 
-                            if (user != null) {
-                                UserSession.getInstance().setSession(user);
-                                UserSession.getInstance().setTokens(accessToken, refreshToken);
-
-                                if (rememberMeCheckBox != null && rememberMeCheckBox.isSelected()) {
-                                    TokenStorage.saveRefreshToken(refreshToken);
-                                } else {
-                                    TokenStorage.clear();
-                                }
-
-                                navigator.goToHome();
+                            if (rememberMeCheckBox != null && rememberMeCheckBox.isSelected()) {
+                                TokenStorage.saveRefreshToken(refreshToken);
                             } else {
-                                showError("Errore il profilo utente è vuoto.");
+                                TokenStorage.clear();
                             }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                            showError("Errore nella lettura della risposta del server.");
-                        }
-                    } else {
-                        if (res.statusCode() == 401) {
-                            showError("Credenziali non valide.");
-                        } else if (res.statusCode() >= 500) {
-                            showError("Errore interno del server.");
+
+                            navigator.goToHome();
                         } else {
-                            showError("Impossibile effettuare il login.");
+                            showError("Errore: il profilo utente è vuoto.");
                         }
+                    } catch (Exception e) {
+                        showError("Errore nella lettura della risposta del server.");
                     }
-                }),
-                () -> Platform.runLater(() -> showError("Errore di connessione al server.")),
-                navigator::setLoading
-        );
+                },
+                message -> showError(message),
+                navigator::setLoading);
 
     }
 

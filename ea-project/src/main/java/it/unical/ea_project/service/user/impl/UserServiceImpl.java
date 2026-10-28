@@ -1,0 +1,212 @@
+package it.unical.ea_project.service.user.impl;
+
+import it.unical.ea_project.domain.user.User;
+import it.unical.ea_project.repository.user.UserRepository;
+import it.unical.ea_project.security.PasswordPolicy;
+import it.unical.ea_project.service.media.PhotoStorageService;
+import it.unical.ea_project.service.security.LoginAttemptService;
+import it.unical.ea_project.service.user.UserService;
+import jakarta.annotation.PostConstruct;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.regex.Pattern;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+
+@Service
+@RequiredArgsConstructor
+public class UserServiceImpl implements UserService {
+
+    private static final Pattern USERNAME_PATTERN = Pattern.compile("^[A-Za-z0-9._-]{3,30}$");
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final LoginAttemptService loginAttemptService;
+    private final PhotoStorageService photoStorageService;
+    private String dummyHash;
+
+    @PostConstruct
+    void initDummyHash() {
+        this.dummyHash = passwordEncoder.encode("dummy-password-for-timing");
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<User> getUserById(Long id) {
+        return userRepository.findById(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmailIgnoreCase(email);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<User> login(String identifier, String password) {
+        String normalizedIdentifier = identifier == null ? "" : identifier.trim();
+        loginAttemptService.assertAllowed(normalizedIdentifier);
+        Optional<User> userOpt = userRepository.findByEmailIgnoreCase(normalizedIdentifier);
+        if (userOpt.isEmpty()) {
+            userOpt = userRepository.findByUsernameIgnoreCase(normalizedIdentifier);
+        }
+
+        String candidate = password == null ? "" : password;
+
+        if (userOpt.isEmpty()
+                || userOpt.get().getDeletedAt() != null
+                || userOpt.get().getHashedPassword() == null) {
+            passwordEncoder.matches(candidate, dummyHash);
+            loginAttemptService.loginFailed(normalizedIdentifier);
+            return Optional.empty();
+        }
+
+        if (passwordEncoder.matches(candidate, userOpt.get().getHashedPassword())) {
+            loginAttemptService.loginSucceeded(normalizedIdentifier);
+            return userOpt;
+        }
+        loginAttemptService.loginFailed(normalizedIdentifier);
+        return Optional.empty();
+    }
+
+    @Override
+    @Transactional
+    public User registerUser(User user) {
+        PasswordPolicy.validate(user.getHashedPassword())
+                .ifPresent(message -> {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
+                });
+
+        String username = user.getUsername() == null ? "" : user.getUsername().trim().toLowerCase(Locale.ROOT);
+        String email = user.getEmail() == null ? "" : user.getEmail().trim().toLowerCase(Locale.ROOT);
+
+        if (!USERNAME_PATTERN.matcher(username).matches()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Lo username deve contenere 3–30 caratteri validi.");
+        }
+        if (email.length() > 254 || !EMAIL_PATTERN.matcher(email).matches()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Inserisci un indirizzo email valido.");
+        }
+
+        user.setUsername(username);
+        user.setEmail(email);
+
+        if (userRepository.existsByUsernameIgnoreCase(username)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username già in uso.");
+        }
+        if (userRepository.existsByEmailIgnoreCase(email)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email già registrata.");
+        }
+
+        user.setHashedPassword(passwordEncoder.encode(user.getHashedPassword()));
+        return userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public User updateProfile(Long userId, String username, String email, String fullName) {
+        User user = findActiveUser(userId);
+        String normalizedUsername = username == null ? "" : username.trim().toLowerCase(Locale.ROOT);
+        String normalizedEmail = email == null ? "" : email.trim().toLowerCase(Locale.ROOT);
+        String normalizedFullName = fullName == null ? "" : fullName.trim().replaceAll("\\s+", " ");
+
+        if (!USERNAME_PATTERN.matcher(normalizedUsername).matches()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Lo username deve contenere 3–30 caratteri: lettere, numeri, punto, trattino o underscore.");
+        }
+        if (normalizedEmail.length() > 254 || !EMAIL_PATTERN.matcher(normalizedEmail).matches()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Inserisci un indirizzo email valido.");
+        }
+        if (normalizedFullName.isBlank() || normalizedFullName.length() > 120) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Il nome completo è obbligatorio e non può superare 120 caratteri.");
+        }
+
+        userRepository.findByUsernameIgnoreCase(normalizedUsername)
+                .filter(existing -> !existing.getId().equals(userId))
+                .ifPresent(existing -> {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Username già in uso.");
+                });
+        userRepository.findByEmailIgnoreCase(normalizedEmail)
+                .filter(existing -> !existing.getId().equals(userId))
+                .ifPresent(existing -> {
+                    throw new ResponseStatusException(HttpStatus.CONFLICT, "Email già registrata.");
+                });
+
+        user.setUsername(normalizedUsername);
+        user.setEmail(normalizedEmail);
+        user.setFullName(normalizedFullName);
+        return userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
+    public User updateProfilePhoto(Long userId, MultipartFile file) {
+        User user = findActiveUser(userId);
+        String previousPhoto = user.getProfilePhotoUrl();
+        user.setProfilePhotoUrl(photoStorageService.storeProfilePhoto(userId, file));
+        User saved = userRepository.save(user);
+        photoStorageService.deleteProfilePhoto(userId, previousPhoto);
+        return saved;
+    }
+
+    @Override
+    @Transactional
+    public User removeProfilePhoto(Long userId) {
+        User user = findActiveUser(userId);
+        String previousPhoto = user.getProfilePhotoUrl();
+        user.setProfilePhotoUrl(null);
+        User saved = userRepository.save(user);
+        // Remove only the former immutable file after the database commit.
+        photoStorageService.deleteProfilePhoto(userId, previousPhoto);
+        return saved;
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(Long userId, String currentPassword, String newPassword) {
+        User user = findActiveUser(userId);
+        if (currentPassword == null || currentPassword.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Inserisci la password attuale.");
+        }
+        if (user.isOauthProvider() || user.getHashedPassword() == null || user.getHashedPassword().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Questo account utilizza un accesso esterno e non ha una password locale da modificare.");
+        }
+        if (!passwordEncoder.matches(currentPassword, user.getHashedPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La password attuale non è corretta.");
+        }
+        PasswordPolicy.validate(newPassword)
+                .ifPresent(message -> {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, message);
+                });
+        if (passwordEncoder.matches(newPassword, user.getHashedPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "La nuova password deve essere diversa da quella attuale.");
+        }
+        user.setAuthVersion(user.getAuthVersion() + 1);
+        user.setHashedPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    private User findActiveUser(Long userId) {
+        return userRepository.findById(userId)
+                .filter(user -> user.getDeletedAt() == null)
+                .orElseThrow(
+                        () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utente non trovato o non attivo."));
+    }
+}

@@ -1,0 +1,183 @@
+/* Reusable component: feedback. Theme: css/theme.css. */
+
+.loading-screen {
+    -fx-background-color: -tone-ink-320;
+    -fx-padding: 36;
+}
+
+.loading-focus {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.loading-brand {
+    -fx-text-fill: -color-text-muted;
+    -fx-font-size: 12;
+    -fx-font-weight: bold;
+}
+
+.loading-message {
+    -fx-text-fill: -color-text;
+    -fx-font-size: 24;
+    -fx-font-weight: bold;
+}
+
+.loading-caption {
+    -fx-text-fill: -color-text-muted;
+    -fx-font-size: 14;
+}
+
+.loading-error-icon {
+    -fx-font-size: 54;
+    -fx-text-fill: -color-danger-soft;
+    -fx-font-weight: bold;
+}
+
+.feedback-overlay {
+    -fx-background-color: -tone-forest-940;
+    -fx-border-color: -tone-ivory-220;
+    -fx-border-width: 1px;
+    -fx-border-radius: 18px;
+    -fx-background-radius: 18px;
+    -fx-padding: 22px 20px;
+    -fx-alignment: center;
+    -fx-spacing: 10px;
+    -fx-effect: dropshadow(gaussian, -tone-ink-450, 22, 0.2, 0, 10);
+    -fx-max-width: 360px;
+    -fx-pref-width: 360px;
+    -fx-pref-height: 200px;
+    -fx-min-height: 180px;
+    -fx-max-height: 220px;
+}
+
+.feedback-icon {
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-ivory;
+    -fx-padding: 0 0 4 0;
+}
+
+.feedback-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-white;
+}
+
+.feedback-message {
+    -fx-font-size: 13px;
+    -fx-text-fill: -tone-white-780;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+    -fx-max-width: 280px;
+}
+
+.status-message,
+.dashboard-status,
+.favorites-status {
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-padding: 10 14;
+    -fx-font-size: 12;
+    -fx-font-weight: bold;
+}
+
+.status-error {
+    -fx-background-color: -tone-danger-220;
+    -fx-border-color: -tone-danger-320;
+    -fx-text-fill: -color-danger;
+}
+
+.dashboard-error {
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-padding: 10 14;
+    -fx-font-size: 12;
+    -fx-font-weight: bold;
+    -fx-background-color: -tone-danger-220;
+    -fx-border-color: -tone-danger-320;
+    -fx-text-fill: -color-danger;
+}
+
+.dashboard-status-error {
+    -fx-background-color: -tone-danger-220;
+    -fx-border-color: -tone-danger-320;
+    -fx-text-fill: -color-danger;
+}
+
+.history-message-error {
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-padding: 10 14;
+    -fx-font-size: 12;
+    -fx-font-weight: bold;
+    -fx-background-color: -tone-danger-220;
+    -fx-border-color: -tone-danger-320;
+    -fx-text-fill: -color-danger;
+}
+
+.status-success,
+.dashboard-status-success {
+    -fx-background-color: -tone-mint-120;
+    -fx-text-fill: -color-success;
+}
+
+.history-message-success {
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-padding: 10 14;
+    -fx-font-size: 12;
+    -fx-font-weight: bold;
+    -fx-background-color: -tone-mint-120;
+    -fx-text-fill: -color-success;
+}
+
+.message-error {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-danger;
+}
+
+.sharing-status-error,
+.history-modal-error {
+    -fx-text-fill: -color-danger;
+}
+
+.message-success {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-success;
+}
+
+.sharing-status-success {
+    -fx-text-fill: -color-success;
+}
+
+.loading-overlay {
+    -fx-border-color: -tone-ivory-260;
+    -fx-border-radius: 16px;
+    -fx-background-color: -tone-ink-850;
+    -fx-background-radius: 16;
+}
+
+.loading-overlay .progress-indicator,
+.progress-indicator {
+    -fx-progress-color: -color-ivory;
+}
+
+.loading-text,
+.loading-label {
+    -fx-text-fill: -color-ivory;
+    -fx-font-size: 14;
+    -fx-font-weight: bold;
+}
+
+.loading-error {
+    -fx-text-fill: -color-danger;
+    -fx-font-size: 14;
+    -fx-wrap-text: true;
+    -fx-text-alignment: center;
+}
+
+/* LoadingRing exposes the same CSS color contract as the native indicator. */
+.loading-ring { -fx-progress-color: -color-text; }
+.tooltip { -fx-background-color: -color-menu; -fx-text-fill: -color-text; -fx-border-color: -tone-ivory-220; -fx-background-radius: 10; -fx-border-radius: 10; -fx-padding: 8 12; -fx-font-size: 12; }

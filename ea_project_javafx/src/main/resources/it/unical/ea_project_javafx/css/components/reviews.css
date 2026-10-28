@@ -1,0 +1,92 @@
+/* Reusable component: reviews. Theme: css/theme.css. */
+
+.recensione-item {
+    -fx-background-color: -tone-white-080;
+    -fx-background-radius: 14px;
+    -fx-border-color: -tone-white-160;
+    -fx-border-radius: 14px;
+    -fx-border-width: 1px;
+    -fx-padding: 16px;
+}
+
+.recensione-item:hover {
+    -fx-border-color: -tone-ivory-450;
+}
+
+.recensione-nome {
+    -fx-text-fill: -color-white;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.recensione-testo {
+    -fx-text-fill: -tone-white-850;
+    -fx-font-size: 13px;
+    -fx-line-spacing: 2px;
+}
+
+.recensione-data {
+    -fx-text-fill: -tone-white-450;
+    -fx-font-size: 11px;
+}
+
+.risposta-container {
+    -fx-background-color: -tone-ink-260;
+    -fx-background-radius: 10px;
+    -fx-padding: 10px;
+    -fx-border-color: -tone-white-100;
+    -fx-border-width: 1px 0 0 0;
+}
+
+.recensione-item .rating-stelle {
+    -fx-padding: 1px 0;
+}
+
+.recensione-item .stella {
+    -fx-background-color: transparent;
+    -fx-text-fill: -tone-white-450;
+    -fx-font-size: 13px;
+    -fx-padding: 0 1px;
+}
+
+.recensione-item .stella-piena {
+    -fx-text-fill: -color-rating;
+}
+
+.risposta-item {
+    -fx-padding: 0;
+}
+
+.risposta-badge {
+    -fx-text-fill: -color-ivory;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.risposta-testo {
+    -fx-text-fill: -tone-white-850;
+    -fx-font-size: 12px;
+    -fx-line-spacing: 1.5px;
+}
+
+.risposta-data {
+    -fx-text-fill: -tone-white-450;
+    -fx-font-size: 10px;
+}
+
+.stella {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.history-star-button {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-font-size: 27;
+    -fx-text-fill: -tone-ivory-320;
+    -fx-padding: 2 5;
+}
+
+.history-star-button:selected {
+    -fx-text-fill: -color-rating;
+}

@@ -32,7 +32,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyTrip(
-    onExperienceClick: (ExperienceRef) -> Unit,
+    onExperienceClick: (ExperienceRef) -> Unit = {},
     modifier: Modifier = Modifier,
     onLoginClick: () -> Unit = {}
 ) {
@@ -41,7 +41,7 @@ fun MyTrip(
         return
     }
 
-    var selected by remember { mutableStateOf<MyTripRepository.HubTarget?>(null) }
+    var selected by remember(UserSession.user?.id) { mutableStateOf<MyTripRepository.HubTarget?>(null) }
 
     selected?.let { target ->
         CollectionScreen(
@@ -59,20 +59,16 @@ fun MyTrip(
 
     val scope = rememberCoroutineScope()
     var showNewList by remember { mutableStateOf(false) }
-    var listsError by remember { mutableStateOf<String?>(null) }
+    val listsError = MyTripRepository.hubErrors.takeIf { it.isNotEmpty() }?.joinToString("\n")
+    var refreshing by remember { mutableStateOf(true) }
+    var retry by remember { mutableIntStateOf(0) }
     var creating by remember { mutableStateOf(false) }
     var createError by remember { mutableStateOf<String?>(null) }
 
-    // Si rilancia ogni volta che l'hub torna visibile (anche uscendo da una raccolta).
-    LaunchedEffect(Unit) {
-        listsError = try {
-            MyTripRepository.refreshLists()
-            null
-        } catch (e: CancellationException) {
-            throw e
-        } catch (e: Exception) {
-            e.message ?: "Impossibile caricare le liste."
-        }
+    LaunchedEffect(UserSession.user?.id, retry) {
+        refreshing = true
+        try { MyTripRepository.refreshLists() }
+        finally { refreshing = false }
     }
 
     Column(
@@ -91,17 +87,19 @@ fun MyTrip(
                 color = MaterialTheme.colorScheme.error,
                 style = MaterialTheme.typography.bodySmall
             )
+            TextButton(onClick = { retry++ }, enabled = !refreshing) { Text("Riprova") }
             Spacer(Modifier.height(8.dp))
         }
+        if (refreshing) LinearProgressIndicator(Modifier.fillMaxWidth())
 
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = PaddingValues(bottom = 24.dp)
         ) {
-            item(key = "bookings") {
+            if (UserSession.role.equals("TRAVELER", true)) item(key = "bookings") {
                 ListRow(
                     title = "Le mie prenotazioni",
-                    subtitle = if (upcoming == 0) "Nessuna in arrivo" else "$upcoming in arrivo",
+                    subtitle = if (refreshing) "Caricamento…" else if (!MyTripRepository.bookingsLoaded) "Dati non disponibili" else if (upcoming == 0) "Nessuna attiva" else "$upcoming attive",
                     icon = Icons.Default.DateRange,
                     onClick = { selected = MyTripRepository.HubTarget.Bookings }
                 )
@@ -109,7 +107,7 @@ fun MyTrip(
             item(key = "favorites") {
                 ListRow(
                     title = "Le mie preferite",
-                    subtitle = countLabel(favorites),
+                    subtitle = if (refreshing) "Caricamento…" else if (!MyTripRepository.favoritesLoaded) "Dati non disponibili" else countLabel(favorites),
                     icon = Icons.Default.Favorite,
                     onClick = { selected = MyTripRepository.HubTarget.Favorites }
                 )
@@ -117,7 +115,7 @@ fun MyTrip(
             items(lists, key = { "list_${it.id}" }) { list ->
                 ListRow(
                     title = list.name,
-                    subtitle = "${countLabel(list.itemCount)} · ${list.visibility.label}",
+                    subtitle = list.visibility.label,
                     icon = Icons.AutoMirrored.Filled.List,
                     onClick = { selected = MyTripRepository.HubTarget.Custom(list) }
                 )
@@ -257,7 +255,7 @@ private fun NewListDialog(
 }
 
 @Composable
-private fun LoginRequired(modifier: Modifier = Modifier, onLoginClick: () -> Unit) {
+internal fun LoginRequired(modifier: Modifier = Modifier, onLoginClick: () -> Unit) {
     Column(
         modifier = modifier
             .fillMaxSize()

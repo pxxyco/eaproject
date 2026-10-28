@@ -1,11 +1,16 @@
 package com.example.application.screens.home
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -15,6 +20,7 @@ import com.example.application.dto.ActivityHomeDTO
 import com.example.application.dto.ExperienceRef
 import com.example.application.dto.ExperienceType
 import com.example.application.dto.TripHomeDTO
+import com.example.application.ui.theme.Stone200
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDate
@@ -54,7 +60,8 @@ private fun ActivityCardItem(
         rating = item.averageRating?.let { "%.1f".format(Locale.ITALY, it) } ?: "-",
         imageUrl = item.imageUrl.orEmpty(),
         dateInfo = formatDateRange(item.startDate, item.endDate),
-        onClick = {  item.activityId?.let { onExperienceClick(ExperienceRef(ExperienceType.ACTIVITY, it)) }
+        onClick = {
+            item.activityId?.let { onExperienceClick(ExperienceRef(ExperienceType.ACTIVITY, it)) }
         },
         modifier = modifier
     )
@@ -80,55 +87,115 @@ private fun TripCardItem(
 
 @Composable
 internal fun ActivityRow(
-    itemsList: List<ActivityHomeDTO>,
-    onExperienceClick: (ExperienceRef) -> Unit
+    list: PagedList<ActivityHomeDTO>,
+    onExperienceClick: (ExperienceRef) -> Unit,
+    onLoadMore: () -> Unit
 ) {
-    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        items(items = itemsList, key = { it.activityId ?: it.hashCode().toLong() }) { item ->
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        items(items = list.items, key = { it.stableKey() }) { item ->
             ActivityCardItem(item, onExperienceClick)
+        }
+        if (list.hasMore) {
+            item(key = "load_more") {
+                LoadMoreButton(
+                    loading = list.loadingMore,
+                    hasError = list.error != null,
+                    onClick = onLoadMore,
+                    modifier = Modifier.width(130.dp)
+                )
+            }
         }
     }
 }
 
 @Composable
 internal fun TripRow(
-    itemsList: List<TripHomeDTO>,
-    onExperienceClick: (ExperienceRef) -> Unit
+    list: PagedList<TripHomeDTO>,
+    onExperienceClick: (ExperienceRef) -> Unit,
+    onLoadMore: () -> Unit
 ) {
-    LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        items(items = itemsList, key = { it.tripId ?: it.hashCode().toLong() }) { item ->
-            TripCardItem(item,onExperienceClick)
+    LazyRow(
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        items(items = list.items, key = { it.stableKey() }) { item ->
+            TripCardItem(item, onExperienceClick)
+        }
+        if (list.hasMore) {
+            item(key = "load_more") {
+                LoadMoreButton(
+                    loading = list.loadingMore,
+                    hasError = list.error != null,
+                    onClick = onLoadMore,
+                    modifier = Modifier.width(130.dp)
+                )
+            }
         }
     }
 }
 
-@Composable
-internal fun ActivityGrid(
-    itemsList: List<ActivityHomeDTO>,
-    onExperienceClick: (ExperienceRef) -> Unit
+
+
+internal fun LazyListScope.activityGridItems(
+    list: PagedList<ActivityHomeDTO>,
+    onExperienceClick: (ExperienceRef) -> Unit,
+    onLoadMore: () -> Unit
 ) {
-    Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        itemsList.chunked(2).forEach { pair ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                pair.forEach { item ->
-                    ActivityCardItem(
-                        item = item,
-                        onExperienceClick = onExperienceClick,
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                    )
-                }
-                if (pair.size == 1) Spacer(Modifier.weight(1f))
+    items(
+        items = list.items.chunked(2),
+        key = { pair -> pair.first().stableKey() }
+    ) { pair ->
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 12.dp)
+                .height(IntrinsicSize.Min),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            pair.forEach { item ->
+                ActivityCardItem(item, onExperienceClick, Modifier.weight(1f).fillMaxHeight())
             }
+            if (pair.size == 1) Spacer(Modifier.weight(1f))
+        }
+    }
+    if (list.hasMore) {
+        item(key = "grid_load_more") {
+            Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                LoadMoreButton(list.loadingMore, list.error != null, onLoadMore)
+            }
+        }
+    }
+}
+
+
+@Composable
+internal fun LoadMoreButton(
+    loading: Boolean,
+    hasError: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    OutlinedButton(
+        onClick = onClick,
+        enabled = !loading,
+        shape = RoundedCornerShape(24.dp),
+        modifier = modifier
+    ) {
+        if (loading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(18.dp),
+                strokeWidth = 2.dp,
+                color = Stone200
+            )
+        } else {
+            Text(
+                text = if (hasError) "Riprova" else "Carica altro",
+                color = Stone200,
+                maxLines = 1
+            )
         }
     }
 }

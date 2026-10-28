@@ -1,0 +1,123 @@
+/* Reusable component: navigation. Theme: css/theme.css. */
+
+.nav-divider {
+    -fx-opacity: 0.25;
+}
+
+.nav-links .hyperlink {
+    -fx-text-fill: -tone-white-940;
+    -fx-underline: false;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.nav-links .hyperlink:hover {
+    -fx-text-fill: -color-ivory;
+}
+
+.nav-user-graphic {
+    -fx-alignment: center-left;
+}
+
+.nav-avatar-container {
+    -fx-background-color: -tone-white-160;
+    -fx-background-radius: 100;
+    -fx-alignment: center;
+}
+
+.nav-avatar-initials {
+    -fx-min-width: 28px;
+    -fx-min-height: 28px;
+    -fx-pref-width: 28px;
+    -fx-pref-height: 28px;
+    -fx-alignment: center;
+    -fx-text-alignment: center;
+    -fx-text-fill: -color-white;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-background-color: -tone-forest-940;
+    -fx-border-color: -tone-ivory-260;
+    -fx-border-width: 1px;
+    -fx-border-radius: 100;
+    -fx-background-radius: 100;
+}
+
+.nav-user-name {
+    -fx-text-fill: -color-white;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+}
+
+.menu-button:showing .nav-user-name {
+    -fx-text-fill: -color-text;
+}
+
+.nav-menu-active .label {
+    -fx-text-fill: -app-accent;
+    -fx-font-weight: bold;
+}
+
+.navbar .nav-divider {
+    -fx-opacity: .6;
+    -fx-padding: 0 4;
+}
+
+.navbar .nav-divider:vertical .line {
+    -fx-background-color: transparent;
+    -fx-border-color: -tone-white-650;
+    -fx-border-width: 0 0 0 1;
+    -fx-border-insets: 0;
+}
+
+.navbar {
+    -fx-background-color: linear-gradient(to bottom, -tone-ink-450, transparent);
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-min-height: 88;
+}
+
+.nav-item {
+    -fx-text-fill: -tone-white-850;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-background-radius: 9;
+    -fx-border-radius: 0;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-padding: 5 10 3 10;
+    -fx-border-width: 0;
+}
+
+.nav-item:active {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.btn-nav-login {
+    -fx-text-fill: -color-white;
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+    -fx-padding: 6px 16px;
+    -fx-background-color: -tone-white-120;
+    -fx-border-color: -tone-white-260;
+    -fx-min-height: 48;
+    -fx-pref-height: 48;
+    -fx-max-height: 48;
+    -fx-background-radius: 24;
+    -fx-border-radius: 24;
+}
+
+.notification-bell-container {
+    -fx-background-radius: 24;
+    -fx-border-radius: 24;
+}
+
+.navbar .menu-button > .arrow-button > .arrow {
+    -fx-background-color: -color-text-secondary;
+}
+
+.nav-item:hover {
+    -fx-text-fill: -color-white;
+}

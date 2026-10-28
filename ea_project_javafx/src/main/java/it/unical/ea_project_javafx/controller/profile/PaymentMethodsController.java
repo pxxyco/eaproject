@@ -1,76 +1,150 @@
 package it.unical.ea_project_javafx.controller.profile;
 
+import com.google.gson.JsonParser;
+import com.google.gson.JsonObject;
+import it.unical.ea_project_javafx.ui.BookingPresentation;
+import it.unical.ea_project_javafx.ui.chart.OrganizerEconomy;
+import javafx.scene.control.Pagination;
 import it.unical.ea_project_javafx.security.UserSession;
-import it.unical.ea_project_javafx.util.BackgroundHelper;
+import it.unical.ea_project_javafx.service.api.ApiService;
+import it.unical.ea_project_javafx.ui.UiText;
+import it.unical.ea_project_javafx.ui.ViewSupport;
+import it.unical.ea_project_javafx.ui.background.BackgroundHelper;
+import it.unical.ea_project_javafx.ui.dialog.PopupFactory;
+import it.unical.ea_project_javafx.util.JsonCodec;
+import java.time.YearMonth;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Map;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
-import java.io.IOException;
+public class PaymentMethodsController implements AutoCloseable {
+    @FXML
+    private VBox financeEconomyHost;
+    @FXML
+    private Label payoutReadiness, financeUpdatedLabel;
+    private OrganizerEconomy economy;
 
-public class PaymentMethodsController {
+    @Override
+    public void close() {
+        ledgerGeneration++;
+        if (economy != null)
+            economy.close();
+    }
 
-    @FXML private ImageView bgImageView;
-    @FXML private StackPane navbarContainer;
-    @FXML private Label titleLabel;
-    @FXML private Label subtitleLabel;
-    @FXML private Label statusMessageLabel;
+    @FXML
+    private ImageView bgImageView;
+    @FXML
+    private StackPane navbarContainer;
+    @FXML
+    private Label titleLabel;
+    @FXML
+    private Label subtitleLabel;
+    @FXML
+    private Label statusMessageLabel;
 
-    @FXML private VBox travelerPaymentsSection;
-    @FXML private TableView<CardRow> cardsTable;
-    @FXML private TableColumn<CardRow, String> cardTypeColumn;
-    @FXML private TableColumn<CardRow, String> cardNumberColumn;
-    @FXML private TableColumn<CardRow, String> cardHolderColumn;
-    @FXML private TableColumn<CardRow, String> expiryColumn;
-    @FXML private TableColumn<CardRow, Void> actionColumn;
+    @FXML
+    private VBox travelerPaymentsSection;
+    @FXML
+    private TableView<CardRow> cardsTable;
+    @FXML
+    private TableColumn<CardRow, String> cardTypeColumn;
+    @FXML
+    private TableColumn<CardRow, String> cardNumberColumn;
+    @FXML
+    private TableColumn<CardRow, String> cardHolderColumn;
+    @FXML
+    private TableColumn<CardRow, String> expiryColumn;
+    @FXML
+    private TableColumn<CardRow, Void> actionColumn;
 
-    @FXML private TextField cardHolderField;
-    @FXML private TextField cardNumberField;
-    @FXML private TextField expiryField;
-    @FXML private PasswordField cvvField;
+    @FXML
+    private TextField cardHolderField;
+    @FXML
+    private TextField cardNumberField;
+    @FXML
+    private TextField expiryField;
+    @FXML
+    private PasswordField cvvField;
 
-    @FXML private VBox organizerPayoutSection;
-    @FXML private TextField payoutHolderField;
-    @FXML private TextField ibanField;
-    @FXML private TextField bicField;
+    @FXML
+    private VBox organizerPayoutSection;
+    @FXML
+    private TextField payoutHolderField;
+    @FXML
+    private TextField ibanField;
+    @FXML
+    private TextField bicField;
 
+    @FXML
+    private Button addCardButton, payoutButton;
+    @FXML
+    private Label paidLabel, pendingLabel, cancelledLabel;
+    @FXML
+    private TableView<JsonObject> ledgerTable;
+    @FXML
+    private TableColumn<JsonObject, String> ledgerTitle, ledgerParticipant, ledgerAmount, ledgerStatus, ledgerDate;
+    @FXML
+    private Pagination ledgerPagination;
+    private long ledgerGeneration;
     private final UserSession userSession = UserSession.getInstance();
     private final ObservableList<CardRow> mockCards = FXCollections.observableArrayList();
 
     @FXML
     public void initialize() {
         BackgroundHelper.setupBackground(bgImageView);
-        loadNavbar();
+        ViewSupport.loadNavbar(navbarContainer);
         setupViewByRole();
         setupCardsTable();
-    }
-
-    private void loadNavbar() {
-        try {
-            FXMLLoader loader = new FXMLLoader(
-                    getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml")
-            );
-            Parent navbar = loader.load();
-            navbarContainer.getChildren().setAll(navbar);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        if ("ORGANIZER".equals(userSession.getRole())) {
+            economy = new OrganizerEconomy();
+            financeEconomyHost.getChildren().setAll(economy);
+            economy.refresh();
+            ledgerTitle.setCellValueFactory(c -> new SimpleStringProperty(JsonCodec.string(c.getValue(), "title", "")));
+            ledgerParticipant.setCellValueFactory(
+                    c -> new SimpleStringProperty(JsonCodec.string(c.getValue(), "participant", "")));
+            ledgerAmount.setCellValueFactory(
+                    c -> new SimpleStringProperty(UiText.money(c.getValue().get("amount").getAsBigDecimal())));
+            ledgerStatus.setCellValueFactory(c -> new SimpleStringProperty(
+                    BookingPresentation.paymentStatus(JsonCodec.string(c.getValue(), "status", ""))));
+            ledgerDate.setCellValueFactory(c -> new SimpleStringProperty(formatLedgerDate(c.getValue())));
+            ledgerTable.setPlaceholder(
+                    new Label("Nessun pagamento registrato. Le prenotazioni senza pagamento non sono incassi."));
+            ledgerTable.setFixedCellSize(48);
+            ledgerPagination.currentPageIndexProperty().addListener((o, a, b) -> loadLedger());
+            loadLedger();
+            ApiService.callDetailed(ApiService.BASE_URL + "/api/account/settings", null, ApiService.Method.GET, r -> {
+                var d = JsonParser.parseString(r.body()).getAsJsonObject();
+                payoutHolderField.setText(JsonCodec.string(d, "payoutHolder", ""));
+                ibanField.setText(JsonCodec.string(d, "iban", ""));
+                bicField.setText(JsonCodec.string(d, "bic", ""));
+                payoutReadiness.setText(ibanField.getText().isBlank() ? "Completa le coordinate per gli accrediti"
+                        : "Coordinate salvate · conto dimostrativo");
+            }, message -> ViewSupport.error(statusMessageLabel, message), null);
+        } else
+            loadCards();
     }
 
     private void setupViewByRole() {
         boolean isOrganizer = "ORGANIZER".equalsIgnoreCase(userSession.getRole());
 
         if (isOrganizer) {
-            titleLabel.setText("Dati di Incasso & Payout");
-            subtitleLabel.setText("Configura il conto bancario su cui ricevere gli accrediti per i tuoi viaggi.");
+            titleLabel.setText("Incassi e payout");
+            subtitleLabel.setText("Controlla i pagamenti registrati e gestisci le coordinate del tuo account.");
             travelerPaymentsSection.setVisible(false);
             travelerPaymentsSection.setManaged(false);
             organizerPayoutSection.setVisible(true);
@@ -85,6 +159,41 @@ public class PaymentMethodsController {
         }
     }
 
+    private String formatLedgerDate(JsonObject entry) {
+        try {
+            return ApiService.<LocalDateTime>fromJson(entry.get("date").toString(), LocalDateTime.class)
+                    .format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"));
+        } catch (RuntimeException e) {
+            return "—";
+        }
+    }
+
+    @FXML
+    private void handleRefreshFinance() {
+        if (economy != null)
+            economy.refresh();
+        loadLedger();
+    }
+
+    private void loadLedger() {
+        long version = ++ledgerGeneration;
+        ApiService.callDetailed(
+                ApiService.BASE_URL + "/api/payments/organizer/finance?page=" + ledgerPagination.getCurrentPageIndex(),
+                null, ApiService.Method.GET, r -> {
+                    if (version != ledgerGeneration)
+                        return;
+                    JsonObject data = JsonParser.parseString(r.body()).getAsJsonObject();
+                    paidLabel.setText(UiText.money(data.get("paid").getAsBigDecimal()));
+                    pendingLabel.setText(UiText.money(data.get("pending").getAsBigDecimal()));
+                    cancelledLabel.setText(UiText.money(data.get("cancelled").getAsBigDecimal()));
+                    ledgerPagination.setPageCount(Math.max(1, data.get("totalPages").getAsInt()));
+                    financeUpdatedLabel.setText(
+                            "Aggiornato alle " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm")));
+                    ledgerTable.getItems().clear();
+                    data.getAsJsonArray("entries").forEach(e -> ledgerTable.getItems().add(e.getAsJsonObject()));
+                }, message -> ViewSupport.error(statusMessageLabel, message), null);
+    }
+
     private void setupCardsTable() {
         cardTypeColumn.setCellValueFactory(cell -> cell.getValue().typeProperty());
         cardNumberColumn.setCellValueFactory(cell -> cell.getValue().numberProperty());
@@ -97,84 +206,120 @@ public class PaymentMethodsController {
                 deleteBtn.getStyleClass().add("danger-action-button");
                 deleteBtn.setOnAction(e -> {
                     CardRow row = getTableView().getItems().get(getIndex());
-                    mockCards.remove(row);
-                    showSuccess("Carta rimossa con successo.");
+                    PopupFactory.showConfirmation(
+                            PopupFactory.resolveRoot(cardsTable),
+                            "Rimuovere questa carta?", "La carta di prova verrà rimossa dal tuo account.",
+                            PopupFactory.Size.COMPACT,
+                            () -> ApiService.callDetailed(ApiService.BASE_URL + "/api/account/cards/" + row.id, null,
+                                    ApiService.Method.DELETE, r -> {
+                                        mockCards.remove(row);
+                                        ViewSupport.success(statusMessageLabel, "Carta rimossa.");
+                                    }, message -> ViewSupport.error(statusMessageLabel, message),
+                                    deleteBtn::setDisable));
                 });
             }
 
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty) setGraphic(null);
-                else setGraphic(deleteBtn);
+                if (empty)
+                    setGraphic(null);
+                else
+                    setGraphic(deleteBtn);
             }
         });
 
-        mockCards.add(new CardRow("Visa", "•••• •••• •••• 4242", userSession.getUsername(), "12/26"));
+        cardsTable.setPlaceholder(new Label("Nessuna carta di prova salvata."));
         cardsTable.setItems(mockCards);
     }
 
     @FXML
     private void handleAddCard(ActionEvent event) {
-        clearMessage();
+        ViewSupport.clear(statusMessageLabel);
         String holder = cardHolderField.getText();
         String number = cardNumberField.getText();
         String expiry = expiryField.getText();
         String cvv = cvvField.getText();
 
-        if (blank(holder) || blank(number) || blank(expiry) || blank(cvv)) {
-            showError("Compila tutti i campi della carta.");
+        if (UiText.isBlank(holder) || UiText.isBlank(number) || UiText.isBlank(expiry) || UiText.isBlank(cvv)) {
+            ViewSupport.error(statusMessageLabel, "Compila tutti i campi della carta.");
             return;
         }
 
-        String masked = "•••• •••• •••• " + (number.length() >= 4 ? number.substring(number.length() - 4) : "1111");
-        mockCards.add(new CardRow("Mastercard", masked, holder, expiry));
+        String digits = number.replaceAll("\\s", "");
+        if (!digits.matches("[0-9]{13,19}") || !luhn(digits)) {
+            ViewSupport.error(statusMessageLabel, "Inserisci un numero di carta di prova valido.");
+            return;
+        }
+        if (!cvv.matches("[0-9]{3,4}") || !expiry.matches("(0[1-9]|1[0-2])/[0-9]{2}")) {
+            ViewSupport.error(statusMessageLabel, "Controlla CVV e scadenza MM/AA.");
+            return;
+        }
+        YearMonth date = YearMonth.of(2000 + Integer.parseInt(expiry.substring(3)),
+                Integer.parseInt(expiry.substring(0, 2)));
+        if (date.isBefore(YearMonth.now())) {
+            ViewSupport.error(statusMessageLabel, "La carta è scaduta.");
+            return;
+        }
+        String brand = digits.startsWith("4") ? "Visa"
+                : digits.startsWith("34") || digits.startsWith("37") ? "Amex"
+                        : digits.startsWith("5") || digits.startsWith("2") ? "Mastercard" : "Altro";
+        var payload = Map.of("brand", brand, "last4", digits.substring(digits.length() - 4), "holder", holder.strip(),
+                "expiryMonth", date.getMonthValue(), "expiryYear", date.getYear());
+        ApiService.callDetailed(ApiService.BASE_URL + "/api/account/cards", ApiService.toJson(payload),
+                ApiService.Method.POST, r -> {
+                    cardHolderField.clear();
+                    cardNumberField.clear();
+                    expiryField.clear();
+                    cvvField.clear();
+                    ViewSupport.success(statusMessageLabel, "Carta di prova salvata.");
+                    loadCards();
+                }, message -> ViewSupport.error(statusMessageLabel, message), addCardButton::setDisable);
+    }
 
-        cardHolderField.clear();
-        cardNumberField.clear();
-        expiryField.clear();
-        cvvField.clear();
-
-        showSuccess("Nuova carta salvata con successo (Mock).");
+    private void loadCards() {
+        ApiService.callDetailed(ApiService.BASE_URL + "/api/account/cards", null, ApiService.Method.GET, r -> {
+            mockCards.clear();
+            for (var e : JsonParser.parseString(r.body()).getAsJsonArray()) {
+                var c = e.getAsJsonObject();
+                CardRow row = new CardRow(JsonCodec.string(c, "brand", ""), "•••• " + JsonCodec.string(c, "last4", ""),
+                        JsonCodec.string(c, "holder", ""), String
+                                .format("%02d/%02d", c.get("expiryMonth").getAsInt(),
+                                        c.get("expiryYear").getAsInt() % 100));
+                row.id = c.get("id").getAsLong();
+                mockCards.add(row);
+            }
+        }, message -> ViewSupport.error(statusMessageLabel, message), null);
     }
 
     @FXML
     private void handleSavePayout(ActionEvent event) {
-        clearMessage();
-        String iban = ibanField.getText();
-        String holder = payoutHolderField.getText();
+        var payload = Map.of("holder", payoutHolderField.getText(), "iban", ibanField.getText(), "bic",
+                bicField.getText());
+        ApiService.callDetailed(ApiService.BASE_URL + "/api/account/payout", ApiService.toJson(payload),
+                ApiService.Method.PUT,
+                r -> ViewSupport.success(statusMessageLabel, "Coordinate salvate nell'account dimostrativo."),
+                message -> ViewSupport.error(statusMessageLabel, message), payoutButton::setDisable);
+    }
 
-        if (blank(iban) || blank(holder)) {
-            showError("Inserisci almeno IBAN e Intestatario del conto.");
-            return;
+    private boolean luhn(String digits) {
+        int total = 0;
+        boolean twice = false;
+        for (int i = digits.length() - 1; i >= 0; i--) {
+            int n = digits.charAt(i) - '0';
+            if (twice) {
+                n *= 2;
+                if (n > 9)
+                    n -= 9;
+            }
+            total += n;
+            twice = !twice;
         }
-
-        showSuccess("Dati di accredito IBAN salvati correttamente!");
-    }
-
-    private boolean blank(String s) { return s == null || s.isBlank(); }
-
-    private void showError(String msg) {
-        statusMessageLabel.setText(msg);
-        statusMessageLabel.getStyleClass().setAll("status-message", "status-error");
-        statusMessageLabel.setVisible(true);
-        statusMessageLabel.setManaged(true);
-    }
-
-    private void showSuccess(String msg) {
-        statusMessageLabel.setText(msg);
-        statusMessageLabel.getStyleClass().setAll("status-message", "status-success");
-        statusMessageLabel.setVisible(true);
-        statusMessageLabel.setManaged(true);
-    }
-
-    private void clearMessage() {
-        statusMessageLabel.setText("");
-        statusMessageLabel.setVisible(false);
-        statusMessageLabel.setManaged(false);
+        return total % 10 == 0;
     }
 
     public static class CardRow {
+        private long id;
         private final SimpleStringProperty type;
         private final SimpleStringProperty number;
         private final SimpleStringProperty holder;
@@ -187,9 +332,20 @@ public class PaymentMethodsController {
             this.expiry = new SimpleStringProperty(expiry);
         }
 
-        public SimpleStringProperty typeProperty() { return type; }
-        public SimpleStringProperty numberProperty() { return number; }
-        public SimpleStringProperty holderProperty() { return holder; }
-        public SimpleStringProperty expiryProperty() { return expiry; }
+        public SimpleStringProperty typeProperty() {
+            return type;
+        }
+
+        public SimpleStringProperty numberProperty() {
+            return number;
+        }
+
+        public SimpleStringProperty holderProperty() {
+            return holder;
+        }
+
+        public SimpleStringProperty expiryProperty() {
+            return expiry;
+        }
     }
 }

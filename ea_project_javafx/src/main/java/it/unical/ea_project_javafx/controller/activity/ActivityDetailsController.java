@@ -1,89 +1,140 @@
 package it.unical.ea_project_javafx.controller.activity;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializer;
-
-import com.google.gson.JsonParser;
 import it.unical.ea_project_javafx.controller.activity.photo.PhotoContainerController;
 import it.unical.ea_project_javafx.controller.activity.photo.PhotoGalleryController;
 import it.unical.ea_project_javafx.controller.activity.reviews.ReviewController;
 import it.unical.ea_project_javafx.controller.activity.reviews.ReviewsContainerController;
+import it.unical.ea_project_javafx.controller.chat.ChatController;
 import it.unical.ea_project_javafx.controller.common.LoadingOverlayController;
-import it.unical.ea_project_javafx.dto.ActivityDTO;
-import it.unical.ea_project_javafx.dto.ReviewDTO;
-import it.unical.ea_project_javafx.dto.TripDTO;
+import it.unical.ea_project_javafx.dto.activity.ActivityDTO;
+import it.unical.ea_project_javafx.dto.review.ReviewDTO;
+import it.unical.ea_project_javafx.dto.trip.TripDTO;
+import it.unical.ea_project_javafx.navigation.SceneNavigator;
 import it.unical.ea_project_javafx.security.UserSession;
-import it.unical.ea_project_javafx.util.ApiService;
-import it.unical.ea_project_javafx.util.BackgroundHelper;
-import it.unical.ea_project_javafx.util.FullscreenPhotoViewer;
-import it.unical.ea_project_javafx.util.PopupFactory;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.stage.Stage;
-import javafx.scene.layout.VBox;
-
+import it.unical.ea_project_javafx.service.api.ApiService;
+import it.unical.ea_project_javafx.service.favorites.FavoriteService;
+import it.unical.ea_project_javafx.ui.ViewSupport;
+import it.unical.ea_project_javafx.ui.animation.PageTransitions;
+import it.unical.ea_project_javafx.ui.background.BackgroundHelper;
+import it.unical.ea_project_javafx.ui.dialog.FullscreenPhotoViewer;
+import it.unical.ea_project_javafx.ui.dialog.PopupFactory;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
+import javafx.geometry.Rectangle2D;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.DatePicker;
+import javafx.scene.control.Label;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.Tooltip;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.shape.Rectangle;
+import javafx.stage.Stage;
 
-public class ActivityDetailsController {
+public class ActivityDetailsController implements AutoCloseable {
+    private boolean closed;
 
-    @FXML private StackPane root;
-    @FXML private StackPane bodyContainer;
-    @FXML private StackPane loadingOverlay;
-    @FXML private StackPane newRecCard;
-    @FXML private StackPane hero;
-    @FXML private StackPane navbarContainer;
+    @Override
+    public void close() {
+        closed = true;
+        closeInAppModal();
+        bodyContainer.getChildren().clear();
+        itinerarioNode = null;
+    }
 
-    @FXML private Button btnDescrizione;
-    @FXML private Button btnFoto;
-    @FXML private Button btnItinerario;
-    @FXML private Button btnRecensioni;
-    @FXML private Button btnPrenota;
+    @FXML
+    private StackPane root;
+    @FXML
+    private StackPane bodyContainer;
+    @FXML
+    private StackPane loadingOverlay;
+    @FXML
+    private StackPane newRecCard;
+    @FXML
+    private StackPane hero;
+    @FXML
+    private StackPane navbarContainer;
 
-    @FXML private Spinner<Integer> spinnerPartecipanti;
+    @FXML
+    private Button btnDescrizione;
+    @FXML
+    private Button btnFoto;
+    @FXML
+    private Button btnItinerario;
+    @FXML
+    private Button btnRecensioni;
+    @FXML
+    private Button btnPrenota;
+    @FXML
+    private Label bookingAvailabilityLabel;
+    @FXML
+    private Button btnContactOrganizer;
 
-    @FXML private DatePicker datePicker;
+    @FXML
+    private Spinner<Integer> spinnerPartecipanti;
 
-    @FXML private ImageView heroImage;
-    @FXML private ImageView bgImageView;
+    @FXML
+    private DatePicker datePicker;
 
-    @FXML private Label lblCategoria;
+    @FXML
+    private ImageView heroImage;
+    @FXML
+    private ImageView bgImageView;
 
-    @FXML private Label lblLocalita;
+    @FXML
+    private Label lblCategoria;
 
-    @FXML private Label lblPrezzo;
+    @FXML
+    private Label lblLocalita;
 
-    @FXML private Label lblRating;
+    @FXML
+    private Label lblPrezzo;
 
-    @FXML private Label lblTitolo;
+    @FXML
+    private Label lblRating;
 
-    @FXML private Label lblTotale;
+    @FXML
+    private Label lblTitolo;
 
-    @FXML private VBox bookingCard;
+    @FXML
+    private Label lblTotale;
 
-    @FXML private LoadingOverlayController loadingCardController;
-    @FXML private ReviewController newRecCardController;
+    @FXML
+    private VBox bookingCard;
 
-    @FXML private ScrollPane contentScroll;
-    @FXML private Button btnFavorite;
+    @FXML
+    private LoadingOverlayController loadingCardController;
+    @FXML
+    private ReviewController newRecCardController;
+
+    @FXML
+    private ScrollPane contentScroll;
+    @FXML
+    private Button btnFavorite;
+    @FXML
+    private Label experienceSummary;
 
     private ReviewsContainerController recensioniController;
     private PopupFactory.Handle activeInAppModal;
@@ -100,15 +151,6 @@ public class ActivityDetailsController {
     private String id;
     private Type myType;
 
-    private final static Gson GSON = new GsonBuilder()
-            .registerTypeAdapter(LocalDateTime.class, (JsonDeserializer<LocalDateTime>) (json, type, ctx) ->
-                    LocalDateTime.parse(json.getAsString()))
-            .registerTypeAdapter(LocalDate.class, (JsonDeserializer<LocalDate>) (json, type, ctx) ->
-                    LocalDate.parse(json.getAsString()))
-            .registerTypeAdapter(LocalTime.class, (JsonDeserializer<LocalTime>) (json, type, ctx) ->
-                    LocalTime.parse(json.getAsString()))
-            .create();
-
     public enum Type {
         ACTIVITY, TRIP
     }
@@ -120,52 +162,49 @@ public class ActivityDetailsController {
 
         BackgroundHelper.setupBackground(bgImageView);
 
-        setupNavbar();
-        
+        ViewSupport.loadNavbar(navbarContainer);
+
         loadingOverlay.setVisible(true);
         boolean isOrganizer = "ORGANIZER".equalsIgnoreCase(UserSession.getInstance().getRole());
-        // bookingCard.setVisible(!isOrganizer);
-        // bookingCard.setManaged(!isOrganizer);
-        
-        btnInitialize();
-
-        // USE FOR DEBUG AND TEST
-        //loadData(Type.ACTIVITY, "1");
-    }
-
-    private void setupNavbar() {
-
-        try {
-
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/it/unical/ea_project_javafx/fxml/common/navbar.fxml"));
-            Node navbar = loader.load();
-            navbarContainer.getChildren().setAll(navbar);
-
-        } catch (IOException e) {
-            System.err.println("Errore nel caricamento della navbar: " + e.getMessage());
-            e.printStackTrace();
+        if (btnContactOrganizer != null) {
+            btnContactOrganizer.setVisible(!isOrganizer);
+            btnContactOrganizer.setManaged(!isOrganizer);
+        }
+        if (isOrganizer) {
+            bookingCard.setManaged(false);
+            bookingCard.setVisible(false);
         }
 
+        btnInitialize();
+
+    }
+
+    @FXML
+    private void handleBackToExperiences() {
+        SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/home/mainview.fxml", null);
     }
 
     public void loadData(Type type, String id) {
-        
+
         myType = type;
         this.id = id;
-        
+
         switch (type) {
             case ACTIVITY -> {
                 ApiService.get(
                         ApiService.BASE_URL + "/api/activities/" + id,
-                        response ->  {
-                            activity = GSON.fromJson(response.body(), ActivityDTO.class);
-
+                        response -> {
+                            if (closed)
+                                return;
+                            activity = ApiService.fromJson(response.body(), ActivityDTO.class);
 
                             setActivityData();
                             setupFavorite();
                             handleDescrizione(null);
+                            Platform.runLater(this::prepareItinerary);
                             contentScroll.setManaged(true);
                             contentScroll.setVisible(true);
+                            PageTransitions.appear(contentScroll);
                             loadingOverlay.setVisible(false);
                         },
                         () -> {
@@ -175,21 +214,24 @@ public class ActivityDetailsController {
                         loading -> {
                             loadingOverlay.setVisible(true);
                             loadingCardController.setMessage("Caricamento...");
-                        }
-                );
+                        });
             }
             case TRIP -> {
                 ApiService.get(
                         ApiService.BASE_URL + "/api/trips/" + id,
-                        response ->  {
-                            trip = GSON.fromJson(response.body(), TripDTO.class);
+                        response -> {
+                            if (closed)
+                                return;
+                            trip = ApiService.fromJson(response.body(), TripDTO.class);
 
                             setTripData();
                             setupFavorite();
                             handleDescrizione(null);
+                            Platform.runLater(this::prepareItinerary);
                             loadingOverlay.setVisible(false);
                             contentScroll.setManaged(true);
                             contentScroll.setVisible(true);
+                            PageTransitions.appear(contentScroll);
                         },
                         () -> {
                             loadingOverlay.setVisible(true);
@@ -198,10 +240,43 @@ public class ActivityDetailsController {
                         loading -> {
                             loadingOverlay.setVisible(true);
                             loadingCardController.setMessage("Caricamento...");
-                        }
-                );
+                        });
             }
         }
+    }
+
+    @FXML
+    private void handleContactOrganizer() {
+        if (!UserSession.getInstance().isLoggedIn()) {
+            SceneNavigator.getInstance().loadScene("/it/unical/ea_project_javafx/fxml/login/login.fxml", null);
+            return;
+        }
+        Long organizer = trip != null ? trip.getCreatedByUserId()
+                : activity != null ? activity.getCreatedByUserId() : null;
+        if (organizer != null)
+            try {
+                FXMLLoader loader = new FXMLLoader(
+                        getClass().getResource("/it/unical/ea_project_javafx/fxml/chat/chat.fxml"));
+                loader.setControllerFactory(type -> {
+                    if (type == ChatController.class)
+                        return new ChatController(true);
+                    try {
+                        return type.getDeclaredConstructor().newInstance();
+                    } catch (Exception ex) {
+                        throw new IllegalStateException(ex);
+                    }
+                });
+                Parent view = loader.load();
+                var chat = (ChatController) loader.getController();
+                chat.compact();
+                var popup = PopupFactory.show(PopupFactory.resolveRoot(root), view, PopupFactory.Size.MEDIUM);
+                popup.onClosed(chat::close);
+                chat.openOrganizer(organizer);
+            } catch (IOException ex) {
+                PopupFactory.showMessage(PopupFactory.resolveRoot(root), "Messaggi",
+                        "Non è stato possibile aprire la chat.", PopupFactory.Size.COMPACT);
+            }
+
     }
 
     private void setActivityData() {
@@ -219,11 +294,13 @@ public class ActivityDetailsController {
         lblLocalita.setText(activity.getCity());
         lblCategoria.setText(activity.getCategory());
         lblTitolo.setText(activity.getTitle());
-        lblRating.setText( "★ " + formatRating(activity.getAverageRating()));
+        lblRating.setText("★ " + formatRating(activity.getAverageRating()));
 
         BigDecimal prezzo = activity.getPrice() != null ? BigDecimal.valueOf(activity.getPrice()) : null;
         lblPrezzo.setText(setMoneyCurrency(prezzo));
         lblTotale.setText(setMoneyCurrency(prezzo));
+        updateBookingAvailability();
+        updateExperienceSummary();
 
     }
 
@@ -239,17 +316,37 @@ public class ActivityDetailsController {
             datePicker.setValue(LocalDate.now());
         }
 
-        lblCategoria.setText("TRIP");
+        lblCategoria.setText("Viaggio");
         lblLocalita.setText(trip.getDestinationCity());
         lblTitolo.setText(trip.getTitle());
 
-        lblRating.setText( "★ " + formatRating(trip.getAverageRating()));
+        lblRating.setText("★ " + formatRating(trip.getAverageRating()));
         lblPrezzo.setText(setMoneyCurrency(trip.getTotalPrice()));
         lblTotale.setText(setMoneyCurrency(trip.getTotalPrice()));
+        updateBookingAvailability();
+        updateExperienceSummary();
 
     }
 
     private void setHeroImage(String imageUrl) {
+        if (!heroImage.fitWidthProperty().isBound()) {
+            heroImage.setPreserveRatio(false);
+            heroImage.fitWidthProperty().bind(hero.widthProperty());
+            hero.widthProperty().addListener((o, a, b) -> updateHeroViewport());
+            hero.heightProperty().addListener((o, a, b) -> updateHeroViewport());
+            heroImage.imageProperty().addListener((o, a, image) -> {
+                if (image != null)
+                    image.progressProperty().addListener((v, x, y) -> updateHeroViewport());
+                updateHeroViewport();
+            });
+            heroImage.fitHeightProperty().bind(hero.heightProperty());
+            Rectangle clip = new Rectangle();
+            clip.widthProperty().bind(hero.widthProperty());
+            clip.heightProperty().bind(hero.heightProperty());
+            clip.setArcWidth(32);
+            clip.setArcHeight(32);
+            hero.setClip(clip);
+        }
 
         String defaultImageUrl = "/photo/default/experience.jpg";
         String requestedImageUrl = (imageUrl == null || imageUrl.isBlank()) ? defaultImageUrl : imageUrl;
@@ -269,6 +366,35 @@ public class ActivityDetailsController {
 
         heroImage.setImage(image);
 
+    }
+
+    private void updateExperienceSummary() {
+        String period;
+        if (myType == Type.TRIP) {
+            var formatter = DateTimeFormatter.ofPattern("dd MMM yyyy", Locale.ITALIAN);
+            period = (trip.getStartDate() == null ? "Data da definire" : trip.getStartDate().format(formatter))
+                    + (trip.getEndDate() == null ? "" : " → " + trip.getEndDate().format(formatter));
+        } else {
+            var formatter = DateTimeFormatter.ofPattern("dd MMM yyyy, HH:mm", Locale.ITALIAN);
+            period = (activity.getStartDate() == null ? "Data da definire" : activity.getStartDate().format(formatter))
+                    + (activity.getDurationMinutes() == null ? "" : " · " + activity.getDurationMinutes() + " minuti");
+        }
+        Integer available = myType == Type.TRIP ? trip.getAvailableSeats() : activity.getAvailableSeats();
+        experienceSummary.setText(period + (available == null ? "" : " · " + available + " posti disponibili"));
+    }
+
+    private void updateHeroViewport() {
+        Image image = heroImage.getImage();
+        if (image == null || image.getWidth() <= 0 || hero.getWidth() <= 0 || hero.getHeight() <= 0)
+            return;
+        double target = hero.getWidth() / hero.getHeight();
+        double width = image.getWidth(), height = image.getHeight();
+        if (width / height > target)
+            width = height * target;
+        else
+            height = width / target;
+        heroImage.setViewport(
+                new Rectangle2D((image.getWidth() - width) / 2, (image.getHeight() - height) / 2, width, height));
     }
 
     private String resolveUrl(String url) {
@@ -291,16 +417,15 @@ public class ActivityDetailsController {
                 ApiService.BASE_URL + endpoint,
                 response -> {
                     if (myType == Type.TRIP) {
-                        trip = GSON.fromJson(response.body(), TripDTO.class);
+                        trip = ApiService.fromJson(response.body(), TripDTO.class);
                         lblRating.setText("★ " + formatRating(trip.getAverageRating()));
                     } else {
-                        activity = GSON.fromJson(response.body(), ActivityDTO.class);
+                        activity = ApiService.fromJson(response.body(), ActivityDTO.class);
                         lblRating.setText("★ " + formatRating(activity.getAverageRating()));
                     }
                 },
                 null,
-                null
-        );
+                null);
     }
 
     private String formatRating(Number rating) {
@@ -357,7 +482,7 @@ public class ActivityDetailsController {
             double height = stage.getScene() != null ? stage.getScene().getHeight() : 720;
 
             Scene previousScene = root.getScene();
-            controller.setOnBackLink( () -> {
+            controller.setOnBackLink(() -> {
                 stage.setScene(previousScene);
             });
 
@@ -373,7 +498,7 @@ public class ActivityDetailsController {
 
     private void openNewReview() {
 
-        newRecCardController.setOnClose( () -> {
+        newRecCardController.setOnClose(() -> {
             newRecCard.setManaged(false);
             newRecCard.setVisible(false);
             newRecCard.setDisable(true);
@@ -408,21 +533,49 @@ public class ActivityDetailsController {
     }
 
     private void showSection(Node node) {
-        bodyContainer.getChildren().setAll(node);
+        // Keep only the two deliberately preloaded sections between tab changes.
+        bodyContainer.getChildren()
+                .removeIf(child -> child != node && child != descrizioneNode && child != itinerarioNode);
+        for (Node child : bodyContainer.getChildren()) {
+            child.setVisible(false);
+            child.setManaged(false);
+        }
+        if (!bodyContainer.getChildren().contains(node))
+            bodyContainer.getChildren().add(node);
+        node.setVisible(true);
+        node.setManaged(true);
+        node.setOpacity(1);
+        PageTransitions.appear(node);
     }
 
+    private void prepareItinerary() {
+        if (closed || itinerarioNode != null)
+            return;
+        itinerarioNode = loadSection("itinerary.fxml");
+        itinerarioNode.setManaged(false);
+        itinerarioNode.setOpacity(0);
+        bodyContainer.getChildren().add(0, itinerarioNode);
+        if (itinerarioNode instanceof Region region) {
+            region.resize(Math.max(600, bodyContainer.getWidth()), 400);
+            region.applyCss();
+            region.layout();
+        }
+        itinerarioNode.setVisible(false);
+    }
 
     @FXML
     private void handleDescrizione(ActionEvent event) {
         setActiveButton(btnDescrizione);
-        descrizioneNode = loadSection("activity-description.fxml");
+        if (descrizioneNode == null)
+            descrizioneNode = loadSection("activity-description.fxml");
         showSection(descrizioneNode);
     }
 
     @FXML
     private void handleItinerario(ActionEvent event) {
         setActiveButton(btnItinerario);
-        itinerarioNode = loadSection("itinerary.fxml");
+        if (itinerarioNode == null)
+            itinerarioNode = loadSection("itinerary.fxml");
         showSection(itinerarioNode);
     }
 
@@ -440,11 +593,11 @@ public class ActivityDetailsController {
         showSection(recensioniNode);
     }
 
-    private void btnInitialize(){
+    private void btnInitialize() {
         sectionButtons = List.of(btnDescrizione, btnItinerario, btnFoto, btnRecensioni);
 
-        SpinnerValueFactory.IntegerSpinnerValueFactory valueFactory =
-                new SpinnerValueFactory.IntegerSpinnerValueFactory(1, 5, 1);
+        SpinnerValueFactory.IntegerSpinnerValueFactory valueFactory = new SpinnerValueFactory.IntegerSpinnerValueFactory(
+                1, 5, 1);
         spinnerPartecipanti.setValueFactory(valueFactory);
 
         spinnerPartecipanti.valueProperty().addListener((obs, oldValue, newValue) -> {
@@ -452,18 +605,64 @@ public class ActivityDetailsController {
         });
     }
 
+    private String bookingUnavailableReason() {
+        String status = myType == Type.TRIP ? (trip == null ? null : trip.getStatus())
+                : (activity == null ? null : activity.getStatus());
+        if ("CANCELLED".equals(status))
+            return "Questa esperienza è stata annullata.";
+        if ("COMPLETED".equals(status))
+            return "Questa esperienza si è già conclusa.";
+        if (!"PUBLISHED".equals(status))
+            return "Questa esperienza non è attualmente pubblicata.";
+        boolean future = myType == Type.TRIP
+                ? trip.getStartDate() != null && trip.getStartDate().isAfter(LocalDate.now())
+                : activity.getStartDate() != null && activity.getStartDate().isAfter(LocalDateTime.now());
+        if (!future)
+            return "Questa esperienza è già iniziata o terminata e non è più prenotabile.";
+        Integer available = myType == Type.TRIP ? trip.getAvailableSeats() : activity.getAvailableSeats();
+        if (available == null || available < 1)
+            return "Non ci sono più posti disponibili per questa esperienza.";
+        return null;
+    }
+
+    private void updateBookingAvailability() {
+        boolean organizer = "ORGANIZER".equalsIgnoreCase(UserSession.getInstance().getRole());
+        String reason = organizer ? "Le prenotazioni sono riservate agli account Traveler."
+                : bookingUnavailableReason();
+        btnPrenota.setDisable(reason != null);
+        btnPrenota.setText(reason == null ? "Prenota Ora" : "Non prenotabile");
+        bookingAvailabilityLabel.setText(reason == null ? "Prenota per la data indicata nel programma." : reason);
+        spinnerPartecipanti.setDisable(reason != null);
+        if (reason == null) {
+            int available = myType == Type.TRIP ? trip.getAvailableSeats() : activity.getAvailableSeats();
+            int selected = spinnerPartecipanti.getValue() == null ? 1 : spinnerPartecipanti.getValue();
+            spinnerPartecipanti.setValueFactory(
+                    new SpinnerValueFactory.IntegerSpinnerValueFactory(1, available, Math.min(selected, available)));
+        }
+        datePicker.setDisable(true);
+        datePicker.setTooltip(new Tooltip("La data è stabilita dal programma dell'esperienza."));
+    }
+
     @FXML
     private void handlePrenota() {
-        if ("ORGANIZER".equalsIgnoreCase(UserSession.getInstance().getRole())) return;
+        if ("ORGANIZER".equalsIgnoreCase(UserSession.getInstance().getRole()))
+            return;
         if (!UserSession.getInstance().isLoggedIn()) {
             showAlert(Alert.AlertType.WARNING, "Accesso richiesto", "Devi effettuare il login per prenotare.");
             return;
         }
         if ((myType == Type.ACTIVITY && activity == null) || (myType == Type.TRIP && trip == null)) {
-            showAlert(Alert.AlertType.ERROR, "Esperienza non disponibile", "Non è stato possibile caricare i dati necessari alla prenotazione.");
+            showAlert(Alert.AlertType.ERROR, "Esperienza non disponibile",
+                    "Non è stato possibile caricare i dati necessari alla prenotazione.");
             return;
         }
 
+        String unavailable = bookingUnavailableReason();
+        if (unavailable != null) {
+            updateBookingAvailability();
+            showBookingFailure(unavailable);
+            return;
+        }
         int seats = spinnerPartecipanti.getValue() == null ? 1 : spinnerPartecipanti.getValue();
         BigDecimal unitPrice = myType == Type.ACTIVITY
                 ? BigDecimal.valueOf(activity.getPrice() == null ? 0.0 : activity.getPrice())
@@ -476,7 +675,7 @@ public class ActivityDetailsController {
         HBox heading = new HBox(12);
         heading.setAlignment(Pos.CENTER_LEFT);
         VBox labels = new VBox(4);
-        HBox.setHgrow(labels, javafx.scene.layout.Priority.ALWAYS);
+        HBox.setHgrow(labels, Priority.ALWAYS);
         Label title = new Label("Conferma prenotazione");
         title.getStyleClass().add("app-modal-title");
         Label subtitle = new Label(myType == Type.TRIP ? "Riepilogo del viaggio" : "Riepilogo dell'attività");
@@ -489,17 +688,19 @@ public class ActivityDetailsController {
         heading.getChildren().addAll(labels, close);
 
         Label experience = new Label(lblTitolo.getText() == null ? "Esperienza" : lblTitolo.getText());
-        experience.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
-        Label date = new Label("Data: " + (datePicker.getValue() == null ? "secondo il programma dell'esperienza" : datePicker.getValue().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
+        experience.getStyleClass().add("checkout-experience");
+        Label date = new Label("Data: " + (datePicker.getValue() == null ? "secondo il programma dell'esperienza"
+                : datePicker.getValue().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))));
         date.getStyleClass().add("app-modal-subtitle");
         HBox seatsRow = new HBox(8, new Label("Partecipanti"), new Region(), new Label(String.valueOf(seats)));
         seatsRow.setAlignment(Pos.CENTER_LEFT);
-        HBox.setHgrow(seatsRow.getChildren().get(1), javafx.scene.layout.Priority.ALWAYS);
+        HBox.setHgrow(seatsRow.getChildren().get(1), Priority.ALWAYS);
         HBox totalRow = new HBox(8, new Label("Totale stimato"), new Region(), new Label(setMoneyCurrency(total)));
         totalRow.setAlignment(Pos.CENTER_LEFT);
-        HBox.setHgrow(totalRow.getChildren().get(1), javafx.scene.layout.Priority.ALWAYS);
-        totalRow.getChildren().get(2).setStyle("-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #e7e5e4;");
-        Label note = new Label("Controlla i dati prima di confermare. La prenotazione verrà registrata sul tuo account.");
+        HBox.setHgrow(totalRow.getChildren().get(1), Priority.ALWAYS);
+        totalRow.getChildren().get(2).getStyleClass().add("checkout-total");
+        Label note = new Label(
+                "Controlla i dati prima di confermare. La prenotazione verrà registrata sul tuo account.");
         note.setWrapText(true);
         note.getStyleClass().add("app-modal-subtitle");
         HBox actions = new HBox(10);
@@ -522,21 +723,28 @@ public class ActivityDetailsController {
         String endpoint = myType == Type.TRIP
                 ? "/api/bookings/trips/" + trip.getTripId()
                 : "/api/bookings/activities/" + activity.getActivityId();
-        ApiService.post(ApiService.BASE_URL + endpoint + "?seats=" + seats, null,
-                response -> javafx.application.Platform.runLater(() -> {
+        ApiService.callDetailed(ApiService.BASE_URL + endpoint + "?seats=" + seats, null, ApiService.Method.POST,
+                response -> Platform.runLater(() -> {
+                    if (myType == Type.TRIP)
+                        trip.setAvailableSeats(trip.getAvailableSeats() - seats);
+                    else
+                        activity.setAvailableSeats(activity.getAvailableSeats() - seats);
+                    updateBookingAvailability();
                     closeInAppModal();
-                    showAlert(Alert.AlertType.INFORMATION, "Prenotazione completata", "La prenotazione è stata registrata correttamente.");
+                    showAlert(Alert.AlertType.INFORMATION, "Prenotazione completata",
+                            "La prenotazione è stata registrata correttamente.");
                 }),
-                () -> javafx.application.Platform.runLater(() -> showBookingFailure(
-                        "Non è stato possibile registrare la prenotazione. Verifica la disponibilità e riprova.")), null);
+                message -> Platform.runLater(() -> showBookingFailure(message)),
+                null);
     }
-
 
     private void showBookingFailure(String message) {
         closeInAppModal();
-        if (root == null) return;
+        if (root == null)
+            return;
         VBox panel = new VBox(14);
         panel.setMaxWidth(480);
+        panel.setMaxHeight(Region.USE_PREF_SIZE);
         Label title = new Label("Prenotazione non completata");
         title.getStyleClass().add("app-modal-title");
         Label body = new Label(message);
@@ -565,7 +773,8 @@ public class ActivityDetailsController {
     }
 
     private void showAlert(Alert.AlertType type, String titleText, String message) {
-        if (root == null) return;
+        if (root == null)
+            return;
         closeInAppModal();
         VBox panel = new VBox(14);
         panel.setMaxWidth(480);
@@ -609,54 +818,30 @@ public class ActivityDetailsController {
         active.getStyleClass().add("section-button-active");
     }
 
-
-    private String favoriteUrl() {
-        return ApiService.BASE_URL + "/api/favorites/"
-                + (myType == Type.ACTIVITY ? "activities/" : "trips/") + id;
-    }
-
     private void setupFavorite() {
-        boolean isTraveler = UserSession.getInstance().isLoggedIn()
-                && !"ORGANIZER".equalsIgnoreCase(UserSession.getInstance().getRole());
-        btnFavorite.setVisible(isTraveler);
-        btnFavorite.setManaged(isTraveler);
-        if (!isTraveler) return;
-
-        ApiService.get(favoriteUrl(),
-                response -> updateFavoriteButton(readFavorite(response.body())),
-                () -> updateFavoriteButton(false),
-                null);
+        boolean traveler = UserSession.getInstance().isLoggedIn()
+                && "TRAVELER".equalsIgnoreCase(UserSession.getInstance().getRole());
+        btnFavorite.setVisible(traveler);
+        btnFavorite.setManaged(traveler);
+        if (!traveler)
+            return;
+        FavoriteService.state(FavoriteService.Target.valueOf(myType.name()), id, this::updateFavoriteButton,
+                message -> updateFavoriteButton(false), btnFavorite::setDisable);
     }
 
     @FXML
     private void handleFavorite() {
-        btnFavorite.setDisable(true);
-        ApiService.callDetailed(favoriteUrl(), null,
-                isFavorite ? ApiService.Method.DELETE : ApiService.Method.POST,
-                response -> {
-                    updateFavoriteButton(readFavorite(response.body()));
-                    btnFavorite.setDisable(false);
-                },
-                message -> {
-                    btnFavorite.setDisable(false);
-                    showAlert(Alert.AlertType.ERROR, "Preferiti", message);
-                },
-                null);
-    }
-
-    private boolean readFavorite(String body) {
-        try {
-            return JsonParser.parseString(body).getAsJsonObject().get("favorite").getAsBoolean();
-        } catch (Exception ex) {
-            return false;
-        }
+        FavoriteService.set(FavoriteService.Target.valueOf(myType.name()), id, !isFavorite,
+                this::updateFavoriteButton,
+                message -> showAlert(Alert.AlertType.ERROR, "Preferiti", message), btnFavorite::setDisable);
     }
 
     private void updateFavoriteButton(boolean favorite) {
         isFavorite = favorite;
         btnFavorite.setText(favorite ? "♥" : "♡");
         btnFavorite.getStyleClass().remove("active");
-        if (favorite) btnFavorite.getStyleClass().add("active");
+        if (favorite)
+            btnFavorite.getStyleClass().add("active");
     }
 
 }

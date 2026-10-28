@@ -2,6 +2,8 @@ package com.example.application
 
 import android.app.Activity
 import androidx.activity.compose.BackHandler
+import com.example.application.dto.UserDTO
+import com.example.application.screens.organizer.OrganizerDashboardScreen
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
@@ -10,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -26,68 +29,89 @@ import com.example.application.screens.activity.ExperienceDetailScreen
 
 @Composable
 fun MainContainer() {
-    val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    val isLoggedIn = UserSession.isLoggedIn
-
     LaunchedEffect(AppStatus.reloadTick) {
-        if (!ApiService.isBackendReachable()) {
-            AppStatus.showNetworkError()
-        } else {
-            AuthRepository.restoreSession()
-        }
+        if (!ApiService.isBackendReachable()) AppStatus.showNetworkError()
+        else AuthRepository.restoreSession()
     }
+    AppErrorDialog(onExit = { (context as? Activity)?.finishAffinity() })
+    MainNavigation(user = UserSession.user, onLogout = { AuthRepository.logout() })
+}
 
-    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
+@Composable
+internal fun MainNavigation(
+    user: UserDTO?,
+    onLogout: () -> Unit,
+    homeContent: (@Composable (Modifier) -> Unit)? = null,
+    tripsContent: (@Composable (Modifier) -> Unit)? = null,
+    dashboardContent: @Composable (Long, Modifier) -> Unit = { id, modifier -> OrganizerDashboardScreen(id, modifier) }
+) {
+    var destination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
+    var returnToPersonalTab by rememberSaveable { mutableStateOf(false) }
     var openExperience by rememberSaveable(stateSaver = ExperienceRef.Saver) {
         mutableStateOf<ExperienceRef?>(null)
     }
+    val organizer = user?.role?.trim().equals("ORGANIZER", ignoreCase = true)
+    val current = when (destination) {
+        AppDestinations.DASHBOARD, AppDestinations.`MY-TRIP` -> if (organizer) AppDestinations.DASHBOARD else AppDestinations.`MY-TRIP`
+        else -> destination
+    }
+    BackHandler(enabled = current != AppDestinations.HOME) {
+        destination = AppDestinations.HOME
+        returnToPersonalTab = false
+    }
     BackHandler(enabled = openExperience != null) { openExperience = null }
-    AppErrorDialog(onExit = { (context as? Activity)?.finishAffinity() })
-
-    NavigationSuiteScaffold(
-        navigationSuiteItems = {
-            AppDestinations.entries.forEach { destination ->
-                item(
-                    icon = {
-                        Icon(
-                            painterResource(destination.icon),
-                            contentDescription = destination.label
-                        )
-                    },
-                    label = { Text(destination.label) },
-                    selected = destination == currentDestination,
-                    onClick = {
-                        openExperience = null
-                        currentDestination = destination
-                    }
-                )
-            }
+    NavigationSuiteScaffold(navigationSuiteItems = {
+        listOf(AppDestinations.HOME, if (organizer) AppDestinations.DASHBOARD else AppDestinations.`MY-TRIP`, AppDestinations.PROFILE).forEach { destinationItem ->
+            item(
+                icon = { Icon(painterResource(destinationItem.icon), contentDescription = null) },
+                label = { Text(destinationItem.label) },
+                selected = destinationItem == current,
+                onClick = {
+                    openExperience = null
+                    destination = destinationItem
+                    returnToPersonalTab = false
+                }
+            )
         }
-    ) {
+    }) {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+            val contentModifier = Modifier.padding(innerPadding)
             val experience = openExperience
             if (experience != null) {
                 ExperienceDetailScreen(
                     experience = experience,
                     onBack = { openExperience = null },
-                    modifier = Modifier.padding(innerPadding)
+                    modifier = contentModifier
                 )
-            } else when (currentDestination) {
-                AppDestinations.HOME -> HomeScreen(
-                    onExperienceClick = {openExperience = it },
-                    modifier = Modifier.padding(innerPadding)
-                )
-                AppDestinations.`MY-TRIP` -> MyTrip(
-                    onExperienceClick = {openExperience = it },
-                    modifier = Modifier.padding(innerPadding)
-                )
-                AppDestinations.PROFILE -> ProfileScreen(
-                    user = UserSession.user,
-                    onLoginSuccess = { },
-                    onLogoutClick = { AuthRepository.logout() },
-                    modifier = Modifier.padding(innerPadding)
-                )
+            } else key(user?.id, user?.role) {
+                when (current) {
+                    AppDestinations.HOME -> {
+                        if (homeContent != null) homeContent(contentModifier)
+                        else HomeScreen(onExperienceClick = { openExperience = it }, modifier = contentModifier)
+                    }
+                    AppDestinations.`MY-TRIP` -> {
+                        if (user == null) MyTrip(modifier = contentModifier, onLoginClick = {
+                            returnToPersonalTab = true
+                            destination = AppDestinations.PROFILE
+                        }) else if (tripsContent != null) tripsContent(contentModifier)
+                        else MyTrip(onExperienceClick = { openExperience = it }, modifier = contentModifier)
+                    }
+                    AppDestinations.DASHBOARD -> user?.id?.let { dashboardContent(it, contentModifier) }
+                    AppDestinations.PROFILE -> ProfileScreen(
+                        user = user,
+                        onLoginSuccess = {
+                            if (returnToPersonalTab) destination = AppDestinations.`MY-TRIP`
+                            returnToPersonalTab = false
+                        },
+                        onLogoutClick = {
+                            returnToPersonalTab = false
+                            destination = AppDestinations.PROFILE
+                            onLogout()
+                        },
+                        modifier = contentModifier
+                    )
+                }
             }
         }
     }
@@ -98,6 +122,7 @@ enum class AppDestinations(
     val icon: Int,
 ) {
     HOME("Esplora", R.drawable.ic_home),
-    `MY-TRIP`("Preferiti", R.drawable.ic_favorite), //TODO Sostituire con Preferiti e non Trip (Trip è gestito dalla home inseme ad Activity)
+    `MY-TRIP`("Preferiti", R.drawable.ic_favorite),
+    DASHBOARD("Dashboard", R.drawable.ic_dashboard),
     PROFILE("Account", R.drawable.ic_account_box),
 }
