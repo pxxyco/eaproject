@@ -154,7 +154,6 @@ fun SearchTopBar(
                     modifier = Modifier.width(fieldWidth)
                 ) {
                     suggestions.forEachIndexed { index, suggestion ->
-                        // Ogni voce entra con un leggero ritardo (effetto a cascata)
                         var visible by remember(suggestion) { mutableStateOf(false) }
                         LaunchedEffect(suggestion) {
                             delay(index * 40L)
