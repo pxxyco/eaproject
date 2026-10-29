@@ -6,7 +6,9 @@
             %-5level %logger{1.} - %encode{%msg}{CRLF}%n</Property>
         <Property name="AUDIT_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [request=%X{requestId}] %-5level
             %encode{%msg}{CRLF}%n</Property>
-        <Property name="LOG_DIR">${sys:eaproject.log.dir:-${env:LOG_DIR:-logs}}</Property>
+        <!-- Rinominata in FINAL_LOG_DIR per evitare conflitti con la variabile d'ambiente
+        env:LOG_DIR -->
+        <Property name="FINAL_LOG_DIR">${sys:eaproject.log.dir:-${env:LOG_DIR:-logs}}</Property>
     </Properties>
 
     <Appenders>
@@ -15,8 +17,8 @@
         </Console>
 
         <RollingRandomAccessFile name="LogToRollingFile"
-            fileName="${LOG_DIR}/app.log"
-            filePattern="${LOG_DIR}/$${date:yyyy-MM}/app-%d{yyyy-MM-dd}-%i.log.gz"
+            fileName="${FINAL_LOG_DIR}/app.log"
+            filePattern="${FINAL_LOG_DIR}/$${date:yyyy-MM}/app-%d{yyyy-MM-dd}-%i.log.gz"
             immediateFlush="true"
             bufferSize="262144">
             <PatternLayout pattern="${LOG_PATTERN}" />
@@ -27,7 +29,7 @@
             </Policies>
 
             <DefaultRolloverStrategy max="20">
-                <Delete basePath="${LOG_DIR}" maxDepth="2">
+                <Delete basePath="${FINAL_LOG_DIR}" maxDepth="2">
                     <IfFileName glob="*/app-*.log.gz" />
                     <IfLastModified age="30d" />
                 </Delete>
@@ -36,8 +38,8 @@
 
 
         <RollingRandomAccessFile name="AuditFile"
-            fileName="${LOG_DIR}/audit.log"
-            filePattern="${LOG_DIR}/$${date:yyyy-MM}/audit-%d{yyyy-MM-dd}-%i.log.gz"
+            fileName="${FINAL_LOG_DIR}/audit.log"
+            filePattern="${FINAL_LOG_DIR}/$${date:yyyy-MM}/audit-%d{yyyy-MM-dd}-%i.log.gz"
             immediateFlush="true">
             <PatternLayout pattern="${AUDIT_PATTERN}" />
 
@@ -47,7 +49,7 @@
             </Policies>
 
             <DefaultRolloverStrategy max="10">
-                <Delete basePath="${LOG_DIR}" maxDepth="2">
+                <Delete basePath="${FINAL_LOG_DIR}" maxDepth="2">
                     <IfFileName glob="*/audit-*.log.gz" />
                     <IfLastModified age="90d" />
                 </Delete>
