@@ -2,7 +2,7 @@ name: ea-project
 
 services:
   db:
-    image: postgres:17-alpine
+    image: ${DB_IMAGE:-postgres:17-alpine}
     environment:
       POSTGRES_DB: ${DB_NAME:-eaproject}
       POSTGRES_USER: ${DB_USER:-eaproject}

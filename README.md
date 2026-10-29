@@ -33,9 +33,20 @@ Applicazione per cercare, prenotare e gestire viaggi, escursioni e attività tur
 
 Maven e Gradle non vanno installati: ogni progetto ha il proprio wrapper (`mvnw`, `gradlew`).
 
-## Avvio rapido con Docker
+## Avvio con Docker
 
 Il backend in Docker risponde su **https://localhost:8443** con lo stesso certificato di cui si fidano i client Android e JavaFX.
+
+### Con le immagini consegnate
+
+Copia nella cartella principale del progetto i file consegnati a parte (`ea-project-images.tar`, `.env`, `certs/server.p12`), poi:
+
+```bash
+docker load -i ea-project-images.tar
+docker compose up -d
+```
+
+### Dal codice
 
 1. Copia `keystore.p12` in `ea-project/src/main/resources/` e `application-dev.properties` nella stessa cartella.
 2. Crea il file `.env` e il keystore per Docker:
@@ -52,11 +63,13 @@ Il backend in Docker risponde su **https://localhost:8443** con lo stesso certif
    docker compose up -d --build
    ```
 
-4. Controlla che risponda (`-k` perché il certificato è self-signed):
+### Verifica
 
-   ```bash
-   curl -k https://localhost:8443/api/health
-   ```
+Controlla che risponda (`-k` perché il certificato è self-signed):
+
+```bash
+curl -k https://localhost:8443/api/health
+```
 
 Per fermare tutto: `docker compose down`. Per cancellare anche i dati: `docker compose down -v`.
 
@@ -96,6 +109,17 @@ Per default si collega a `https://localhost:8443`. Dettagli in [ea_project_javaf
 ## Documentazione delle API
 
 Con il backend avviato, Swagger UI è disponibile su **https://localhost:8443/swagger-ui.html**.
+
+## Account demo
+
+Password per tutti: `Demo2026!`
+
+| Utente | Ruolo |
+|---|---|
+| `calabria.tour` | Organizzatore |
+| `sud.experience` | Organizzatore |
+| `mario.rossi` | Viaggiatore |
+| `giulia.bianchi` | Viaggiatore |
 
 ## Funzionalità implementate
 
