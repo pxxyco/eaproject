@@ -1,0 +1,27 @@
+@import "../../app.css";
+
+.splash-pane {
+    -fx-background-color: -color-text-inverse;
+}
+
+.splash-title-label {
+    -fx-text-fill: -tone-white-940;
+    -fx-font-weight: bold;
+    -fx-font-size: 22px;
+}
+
+.splash-label {
+    -fx-text-fill: -tone-white-940;
+    -fx-font-weight: bold;
+    -fx-font-size: 15px;
+}
+
+.btn-splash {
+    -fx-background-color: -color-ivory;
+    -fx-text-fill: -color-text-inverse;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+    -fx-background-radius: 8px;
+    -fx-padding: 10px 24px;
+    -fx-cursor: hand;
+}

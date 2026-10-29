@@ -1,0 +1,129 @@
+.section-card-title {
+    -fx-text-fill: -color-white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.section-card-subtitle {
+    -fx-text-fill: -tone-white-550;
+    -fx-font-size: 12px;
+}
+
+.descrizione-testo {
+    -fx-text-fill: -tone-white-850;
+    -fx-font-size: 13px;
+    -fx-line-spacing: 3px;
+}
+
+.empty-text {
+    -fx-text-fill: -tone-white-550;
+    -fx-font-size: 13px;
+}
+
+.extra {
+    -fx-text-fill: -color-white;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.hero-title {
+    -fx-font-size: 28px;
+    -fx-font-weight: 800;
+    -fx-text-fill: -color-white;
+}
+
+.hero-subtitle {
+    -fx-font-size: 15px;
+    -fx-text-fill: -tone-white-850;
+}
+
+.section-header {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-white;
+}
+
+.sub-heading {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-white;
+}
+
+.booking-count-value {
+    -fx-font-size: 34px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-ivory;
+}
+
+.stat-label {
+    -fx-text-fill: -tone-white-650;
+}
+
+.label {
+    -fx-text-fill: -color-text;
+}
+
+.page-title,
+.account-title,
+.dash-title {
+    -fx-font-size: 32;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text;
+}
+
+.page-subtitle,
+.account-subtitle,
+.dash-subtitle {
+    -fx-font-size: 14;
+    -fx-text-fill: -color-text-muted;
+}
+
+.eyebrow,
+.account-kicker {
+    -fx-font-size: 11;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text-muted;
+}
+
+.section-title {
+    -fx-font-size: 20;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text;
+}
+
+.section-subtitle {
+    -fx-font-size: 12;
+    -fx-text-fill: -color-text-muted;
+}
+
+.field-label,
+.form-label,
+.input-label {
+    -fx-font-size: 12;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text-secondary;
+}
+
+.text-muted,
+.hint,
+.password-hint {
+    -fx-font-size: 11;
+    -fx-text-fill: -color-text-muted;
+    -fx-wrap-text: true;
+}
+
+.text-strong,
+.checkout-experience {
+    -fx-font-size: 16;
+    -fx-font-weight: bold;
+}
+
+.checkout-total {
+    -fx-font-size: 20;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-ivory;
+}
+
+.itinerary-detail-label {
+    -fx-text-fill: -color-white;
+}

@@ -1,0 +1,83 @@
+package it.unical.ea_project.controller.advice;
+
+import it.unical.ea_project.security.LoginBlockedException;
+import jakarta.servlet.http.HttpServletRequest;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
+
+@RestControllerAdvice
+public class ApiExceptionHandler {
+
+    @ExceptionHandler(LoginBlockedException.class)
+    public ResponseEntity<Map<String, Object>> handleLoginBlocked(LoginBlockedException exception) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header("Retry-After", Long.toString(exception.retryAfterSeconds()))
+                .header("Cache-Control", "no-store")
+                .body(Map.of("status", 429, "code", "ERR-105", "message", exception.getReason()));
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Map<String, Object>> handleResponseStatus(ResponseStatusException exception,
+            HttpServletRequest request) {
+        HttpStatus status = HttpStatus.resolve(exception.getStatusCode().value());
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("status", exception.getStatusCode().value());
+        body.put("message", exception.getReason() == null ? "Richiesta non valida." : exception.getReason());
+        var response = ResponseEntity.status(status == null ? HttpStatus.INTERNAL_SERVER_ERROR : status);
+        if (exception.getStatusCode().value() == 429) {
+            String path = request.getRequestURI();
+            boolean photoUpload = path.endsWith("/photos") || path.endsWith("/cover")
+                    || path.endsWith("/profile-photo");
+            response.header("Retry-After", photoUpload ? "2" : path.startsWith("/api/chat") ? "30"
+                    : path.equals("/api/users/login") ? "60" : "900");
+            response.header("Cache-Control", "no-store");
+        }
+        return response.body(body);
+    }
+
+    @ExceptionHandler(OptimisticLockingFailureException.class)
+    public ResponseEntity<Map<String, Object>> concurrentEdit(Exception exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("status", 409, "message",
+                "Un altro utente ha aggiornato questi dati. Ricarica prima di salvare."));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalArgument(IllegalArgumentException exception) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("status", HttpStatus.BAD_REQUEST.value());
+        body.put("message", exception.getMessage() == null || exception.getMessage().isBlank()
+                ? "I dati inviati non sono validi."
+                : exception.getMessage());
+        return ResponseEntity.badRequest().body(body);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> handleAccessDenied(AccessDeniedException exception) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("status", HttpStatus.FORBIDDEN.value());
+        body.put("message", exception.getMessage() == null || exception.getMessage().isBlank()
+                ? "Non hai i permessi per eseguire questa operazione."
+                : exception.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleDataConflict(
+            DataIntegrityViolationException exception, HttpServletRequest request) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("status", HttpStatus.CONFLICT.value());
+        String message = request.getRequestURI().startsWith("/api/users")
+                ? "Username o email già in uso."
+                : "Conflitto con i dati già presenti. Controlla i valori inseriti e riprova.";
+        body.put("message", message);
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+}

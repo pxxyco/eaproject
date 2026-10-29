@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+<StackPane stylesheets="@../../css/screens/organizer/dashboard.css" xmlns:fx="http://javafx.com/fxml/1" fx:id="rootStackPane"
+    fx:controller="it.unical.ea_project_javafx.controller.organizer.OrganizerDashboardController">
+    <VBox alignment="TOP_CENTER">
+        <VBox spacing="36" maxWidth="1220"
+            styleClass="organizer-workspace, organizer-dashboard-fragment">
+            <HBox alignment="CENTER_LEFT" spacing="18">
+                <VBox spacing="8" HBox.hgrow="ALWAYS">
+                    <Label text="AREA ORGANIZER" styleClass="account-kicker" />
+                    <Label text="Il tuo centro operativo" styleClass="dash-title" />
+                    <Label
+                        text="Le prossime partenze, le prenotazioni ricevute e le azioni che ti servono ogni giorno."
+                        styleClass="dash-subtitle" wrapText="true" />
+                </VBox>
+                <Button text="Aggiorna" onAction="#handleRefresh" styleClass="btn-secondary" />
+                <Button text="+ Crea offerta" onAction="#handleOpenCreateOffer"
+                    styleClass="btn-primary, btn-create-offer" />
+            </HBox>
+            <Label fx:id="dashboardErrorLabel" visible="false" managed="false" wrapText="true" />
+            <HBox spacing="16">
+                <VBox spacing="9" styleClass="kpi-card" HBox.hgrow="ALWAYS">
+                    <Label text="Offerte pubblicate" styleClass="kpi-title" />
+                    <Label fx:id="publishedCountLabel" text="—" styleClass="kpi-value" />
+                </VBox>
+                <VBox spacing="9" styleClass="kpi-card" HBox.hgrow="ALWAYS">
+                    <Label text="Bozze da completare" styleClass="kpi-title" />
+                    <Label fx:id="draftCountLabel" text="—" styleClass="kpi-value" />
+                </VBox>
+                <VBox spacing="9" styleClass="kpi-card" HBox.hgrow="ALWAYS">
+                    <Label text="Posti prenotati attivi" styleClass="kpi-title" />
+                    <Label fx:id="totalSubscribersLabel" text="—" styleClass="kpi-value" />
+                </VBox>
+                <VBox spacing="9" styleClass="kpi-card" HBox.hgrow="ALWAYS">
+                    <Label text="Pagamenti registrati" styleClass="kpi-title" />
+                    <Label fx:id="totalRevenueLabel" text="—" styleClass="kpi-value" />
+                </VBox>
+            </HBox>
+            <HBox spacing="12">
+                <Button text="Gestisci offerte ed eventi →" onAction="#handleCatalog"
+                    styleClass="btn-secondary" />
+                <Button text="Prenotazioni e iscritti →" onAction="#handleBookings"
+                    styleClass="btn-secondary" />
+                <Button text="Incassi e payout →" onAction="#handleFinance"
+                    styleClass="btn-secondary" />
+            </HBox>
+            <VBox fx:id="economyHost" spacing="18" />
+            <VBox spacing="18" styleClass="account-panel">
+                <Label text="Da completare" styleClass="section-header" />
+                <Label text="Riprendi le bozze e preparale alla pubblicazione."
+                    styleClass="section-subtitle" />
+                <VBox fx:id="draftActions" spacing="12" />
+            </VBox>
+            <VBox spacing="20">
+                <Label text="In partenza" styleClass="section-header" />
+                <Label
+                    text="Le prime cinque esperienze pubblicate in programma. Apri il catalogo per vedere anche bozze e archivio."
+                    styleClass="dash-subtitle" wrapText="true" />
+                <TableView fx:id="offersTable" prefHeight="350" minHeight="120"
+                    styleClass="custom-table, organizer-offers-table">
+                    <columns>
+                        <TableColumn fx:id="titleColumn" text="Offerta" prefWidth="245" />
+                        <TableColumn fx:id="typeColumn" text="Tipo" prefWidth="90" />
+                        <TableColumn fx:id="placeColumn" text="Luogo" prefWidth="105" />
+                        <TableColumn fx:id="periodColumn" text="Date" prefWidth="180" />
+                        <TableColumn fx:id="stateColumn" text="Stato" prefWidth="100" />
+                        <TableColumn fx:id="seatsColumn" text="Posti liberi / totali"
+                            prefWidth="120" />
+                        <TableColumn fx:id="priceColumn" text="Prezzo" prefWidth="90" />
+                        <TableColumn fx:id="actionsColumn" text="Azioni" prefWidth="190"
+                            sortable="false" />
+                    </columns>
+                </TableView>
+            </VBox>
+            <VBox spacing="20">
+                <Label text="Le ultime prenotazioni" styleClass="section-header" />
+                <TableView fx:id="subscribersTable" prefHeight="275" styleClass="custom-table">
+                    <columns>
+                        <TableColumn fx:id="participantColumn" text="Partecipante" prefWidth="260" />
+                        <TableColumn fx:id="activityColumn" text="Esperienza" prefWidth="430" />
+                        <TableColumn fx:id="dateColumn" text="Ricevuta il" prefWidth="200" />
+                    </columns>
+                    <columnResizePolicy>
+                        <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                    </columnResizePolicy>
+                </TableView>
+            </VBox>
+        </VBox>
+    </VBox>
+</StackPane>

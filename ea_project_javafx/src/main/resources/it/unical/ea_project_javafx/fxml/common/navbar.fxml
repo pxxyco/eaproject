@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.shape.SVGPath?>
+<?import javafx.scene.control.Button?>
+<BorderPane stylesheets="@../../css/app.css" styleClass="navbar"
+    xmlns="http://javafx.com/javafx/21.0.2"
+    xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="it.unical.ea_project_javafx.controller.common.NavbarController">
+    <left>
+        <HBox alignment="CENTER_LEFT" spacing="16.0">
+            <children>
+                <StackPane minWidth="64.0" prefWidth="64.0" maxWidth="64.0"
+                    minHeight="56.0" prefHeight="56.0" maxHeight="56.0">
+                    <ImageView fitHeight="56.0" fitWidth="56.0" preserveRatio="true"
+                        smooth="true" styleClass="nav-logo" accessibleText="EA Project">
+                        <image>
+                            <Image url="@../../images/monogram_render.png" />
+                        </image>
+                    </ImageView>
+                </StackPane>
+                <Separator orientation="VERTICAL" minHeight="42" prefHeight="42" maxHeight="42"
+                    styleClass="nav-divider" />
+
+                <HBox alignment="CENTER_LEFT" spacing="20.0" styleClass="nav-links">
+                    <children>
+                        <Label fx:id="homeNavItem" onMouseClicked="#handleHome"
+                            styleClass="nav-item" text="Home" />
+                        <Label fx:id="dashboardNavItem" onMouseClicked="#handleDashboard"
+                            styleClass="nav-item" text="Dashboard" />
+
+                        <!-- Voci Traveler -->
+                        <Label fx:id="travelerHistoryNavItem" onMouseClicked="#handleBookingHistory"
+                            styleClass="nav-item" text="Storico" />
+                        <Label fx:id="travelerFavoritesNavItem" onMouseClicked="#handleFavorites"
+                            styleClass="nav-item" text="Preferiti" />
+                        <Label fx:id="travelerItineraryNavItem"
+                            onMouseClicked="#handleCollaborativeItinerary" styleClass="nav-item"
+                            text="Itinerari" />
+
+                        <!-- Voci Organizer -->
+                        <Label fx:id="organizerEventsNavItem"
+                            onMouseClicked="#handleOrganizerEvents" styleClass="nav-item"
+                            text="Offerte ed Eventi" />
+                        <Label fx:id="organizerAttendeesNavItem"
+                            onMouseClicked="#handleOrganizerAttendees" styleClass="nav-item"
+                            text="Prenotazioni &amp; Iscritti" />
+                    </children>
+                </HBox>
+            </children>
+        </HBox>
+    </left>
+
+    <right>
+        <HBox alignment="CENTER_RIGHT" spacing="12.0" BorderPane.alignment="CENTER">
+            <children>
+                <Label fx:id="loginLabel" onMouseClicked="#handleLogin" styleClass="btn-nav-login"
+                    text="Login" />
+
+                <StackPane fx:id="notificationBellContainer" onMouseClicked="#handleNotifications"
+                    styleClass="notification-bell-container" prefWidth="48.0" prefHeight="48.0"
+                    minWidth="48.0" minHeight="48.0" maxWidth="48.0" maxHeight="48.0"
+                    visible="false" managed="false" accessibleText="Notifiche"
+                    focusTraversable="true">
+                    <Label text="🔔" styleClass="notification-bell-icon" />
+                    <Label fx:id="notificationBadge" text="" styleClass="notification-badge"
+                        visible="false" managed="false" />
+                </StackPane>
+                <Button fx:id="messagesButton" onAction="#handleChat"
+                    styleClass="notification-bell-container, nav-messages-button"
+                    visible="false" managed="false" accessibleText="Messaggi">
+                    <graphic>
+                        <StackPane>
+                            <SVGPath
+                                content="M 3 1 L 13 1 Q 16 1 16 4 L 16 10 Q 16 13 13 13 L 7 13 L 2 17 L 3 13 Q 0 13 0 10 L 0 4 Q 0 1 3 1 Z"
+                                styleClass="nav-message-icon" />
+                            <Label fx:id="messagesBadge" styleClass="nav-message-badge"
+                                visible="false" managed="false" mouseTransparent="true" />
+                        </StackPane>
+                    </graphic>
+                </Button>
+                <MenuButton fx:id="userMenuButton" styleClass="btn-nav-login" text=""
+                    prefHeight="48" minHeight="48" maxHeight="48"
+                    accessibleText="Menu utente">
+                    <graphic>
+                        <HBox alignment="CENTER_LEFT" spacing="8.0" styleClass="nav-user-graphic">
+                            <StackPane fx:id="userAvatarContainer" prefWidth="28.0"
+                                prefHeight="28.0" minWidth="28.0" minHeight="28.0" maxWidth="28.0"
+                                maxHeight="28.0" styleClass="nav-avatar-container">
+                                <Label fx:id="userAvatarInitialsLabel" text="U"
+                                    styleClass="nav-avatar-initials" />
+                                <ImageView fx:id="userAvatarImageView" fitWidth="28.0"
+                                    fitHeight="28.0" preserveRatio="false" smooth="true"
+                                    visible="false" managed="false" />
+                            </StackPane>
+                            <Label fx:id="userMenuLabel" text="Utente" styleClass="nav-user-name" />
+                        </HBox>
+                    </graphic>
+                    <items>
+                        <MenuItem fx:id="profileMenuItem" onAction="#handleProfileInfos"
+                            text="Il mio Profilo" />
+                        <MenuItem fx:id="settingsMenuItem" onAction="#handleSettings"
+                            text="Impostazioni &amp; Sicurezza" />
+                        <MenuItem fx:id="paymentsMenuItem" onAction="#handlePaymentMethods"
+                            text="Metodi di Pagamento" />
+                        <SeparatorMenuItem />
+                        <MenuItem fx:id="supportMenuItem" onAction="#handleSupport"
+                            text="Centro Assistenza" />
+                        <SeparatorMenuItem />
+                        <MenuItem onAction="#handleLogout" styleClass="logout-item" text="Logout" />
+                    </items>
+                </MenuButton>
+            </children>
+        </HBox>
+    </right>
+
+    <padding>
+        <Insets bottom="20.0" left="24.0" right="24.0" top="20.0" />
+    </padding>
+</BorderPane>

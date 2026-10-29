@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<VBox stylesheets="@../../css/screens/login/login.css" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="it.unical.ea_project_javafx.controller.login.RoleSelectionStepController"
+    spacing="20.0">
+
+    <Button onAction="#goToLogin" styleClass="btn-back" text="← Torna al Login" />
+    <Label styleClass="header-title" text="Seleziona Account" />
+
+    <HBox onMouseClicked="#selectPersonalRole" spacing="16.0" styleClass="role-card">
+        <VBox alignment="CENTER_LEFT">
+            <Label styleClass="role-title" text="Account Personal" />
+            <Label styleClass="role-desc" text="Per esploratori e viaggiatori singoli" />
+        </VBox>
+    </HBox>
+
+    <HBox onMouseClicked="#selectBusinessRole" spacing="16.0" styleClass="role-card">
+        <VBox alignment="CENTER_LEFT">
+            <Label styleClass="role-title" text="Account Business" />
+            <Label styleClass="role-desc" text="Per organizzatori, hotel e guide" />
+        </VBox>
+    </HBox>
+</VBox>

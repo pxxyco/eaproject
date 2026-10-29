@@ -1,0 +1,25 @@
+.tab-pane,
+.tab-pane > .tab-content-area,
+.tab-pane .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.tab-pane .tab {
+    -fx-background-color: -tone-mint-080;
+    -fx-background-radius: 14 14 0 0;
+    -fx-padding: 10 18;
+}
+
+.tab-pane .tab:selected {
+    -fx-background-color: -tone-mint-180;
+}
+
+.tab-pane .tab-label {
+    -fx-text-fill: -color-text;
+    -fx-font-size: 14;
+}
+
+.tab-pane .tab:focused .focus-indicator {
+    -fx-border-color: -app-accent;
+    -fx-border-radius: 10;
+}

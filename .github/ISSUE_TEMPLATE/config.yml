@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Guide e FAQ
+    url: https://github.com/pxxyco/untitled_ea_project/blob/main/docs/FAQ.md
+    about: Installazione e risposte ai problemi più comuni.
+  - name: Sicurezza e segnalazioni riservate
+    url: https://github.com/pxxyco/untitled_ea_project/blob/main/SECURITY.md
+    about: Non pubblicare vulnerabilità o dati sensibili nelle issue.

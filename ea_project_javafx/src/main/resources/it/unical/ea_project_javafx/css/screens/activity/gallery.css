@@ -1,0 +1,11 @@
+@import "../../app.css";
+
+.bg-image {
+    -fx-background-color: -color-text-inverse;
+}
+
+.title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-white;
+}

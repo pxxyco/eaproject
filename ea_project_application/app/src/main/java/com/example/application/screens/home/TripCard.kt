@@ -1,0 +1,128 @@
+package com.example.application.screens.home
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import com.example.application.ui.theme.*
+
+@Composable
+fun TripCard(
+    title: String,
+    location: String,
+    price: String,
+    rating: String,
+    dateRange: String,
+    imageUrl: String,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .width(280.dp)
+            .height(200.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = PopupSurface)
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+
+            // Immagine del viaggio
+            RemotePhoto(
+                imageUrl = imageUrl,
+                modifier = Modifier.fillMaxSize(),
+                contentDescription = title
+            )
+
+            // Badge in alto a destra
+            Surface(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(10.dp),
+                shape = RoundedCornerShape(8.dp),
+                color = OverlayDark
+            ) {
+                Text(
+                    text = "Viaggio",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White,
+                    modifier = Modifier.padding(
+                        horizontal = 6.dp,
+                        vertical = 2.dp
+                    )
+                )
+            }
+
+            // Informazioni del viaggio
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .background(androidx.compose.ui.graphics.Brush.verticalGradient(listOf(Color.Transparent, Color.Black.copy(alpha = 0.92f))))
+                    .padding(12.dp)
+            ) {
+                Column {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = location,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White.copy(alpha = .85f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+
+                        Text(
+                            text = "⭐ $rating",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = RatingAmber,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(2.dp))
+
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color.White,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = dateRange,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White.copy(alpha = .85f)
+                        )
+
+                        Text(
+                            text = "da $price",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+        }
+    }
+}

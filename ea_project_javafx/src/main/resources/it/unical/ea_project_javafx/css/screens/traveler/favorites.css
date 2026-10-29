@@ -1,0 +1,295 @@
+@import "../../app.css";
+
+.favorites-page-shell,
+.favorites-scroll>.viewport {
+    -fx-background-color: transparent;
+}
+
+.favorites-page-root {
+    -fx-background-color: transparent;
+    -fx-font-size: 12px;
+}
+
+.favorites-overlay {
+    -fx-background-color: -tone-ink-780;
+}
+
+.favorites-scroll {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+    -fx-padding: 0;
+}
+
+.favorites-hero {
+    -fx-alignment: center-left;
+    -fx-spacing: 22px;
+    -fx-padding: 2px 0 18px 0;
+    -fx-border-color: transparent transparent -tone-ivory-220 transparent;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.favorites-eyebrow,
+.favorites-section-kicker,
+.favorites-count-note {
+    -fx-text-fill: -tone-ivory-650;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+
+.favorites-subtitle {
+    -fx-text-fill: -tone-ivory-720;
+    -fx-font-size: 13px;
+    -fx-max-width: 760px;
+}
+
+.favorites-hero-mark {
+    -fx-alignment: center-right;
+    -fx-padding: 8px 0 8px 24px;
+    -fx-border-color: transparent transparent transparent -tone-ivory-220;
+    -fx-border-width: 0 0 0 1px;
+}
+
+.favorites-hero-star {
+    -fx-text-fill: -color-ivory;
+    -fx-font-size: 32px;
+}
+
+.favorites-hero-caption {
+    -fx-text-fill: -tone-ivory-550;
+    -fx-font-size: 9px;
+    -fx-font-weight: bold;
+}
+
+.favorites-status {
+    -fx-padding: 11px 14px;
+    -fx-background-color: -tone-ivory-080;
+    -fx-background-radius: 10px;
+    -fx-border-color: -tone-ivory-180;
+    -fx-border-radius: 10px;
+    -fx-border-width: 1px;
+    -fx-text-fill: -color-text;
+    -fx-font-size: 12px;
+}
+
+.favorites-section-title {
+    -fx-text-fill: -color-text;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.favorites-muted {
+    -fx-text-fill: -tone-ivory-650;
+    -fx-font-size: 11px;
+}
+
+.favorites-field,
+.favorites-visibility {
+    -fx-min-height: 38px;
+    -fx-pref-height: 38px;
+}
+
+.favorites-create-button {
+    -fx-min-height: 38px;
+    -fx-padding: 0 17px;
+}
+
+.favorites-small-action,
+.favorites-search-button,
+.favorites-share-button {
+    -fx-padding: 8px 12px;
+}
+
+.favorites-add-button {
+    -fx-min-height: 38px;
+}
+
+.favorites-workspace {
+    -fx-alignment: top-left;
+    -fx-spacing: 28px;
+    -fx-padding: 2px 0 8px 0;
+}
+
+.favorites-sidebar {
+    -fx-padding: 2px 22px 0 0;
+    -fx-border-color: transparent -tone-ivory-180 transparent transparent;
+    -fx-border-width: 0 1px 0 0;
+}
+
+.favorites-main-area {
+    -fx-padding: 2px 0 0 0;
+    -fx-background-color: transparent;
+}
+
+.favorites-selected-heading {
+    -fx-alignment: center-left;
+    -fx-spacing: 14px;
+    -fx-padding: 0 0 14px 0;
+    -fx-border-color: transparent transparent -tone-ivory-160 transparent;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.favorites-selected-title {
+    -fx-text-fill: -color-text;
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+}
+
+.favorites-collection-grid {
+    -fx-spacing: 24px;
+    -fx-alignment: top-left;
+}
+
+.favorites-collection-column {
+    -fx-spacing: 14px;
+    -fx-padding: 2px 0 0 0;
+    -fx-background-color: transparent;
+}
+
+.favorites-type-glyph {
+    -fx-text-fill: -color-ivory;
+    -fx-font-size: 22px;
+    -fx-min-width: 32px;
+    -fx-alignment: center;
+}
+
+.favorites-rule {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.favorites-rule .line {
+    -fx-border-color: -tone-ivory-160;
+    -fx-border-width: 1px 0 0 0;
+}
+
+.favorites-list-view {
+    -fx-padding: 4px;
+}
+
+.favorites-list-view .list-cell {
+    -fx-padding: 10px 10px;
+}
+
+.favorites-list-view .list-cell:empty {
+    -fx-padding: 0;
+}
+
+.favorites-list-selector .list-cell {
+    -fx-padding: 12px 10px;
+}
+
+.favorites-content-list {
+    -fx-min-height: 130px;
+}
+
+.favorites-search-results {
+    -fx-min-height: 90px;
+}
+
+.favorites-shared-section {
+    -fx-spacing: 16px;
+    -fx-padding: 22px 0 0 0;
+    -fx-border-color: -tone-ivory-180 transparent transparent transparent;
+    -fx-border-width: 1px 0 0 0;
+}
+
+.favorites-shared-details {
+    -fx-min-height: 180px;
+}
+
+.favorites-title {
+    -fx-text-fill: -color-text;
+    -fx-font-size: 34;
+    -fx-font-weight: bold;
+}
+
+.favorites-inner-layout {
+    -fx-background-color: transparent;
+    -fx-max-width: 1240px;
+    -fx-fill-width: true;
+    -fx-spacing: 34;
+}
+
+.favorites-create-line {
+    -fx-alignment: center-left;
+    -fx-spacing: 14px;
+    -fx-border-color: transparent transparent -tone-ivory-180 transparent;
+    -fx-border-width: 0 0 1px 0;
+    -fx-padding: 24;
+}
+
+.favorites-simple-layout {
+    -fx-padding: 30 32 44;
+}
+
+.favorites-simple .tab-pane {
+    -fx-background-color: transparent;
+}
+
+.favorites-simple .tab-content-area {
+    -fx-padding: 22 0 0;
+    -fx-background-color: transparent;
+}
+
+.favorites-simple .favorites-list-view {
+    -fx-padding: 8;
+}
+
+.favorites-simple .list-cell {
+    -fx-padding: 16 12;
+}
+
+.favorites-simple .favorites-tabs {
+    -fx-border-color: transparent;
+    -fx-background-color: transparent;
+}
+
+.favorites-create-inline {
+    -fx-padding: 6 0 18;
+}
+
+.favorites-content {
+    -fx-fill-width: true;
+    -fx-padding: 0 0 0 8;
+    -fx-spacing: 20;
+    -fx-background-color: transparent;
+}
+
+.favorites-create-inline .combo-box {
+    -fx-min-height: 40;
+    -fx-pref-height: 40;
+    -fx-max-height: 40;
+}
+
+.favorites-simple .favorites-create-inline {
+    -fx-padding: 20;
+    -fx-spacing: 14;
+}
+
+.favorites-simple .favorites-sidebar,
+.favorites-simple .favorites-content {
+    -fx-padding: 20;
+    -fx-border-width: 1;
+    -fx-border-color: -tone-ivory-180;
+    -fx-fill-width: true;
+}
+
+.favorites-simple .favorites-sidebar>.section-header {
+    -fx-min-height: 54;
+    -fx-pref-height: 54;
+    -fx-alignment: top-left;
+    -fx-wrap-text: true;
+}
+
+.favorites-create-controls>.text-field,
+.favorites-create-controls>.combo-box,
+.favorites-create-controls>.button {
+    -fx-min-height: 44;
+    -fx-pref-height: 44;
+    -fx-max-height: 44;
+}
+
+.favorites-simple .favorites-content .tab-content-area {
+    -fx-padding: 18 0 0;
+}

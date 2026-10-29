@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+<StackPane stylesheets="@../../css/screens/organizer/attendees.css" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="it.unical.ea_project_javafx.controller.organizer.AttendeesController">
+    <ImageView fx:id="bgImageView" preserveRatio="false" mouseTransparent="true" />
+    <BorderPane>
+        <top>
+            <StackPane fx:id="navbarContainer" />
+        </top>
+        <center>
+            <ScrollPane fitToWidth="true" styleClass="main-scroll">
+                <VBox alignment="TOP_CENTER">
+                    <VBox spacing="25" maxWidth="1220" styleClass="organizer-workspace">
+                        <HBox alignment="CENTER_LEFT" spacing="20">
+                            <VBox spacing="8" HBox.hgrow="ALWAYS">
+                                <Label text="AREA ORGANIZER" styleClass="account-kicker" />
+                                <Label text="Prenotazioni e iscritti" styleClass="dash-title" />
+                                <Label
+                                    text="Prepara le partenze: trova i partecipanti, verifica i posti e contattali in un clic."
+                                    styleClass="dash-subtitle" wrapText="true" />
+                            </VBox>
+                            <Button text="Aggiorna" onAction="#handleRefresh"
+                                styleClass="btn-secondary" />
+                        </HBox>
+                        <Label fx:id="statusMessageLabel" visible="false" managed="false"
+                            wrapText="true" />
+                        <HBox spacing="20">
+                            <VBox spacing="8" styleClass="kpi-card">
+                                <Label text="Posti attivi nei risultati" styleClass="kpi-title" />
+                                <Label fx:id="totalAttendeesLabel" text="—" styleClass="kpi-value" />
+                            </VBox>
+                            <VBox spacing="8" alignment="CENTER_LEFT">
+                                <Label fx:id="matchingLabel" text="Caricamento…"
+                                    styleClass="section-header" />
+                                <Label
+                                    text="Stato della prenotazione e del pagamento sono indicati separatamente."
+                                    styleClass="dash-subtitle" wrapText="true" />
+                            </VBox>
+                        </HBox>
+                        <VBox spacing="12">
+                            <TextField fx:id="searchField"
+                                promptText="Cerca partecipante, email o esperienza"
+                                styleClass="custom-input" />
+                            <HBox spacing="12">
+                                <ComboBox fx:id="eventFilterCombo" maxWidth="Infinity"
+                                    HBox.hgrow="ALWAYS" />
+                                <ComboBox fx:id="statusFilter" prefWidth="180" />
+                            </HBox>
+                        </VBox>
+                        <TableView fx:id="attendeesTableView" prefHeight="530"
+                            styleClass="custom-table">
+                            <columns>
+                                <TableColumn fx:id="participantColumn" text="Partecipante"
+                                    prefWidth="160" />
+                                <TableColumn fx:id="emailColumn" text="Email" prefWidth="185" />
+                                <TableColumn fx:id="eventColumn" text="Esperienza" prefWidth="190" />
+                                <TableColumn fx:id="seatsColumn" text="Posti" prefWidth="60" />
+                                <TableColumn fx:id="dateColumn" text="Quando" prefWidth="200" />
+                                <TableColumn fx:id="statusColumn" text="Prenotazione"
+                                    prefWidth="170" />
+                                <TableColumn fx:id="paymentColumn" text="Pagamento" prefWidth="120" />
+                            </columns>
+                        </TableView>
+                        <Pagination fx:id="pagination" maxPageIndicatorCount="7" />
+                        <HBox alignment="CENTER_LEFT" spacing="18" styleClass="organizer-selection">
+                            <Label fx:id="selectionLabel"
+                                text="Seleziona una prenotazione per contattare il partecipante."
+                                wrapText="true" HBox.hgrow="ALWAYS" maxWidth="Infinity" />
+                            <Button fx:id="contactButton" text="Scrivi al partecipante"
+                                disable="true" onAction="#handleContact" styleClass="btn-primary" />
+                        </HBox>
+                    </VBox>
+                </VBox>
+            </ScrollPane>
+        </center>
+    </BorderPane>
+</StackPane>

@@ -1,0 +1,7 @@
+# Esempio da completare e rinominare CODEOWNERS dopo l’accordo del team.
+# Usare solo utenti/team GitHub con accesso di scrittura al repository.
+# *                 @responsabile-repository
+# /ea-project/      @responsabile-backend
+# /ea_project_javafx/ @responsabile-desktop
+# /ea_project_application/ @responsabile-android
+# /docs/            @responsabile-documentazione

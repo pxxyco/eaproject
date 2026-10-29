@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.PasswordField?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<VBox stylesheets="@../../css/screens/login/login.css" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="it.unical.ea_project_javafx.controller.login.RegistrationStepController"
+    spacing="16.0">
+
+    <Button onAction="#backToRoleSelection" styleClass="btn-back" text="← Torna indietro" />
+    <Label fx:id="wizardTitle" styleClass="header-title" text="Dettagli Profilo" />
+
+    <!-- Label per i messaggi di errore -->
+    <Label fx:id="errorLabel" managed="false" visible="false" styleClass="message-error"
+        wrapText="true" />
+
+    <VBox spacing="10.0">
+        <HBox spacing="10.0">
+            <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                <Label styleClass="input-label" text="Nome" />
+                <TextField fx:id="regFirstNameField" promptText="Nome" styleClass="custom-input" />
+            </VBox>
+            <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                <Label styleClass="input-label" text="Cognome" />
+                <TextField fx:id="regLastNameField" promptText="Cognome" styleClass="custom-input" />
+            </VBox>
+        </HBox>
+
+        <VBox spacing="4.0">
+            <Label styleClass="input-label" text="Username" />
+            <TextField fx:id="regUsernameField" promptText="Scegli uno username"
+                styleClass="custom-input" />
+        </VBox>
+
+        <VBox spacing="4.0">
+            <Label styleClass="input-label" text="Email" />
+            <TextField fx:id="regEmailField" promptText="Enter your email" styleClass="custom-input" />
+        </VBox>
+
+        <VBox spacing="4.0">
+            <Label styleClass="input-label" text="Password" />
+            <PasswordField fx:id="regPasswordField" promptText="Enter your password"
+                styleClass="custom-input" />
+            <Label styleClass="password-hint"
+                text="Minimo 8 caratteri, una lettera, un numero e un carattere speciale."
+                wrapText="true" />
+        </VBox>
+
+        <VBox spacing="4.0">
+            <Label styleClass="input-label" text="Confirm Password" />
+            <PasswordField fx:id="regConfirmPasswordField" promptText="Confirm your password"
+                styleClass="custom-input" />
+        </VBox>
+    </VBox>
+
+    <Button fx:id="btnRegister" maxWidth="1.7976931348623157E308"
+        onAction="#handleRegistrationSubmit" styleClass="btn-submit" text="Conferma e Registrati" />
+</VBox>

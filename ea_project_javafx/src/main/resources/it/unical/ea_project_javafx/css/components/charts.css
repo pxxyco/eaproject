@@ -1,0 +1,36 @@
+.checkout-total,
+.economy-value {
+    -fx-font-size: 25;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text;
+}
+
+.economy-chart .chart-plot-background {
+    -fx-background-color: transparent;
+}
+
+.economy-chart .chart-vertical-grid-lines,
+.economy-chart .chart-horizontal-grid-lines {
+    -fx-stroke: -tone-ivory-080;
+}
+
+.economy-chart .axis {
+    -fx-tick-label-fill: -color-text-muted;
+}
+
+.economy-chart .axis-label,
+.economy-chart .chart-legend-item {
+    -fx-text-fill: -color-ivory;
+}
+
+.economy-chart .chart-legend {
+    -fx-background-color: transparent;
+}
+
+.economy-chart .default-color0.chart-bar {
+    -fx-bar-fill: -color-text-muted;
+}
+
+.economy-chart .default-color1.chart-bar {
+    -fx-bar-fill: -color-accent;
+}

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox stylesheets="@../../css/screens/activity/content.css" maxWidth="Infinity" spacing="20.0" styleClass="descrizione-card" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:controller="it.unical.ea_project_javafx.controller.activity.ActivityDescriptionController">
+    <padding>
+        <Insets bottom="28.0" left="28.0" right="28.0" top="28.0" />
+    </padding>
+    <children>
+        <VBox spacing="8.0">
+            <children>
+                <Label styleClass="section-card-title" text="Descrizione" />
+                <Label fx:id="lblDescrizione" maxWidth="Infinity" minHeight="-Infinity" styleClass="descrizione-testo" text="Nessuna descrizione disponibile" wrapText="true" />
+            </children>
+        </VBox>
+
+        <Separator styleClass="nav-divider" />
+
+        <VBox spacing="8.0">
+            <children>
+                <Label styleClass="section-card-title" text="Note aggiuntive" />
+                <Label fx:id="lblNota" maxWidth="Infinity" minHeight="-Infinity" styleClass="descrizione-testo" text="Nessuna nota aggiuntiva disponibile" wrapText="true" />
+            </children>
+        </VBox>
+    </children>
+</VBox>

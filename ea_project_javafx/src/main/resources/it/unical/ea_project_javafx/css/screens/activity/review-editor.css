@@ -1,0 +1,28 @@
+@import "../../app.css";
+
+.popup-overlay-root {
+    -fx-background-color: transparent;
+}
+
+.popup-titolo {
+    -fx-text-fill: -color-white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.popup-recensione .rating-stelle {
+    -fx-padding: 4px 0;
+}
+
+.popup-recensione .stella {
+    -fx-background-color: transparent;
+    -fx-text-fill: -tone-white-450;
+    -fx-font-size: 26px;
+    -fx-cursor: hand;
+    -fx-padding: 0 2px;
+}
+
+.popup-recensione .stella:hover,
+.popup-recensione .stella-piena {
+    -fx-text-fill: -color-rating;
+}

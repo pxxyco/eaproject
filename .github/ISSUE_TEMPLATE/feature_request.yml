@@ -1,0 +1,32 @@
+name: Proponi una funzione
+description: Un miglioramento legato a un bisogno concreto.
+title: "[Proposta] "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Quale problema vuoi risolvere?
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Comportamento desiderato
+      description: Descrivi un esempio dal punto di vista dell’utente.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternative considerate
+  - type: dropdown
+    id: components
+    attributes:
+      label: Componenti interessati
+      multiple: true
+      options: [Backend, JavaFX, Android, Docker, Documentazione]
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Come verifichiamo che sia completata?

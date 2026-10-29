@@ -1,0 +1,11 @@
+.account-layout {
+    -fx-padding: 30 32 48 32;
+}
+
+.account-panel {
+    -fx-padding: 26;
+}
+
+.faq-answer {
+    -fx-text-fill: -color-text-muted;
+}

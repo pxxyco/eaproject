@@ -1,0 +1,66 @@
+name: ea-project
+
+services:
+  db:
+    image: ${DB_IMAGE:-postgres:17-alpine}
+    environment:
+      POSTGRES_DB: ${DB_NAME:-eaproject}
+      POSTGRES_USER: ${DB_USER:-eaproject}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Imposta DB_PASSWORD nel file .env}
+      TZ: Europe/Rome
+    volumes:
+      - database:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB" ]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+    restart: unless-stopped
+    mem_limit: 384m
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  backend:
+    build:
+      context: ./ea-project
+    image: ${BACKEND_IMAGE:-ea-project-backend:1.0.0}
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-eaproject}
+      DB_USER: ${DB_USER:-eaproject}
+      DB_PSW: ${DB_PASSWORD:?Imposta DB_PASSWORD nel file .env}
+      JWT_SECRET: ${JWT_SECRET:?Imposta JWT_SECRET in Base64 nel file .env}
+      SERVER_SSL_ENABLED: ${SERVER_SSL_ENABLED:-true}
+      SSL_KEYSTORE: ${SSL_KEYSTORE:-file:/app/certs/server.p12}
+      SSL_KEYSTORE_PASSWORD: ${SSL_KEYSTORE_PASSWORD:-}
+      LOG_DIR: /app/logs
+      TZ: Europe/Rome
+    ports:
+      - "${BACKEND_HOST:-127.0.0.1}:${BACKEND_PORT:-8443}:8080"
+    volumes:
+      - media:/app/storage
+      - logs:/app/logs
+      - ./certs:/app/certs:ro
+    read_only: true
+    tmpfs:
+      - /tmp:size=128m,mode=1777
+    cap_drop: [ ALL ]
+    security_opt: [ no-new-privileges:true ]
+    init: true
+    restart: unless-stopped
+    mem_limit: 768m
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+volumes:
+  database:
+  media:
+  logs:

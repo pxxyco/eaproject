@@ -1,0 +1,158 @@
+@import "../../app.css";
+
+.chat-root {
+    -fx-background-color: linear-gradient(to bottom right, -color-ink, -color-stone);
+}
+
+.chat-sidebar {
+    -fx-padding: 24 18 24 24;
+    -fx-border-color: transparent -tone-ivory-120 transparent transparent;
+}
+
+.chat-thread {
+    -fx-padding: 24;
+}
+
+.chat-title {
+    -fx-text-fill: -color-text;
+    -fx-font-size: 23;
+    -fx-font-weight: bold;
+}
+
+.chat-meta,
+.chat-message-time {
+    -fx-text-fill: -color-stone-muted;
+    -fx-font-size: 11;
+}
+
+.chat-status {
+    -fx-text-fill: -color-text-secondary;
+    -fx-font-size: 12;
+}
+
+.chat-conversations .virtual-flow {
+    -fx-background-color: transparent;
+}
+
+.chat-conversations .list-cell:selected {
+    -fx-background-color: -tone-ivory-160;
+    -fx-background-radius: 12;
+    -fx-text-fill: -color-white;
+}
+
+.chat-message-own {
+    -fx-padding: 14 18;
+    -fx-background-radius: 16;
+    -fx-background-color: -color-ivory;
+}
+
+.chat-message-other {
+    -fx-padding: 14 18;
+    -fx-background-radius: 16;
+    -fx-background-color: -color-stone-raised;
+}
+
+.chat-message-text {
+    -fx-text-fill: -color-text;
+    -fx-font-size: 14;
+}
+
+.chat-message-own .chat-message-text {
+    -fx-text-fill: -color-text-inverse;
+}
+
+.chat-message-own .chat-message-time {
+    -fx-text-fill: -color-stone-soft;
+}
+
+.chat-scroll,
+.chat-root .scroll-pane>.viewport {
+    -fx-background-color: transparent;
+}
+
+.chat-root .scroll-pane {
+    -fx-background: transparent;
+    -fx-background-color: transparent;
+}
+
+.chat-conversations .list-cell:empty {
+    -fx-border-color: transparent;
+}
+
+.chat-compact .chat-title {
+    -fx-font-size: 20;
+}
+
+.chat-conversations {
+    -fx-background-color: transparent;
+    -fx-background-radius: 16;
+    -fx-border-radius: 16;
+    -fx-padding: 8;
+}
+
+.chat-conversations .list-cell {
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-text-secondary;
+    -fx-border-color: transparent transparent -tone-ivory-080 transparent;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-padding: 16 12;
+}
+
+.chat-peer-name {
+    -fx-font-size: 15;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text;
+}
+
+.chat-preview {
+    -fx-font-size: 12;
+    -fx-text-fill: -color-text-muted;
+}
+
+.chat-unread-dot {
+    -fx-fill: -color-success;
+}
+
+.chat-text-run {
+    -fx-fill: -color-text;
+    -fx-font-size: 14;
+}
+
+.chat-message-own .chat-text-run {
+    -fx-fill: -color-text-inverse;
+}
+
+.chat-quote {
+    -fx-padding: 9 12;
+    -fx-background-color: -tone-forest-180;
+    -fx-background-radius: 10;
+    -fx-border-color: transparent transparent transparent -color-text-muted;
+    -fx-border-width: 0 0 0 3;
+    -fx-text-fill: -color-ivory;
+}
+
+.chat-message-own .chat-quote {
+    -fx-text-fill: -color-stone;
+}
+
+.chat-compact {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.chat-compact .chat-panel {
+    -fx-padding: 0;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.chat-compact .chat-thread {
+    -fx-padding: 12;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.app-root.chat-compact {
+    -fx-background-color: transparent;
+}

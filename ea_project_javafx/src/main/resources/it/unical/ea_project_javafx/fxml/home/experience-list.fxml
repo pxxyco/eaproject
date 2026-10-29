@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import it.unical.ea_project_javafx.ui.loading.LoadingRing?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<VBox stylesheets="@../../css/app.css" maxWidth="1000.0" spacing="15.0" VBox.vgrow="ALWAYS" xmlns="http://javafx.com/javafx/21.0.2"
+    xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="it.unical.ea_project_javafx.controller.home.ExperienceListController">
+
+    <HBox alignment="CENTER_LEFT" spacing="10.0">
+        <children>
+            <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                <children>
+                    <Label fx:id="label1" styleClass="section-title"
+                        text="Esperienze più apprezzate dai viaggiatori" wrapText="true" />
+                    <Label fx:id="label2" styleClass="section-subtitle"
+                        text="Valutate da utenti reali che hanno partecipato alle attività"
+                        wrapText="true" />
+                </children>
+            </VBox>
+            <Button fx:id="resetButton" managed="false" onAction="#handleReset"
+                styleClass="btn-search" text="Azzera ricerca" visible="false" />
+        </children>
+    </HBox>
+
+    <VBox fx:id="cardsContainer" spacing="16.0" VBox.vgrow="ALWAYS" />
+
+    <VBox fx:id="loadingIndicatorBox" alignment="CENTER" managed="false" spacing="8.0"
+        styleClass="experience-list-content" visible="false">
+        <children>
+            <LoadingRing maxHeight="40.0" maxWidth="40.0" prefHeight="40.0" prefWidth="40.0" />
+            <Label styleClass="section-subtitle" text="Caricamento in corso..." />
+        </children>
+    </VBox>
+
+    <VBox alignment="CENTER" spacing="12" styleClass="page-navigation">
+        <HBox alignment="CENTER" spacing="10">
+            <Button fx:id="previousPageButton" text="← Precedente" onAction="#handlePreviousPage"
+                styleClass="page-nav" />
+            <HBox fx:id="pageNumbers" alignment="CENTER" spacing="8" />
+            <Button fx:id="nextPageButton" text="Successiva →" onAction="#handleNextPage"
+                styleClass="page-nav" />
+        </HBox>
+        <Label fx:id="pageSummary" styleClass="section-subtitle" />
+        <Label fx:id="pageError" wrapText="true" managed="false" visible="false"
+            styleClass="section-subtitle" />
+        <Button fx:id="retryPageButton" text="Riprova" onAction="#handleRetryPage" managed="false"
+            visible="false" styleClass="page-nav" />
+    </VBox>
+</VBox>

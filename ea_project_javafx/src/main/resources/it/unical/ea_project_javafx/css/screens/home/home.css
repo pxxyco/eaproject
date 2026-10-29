@@ -1,0 +1,5 @@
+@import "../../app.css";
+
+.cards-row {
+    -fx-alignment: center-left;
+}

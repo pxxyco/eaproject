@@ -1,0 +1,47 @@
+.foto,
+.photo-container {
+    -fx-control-inner-background: transparent;
+}
+
+.foto-placeholder {
+    -fx-background-color: -tone-white-120;
+    -fx-background-radius: 10px;
+    -fx-control-inner-background: transparent;
+    -fx-cursor: hand;
+}
+
+.foto-placeholder:hover {
+    -fx-background-color: -tone-ivory-220;
+}
+
+.fullscreen-overlay {
+    -fx-background-color: -tone-ink-720;
+}
+
+.foto-item {
+    -fx-cursor: hand;
+    -fx-effect: dropshadow(gaussian, -tone-ink-260, 4, 0, 0, 2);
+}
+
+.foto-item:hover {
+    -fx-translate-y: -2px;
+    -fx-effect: dropshadow(gaussian, -tone-white-320, 12, 0.5, 0, 5);
+}
+
+.media-interactive {
+    -fx-cursor: hand;
+}
+
+.map-marker {
+    -fx-fill: -color-ink;
+    -fx-stroke: -color-white;
+    -fx-stroke-width: 2;
+}
+
+.map-marker-label {
+    -fx-background-color: transparent;
+    -fx-padding: 2 6;
+    -fx-background-radius: 4;
+    -fx-text-fill: -color-white;
+    -fx-font-size: 11;
+}

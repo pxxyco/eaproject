@@ -1,0 +1,52 @@
+package it.unical.ea_project_javafx.dto.booking;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class BookingDTO {
+
+    private Long bookingId;
+
+    private Long userId;
+
+    private Long tripId;
+
+    private Long activityId;
+
+    private String participantName;
+
+    private String participantEmail;
+
+    private String itemTitle;
+
+    private String itemDate;
+
+    private String itemEndDate;
+
+    private String itemStatus;
+
+    private String itemLocation;
+
+    private Integer seats;
+
+    private String bookingType; // Booking.BookingType: TRIP, ACTIVITY
+
+    private String bookingStatus; // Booking.BookingStatus: PENDING, COMPLETED, CONFIRMED, CANCELLED
+
+    private BigDecimal price;
+
+    private String paymentStatus;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime deletedAt;
+
+}

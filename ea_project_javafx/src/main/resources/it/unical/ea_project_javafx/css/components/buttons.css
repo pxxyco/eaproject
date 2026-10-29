@@ -1,0 +1,365 @@
+.button,
+.toggle-button,
+.menu-button {
+    -fx-background-insets: 0;
+    -fx-background-color: -tone-ivory-100;
+    -fx-border-color: -tone-ivory-220;
+    -fx-border-width: 1;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-text-fill: -color-text;
+    -fx-font-size: 13;
+    -fx-font-weight: bold;
+    -fx-padding: 10 16;
+    -fx-cursor: hand;
+}
+
+.button:hover,
+.toggle-button:hover,
+.menu-button:hover {
+    -fx-background-color: -tone-ivory-180;
+}
+
+.button:pressed,
+.toggle-button:pressed {
+    -fx-background-color: -tone-ivory-260;
+}
+
+.button:focused,
+.toggle-button:focused,
+.menu-button:focused {
+    -fx-border-color: -app-accent;
+}
+
+.button:disabled,
+.toggle-button:disabled,
+.menu-button:disabled {
+    -fx-opacity: .45;
+    -fx-cursor: default;
+}
+
+.btn-primary,
+.btn-submit,
+.btn-search,
+.btn-splash,
+.btn-invia,
+.favorites-primary-button,
+.history-review-button,
+.feedback-button,
+.export-popup-panel .btn-primary {
+    -fx-background-color: -color-ivory;
+    -fx-text-fill: -color-text-inverse;
+    -fx-border-color: transparent;
+}
+
+.btn-primary:hover,
+.btn-submit:hover,
+.btn-search:hover,
+.btn-invia:hover,
+.btn-splash:hover,
+.favorites-primary-button:hover,
+.history-review-button:hover,
+.notification-accept:hover,
+.feedback-button:hover {
+    -fx-background-color: -color-text;
+}
+
+.btn-primary:pressed,
+.btn-submit:pressed,
+.btn-search:pressed,
+.favorites-primary-button:pressed {
+    -fx-background-color: -color-text-secondary;
+}
+
+.btn-secondary,
+.favorites-secondary-button,
+.history-detail-button,
+.dashboard-upcoming-action,
+.dashboard-space-link,
+.more-button,
+.next,
+.previous {
+    -fx-background-color: -tone-ivory-100;
+    -fx-border-color: -tone-ivory-220;
+    -fx-text-fill: -color-text;
+}
+
+.btn-secondary:hover,
+.favorites-secondary-button:hover,
+.history-detail-button:hover,
+.dashboard-upcoming-action:hover,
+.dashboard-space-link:hover,
+.notification-decline:hover,
+.more-button:hover,
+.next:hover,
+.previous:hover {
+    -fx-background-color: -tone-ivory-180;
+}
+
+.btn-danger,
+.danger-action-button,
+.favorites-danger-action,
+.history-delete-review-button {
+    -fx-background-color: -tone-danger-220;
+    -fx-border-color: -tone-danger-320;
+    -fx-text-fill: -color-danger;
+}
+
+.btn-danger:hover,
+.danger-action-button:hover,
+.favorites-danger-action:hover,
+.history-delete-review-button:hover,
+.btn-remove-stage:hover,
+.btn-card-delete:hover {
+    -fx-background-color: -tone-danger-450;
+}
+
+.btn-ghost,
+.btn-back,
+.btn-link,
+.back-link,
+.favorites-text-action,
+.notification-mark-all,
+.custom-link,
+.custom-link-bold {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -color-text-secondary;
+    -fx-padding: 5 0;
+}
+
+.btn-ghost:hover,
+.btn-back:hover,
+.btn-link:hover,
+.back-link:hover,
+.btn-rispondi:hover,
+.btn-annulla:hover,
+.favorites-text-action:hover,
+.notification-mark-all:hover,
+.custom-link:hover,
+.custom-link-bold:hover {
+    -fx-text-fill: -color-white;
+    -fx-underline: true;
+}
+
+.hyperlink {
+    -fx-text-fill: -color-text-secondary;
+    -fx-border-color: transparent;
+    -fx-cursor: hand;
+}
+
+.hyperlink:hover {
+    -fx-text-fill: -color-white;
+}
+
+.button-compact,
+.history-action-button,
+.favorites-small-action,
+.favorites-search-button,
+.favorites-share-button {
+    -fx-font-size: 11;
+    -fx-padding: 7 11;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+}
+
+.notification-accept {
+    -fx-background-color: -color-ivory;
+    -fx-text-fill: -color-text-inverse;
+    -fx-border-color: transparent;
+    -fx-font-size: 11;
+    -fx-padding: 7 11;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+}
+
+.notification-decline {
+    -fx-background-color: -tone-ivory-100;
+    -fx-border-color: -tone-ivory-220;
+    -fx-text-fill: -color-text;
+    -fx-font-size: 11;
+    -fx-padding: 7 11;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+}
+
+.btn-rispondi,
+.btn-annulla {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -color-text-secondary;
+    -fx-font-size: 11;
+    -fx-padding: 7 11;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+}
+
+.btn-remove-stage,
+.btn-card-delete {
+    -fx-background-color: -tone-danger-220;
+    -fx-border-color: -tone-danger-320;
+    -fx-text-fill: -color-danger;
+    -fx-font-size: 11;
+    -fx-padding: 7 11;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+}
+
+.btn-card-action {
+    -fx-font-size: 11;
+    -fx-padding: 7 11;
+    -fx-background-radius: 10;
+    -fx-border-radius: 10;
+    -fx-background-color: -tone-forest-940;
+    -fx-text-fill: -color-white;
+}
+
+.button-icon,
+.control-btn,
+.btn-icon-close,
+.close-button,
+.app-modal-close,
+.sharing-popup-close,
+.export-popup-close,
+.search-icon-button,
+.carousel-button,
+.btn-actions {
+    -fx-background-radius: 100;
+    -fx-border-radius: 100;
+    -fx-min-width: 40;
+    -fx-min-height: 40;
+    -fx-pref-width: 40;
+    -fx-pref-height: 40;
+    -fx-max-width: 40;
+    -fx-max-height: 40;
+    -fx-alignment: center;
+    -fx-padding: 0;
+    -fx-font-size: 18;
+}
+
+.btn-elimina {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: -color-text-muted;
+    -fx-font-size: 16;
+    -fx-padding: 4 8;
+    -fx-background-radius: 100;
+}
+
+.btn-actions>.arrow-button,
+.btn-actions>.arrow-button>.arrow {
+    -fx-padding: 0;
+    -fx-min-width: 0;
+    -fx-pref-width: 0;
+    -fx-max-width: 0;
+    -fx-background-color: transparent;
+}
+
+.btn-actions>.label {
+    -fx-text-fill: -color-white;
+    -fx-font-size: 22;
+    -fx-padding: 0;
+    -fx-alignment: center;
+}
+
+.btn-favorite {
+    -fx-background-radius: 100;
+    -fx-border-radius: 100;
+    -fx-min-width: 40;
+    -fx-min-height: 40;
+    -fx-pref-width: 40;
+    -fx-pref-height: 40;
+    -fx-max-width: 40;
+    -fx-max-height: 40;
+    -fx-alignment: center;
+    -fx-padding: 0;
+    -fx-font-size: 18;
+    -fx-background-color: -tone-ink-550;
+}
+
+.btn-favorite.active {
+    -fx-text-fill: -color-danger-soft;
+    -fx-border-color: -color-danger-soft;
+}
+
+.btn-primary.add-button {
+    -fx-background-color: -color-ivory;
+    -fx-text-fill: -color-text-inverse;
+}
+
+.add-button {
+    -fx-background-radius: 100;
+    -fx-border-radius: 100;
+    -fx-min-width: 40;
+    -fx-min-height: 40;
+    -fx-pref-width: 40;
+    -fx-pref-height: 40;
+    -fx-max-width: 40;
+    -fx-max-height: 40;
+    -fx-alignment: center;
+    -fx-padding: 0;
+    -fx-font-size: 18;
+    -fx-background-color: -color-ivory;
+    -fx-text-fill: -color-text-inverse;
+}
+
+.password-reveal {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-effect: null;
+    -fx-text-fill: -color-text-muted;
+    -fx-font-size: 21;
+    -fx-min-width: 42;
+    -fx-max-width: 42;
+    -fx-padding: 6;
+    -fx-background-radius: 10;
+}
+
+.password-reveal:hover {
+    -fx-background-color: -tone-ivory-065;
+    -fx-text-fill: -color-white;
+}
+
+.section-button {
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+    -fx-padding: 7 18;
+}
+
+.section-button-active {
+    -fx-background-radius: 20;
+    -fx-border-radius: 20;
+    -fx-padding: 7 18;
+    -fx-background-color: -tone-mint-180;
+    -fx-border-color: -app-accent;
+}
+
+.section-button-active:hover {
+    -fx-background-color: -tone-mint-260;
+}
+
+.organizer-row-action {
+    -fx-padding: 7 10;
+    -fx-background-radius: 12;
+    -fx-border-radius: 12;
+    -fx-font-size: 12;
+}
+
+.organizer-row-action .label {
+    -fx-text-fill: -color-text;
+}
+
+.organizer-row-action .arrow {
+    -fx-background-color: -color-text-secondary;
+}
+
+.btn-login-pill { -fx-background-radius: 24; -fx-border-radius: 24; -fx-padding: 10 18; }
+.custom-link-bold { -fx-font-weight: bold; }
+
+.btn-create-offer {
+    -fx-background-color: -color-menu; -fx-text-fill: -color-ivory;
+    -fx-border-color: -app-accent; -fx-border-width: 1;
+    -fx-background-radius: 16; -fx-border-radius: 16;
+}
+.btn-create-offer:hover { -fx-background-color: derive(-color-menu, 18%); -fx-text-fill: -color-ivory; }
+.btn-create-offer:pressed { -fx-background-color: derive(-color-menu, -8%); }

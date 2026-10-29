@@ -1,0 +1,40 @@
+.page-navigation {
+    -fx-padding: 18 0 24;
+}
+
+.page-button:disabled,
+.page-nav:disabled {
+    -fx-opacity: 0.4;
+}
+
+.pagination .pagination-control .number-button,
+.pagination .pagination-control .left-arrow-button,
+.pagination .pagination-control .right-arrow-button,
+.page-button,
+.page-nav {
+    -fx-background-color: -tone-ivory-080;
+    -fx-border-color: -tone-ivory-220;
+    -fx-text-fill: -color-ivory;
+    -fx-background-radius: 14;
+    -fx-border-radius: 14;
+    -fx-min-width: 40;
+    -fx-min-height: 40;
+    -fx-padding: 9 14;
+    -fx-font-weight: bold;
+    -fx-cursor: hand;
+}
+
+.pagination .pagination-control .number-button:selected,
+.page-button:selected {
+    -fx-background-color: -color-ivory;
+    -fx-text-fill: -color-text-inverse;
+}
+
+.pagination .pagination-control .left-arrow,
+.pagination .pagination-control .right-arrow {
+    -fx-background-color: -color-text-secondary;
+}
+
+.pagination .page-information {
+    -fx-text-fill: -color-text-muted;
+}

@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<StackPane stylesheets="@../../css/screens/traveler/bookings.css" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="it.unical.ea_project_javafx.controller.traveler.BookingsController">
+
+    <ImageView fx:id="bgImageView" pickOnBounds="true" preserveRatio="false" />
+    <Region styleClass="profile-overlay" />
+
+    <BorderPane>
+        <top>
+            <StackPane fx:id="navbarContainer" />
+        </top>
+        <center>
+            <ScrollPane fitToWidth="true" styleClass="main-scroll">
+                <content>
+                    <VBox alignment="TOP_CENTER" spacing="24.0">
+                        <padding>
+                            <Insets bottom="40.0" left="32.0" right="32.0" top="28.0" />
+                        </padding>
+
+                        <VBox maxWidth="1160.0" spacing="20.0" styleClass="glass-card">
+                            <padding>
+                                <Insets bottom="28.0" left="28.0" right="28.0" top="28.0" />
+                            </padding>
+
+                            <HBox alignment="CENTER_LEFT" spacing="16.0">
+                                <VBox spacing="4.0" HBox.hgrow="ALWAYS">
+                                    <Label styleClass="dash-title" text="Prenotazioni e Storico" />
+                                    <Label styleClass="dash-subtitle"
+                                        text="Consulta le esperienze in programma e quelle passate, verifica lo stato delle prenotazioni ed esporta gli eventi in calendario."
+                                        wrapText="true" />
+                                </VBox>
+                            </HBox>
+
+                            <Label fx:id="statusMessageLabel" managed="false" visible="false"
+                                wrapText="true" />
+
+                            <Separator styleClass="nav-divider" />
+
+                            <HBox spacing="12.0">
+                                <VBox styleClass="booking-count-card" HBox.hgrow="ALWAYS">
+                                    <Label fx:id="totalBookingsLabel"
+                                        styleClass="booking-count-value" text="0" />
+                                    <Label styleClass="stat-label" text="Prenotazioni totali" />
+                                </VBox>
+                                <VBox styleClass="booking-count-card" HBox.hgrow="ALWAYS">
+                                    <Label fx:id="activeBookingsLabel"
+                                        styleClass="booking-count-value" text="0" />
+                                    <Label styleClass="stat-label" text="In programma" />
+                                </VBox>
+                                <VBox styleClass="booking-count-card" HBox.hgrow="ALWAYS">
+                                    <Label fx:id="historicalBookingsLabel"
+                                        styleClass="booking-count-value" text="0" />
+                                    <Label styleClass="stat-label" text="Nello storico" />
+                                </VBox>
+                                <VBox styleClass="booking-count-card" HBox.hgrow="ALWAYS">
+                                    <Label fx:id="spentTotalLabel" styleClass="booking-count-value"
+                                        text="€ 0,00" />
+                                    <Label styleClass="stat-label"
+                                        text="Valore prenotazioni non cancellate" />
+                                </VBox>
+                            </HBox>
+
+                            <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                <TextField fx:id="searchFilterField"
+                                    promptText="Cerca per titolo, luogo, data..."
+                                    styleClass="custom-input" HBox.hgrow="ALWAYS" />
+                                <ComboBox fx:id="periodFilterCombo" promptText="Periodo"
+                                    styleClass="traveler-search-type" prefWidth="150.0" />
+                                <ComboBox fx:id="statusFilterCombo" promptText="Stato"
+                                    styleClass="traveler-search-type" prefWidth="170.0" />
+                            </HBox>
+
+                            <TableView fx:id="bookingsTableView" prefHeight="380.0"
+                                styleClass="profile-table">
+                                <columns>
+                                    <TableColumn fx:id="itemTitleColumn" prefWidth="205.0"
+                                        text="Esperienza / Viaggio" />
+                                    <TableColumn fx:id="dateColumn" prefWidth="175.0"
+                                        text="Data esperienza" />
+                                    <TableColumn fx:id="bookedAtColumn" prefWidth="135.0"
+                                        text="Prenotata il" />
+                                    <TableColumn fx:id="locationColumn" prefWidth="135.0"
+                                        text="Luogo" />
+                                    <TableColumn fx:id="seatsColumn" prefWidth="55.0" text="Posti" />
+                                    <TableColumn fx:id="priceColumn" prefWidth="95.0" text="Prezzo" />
+                                    <TableColumn fx:id="statusColumn" prefWidth="120.0" text="Stato" />
+                                    <TableColumn fx:id="actionsColumn" prefWidth="180.0"
+                                        text="Azioni" />
+                                </columns>
+                                <columnResizePolicy>
+                                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                                </columnResizePolicy>
+                            </TableView>
+
+                        </VBox>
+                    </VBox>
+                </content>
+            </ScrollPane>
+        </center>
+    </BorderPane>
+</StackPane>

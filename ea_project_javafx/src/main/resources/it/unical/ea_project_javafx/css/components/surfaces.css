@@ -1,0 +1,58 @@
+.glass-card,
+.surface-card,
+.account-panel,
+.kpi-card,
+.booking-card,
+.itinerary-panel,
+.profile-card,
+.security-card,
+.organizer-selection,
+.content-rows.experience-body,
+.experience-card,
+.booking-search-box,
+.booking-count-card,
+.dashboard-upcoming-card,
+.sharing-popup-card,
+.itinerario,
+.descrizione-card,
+.foto,
+.photo-container,
+.recensione-container,
+.map-card {
+    -fx-background-color: linear-gradient(to bottom right, -tone-ivory-080, -tone-ivory-025), -tone-forest-650;
+    -fx-background-insets: 0,1;
+    -fx-background-radius: 22,21;
+    -fx-border-radius: 22;
+    -fx-border-width: 1;
+    -fx-border-color: -tone-ivory-180;
+}
+
+.account-panel .account-panel,
+.surface-inset {
+    -fx-background-color: -tone-ivory-065;
+}
+
+.chat-panel {
+    -fx-background-insets: 0,1;
+    -fx-border-width: 1;
+    -fx-background-color: -tone-forest-780;
+    -fx-background-radius: 22;
+    -fx-border-radius: 22;
+    -fx-border-color: -tone-ivory-180;
+}
+
+.history-booking-card,
+.favorites-shared-section,
+.dashboard-space-panel {
+    -fx-background-color: -tone-forest-780;
+    -fx-background-radius: 22;
+    -fx-border-radius: 22;
+    -fx-border-color: -tone-ivory-180;
+}
+
+.experience-body .descrizione-card,
+.experience-body .itinerario,
+.experience-body .foto,
+.experience-body .recensione-container {
+    -fx-background-color: -tone-ivory-045;
+}

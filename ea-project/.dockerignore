@@ -1,0 +1,17 @@
+*
+!pom.xml
+!src/
+!src/**
+!demo-photo/
+!demo-photo/**
+src/test/
+src/main/resources/application-dev.properties
+src/main/resources/application-local.*
+../certs/keystore.p12
+src/main/resources/*.p12
+src/main/resources/*.jks
+**/*.pem
+**/*.key
+**/*.p12
+**/*.jks
+**/.env*

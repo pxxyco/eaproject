@@ -1,0 +1,272 @@
+@import "../../app.css";
+
+.dashboard-section {
+    -fx-spacing: 14px;
+}
+
+.dashboard-welcome {
+    -fx-padding: 28px 30px;
+    -fx-background-color: linear-gradient(to bottom right, -tone-ivory-160, -tone-white-045 58%, -tone-white-025);
+    -fx-background-radius: 22px;
+    -fx-border-color: -tone-ivory-260;
+    -fx-border-radius: 22px;
+    -fx-border-width: 1px;
+    -fx-effect: dropshadow(gaussian, -tone-ink-220, 24, 0.14, 0, 8);
+}
+
+.dashboard-welcome-eyebrow {
+    -fx-text-fill: -tone-ivory-720;
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+}
+
+.dashboard-welcome-subtitle {
+    -fx-text-fill: -tone-ivory-780;
+    -fx-font-size: 13px;
+}
+
+.dashboard-kpi-label {
+    -fx-font-size: 10px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -tone-ivory-650;
+}
+
+.dashboard-kpi-value {
+    -fx-font-size: 30px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text;
+}
+
+.dashboard-kpi-help {
+    -fx-font-size: 11px;
+    -fx-text-fill: -tone-ivory-650;
+}
+
+.dashboard-upcoming-row {
+    -fx-alignment: center-left;
+}
+
+.dashboard-upcoming-card {
+    -fx-padding: 17px;
+    -fx-spacing: 9px;
+    -fx-min-width: 0;
+    -fx-pref-width: 0;
+    -fx-min-height: 178px;
+}
+
+.dashboard-upcoming-type {
+    -fx-text-fill: -tone-ivory-650;
+    -fx-font-size: 9px;
+    -fx-font-weight: bold;
+}
+
+.dashboard-upcoming-title {
+    -fx-text-fill: -color-text;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.dashboard-upcoming-date {
+    -fx-text-fill: -color-ivory;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.dashboard-upcoming-location {
+    -fx-text-fill: -tone-ivory-720;
+    -fx-font-size: 11px;
+}
+
+.dashboard-upcoming-empty {
+    -fx-padding: 19px 22px;
+    -fx-min-height: 95px;
+    -fx-background-color: -tone-white-045;
+    -fx-background-radius: 14px;
+    -fx-border-color: -tone-ivory-120;
+    -fx-border-radius: 14px;
+}
+
+.dashboard-upcoming-empty-title {
+    -fx-text-fill: -color-text;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.dashboard-upcoming-empty-subtitle {
+    -fx-text-fill: -tone-ivory-650;
+    -fx-font-size: 11px;
+}
+
+.dashboard-status {
+    -fx-padding: 9px 12px;
+    -fx-background-radius: 9px;
+    -fx-font-size: 12px;
+}
+
+.dashboard-status-error {
+    -fx-text-fill: -color-danger;
+    -fx-background-color: -tone-danger-220;
+}
+
+.dashboard-status-success {
+    -fx-text-fill: -color-ivory;
+    -fx-background-color: -tone-ivory-100;
+}
+
+.dashboard-empty-label {
+    -fx-text-fill: -tone-ivory-720;
+    -fx-padding: 25px 18px;
+}
+
+.dashboard-welcome-intro {
+    -fx-padding: 5px 8px 5px 0;
+}
+
+.dashboard-welcome-title {
+    -fx-font-size: 28px;
+}
+
+.dashboard-welcome-signature {
+    -fx-font-size: 10px;
+    -fx-text-fill: -tone-ivory-450;
+    -fx-font-weight: bold;
+}
+
+.dashboard-space-panel {
+    -fx-padding: 16px;
+}
+
+.dashboard-space-eyebrow {
+    -fx-text-fill: -tone-ivory-550;
+    -fx-font-size: 9px;
+    -fx-font-weight: bold;
+}
+
+.dashboard-space-title {
+    -fx-text-fill: -color-text;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.dashboard-space-metrics {
+    -fx-fill-height: true;
+}
+
+.dashboard-space-stat {
+    -fx-pref-width: 152px;
+    -fx-min-height: 78px;
+    -fx-padding: 11px 12px;
+    -fx-background-color: -tone-white-065;
+    -fx-background-radius: 11px;
+    -fx-border-color: -tone-ivory-100;
+    -fx-border-radius: 11px;
+}
+
+.dashboard-space-stat:hover {
+    -fx-background-color: -tone-white-100;
+}
+
+.dashboard-space-stat .dashboard-kpi-value {
+    -fx-font-size: 25px;
+}
+
+.dashboard-space-stat .dashboard-kpi-label {
+    -fx-font-size: 9px;
+}
+
+.dashboard-space-stat .dashboard-kpi-help {
+    -fx-font-size: 10px;
+}
+
+.traveler-dashboard-content .dashboard-booking-filters {
+    -fx-alignment: center-left;
+    -fx-spacing: 12px;
+}
+
+.traveler-dashboard-content .dashboard-welcome {
+    -fx-alignment: center-left;
+    -fx-min-height: 238px;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-effect: null;
+    -fx-padding: 12 0 24 0;
+}
+
+.traveler-dashboard-content .dashboard-space-panel .label {
+    -fx-text-fill: -color-ivory;
+}
+
+.traveler-dashboard-content .dashboard-kpi-value {
+    -fx-font-size: 30;
+}
+
+.traveler-dashboard-content .dashboard-bookings-section {
+    -fx-background-radius: 18px;
+    -fx-border-radius: 18px;
+    -fx-spacing: 15px;
+    -fx-padding: 20 0 0 0;
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.traveler-dashboard-content .dashboard-kpi-label {
+    -fx-font-size: 10;
+}
+
+.traveler-dashboard-content .dashboard-kpi-help {
+    -fx-font-size: 12;
+}
+
+.traveler-dashboard-content .dashboard-section {
+    -fx-spacing: 22;
+    -fx-padding: 12 0;
+}
+
+.traveler-dashboard-content .dashboard-welcome-title {
+    -fx-font-size: 38;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text;
+}
+
+.traveler-dashboard-content .dashboard-welcome-eyebrow {
+    -fx-font-size: 12;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text-muted;
+}
+
+.traveler-dashboard-content .dashboard-welcome-subtitle {
+    -fx-font-size: 18;
+    -fx-text-fill: -color-text-secondary;
+}
+
+.traveler-dashboard-content .dashboard-welcome-signature {
+    -fx-font-size: 11;
+    -fx-text-fill: -color-text-muted;
+}
+
+.traveler-dashboard-content .section-title {
+    -fx-font-size: 26;
+    -fx-font-weight: bold;
+    -fx-text-fill: -color-text;
+}
+
+.traveler-dashboard-content .dashboard-space-panel {
+    -fx-padding: 24;
+}
+
+.traveler-dashboard-content .dashboard-space-title {
+    -fx-font-size: 19;
+    -fx-font-weight: bold;
+}
+
+.dashboard-agenda-note {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent transparent transparent -tone-ivory-450;
+    -fx-border-width: 0 0 0 2;
+    -fx-padding: 8 0 8 28;
+}
+
+.dashboard-agenda-note .dashboard-kpi-value {
+    -fx-font-size: 34;
+    -fx-min-width: 45;
+}

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<StackPane stylesheets="@../../css/screens/profile/profile.css" xmlns:fx="http://javafx.com/fxml/1"
+    fx:controller="it.unical.ea_project_javafx.controller.profile.ProfileController"
+    styleClass="account-page">
+    <ImageView fx:id="bgImageView" mouseTransparent="true" opacity="0.12" />
+    <BorderPane>
+        <top>
+            <StackPane fx:id="navbarContainer" />
+        </top>
+        <center>
+            <ScrollPane fitToWidth="true" styleClass="main-scroll">
+                <VBox alignment="TOP_CENTER" styleClass="account-layout">
+                    <VBox maxWidth="1080" spacing="24">
+                        <Label text="IL TUO ACCOUNT" styleClass="account-kicker" wrapText="true" />
+                        <Label text="Il mio profilo" styleClass="account-title" wrapText="true" />
+                        <Label text="Le informazioni che rendono tuo questo spazio."
+                            styleClass="account-subtitle" wrapText="true" />
+                        <Label fx:id="statusLabel" visible="false" managed="false" wrapText="true" />
+                        <HBox spacing="24" alignment="TOP_LEFT">
+                            <VBox spacing="20" minWidth="270" prefWidth="290"
+                                styleClass="account-panel">
+                                <StackPane fx:id="avatarContainer" styleClass="profile-avatar"
+                                    prefHeight="104" maxHeight="104" minHeight="104" maxWidth="104">
+                                    <Label fx:id="avatarInitialsLabel" text="U"
+                                        styleClass="avatar-initials" />
+                                    <ImageView fx:id="profilePhotoImageView" fitWidth="104"
+                                        fitHeight="104" />
+                                </StackPane>
+                                <Label fx:id="fullNameLabel" styleClass="section-header"
+                                    wrapText="true" />
+                                <Label fx:id="roleBadgeLabel" styleClass="role-badge" />
+                                <Label
+                                    text="Una foto per farti riconoscere. PNG o JPG, fino a 5 MB."
+                                    styleClass="section-subtitle" wrapText="true" />
+                                <Button text="Scegli foto" onAction="#handleChooseProfilePhoto"
+                                    styleClass="btn-secondary" />
+                                <Button fx:id="savePhotoButton" text="Carica foto"
+                                    onAction="#handleUploadProfilePhoto" styleClass="btn-primary" />
+                                <Button fx:id="cancelPhotoButton" text="Annulla selezione"
+                                    onAction="#handleCancelPhotoSelection"
+                                    styleClass="btn-secondary" />
+                                <Button fx:id="removePhotoButton" text="Rimuovi foto"
+                                    onAction="#handleRemoveProfilePhoto" styleClass="btn-secondary" />
+                            </VBox>
+                            <VBox spacing="24" HBox.hgrow="ALWAYS">
+                                <VBox spacing="18" styleClass="account-panel">
+                                    <Label text="I tuoi dati" styleClass="section-header"
+                                        wrapText="true" />
+                                    <Label text="Aggiorna le informazioni associate al tuo account."
+                                        styleClass="section-subtitle" wrapText="true" />
+                                    <VBox spacing="7">
+                                        <Label text="Nome completo" styleClass="form-label"
+                                            wrapText="true" />
+                                        <TextField fx:id="fullNameField" promptText="Nome e cognome"
+                                            styleClass="custom-input" />
+                                    </VBox>
+                                    <VBox spacing="7">
+                                        <Label text="Username" styleClass="form-label"
+                                            wrapText="true" />
+                                        <TextField fx:id="usernameField"
+                                            promptText="Il tuo nome su EA Project"
+                                            styleClass="custom-input" />
+                                    </VBox>
+                                    <VBox spacing="7">
+                                        <Label text="Indirizzo email" styleClass="form-label"
+                                            wrapText="true" />
+                                        <TextField fx:id="emailField" promptText="nome@esempio.it"
+                                            styleClass="custom-input" />
+                                    </VBox>
+                                    <Button text="Salva modifiche" onAction="#handleSaveProfile"
+                                        styleClass="btn-primary" />
+                                </VBox>
+                                <HBox spacing="20" styleClass="account-panel">
+                                    <VBox spacing="8" HBox.hgrow="ALWAYS">
+                                        <Label text="Account e accesso" styleClass="section-header"
+                                            wrapText="true" />
+                                        <Label fx:id="roleValueLabel" />
+                                        <Label
+                                            text="Gestisci la password, le sessioni e le preferenze."
+                                            styleClass="section-subtitle" wrapText="true" />
+                                    </VBox>
+                                    <Button text="Sicurezza →" onAction="#handleGoToSettings"
+                                        styleClass="btn-secondary" />
+                                </HBox>
+                            </VBox>
+                        </HBox>
+                    </VBox>
+                </VBox>
+            </ScrollPane>
+        </center>
+    </BorderPane>
+</StackPane>

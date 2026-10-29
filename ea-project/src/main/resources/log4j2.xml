@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+
+    <Properties>
+        <Property name="LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] [request=%X{requestId}]
+            %-5level %logger{1.} - %encode{%msg}{CRLF}%n</Property>
+        <Property name="AUDIT_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} [request=%X{requestId}] %-5level
+            %encode{%msg}{CRLF}%n</Property>
+        <!-- Rinominata in FINAL_LOG_DIR per evitare conflitti con la variabile d'ambiente
+        env:LOG_DIR -->
+        <Property name="FINAL_LOG_DIR">${sys:eaproject.log.dir:-${env:LOG_DIR:-logs}}</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="LogToConsole" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}" />
+        </Console>
+
+        <RollingRandomAccessFile name="LogToRollingFile"
+            fileName="${FINAL_LOG_DIR}/app.log"
+            filePattern="${FINAL_LOG_DIR}/$${date:yyyy-MM}/app-%d{yyyy-MM-dd}-%i.log.gz"
+            immediateFlush="true"
+            bufferSize="262144">
+            <PatternLayout pattern="${LOG_PATTERN}" />
+
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+                <SizeBasedTriggeringPolicy size="50 MB" />
+            </Policies>
+
+            <DefaultRolloverStrategy max="20">
+                <Delete basePath="${FINAL_LOG_DIR}" maxDepth="2">
+                    <IfFileName glob="*/app-*.log.gz" />
+                    <IfLastModified age="30d" />
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingRandomAccessFile>
+
+
+        <RollingRandomAccessFile name="AuditFile"
+            fileName="${FINAL_LOG_DIR}/audit.log"
+            filePattern="${FINAL_LOG_DIR}/$${date:yyyy-MM}/audit-%d{yyyy-MM-dd}-%i.log.gz"
+            immediateFlush="true">
+            <PatternLayout pattern="${AUDIT_PATTERN}" />
+
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+                <SizeBasedTriggeringPolicy size="20 MB" />
+            </Policies>
+
+            <DefaultRolloverStrategy max="10">
+                <Delete basePath="${FINAL_LOG_DIR}" maxDepth="2">
+                    <IfFileName glob="*/audit-*.log.gz" />
+                    <IfLastModified age="90d" />
+                </Delete>
+            </DefaultRolloverStrategy>
+        </RollingRandomAccessFile>
+    </Appenders>
+
+    <Loggers>
+
+        <Logger name="AUDIT" level="info" additivity="false">
+            <AppenderRef ref="AuditFile" />
+            <AppenderRef ref="LogToConsole" />
+        </Logger>
+
+        <Logger name="it.unical.ea_project" level="info" additivity="false">
+            <AppenderRef ref="LogToRollingFile" />
+            <AppenderRef ref="LogToConsole" />
+        </Logger>
+
+        <Root level="info">
+            <AppenderRef ref="LogToRollingFile" />
+            <AppenderRef ref="LogToConsole" />
+        </Root>
+    </Loggers>
+</Configuration>

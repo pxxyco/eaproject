@@ -1,0 +1,51 @@
+.logo {
+    -fx-text-fill: -color-white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+
+
+.app-root,
+.account-page,
+.chat-root,
+.splash-pane {
+    -fx-background-color: -color-ink;
+}
+
+.bg-overlay {
+    -fx-background-color: -tone-ink-850;
+}
+
+.app-background-shade,
+.profile-overlay,
+.favorites-overlay {
+    -fx-background-color: -tone-ink-780;
+}
+
+.app-shell,
+.content-wrapper,
+.content-scroll,
+.content-scroll>.viewport {
+    -fx-background-color: transparent;
+    -fx-background: transparent;
+}
+
+.separator:horizontal .line {
+    -fx-border-color: -tone-ivory-160;
+    -fx-border-width: 1 0 0 0;
+    -fx-background-color: transparent;
+}
+
+.split-pane {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.experience-list-content {
+    -fx-padding: 10;
+}
+
+.root.app-root {
+    -fx-background-color: -color-ink;
+}
