@@ -171,7 +171,6 @@ public class UserServiceImpl implements UserService {
         String previousPhoto = user.getProfilePhotoUrl();
         user.setProfilePhotoUrl(null);
         User saved = userRepository.save(user);
-        // Remove only the former immutable file after the database commit.
         photoStorageService.deleteProfilePhoto(userId, previousPhoto);
         return saved;
     }

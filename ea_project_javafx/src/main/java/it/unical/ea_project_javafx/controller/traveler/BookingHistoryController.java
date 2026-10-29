@@ -146,7 +146,6 @@ public class BookingHistoryController implements AutoCloseable {
                 .filter(node -> node instanceof ListCell<?> cell && !cell.isEmpty()
                         && cell.getIndex() >= historyList.getItems().size() - 2)
                 .anyMatch(node -> {
-                    // VirtualFlow also keeps spare cells in a separate, hidden group.
                     boolean inViewport = false;
                     for (Node parent = node; parent != null; parent = parent.getParent()) {
                         if (!parent.isVisible())
@@ -539,7 +538,6 @@ public class BookingHistoryController implements AutoCloseable {
         scroll.setFitToWidth(true);
         scroll.setPrefViewportHeight(385);
         scroll.getStyleClass().add("history-modal-scroll");
-        // Header remains visible; only the form body scrolls on small screens.
         panel.getChildren().add(scroll);
         showInAppModal(panel);
     }

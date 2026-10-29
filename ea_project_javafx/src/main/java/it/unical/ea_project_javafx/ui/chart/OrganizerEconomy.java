@@ -16,10 +16,6 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 
-/**
- * One bounded monthly aggregate, shared by the organizer dashboard and finance
- * page.
- */
 public final class OrganizerEconomy extends VBox implements AutoCloseable {
     private final Label status = new Label(), paid = new Label("—"), count = new Label("—"), average = new Label("—"),
             reserved = new Label("—");

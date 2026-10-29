@@ -8,7 +8,6 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.function.Consumer;
 
-/** Shared API contract for quick favorites, independent of named collections. */
 public final class FavoriteService {
     public enum Target {
         ACTIVITY("activities"), TRIP("trips");

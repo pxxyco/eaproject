@@ -88,10 +88,6 @@ public class ApiService {
         HttpRequest build(String token) throws Exception;
     }
 
-    /**
-     * Shared transport for JSON and multipart requests, with one refresh/retry
-     * policy.
-     */
     private static void executeRequest(RequestFactory requestFactory,
             Consumer<HttpResponse<String>> onSuccess, Consumer<String> onServerFailure,
             Consumer<Throwable> onNetworkFailure, Consumer<Boolean> loadingSetter, boolean allowRefresh) {
@@ -151,7 +147,6 @@ public class ApiService {
         return pending;
     }
 
-    /** Preserves the server's validation/conflict message for forms. */
     public static void callDetailed(String url, String body, Method method,
             Consumer<HttpResponse<String>> onSuccess, Consumer<String> onFailure,
             Consumer<Boolean> loadingSetter) {
@@ -199,7 +194,6 @@ public class ApiService {
                 }
             }
         } catch (Exception ignored) {
-            // The body may be plain text or a framework error document.
         }
         String plain = responseBody.trim();
         if (!plain.startsWith("{") && plain.length() <= 250 && !plain.contains("<html"))
@@ -273,8 +267,6 @@ public class ApiService {
     private static void uploadFiles(String url, List<Path> files, String formField,
             Consumer<HttpResponse<String>> onSuccess, Runnable onFailure,
             Consumer<String> onServerFailure, Consumer<Boolean> loadingSetter) {
-        // Copy the selection: later edits to the form cannot change an in-flight
-        // upload.
         List<Path> selection = List.copyOf(files);
         executeRequest(token -> buildMultipartRequest(url, selection, formField, token), onSuccess,
                 message -> {

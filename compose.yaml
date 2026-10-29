@@ -35,13 +35,13 @@ services:
       DB_USER: ${DB_USER:-eaproject}
       DB_PSW: ${DB_PASSWORD:?Imposta DB_PASSWORD nel file .env}
       JWT_SECRET: ${JWT_SECRET:?Imposta JWT_SECRET in Base64 nel file .env}
-      SERVER_SSL_ENABLED: ${SERVER_SSL_ENABLED:-false}
+      SERVER_SSL_ENABLED: ${SERVER_SSL_ENABLED:-true}
       SSL_KEYSTORE: ${SSL_KEYSTORE:-file:/app/certs/server.p12}
       SSL_KEYSTORE_PASSWORD: ${SSL_KEYSTORE_PASSWORD:-}
       LOG_DIR: /app/logs
       TZ: Europe/Rome
     ports:
-      - "${BACKEND_HOST:-127.0.0.1}:${BACKEND_PORT:-8080}:8080"
+      - "${BACKEND_HOST:-127.0.0.1}:${BACKEND_PORT:-8443}:8080"
     volumes:
       - media:/app/storage
       - logs:/app/logs

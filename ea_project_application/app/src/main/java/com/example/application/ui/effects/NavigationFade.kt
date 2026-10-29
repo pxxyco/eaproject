@@ -12,10 +12,8 @@ import androidx.compose.ui.graphics.*
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 
-/** Extra scrollable space keeps the last action above the fading region at the end of a page. */
 internal val LocalNavigationTail = staticCompositionLocalOf { 0.dp }
 
-/** Visible overlap between the page viewport and the top of the floating navigation capsule. */
 internal val LocalNavigationOverlap = staticCompositionLocalOf { 0.dp }
 
 private const val SHADER = """
@@ -51,12 +49,10 @@ internal class BottomBlur {
         shader.setFloatUniform("height", height)
         shader.setFloatUniform("fade", fade)
         shader.setFloatUniform("radius", radius)
-        // Android snapshots uniforms when creating the effect. Build it AFTER setting the viewport.
         cachedEffect = android.graphics.RenderEffect.createRuntimeShaderEffect(shader, "content").asComposeRenderEffect()
     }
 }
 
-/** GPU sampling is limited to the bottom strip. Older Android versions use a soft alpha fade. */
 @Composable
 internal fun Modifier.navigationFade(): Modifier {
     val fade = with(LocalDensity.current) { 72.dp.toPx() }

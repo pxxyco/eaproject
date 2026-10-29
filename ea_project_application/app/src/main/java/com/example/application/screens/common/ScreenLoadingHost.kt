@@ -11,7 +11,6 @@ internal class ScreenLoadingHost {
 }
 internal val LocalScreenLoadingHost = staticCompositionLocalOf<ScreenLoadingHost?> { null }
 
-/** Returns true when navigation owns the overlay, so a page does not draw a second cropped one. */
 @Composable
 internal fun publishScreenLoading(message: String?): Boolean {
     val host = LocalScreenLoadingHost.current

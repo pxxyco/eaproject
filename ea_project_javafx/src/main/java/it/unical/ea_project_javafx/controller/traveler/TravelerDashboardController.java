@@ -74,11 +74,6 @@ import static it.unical.ea_project_javafx.ui.BookingPresentation.isHistorical;
 import static it.unical.ea_project_javafx.ui.BookingPresentation.isTrip;
 import static it.unical.ea_project_javafx.ui.BookingPresentation.statusCell;
 
-/**
- * Traveler dashboard: data-backed discovery, booking summary and the same
- * operational booking table
- * available in the former dedicated bookings page.
- */
 public class TravelerDashboardController implements ProfileDashboardController {
     @FXML
     private VBox dashboardRoot;
@@ -214,10 +209,6 @@ public class TravelerDashboardController implements ProfileDashboardController {
 
     private boolean missingWelcomeBindingsReported;
 
-    /**
-     * Evita che un FXML rimasto obsoleto in target/classes faccia fallire tutta la
-     * navigazione.
-     */
     private void setLabelText(Label injectedLabel, String fxId, String value) {
         Label target = resolveLabel(injectedLabel, fxId);
         if (target != null)
@@ -343,7 +334,6 @@ public class TravelerDashboardController implements ProfileDashboardController {
         }
         discoveryTitle.setText(selectedCategory.getText());
         discoverySubtitle.setText("Esplora le esperienze di questa categoria.");
-        // Retain the current page while the category request is in flight.
         boolean trips = category.equals("TRIP");
         long request = ++discoveryGeneration;
         String endpoint = trips ? "/api/trips/search?page=0&size=9"
@@ -586,9 +576,6 @@ public class TravelerDashboardController implements ProfileDashboardController {
     }
 
     private void renderUpcomingExperiences() {
-        // Un FXML ancora presente in target/classes potrebbe non avere questa sezione
-        // nuova.
-        // La schermata deve rimanere navigabile e la build clean aggiornerà la risorsa.
         if (upcomingExperienceContainer == null)
             return;
         upcomingExperienceContainer.getChildren().clear();

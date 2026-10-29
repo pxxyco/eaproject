@@ -12,7 +12,6 @@ import androidx.compose.ui.platform.LocalContext
 internal fun SecuritySettings(user: UserDTO, actions: AccountActions, onLogout: () -> Unit, gateway: AccountGateway) {
     val context = LocalContext.current
     val notifications = rememberNotificationAccess()
-    // Read Compose state so returning from system settings refreshes channel availability.
     val bookingAllowed = remember(notifications.revision) { NotificationChannels.allowed(context, NotificationChannels.BOOKINGS) }
     val messagesAllowed = remember(notifications.revision) { NotificationChannels.allowed(context, NotificationChannels.MESSAGES) }
     var preferences by remember { mutableStateOf<AccountPreferences?>(null) }

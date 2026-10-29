@@ -9,10 +9,6 @@ import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.layout.StackPane;
 
-/**
- * Shared view wiring and feedback; controllers retain only their page-specific
- * actions.
- */
 public final class ViewSupport {
 
     private ViewSupport() {

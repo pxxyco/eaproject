@@ -18,7 +18,6 @@ import java.io.IOException
 import java.time.LocalDate
 import java.util.concurrent.TimeUnit
 
-/** Android equivalent of the desktop daily wallpaper loader: Bing first, three attempts, then fallback. */
 internal object WallpaperService {
     private val mutex = Mutex()
     private var day: LocalDate? = null
@@ -48,8 +47,8 @@ internal object WallpaperService {
                                 bitmap = decode(temporary) ?: throw IOException("Immagine non valida")
                                 if (!temporary.renameTo(target)) temporary.copyTo(target, overwrite = true)
                             } finally { temporary.delete() }
-                        } catch (_: IOException) { /* Retry the complete API and image request. */ }
-                        catch (_: RuntimeException) { /* Malformed response or image. */ }
+                        } catch (_: IOException) {}
+                        catch (_: RuntimeException) {}
                     }
                 }
             }
@@ -79,7 +78,6 @@ internal object WallpaperService {
         })
     }
 
-    /** A small, cached two-pass box blur also works on API 30 without RenderScript. */
     private fun soften(source: Bitmap): Bitmap {
         val width = minOf(720, source.width)
         val height = (source.height.toLong() * width / source.width).toInt().coerceAtLeast(1)

@@ -3,7 +3,6 @@ package com.example.application.network
 internal enum class PasswordStrength(val label: String, val level: Int) {
     WEAK("Debole", 1), FAIR("Discreta", 2), STRONG("Forte", 3), VERY_STRONG("Molto forte", 4);
     companion object {
-        /** Local guidance, not a claim of measured password entropy. No password leaves this function. */
         fun of(value: String): PasswordStrength {
             val lower = value.lowercase(java.util.Locale.ROOT)
             val common = listOf("password", "qwerty", "123456", "abcdef", "letmein").any { lower.contains(it) }

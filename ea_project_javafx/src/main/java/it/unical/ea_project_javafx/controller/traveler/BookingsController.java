@@ -282,11 +282,6 @@ public class BookingsController {
         };
     }
 
-    /**
-     * Upcoming first (nearest date first), then the most recent historical items;
-     * cancelled last.
-     */
-
     private void exportIcs(BookingDTO dto) {
         if (dto == null || dto.getBookingId() == null) {
             ViewSupport.error(statusMessageLabel, "Seleziona una prenotazione valida da esportare.");

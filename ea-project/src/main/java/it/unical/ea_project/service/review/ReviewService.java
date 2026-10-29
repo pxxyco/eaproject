@@ -13,10 +13,6 @@ public interface ReviewService {
 
     List<Review> findByUser(Long userId);
 
-    /**
-     * Returns only the authenticated user's non-deleted reviews, with organizer
-     * responses when present.
-     */
     List<ReviewDTO> findByUserAsDto(Long userId);
 
     @Nullable

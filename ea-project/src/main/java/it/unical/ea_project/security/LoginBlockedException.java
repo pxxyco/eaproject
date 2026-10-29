@@ -4,7 +4,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpHeaders;
 
-/** Account cooldown, distinct from the HTTP request-rate bucket (ERR-104). */
 public final class LoginBlockedException extends ResponseStatusException {
     private final long retryAfterSeconds;
 

@@ -17,7 +17,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
-/** No card data is collected or transmitted by this demonstrative checkout. */
 public final class MockCheckoutDialog {
     private MockCheckoutDialog() {
     }

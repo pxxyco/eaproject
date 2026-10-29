@@ -16,7 +16,6 @@ import com.example.application.ui.theme.GlassFill
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-/** One operation per account page; cancelling navigation cancels its UI work. */
 internal class AccountActions(private val scope: CoroutineScope, val snackbar: SnackbarHostState) {
     var busy by mutableStateOf(false)
         private set

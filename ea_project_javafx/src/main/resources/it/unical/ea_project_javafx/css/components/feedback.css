@@ -1,5 +1,3 @@
-/* Reusable component: feedback. Theme: css/theme.css. */
-
 .loading-screen {
     -fx-background-color: -tone-ink-320;
     -fx-padding: 36;
@@ -178,6 +176,5 @@
     -fx-text-alignment: center;
 }
 
-/* LoadingRing exposes the same CSS color contract as the native indicator. */
 .loading-ring { -fx-progress-color: -color-text; }
 .tooltip { -fx-background-color: -color-menu; -fx-text-fill: -color-text; -fx-border-color: -tone-ivory-220; -fx-background-radius: 10; -fx-border-radius: 10; -fx-padding: 8 12; -fx-font-size: 12; }

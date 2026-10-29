@@ -58,8 +58,6 @@ public class SplashScreenController {
     public void initialize() {
 
         ApiService.setOnNetworkFailureGlobal(this::restartAppManually);
-        // Gli HTTP 429 (ERR-104) sono errori locali delle singole richieste.
-        // Non vengono mai usati per riportare l'intera applicazione allo splash.
         retryButton.setOnAction(e -> checkBackendConnection());
         exitButton.setOnAction(e -> shutdownAndExit());
 

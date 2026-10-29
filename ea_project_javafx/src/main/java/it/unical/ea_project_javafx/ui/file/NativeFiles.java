@@ -8,9 +8,6 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
-/**
- * Restores window-manager geometry and presentation after a native file dialog.
- */
 public final class NativeFiles {
     private NativeFiles() {
     }

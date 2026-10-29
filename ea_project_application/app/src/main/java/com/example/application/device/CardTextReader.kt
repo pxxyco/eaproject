@@ -3,10 +3,8 @@ package com.example.application.device
 import java.time.YearMonth
 import java.util.Locale
 
-/** Conservative extraction of printed metadata. OCR text and PAN never enter a request, file or log. */
 internal object CardTextReader {
     internal data class Reading(val pan: String?, val holder: String?, val expiry: YearMonth?) {
-        // Deliberately do not expose a generated toString containing the number.
         override fun toString() = "CardReading(redacted)"
     }
     private val panPatterns = listOf(
@@ -18,7 +16,6 @@ internal object CardTextReader {
     fun read(lines: List<String>, now: YearMonth = YearMonth.now()): Reading {
         val pans = lines.flatMap { line -> panPatterns.flatMap { pattern ->
             pattern.findAll(line).mapNotNull { match ->
-                // Never mistake a prefix of a longer number, or an adjacent CVV/date, for a complete PAN.
                 if (line.removeRange(match.range).any(Char::isDigit)) null else match.value.filter(Char::isDigit)
             }.toList()
         } }
@@ -38,7 +35,6 @@ internal object CardTextReader {
     }
 }
 
-/** Requires consistent frames. Front and back may be combined only within the same explicit scan. */
 internal class CardScanSession(private val today: () -> YearMonth = YearMonth::now) {
     private var pan: String? = null
     private var holder: String? = null

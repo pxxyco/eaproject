@@ -33,8 +33,6 @@ internal fun FloatingNavigation(destinations: List<AppDestinations>, selected: A
     modifier: Modifier = Modifier) {
     val shape = RoundedCornerShape(32.dp)
     Box(modifier.widthIn(max = 560.dp).fillMaxWidth().testTag("floating_navigation")) {
-        // Paint the soft shadow without an elevated RenderNode: translucent elevation can
-        // leave a bright rectangular strip behind the labels on Android.
         Box(Modifier.matchParentSize().dropShadow(shape, Shadow(radius = 12.dp, color = Color.Black.copy(alpha = .18f), offset = DpOffset(0.dp, 4.dp))).clip(shape).background(GlassFill).border(1.dp, GlassBorder, shape))
         Row(Modifier.selectableGroup().padding(8.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             destinations.forEach { destination ->

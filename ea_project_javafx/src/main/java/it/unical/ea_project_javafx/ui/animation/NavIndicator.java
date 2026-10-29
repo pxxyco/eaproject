@@ -19,9 +19,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.util.Duration;
 
-/**
- * One indicator per scene, preserving its previous position across navigation.
- */
 public final class NavIndicator {
     private static final Object KEY = new Object();
     private final Region line = new Region();

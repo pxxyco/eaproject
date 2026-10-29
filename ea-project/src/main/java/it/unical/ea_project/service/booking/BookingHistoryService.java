@@ -15,10 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-/**
- * The database filters and pages history; only the selected bookings and
- * reviews are materialized.
- */
 @Service
 @RequiredArgsConstructor
 public class BookingHistoryService {

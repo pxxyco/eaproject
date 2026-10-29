@@ -162,8 +162,6 @@ public class ReviewServiceImpl implements ReviewService {
 
         if (data.getRating() != null)
             review.setRating(data.getRating());
-        // PUT represents the current review form: a null/blank comment means the author
-        // cleared it.
         review.setComment(normalizeComment(data.getComment()));
 
         Long tripId = review.getTrip() != null ? review.getTrip().getTripId() : null;

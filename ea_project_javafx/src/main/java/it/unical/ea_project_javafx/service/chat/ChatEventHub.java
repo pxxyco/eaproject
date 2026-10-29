@@ -8,10 +8,6 @@ import java.util.function.LongConsumer;
 import javafx.animation.PauseTransition;
 import javafx.util.Duration;
 
-/**
- * One SSE connection shared by the navbar, full chat and compact chat. FX
- * thread only.
- */
 public final class ChatEventHub {
     private static final Map<Long, LongConsumer> changes = new LinkedHashMap<>();
     private static final Map<Long, Consumer<String>> states = new LinkedHashMap<>();

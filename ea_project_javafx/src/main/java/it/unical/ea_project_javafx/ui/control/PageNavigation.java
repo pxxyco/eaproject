@@ -9,7 +9,6 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-/** Reusable pager styled by the shared pagination component. */
 public final class PageNavigation extends VBox {
     private final IntegerProperty currentPageIndex = new SimpleIntegerProperty();
     private final IntegerProperty pageCount = new SimpleIntegerProperty(1);

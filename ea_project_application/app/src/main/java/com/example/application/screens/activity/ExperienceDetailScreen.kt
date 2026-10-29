@@ -104,7 +104,7 @@ internal fun ExperienceDetailContent(detail: ExperienceDetail, onBookClick: () -
     val scrollTail = LocalNavigationTail.current.coerceAtLeast(72.dp)
     var selectedTab by rememberSaveable { mutableStateOf(DetailTab.DESCRIPTION) }
     var openPhoto by remember { mutableStateOf<PhotoViewerRequest?>(null) }
-    val reviewsState = rememberReviewsState(detail.ref)
+    val reviewsState = rememberReviewsState(detail.ref, detail.ownerId)
     val headerHeightPx = with(LocalDensity.current) { HEADER_HEIGHT.toPx() }
 
     val headerOffset by remember {
@@ -121,8 +121,6 @@ internal fun ExperienceDetailContent(detail: ExperienceDetail, onBookClick: () -
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Only the scrolling page fades. The booking action stays outside the shader,
-        // and the page overlaps its rounded top by a few pixels for a soft transition.
         Box(Modifier.fillMaxSize().padding(bottom = bookingHeight + bottomGap - 22.dp).navigationFade().background(GlassFill)) {
             RemotePhoto(
                 imageUrl = detail.coverUrl,
@@ -159,7 +157,7 @@ internal fun ExperienceDetailContent(detail: ExperienceDetail, onBookClick: () -
                             onPhotoClick = { photos, index -> openPhoto = PhotoViewerRequest(photos, index) }
                         )
                     }
-                    DetailTab.REVIEWS -> reviewsSection(reviewsState, detail.averageRating)
+                    DetailTab.REVIEWS -> reviewsSection(reviewsState)
                 }
             }
 

@@ -9,7 +9,6 @@ import javafx.scene.paint.LinearGradient;
 import javafx.scene.paint.Stop;
 import javafx.scene.shape.Rectangle;
 
-/** Gentle top fade for pages with a stationary header. */
 final class PageViewportFade {
     static void install(ScrollPane pane) {
         final Rectangle mask = new Rectangle();

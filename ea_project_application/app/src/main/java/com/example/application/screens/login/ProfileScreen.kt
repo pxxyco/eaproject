@@ -71,7 +71,6 @@ private fun ProfileContent(user: UserDTO, onLogoutClick: () -> Unit, modifier: M
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Avatar con le iniziali (la foto profilo reale arriverà con una libreria immagini)
         Box(
             modifier = Modifier.size(96.dp).clip(CircleShape).background(Stone600),
             contentAlignment = Alignment.Center

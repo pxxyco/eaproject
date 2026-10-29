@@ -1,5 +1,3 @@
-/* Reusable component: buttons. Theme: css/theme.css. */
-
 .button,
 .toggle-button,
 .menu-button {
@@ -355,7 +353,6 @@
     -fx-background-color: -color-text-secondary;
 }
 
-/* Navigation/login actions retain the pill proportion of the existing navbar. */
 .btn-login-pill { -fx-background-radius: 24; -fx-border-radius: 24; -fx-padding: 10 18; }
 .custom-link-bold { -fx-font-weight: bold; }
 

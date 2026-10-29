@@ -8,7 +8,6 @@ import java.time.ZoneOffset
 
 internal data class CalendarEvent(val title: String, val location: String, val start: Long, val end: Long, val allDay: Boolean) {
     companion object {
-        /** Matches the backend ICS export: inclusive trip dates, Rome time for activities. */
         fun from(title: String?, location: String?, start: String?, end: String?): CalendarEvent? = runCatching {
             require(!start.isNullOrBlank())
             val allDay = start.length == 10

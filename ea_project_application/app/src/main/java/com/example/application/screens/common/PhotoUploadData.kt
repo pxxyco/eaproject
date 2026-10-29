@@ -7,7 +7,6 @@ import java.io.InputStream
 internal const val MAX_PHOTO_BYTES = 10 * 1024 * 1024
 internal class PhotoTooLargeException : IOException()
 
-/** Enforces the server limit even when a document provider cannot report the file size. */
 internal fun readPhotoBytes(input: InputStream, maxBytes: Int = MAX_PHOTO_BYTES): ByteArray {
     val output = ByteArrayOutputStream()
     val buffer = ByteArray(8192)

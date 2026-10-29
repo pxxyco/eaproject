@@ -15,7 +15,6 @@ import com.example.application.ui.effects.LocalNavigationOverlap
 import com.example.application.ui.effects.LocalNavigationTail
 import com.example.application.ui.effects.navigationFade
 
-/** Shared floating navigation geometry, including space for pages with their own fixed actions. */
 @Composable
 internal fun FloatingNavigationLayout(
     destinations: List<AppDestinations>,

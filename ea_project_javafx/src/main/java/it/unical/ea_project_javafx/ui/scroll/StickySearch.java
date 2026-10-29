@@ -30,10 +30,6 @@ import javafx.scene.paint.Stop;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
-/**
- * One set of controls, pixel-aligned in either location, with a continuous
- * palette transition.
- */
 public final class StickySearch implements AutoCloseable {
     private final ScrollPane scroll;
     private final VBox dock;
@@ -101,8 +97,6 @@ public final class StickySearch implements AutoCloseable {
     }
 
     private void positionDock() {
-        // Use the slot's actual screen X and width, not the center of a pane containing
-        // a scrollbar.
         var bounds = dock.getParent().sceneToLocal(search.slot().localToScene(search.slot().getLayoutBounds()));
         double height = search.controls().prefHeight(bounds.getWidth());
         dock.resizeRelocate(bounds.getMinX(), 8, bounds.getWidth(), height);

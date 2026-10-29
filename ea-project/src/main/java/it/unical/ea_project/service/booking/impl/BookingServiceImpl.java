@@ -296,10 +296,6 @@ public class BookingServiceImpl implements BookingService {
 
     }
 
-    /**
-     * Start instant used to avoid cancelling events that have already started.
-     * Trips have day precision.
-     */
     private LocalDateTime getEventStartDateTime(Booking booking) {
         if (booking.getTrip() != null && booking.getTrip().getStartDate() != null) {
             return booking.getTrip().getStartDate().atStartOfDay();
@@ -356,10 +352,6 @@ public class BookingServiceImpl implements BookingService {
 
     }
 
-    /**
-     * Loads current payment states in one query for booking lists, avoiding an N+1
-     * query pattern.
-     */
     private Map<Long, String> loadLatestPaymentStatuses(List<Booking> bookings) {
         if (bookings == null || bookings.isEmpty())
             return Map.of();
@@ -371,8 +363,6 @@ public class BookingServiceImpl implements BookingService {
         if (ids.isEmpty())
             return Map.of();
         Map<Long, String> statuses = new HashMap<>();
-        // The repository returns newest payments first; retain only the first
-        // non-deleted one per booking.
         for (Payment payment : paymentRepository
                 .findBookingPaymentsBatch(ids)) {
             if (payment == null || payment.getBooking() == null)

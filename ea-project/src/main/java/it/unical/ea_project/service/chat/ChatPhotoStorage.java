@@ -24,10 +24,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-/**
- * Private chat media: validates decoded format and dimensions, strips metadata
- * and bounds output.
- */
 @Service
 public class ChatPhotoStorage {
     private final Semaphore decoders = new Semaphore(2);

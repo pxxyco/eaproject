@@ -21,7 +21,6 @@ import com.example.application.service.media.WallpaperService
 import com.example.application.ui.theme.ScreenBackground
 import com.example.application.ui.theme.WallpaperShade
 
-/** One background behind navigation; switching screens never reloads or replaces it. */
 @Composable
 internal fun BackgroundHelper(content: @Composable BoxScope.() -> Unit) {
     val context = LocalContext.current.applicationContext

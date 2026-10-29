@@ -12,10 +12,6 @@ import javafx.scene.control.TextInputControl;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 
-/**
- * A damped spring preserves wheel momentum and adds a small, bounded edge
- * bounce.
- */
 public final class SmoothScrolling {
     private static final Object INSTALLED = new Object(), STATE = new Object();
 
@@ -90,8 +86,6 @@ public final class SmoothScrolling {
             double next = target + pixels;
             target = Math.max(0, Math.min(max, next));
             velocity += pixels * 2.3;
-            // Edges have a short elastic response rather than accumulating hidden scroll
-            // distance.
             if (next < 0 || next > max)
                 velocity = Math.max(-220, Math.min(220, velocity));
         }
@@ -111,8 +105,6 @@ public final class SmoothScrolling {
             previous = now;
             double max = range(pane);
             target = Math.max(0, Math.min(max, target));
-            // Slightly underdamped, with enough drag to settle promptly after the last
-            // wheel tick.
             velocity += ((target - position) * 120 - velocity * 16) * dt;
             position += velocity * dt;
             double clamped = Math.max(0, Math.min(max, position));

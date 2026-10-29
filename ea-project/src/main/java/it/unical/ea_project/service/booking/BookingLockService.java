@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-/** All reservation mutations lock the experience BEFORE the booking, including checkout. */
 @Service
 @RequiredArgsConstructor
 public class BookingLockService {

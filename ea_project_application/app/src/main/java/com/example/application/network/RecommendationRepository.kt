@@ -14,6 +14,5 @@ internal object RecommendationRepository {
     var revision by mutableIntStateOf(0)
         private set
     fun invalidate() { revision++ }
-    // No cross-user cache: re-evaluate history and consent every time the Traveler opens the feed.
     suspend fun load() = ApiService.get("/api/recommendations/mine?limit=4", Recommendations::class.java)
 }

@@ -101,8 +101,6 @@ public class ProfileController {
             profilePhotoImageView.setSmooth(true);
             profilePhotoImageView.setClip(new Circle(52, 52, 52));
             profilePhotoImageView.setVisible(false);
-            // Mantiene fissa la geometria dell'avatar anche quando viene mostrata
-            // l'immagine.
             profilePhotoImageView.setManaged(true);
         }
         updatePhotoButtons();
@@ -251,7 +249,6 @@ public class ProfileController {
                 ViewSupport.error(statusLabel, "La foto ha dimensioni eccessive. Riducila prima di caricarla.");
                 return;
             }
-            // Load a small preview, not a full-resolution bitmap, to limit memory usage.
             Image preview = new Image(path.toUri().toString(), 240, 240, true, true, false);
             if (preview.isError() || preview.getWidth() <= 0 || preview.getHeight() <= 0) {
                 ViewSupport.error(statusLabel, "Il file selezionato non è un'immagine valida o supportata.");

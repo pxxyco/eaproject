@@ -6,7 +6,6 @@ import it.unical.ea_project.domain.trip.Trip;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-/** Shared experience dates and participation rules, independent from payment labels. */
 public final class BookingLifecycle {
     private BookingLifecycle() {}
 

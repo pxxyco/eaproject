@@ -20,12 +20,6 @@ import javafx.animation.Timeline;
 import javafx.application.Platform;
 import javafx.util.Duration;
 
-/**
- * Unico polling delle notifiche per tutta l'app: evita che ogni navbar avvii un
- * proprio timer.
- * Esegue al massimo una richiesta contemporaneamente e aggiorna i listener
- * attivi.
- */
 public final class NotificationPollingService {
     private static final NotificationPollingService INSTANCE = new NotificationPollingService();
     private static final String UNREAD_URL = ApiService.BASE_URL + "/api/notifications/unread";
@@ -78,18 +72,11 @@ public final class NotificationPollingService {
         return new Subscription(this, listener);
     }
 
-    /** Aggiorna i badge senza creare un secondo timer o richieste concorrenti. */
     public void refreshNow() {
         requireFxThread();
         pollNow();
     }
 
-    /**
-     * Carica l'elenco per il vassoio condividendo un eventuale polling già in
-     * corso.
-     * In questo modo il click sulla campanella non genera una seconda GET
-     * concorrente.
-     */
     public void fetchUnreadForTray(Consumer<JsonArray> onSuccess, Consumer<String> onFailure) {
         requireFxThread();
         if (!UserSession.getInstance().isLoggedIn()) {
@@ -112,14 +99,8 @@ public final class NotificationPollingService {
         pollNow();
     }
 
-    /**
-     * Va invocato al logout per non riutilizzare gli ID della sessione precedente.
-     */
     public void clearSessionState() {
         requireFxThread();
-        // Invalida le risposte avviate nella sessione precedente: un logout/login
-        // rapido
-        // non deve mostrare notifiche appartenenti all'utente precedente.
         sessionGeneration++;
         chatRefresh.stop();
         ChatEventHub.reset();
@@ -145,8 +126,6 @@ public final class NotificationPollingService {
         ApiService.callDetailed(UNREAD_URL, null, ApiService.Method.GET, response -> {
             requestInFlight = false;
             if (requestGeneration != sessionGeneration) {
-                // La sessione è cambiata mentre la richiesta era in corso: ignora il body
-                // precedente e, se necessario, carica i dati della sessione attuale.
                 if (UserSession.getInstance().isLoggedIn()
                         && (!listeners.isEmpty() || !trayCallbacks.isEmpty()))
                     pollNow();
@@ -183,14 +162,10 @@ public final class NotificationPollingService {
                     snapshotAt = System.currentTimeMillis();
                     lastUnreadCount = unread.size();
                     hasSnapshot = true;
-                    // Se l'utente sta aprendo il vassoio, mostra già le notifiche lì senza un toast
-                    // duplicato.
                     publish(new Snapshot(lastUnreadCount, trayCallbacks.isEmpty() ? firstNew : null));
                     notifyTraySuccess(unread);
                 } catch (RuntimeException ignored) {
                     notifyTrayFailure("Non è stato possibile leggere le notifiche.");
-                    // Un errore transitorio non deve interrompere la navbar; il prossimo polling
-                    // riprova.
                 }
             } else {
                 notifyTrayFailure("La sessione non è più attiva.");
@@ -206,8 +181,6 @@ public final class NotificationPollingService {
             String failure = message == null || message.isBlank()
                     ? "Non è stato possibile caricare le notifiche."
                     : message;
-            // ERR-104 indica un limite esplicito del server. Rispettiamo Retry-After
-            // evitando che click ripetuti sulla campanella generino un altro burst.
             if (failure.toUpperCase(Locale.ROOT).contains("ERR-104")) {
                 retryAfterEpochMillis = System.currentTimeMillis() + POLLING_SECONDS * 1000L;
                 lastRateLimitMessage = failure;
@@ -247,7 +220,6 @@ public final class NotificationPollingService {
         List<Consumer<Snapshot>> copy = new ArrayList<>(listeners);
         for (int i = 0; i < copy.size(); i++) {
             Consumer<Snapshot> listener = copy.get(i);
-            // Una sola navbar mostra il toast; tutte aggiornano il badge.
             listener.accept(i == 0 ? snapshot : new Snapshot(snapshot.unreadCount(), null));
         }
     }

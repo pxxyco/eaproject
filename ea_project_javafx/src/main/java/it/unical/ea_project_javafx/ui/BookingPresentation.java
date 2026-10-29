@@ -11,10 +11,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableRow;
 
-/**
- * One interpretation of the booking data supplied by the backend, shared by
- * traveler views.
- */
 public final class BookingPresentation {
     private BookingPresentation() {
     }
@@ -102,7 +98,6 @@ public final class BookingPresentation {
             return null;
         String value = booking.getItemEndDate();
         if (value == null || value.isBlank()) {
-            // Graceful fallback for older backend responses without itemEndDate.
             LocalDateTime start = eventStartDateTime(booking);
             if (start == null)
                 return null;

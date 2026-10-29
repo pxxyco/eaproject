@@ -11,7 +11,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.*
 import androidx.compose.ui.unit.dp
 
-/** The stored value contains exactly MMYY digits. Formatting never rewrites the cursor position. */
 internal object ExpiryTransformation : VisualTransformation {
     override fun filter(text: AnnotatedString): TransformedText {
         val raw = text.text

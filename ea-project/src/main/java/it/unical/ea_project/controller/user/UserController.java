@@ -113,7 +113,6 @@ public class UserController {
         }
     }
 
-    /** Revokes access and refresh tokens on every device for this account. */
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(@AuthenticationPrincipal AuthUser auth) {
         users.revokeSessions(auth.id());

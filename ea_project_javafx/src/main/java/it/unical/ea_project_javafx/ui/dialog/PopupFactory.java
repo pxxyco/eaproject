@@ -24,11 +24,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
-/**
- * Fabbrica unica dei popup in-app. Centralizza overlay, blur, animazioni,
- * pulsante di chiusura, dimensioni e stile del contenitore.
- * Tutte le operazioni devono essere invocate dal JavaFX Application Thread.
- */
 public final class PopupFactory {
     private static final String COMMON_CSS = "/it/unical/ea_project_javafx/css/app.css";
     private static final Map<StackPane, Handle> ACTIVE_POPUPS = new WeakHashMap<>();
@@ -61,9 +56,6 @@ public final class PopupFactory {
             throw new IllegalArgumentException("La radice della scena e il contenuto del popup sono obbligatori.");
         }
         Size resolvedSize = size == null ? Size.MEDIUM : size;
-        // Un bottone o una schermata annidata può passare un contenitore interno.
-        // L'overlay deve invece appartenere sempre alla radice reale della Scene:
-        // in questo modo blur e backdrop coprono anche navbar e sfondo.
         sceneRoot = fullSceneRoot(sceneRoot);
 
         Handle previous = ACTIVE_POPUPS.get(sceneRoot);
@@ -90,8 +82,6 @@ public final class PopupFactory {
         double viewportHeight = sceneRoot.getScene() == null ? sceneRoot.getHeight() : sceneRoot.getScene().getHeight();
         double maxWidth = resolvedSize.maxWidth;
         double maxHeight = resolvedSize.maxHeight;
-        // Mantiene margine visibile anche su finestre ridimensionate; non impone una
-        // larghezza minima superiore allo spazio reale disponibile.
         if (viewportWidth > 0)
             maxWidth = Math.min(maxWidth, Math.max(200, viewportWidth - 40));
         if (viewportHeight > 0)
@@ -146,10 +136,6 @@ public final class PopupFactory {
         return handle;
     }
 
-    /**
-     * Risolve una radice StackPane che copre l'intera scena, anche se la vista ne
-     * usa un altro tipo.
-     */
     public static StackPane resolveRoot(Node anchor) {
         if (anchor == null || anchor.getScene() == null)
             return null;
@@ -231,9 +217,6 @@ public final class PopupFactory {
             return;
         }
 
-        // Per i pannelli non VBox, la barra di chiusura deve stare dentro la stessa
-        // superficie glass; altrimenti la X resta fuori dal pannello e sembra un popup
-        // diverso.
         if (content.getParent() instanceof StackPane parent) {
             int index = parent.getChildren().indexOf(content);
             if (index >= 0) {
@@ -301,10 +284,6 @@ public final class PopupFactory {
             scene.getStylesheets().add(css);
     }
 
-    /**
-     * Applica la stylesheet comune direttamente al popup, dopo i fogli specifici
-     * del FXML.
-     */
     private static void ensurePopupStylesheet(Parent content) {
         var resource = PopupFactory.class.getResource(COMMON_CSS);
         if (resource == null)
@@ -380,8 +359,6 @@ public final class PopupFactory {
                 if (root.getChildren().contains(node))
                     node.setEffect(effect);
             });
-            // Stacca i contenuti dall'overlay rimosso: i popup FXML riutilizzati
-            // (es. gestione condivisioni) possono essere aperti una seconda volta.
             overlay.getChildren().clear();
             if (ACTIVE_POPUPS.get(root) == this)
                 ACTIVE_POPUPS.remove(root);

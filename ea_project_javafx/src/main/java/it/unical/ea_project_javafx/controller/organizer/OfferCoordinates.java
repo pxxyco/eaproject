@@ -1,6 +1,5 @@
 package it.unical.ea_project_javafx.controller.organizer;
 
-/** Optional coordinates must be supplied as a valid pair. */
 final class OfferCoordinates {
     private OfferCoordinates() {}
     static Double[] parse(String latitude, String longitude) {

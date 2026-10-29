@@ -15,10 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-/**
- * A mock settlement uses the stored booking price and serializes retries with
- * cancellation.
- */
 @Service
 public class MockCheckoutService {
     public record Receipt(String title, BigDecimal amount, String reference, LocalDateTime paidAt) {

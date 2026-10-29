@@ -552,7 +552,6 @@ public class ActivityDetailsController implements AutoCloseable {
     }
 
     private void showSection(Node node) {
-        // Keep only the two deliberately preloaded sections between tab changes.
         bodyContainer.getChildren()
                 .removeIf(child -> child != node && child != descrizioneNode && child != itinerarioNode);
         for (Node child : bodyContainer.getChildren()) {

@@ -104,8 +104,6 @@ public class Trip {
     @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Stage> stages = new ArrayList<>();
 
-    // Distinguish an omitted itinerary (preserve it) from an explicitly empty
-    // itinerary.
     @Transient
     @JsonIgnore
     @Setter(AccessLevel.NONE)

@@ -32,7 +32,7 @@ public class SingleInstanceLock {
             int port = BASE_PORT + i;
             try {
                 serverSocket = new ServerSocket(port, 10, InetAddress.getByName("localhost"));
-                return true; // Lock acquisito con successo!
+                return true;
             } catch (IOException e) {
                 if (isOurAppRunningOnPort(port)) {
                     sendFocusCommand(port);

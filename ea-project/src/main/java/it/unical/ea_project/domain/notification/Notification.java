@@ -39,7 +39,6 @@ public class Notification {
     @Column(name = "notification_id")
     private Long notificationId;
 
-    // Usiamo LAZY per performance.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

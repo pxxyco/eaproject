@@ -204,8 +204,6 @@ public class ExperienceListController {
     }
 
     private void finishPage(int page, long count, int pages, Runnable render) {
-        // A concurrent deletion may remove the requested last page: return to the new
-        // last page.
         if (pages > 0 && page >= pages) {
             requestPage(pages - 1, true);
             return;

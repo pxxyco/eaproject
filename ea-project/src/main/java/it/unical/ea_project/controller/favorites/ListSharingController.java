@@ -50,9 +50,6 @@ public class ListSharingController {
     private final ListTripsRepository listTrips;
     private final TripRepository trips;
 
-    // Per compatibilità accetta identifier (nuovo client), username (client
-    // precedente) oppure email.
-    // userId resta interno per modifiche/revoche di condivisioni già accettate.
     public record ShareListRequest(Long listId, String identifier, String username, String email,
             Long userId, ListSharing.SharingPermission permission) {
     }
@@ -140,12 +137,6 @@ public class ListSharingController {
                 "email", recipient.getEmail()));
     }
 
-    /**
-     * Ricerca persone attive per username o email, limitata alla gestione di una
-     * lista posseduta
-     * dall'utente autenticato. Non espone un elenco globale degli utenti senza una
-     * lista autorizzata.
-     */
     @GetMapping("/search-users")
     @Transactional(readOnly = true)
     public ResponseEntity<?> searchUsersForSharing(@RequestParam Long listId,
@@ -191,10 +182,6 @@ public class ListSharingController {
                 .ok(listSharingService.getSharedListsForUser(user.id()).stream().map(SharingResponse::from).toList());
     }
 
-    /**
-     * Elenca solo le liste accettate e condivise con l'utente autenticato,
-     * includendo viaggi e tappe.
-     */
     @GetMapping("/shared-with-me")
     @Transactional(readOnly = true)
     public ResponseEntity<List<SharedListResponse>> getSharedListsWithDetails(

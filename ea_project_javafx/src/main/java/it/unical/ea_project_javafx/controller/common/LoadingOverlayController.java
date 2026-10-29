@@ -12,10 +12,6 @@ import javafx.scene.effect.GaussianBlur;
 import javafx.scene.layout.StackPane;
 import it.unical.ea_project_javafx.ui.loading.LoadingRing;
 
-/**
- * A page-wide loading focus; animation and blur only live while the overlay is
- * visible.
- */
 public class LoadingOverlayController {
     @FXML
     private StackPane loadingRoot;

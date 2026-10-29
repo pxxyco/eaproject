@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.function.Function;
 
-/** Single JSON contract for all frontend consumers of backend data. */
 public final class JsonCodec {
 
     private JsonCodec() {

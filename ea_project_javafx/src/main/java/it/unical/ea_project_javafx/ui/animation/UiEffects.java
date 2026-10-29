@@ -47,10 +47,6 @@ import javafx.scene.paint.Paint;
 import javafx.stage.Window;
 import javafx.util.Duration;
 
-/**
- * Shared, finite transitions. Only interacted controls animate; text is never
- * delayed or replaced.
- */
 public final class UiEffects {
     private static final Object INSTALLED = new Object(), WATCHED = new Object(), STATE = new Object();
     private static Color accent = Color.web("#d0b38b");
@@ -182,8 +178,6 @@ public final class UiEffects {
         if (node.getStyleClass().contains("history-feed") || node.getStyleClass().contains("password-reveal")
                 || node.getStyleClass().contains("favorites-tabs") || node.getStyleClass().contains("back-link"))
             return false;
-        // Skin internals are styled by their owning control rather than animated
-        // individually.
         if (node instanceof TextInputControl && node.getStyleClass().contains("text-field")
                 && (node.getParent() instanceof Spinner<?> || node.getParent() instanceof ComboBoxBase<?>))
             return false;
@@ -267,7 +261,6 @@ public final class UiEffects {
             animatedBackground.set(background);
             if (!surface.borderProperty().isBound())
                 surface.borderProperty().bind(animatedBorder);
-            // Native selected fills and check/radio marks must retain their contrast.
             boolean nativePopup = false;
             for (Node ancestor = node; ancestor != null; ancestor = ancestor.getParent())
                 nativePopup |= ancestor.getStyleClass().contains("combo-box-popup");

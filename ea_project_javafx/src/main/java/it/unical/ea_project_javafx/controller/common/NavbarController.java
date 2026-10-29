@@ -287,10 +287,6 @@ public class NavbarController {
         }
     }
 
-    /**
-     * Keeps the navbar avatar in sync with UserSession after an upload, replacement
-     * or removal.
-     */
     private void updateUserAvatar() {
         long requestId = ++avatarLoadRequestId;
         UserSession session = UserSession.getInstance();
@@ -782,9 +778,6 @@ public class NavbarController {
         popup.show(owner, bounds.getMinX(), bounds.getMaxY() + 12);
         Platform.runLater(reposition);
 
-        // A Popup JavaFX is una finestra separata: seguiamo spostamento e
-        // ridimensionamento
-        // della finestra principale, così la tendina resta ancorata alla navbar.
         ChangeListener<Number> windowListener = (obs, oldValue, newValue) -> reposition.run();
         owner.xProperty().addListener(windowListener);
         owner.yProperty().addListener(windowListener);

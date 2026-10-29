@@ -26,10 +26,6 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
   @EntityGraph(attributePaths = { "trip", "activity", "user" })
   List<Booking> findByUserIdAndBookingIdInAndDeletedAtIsNull(Long userId, List<Long> ids);
 
-  /**
-   * Serializes cancellation of the same booking so concurrent requests cannot
-   * restore seats twice.
-   */
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("SELECT b FROM Booking b WHERE b.bookingId = :bookingId")
   Optional<Booking> findByBookingIdForUpdate(@Param("bookingId") Long bookingId);

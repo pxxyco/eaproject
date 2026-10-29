@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.provider.CalendarContract
 
-/** System pickers grant access to selected data; no broad storage/calendar permission is needed. */
 internal fun launchPhotoPicker(launch: () -> Unit): String? = try { launch(); null }
 catch (_: ActivityNotFoundException) { "Nessun selettore foto disponibile sul dispositivo." }
 catch (_: SecurityException) { "Il selettore foto non è accessibile. Controlla le impostazioni del dispositivo." }

@@ -19,10 +19,6 @@ import java.util.function.Consumer;
 import java.util.function.LongConsumer;
 import javafx.application.Platform;
 
-/**
- * One connection per visible chat. Both workers are virtual threads and close
- * with the page.
- */
 public final class ChatStream implements AutoCloseable {
     private static final HttpClient HTTP = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
     private volatile boolean closed;

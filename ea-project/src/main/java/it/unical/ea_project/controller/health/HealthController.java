@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-/** Public readiness probe. No configuration or database details are exposed. */
 @RestController
 public class HealthController {
     private final DataSource database;
@@ -22,7 +21,6 @@ public class HealthController {
             if (connection.isValid(2))
                 return ResponseEntity.ok(Map.of("status", "UP"));
         } catch (SQLException ignored) {
-            // A failed database connection makes this instance unready.
         }
         return ResponseEntity.status(503).body(Map.of("status", "DOWN"));
     }

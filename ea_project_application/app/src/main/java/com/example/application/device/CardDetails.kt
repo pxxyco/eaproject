@@ -1,6 +1,5 @@
 package com.example.application.device
 
-/** Only these card details may leave the NFC reader or be sent to the account API. */
 internal data class ScannedCard(val brand: String, val last4: String, val holder: String?, val month: Int?, val year: Int?)
 
 internal object CardNumbers {

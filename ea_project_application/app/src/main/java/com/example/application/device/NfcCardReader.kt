@@ -9,7 +9,6 @@ import java.io.IOException
 import java.util.Calendar
 import java.util.concurrent.atomic.AtomicReference
 
-/** Bounded, read-only EMV exchange. No transaction history, PIN operations or APDU logging. */
 internal class NfcCardReader {
     private val connection = AtomicReference<IsoDep?>()
     @Volatile private var closed = true

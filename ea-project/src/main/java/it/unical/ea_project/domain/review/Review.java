@@ -51,7 +51,7 @@ public class Review {
     @Column(name = "rating", nullable = false)
     private Integer rating;
 
-    @Column(name = "comment", length = 200) // Lunghezza per il testo
+    @Column(name = "comment", length = 200)
     private String comment;
 
     @Column(name = "created_at", nullable = false, updatable = false)

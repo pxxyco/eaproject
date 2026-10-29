@@ -25,7 +25,6 @@ import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 
-/** Only Preview + ImageAnalysis are bound. There is no ImageCapture, file URI, bitmap cache or upload path. */
 @Composable
 @androidx.annotation.OptIn(androidx.camera.core.ExperimentalGetImage::class)
 internal fun CameraCardPreview(modifier: Modifier, session: CardScanSession,

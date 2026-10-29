@@ -32,7 +32,6 @@ internal fun PaymentMethods(actions: AccountActions, gateway: AccountGateway) {
     val brand = scanned?.brand ?: CardNumbers.brand(number)
     val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current.lifecycle
-    // Sensitive input is transient, never saveable; protect it from screenshots and recents.
     DisposableEffect(lifecycle) {
         val activity = context.findActivity()
         val alreadySecure = ((activity?.window?.attributes?.flags ?: 0) and WindowManager.LayoutParams.FLAG_SECURE) != 0
