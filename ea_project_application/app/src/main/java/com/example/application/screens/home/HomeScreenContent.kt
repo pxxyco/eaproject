@@ -53,6 +53,7 @@ internal fun HomeScreenContent(
     onLoadMoreSearchTrips: () -> Unit
 ) {
     val listState = rememberLazyListState()
+    val recommendationsState = remember { RecommendationsState() }
     val scope = rememberCoroutineScope()
 
     var submittedQuery by remember { mutableStateOf("") }
@@ -153,7 +154,10 @@ internal fun HomeScreenContent(
             } else if (homeError == null) {
                 item(key = "recommendations") {
                     Column {
-                        RecommendationsSection(onExperienceClick = onExperienceClick)
+                        RecommendationsSection(
+                            onExperienceClick = onExperienceClick,
+                            state = recommendationsState
+                        )
                         Spacer(Modifier.height(28.dp))
                     }
                 }

@@ -10,26 +10,40 @@ import androidx.compose.ui.unit.dp
 import com.example.application.dto.ExperienceRef
 import com.example.application.network.*
 
+internal class RecommendationsState {
+    var response by mutableStateOf<Recommendations?>(null)
+    var error by mutableStateOf<String?>(null)
+    var retry by mutableIntStateOf(0)
+    var loadedKey: Any? = null
+}
+
 @Composable
 internal fun RecommendationsSection(
     onExperienceClick: (ExperienceRef) -> Unit,
+    state: RecommendationsState = remember { RecommendationsState() },
     load: suspend () -> ApiResult<Recommendations> = { RecommendationRepository.load() }
 ) {
     val user = UserSession.user
     if (!user?.role.equals("TRAVELER", true)) return
-    var response by remember(user?.id) { mutableStateOf<Recommendations?>(null) }
-    var error by remember(user?.id) { mutableStateOf<String?>(null) }
-    var retry by remember { mutableIntStateOf(0) }
-    LaunchedEffect(user?.id, RecommendationRepository.revision, retry) {
-        response = null
-        error = null
+    val key = Triple(user?.id, RecommendationRepository.revision, state.retry)
+    LaunchedEffect(key) {
+        if (state.loadedKey == key) return@LaunchedEffect
+        state.error = null
         when (val result = load()) {
-            is ApiResult.Success -> response = result.data
-            else -> error = result.accountError()
+            is ApiResult.Success -> {
+                state.response = result.data
+                state.loadedKey = key
+            }
+            else -> state.error = result.accountError()
         }
     }
-    val trips = response?.trips.orEmpty().filter { it.item.tripId != null }.distinctBy { it.item.tripId }
-    val activities = response?.activities.orEmpty().filter { it.item.activityId != null }.distinctBy { it.item.activityId }
+    val response = state.response
+    val trips = remember(response) {
+        response?.trips.orEmpty().filter { it.item.tripId != null }.distinctBy { it.item.tripId }
+    }
+    val activities = remember(response) {
+        response?.activities.orEmpty().filter { it.item.activityId != null }.distinctBy { it.item.activityId }
+    }
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         SectionTitle(if (response?.personalized == true) "Scelte per te" else "Idee da scoprire")
         Text(
@@ -37,10 +51,10 @@ internal fun RecommendationsSection(
             else "Esperienze disponibili: i consigli si adattano alle tue preferenze quando la personalizzazione è attiva.",
             style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        if (response == null && error == null) LinearProgressIndicator(Modifier.fillMaxWidth())
-        error?.let {
+        if (response == null && state.error == null) LinearProgressIndicator(Modifier.fillMaxWidth())
+        state.error?.let {
             Text(it, color = MaterialTheme.colorScheme.error)
-            OutlinedButton(onClick = { retry++ }) { Text("Riprova consigli") }
+            OutlinedButton(onClick = { state.retry++ }) { Text("Riprova consigli") }
         }
         LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             items(trips, key = { "trip-${it.item.tripId}" }) { pick ->
