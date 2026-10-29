@@ -26,7 +26,7 @@ services:
   backend:
     build:
       context: ./ea-project
-    image: ea-project-backend:rc
+    image: ${BACKEND_IMAGE:-ea-project-backend:1.0.0}
     depends_on:
       db:
         condition: service_healthy

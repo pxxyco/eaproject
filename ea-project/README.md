@@ -2,6 +2,8 @@
 
 Backend REST dell'applicazione, scritto con **Spring Boot 4.1** e **Java 21**.
 
+**Versione ufficiale: RTM 1.0.0**, tag `v1.0.0`, immagine `ea-project-backend:1.0.0`.
+
 ## Stack
 
 - Spring Web MVC, Spring Security, Spring Data JPA (Hibernate)
@@ -37,14 +39,25 @@ Il server parte su `https://localhost:8443`. Le tabelle vengono create o aggiorn
 
 ## Avvio con Docker
 
-Dalla cartella principale del repository:
+Dalla cartella principale puoi scegliere tra le immagini pronte e la compilazione dal codice.
+
+**Immagini consegnate:** disponi `ea-project-images-1.0.0.tar`, `.env` e `certs/server.p12` come indicato nella [guida iniziale](../docs/GETTING_STARTED.md#con-il-pacchetto-docker-rtm). Il `.env` RTM seleziona `BACKEND_IMAGE=ea-project-backend:1.0.0` e `DB_IMAGE=postgres:17-alpine`. Un dataset demo richiede l’immagine dedicata indicata dal team:
 
 ```bash
-python scripts/setup-local-env.py
+docker load -i ea-project-images-1.0.0.tar
+docker compose up -d --no-build --pull never
+```
+
+**Dal codice:** con i file TLS/configurazione del team già disponibili:
+
+```bash
+python3 scripts/setup-local-env.py
 docker compose up -d --build
 ```
 
-Il profilo `container` (`application-container.properties`) ascolta sulla porta 8080 del container, che Compose espone su `https://localhost:8443`. Il keystore viene montato da `certs/server.p12`. Il container gira come utente non-root con filesystem in sola lettura; foto e log stanno nei volumi `media` e `logs`.
+Il profilo `container` ascolta sulla porta 8080 interna, esposta da Compose su **https://localhost:8443**. Il keystore è montato da `certs/server.p12`; il container gira come utente non-root con filesystem in sola lettura. Database, media e log persistono nei volumi.
+
+La [guida completa](../docs/GETTING_STARTED.md#avvio-con-docker) distingue configurazione della consegna, setup locale, verifica e arresto. Importare un TAR non aggiorna l’immagine ai cambiamenti successivi del codice e non sostituisce un volume database esistente.
 
 ## Test
 

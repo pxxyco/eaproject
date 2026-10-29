@@ -22,6 +22,6 @@
 
 - [ ] Modifica coerente con la issue e con i componenti condivisi.
 - [ ] Test pertinenti eseguiti o motivazione dei controlli mancanti.
-- [ ] Documentazione/changelog aggiornati se necessari.
+- [ ] Documentazione/note di release aggiornate se necessari.
 - [ ] Nessun segreto, dato reale o output di build aggiunto.
 - [ ] Impatto su schema, distribuzione e compatibilità descritto, se presente.

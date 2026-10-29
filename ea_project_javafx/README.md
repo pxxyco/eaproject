@@ -1,5 +1,7 @@
 # ea_project_javafx – Client desktop
 
+**Versione ufficiale: RTM 1.0.0** · Backend compatibile: 1.0.0.
+
 Client desktop dell'applicazione, scritto in **Java 21** con **JavaFX 21** (FXML + CSS).
 
 ## Requisiti

@@ -12,4 +12,6 @@ src/main/resources/*.p12
 src/main/resources/*.jks
 **/*.pem
 **/*.key
+**/*.p12
+**/*.jks
 **/.env*

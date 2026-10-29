@@ -4,6 +4,8 @@ import argparse
 import hashlib
 import json
 import platform
+import os
+import xml.etree.ElementTree as ET
 import re
 import shutil
 import subprocess
@@ -34,11 +36,50 @@ def inspect_jar(path):
             raise ValueError('Il JAR contiene configurazioni private o keystore: usa il profilo release-dist da una directory di build pulita.')
 
 
-def one_jar(directory):
+def one_jar(directory, version=None):
     jars = [p for p in directory.glob('*.jar') if not p.name.endswith(('-sources.jar', '-javadoc.jar', '.original.jar'))]
+    if version is not None:
+        jars = [p for p in jars if p.name.endswith('-' + version + '.jar')]
     if len(jars) != 1:
         raise ValueError(f'Atteso un JAR in {directory}; specifica il percorso con l’opzione dedicata.')
     return jars[0]
+
+
+def project_versions():
+    ns = {'m': 'http://maven.apache.org/POM/4.0.0'}
+    versions = {name: ET.parse(ROOT / name / 'pom.xml').getroot().find('m:version', ns).text
+                for name in ['ea-project', 'ea_project_javafx']}
+    gradle = (ROOT / 'ea_project_application/app/build.gradle.kts').read_text()
+    versions['android'] = re.search(r'versionName\s*=\s*"([^"\n]+)"', gradle).group(1)
+    return versions
+
+
+def jar_version(path):
+    with zipfile.ZipFile(path) as jar:
+        versions = set()
+        for name in jar.namelist():
+            if 'META-INF/maven/' in name and name.endswith('/pom.properties'):
+                for line in jar.read(name).decode().splitlines():
+                    if line.startswith('version='):
+                        versions.add(line.split('=', 1)[1].strip())
+        if len(versions) != 1:
+            raise ValueError('Metadati di versione Maven mancanti o ambigui: ' + path.name)
+        return versions.pop()
+
+
+def android_aapt(explicit):
+    if explicit:
+        return explicit
+    if shutil.which('aapt'):
+        return shutil.which('aapt')
+    roots = [os.environ.get('ANDROID_HOME'), os.environ.get('ANDROID_SDK_ROOT'), str(Path.home() / 'Android/Sdk')]
+    for root in roots:
+        if root:
+            tools = sorted((Path(root) / 'build-tools').glob('*/aapt*'))
+            tools = [p for p in tools if p.name in {'aapt', 'aapt.exe'}]
+            if tools:
+                return str(tools[-1])
+    raise ValueError('Indica --aapt con il percorso di aapt negli Android SDK build-tools per verificare la versione dell’APK.')
 
 
 def checksum(path):
@@ -58,25 +99,32 @@ def write_archive(directory, output):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--version', required=True, help='Per esempio 1.0.0 o 1.0.0-rc.1')
+    parser.add_argument('--version', help='Versione RTM stabile; default: versione dichiarata nei moduli (1.0.0).')
     parser.add_argument('--android-apk', type=Path, required=True)
     parser.add_argument('--android-kind', choices=['demo', 'release'], required=True)
     parser.add_argument('--backend-jar', type=Path)
     parser.add_argument('--desktop-jar', type=Path)
     parser.add_argument('--desktop-lib', type=Path, default=ROOT / 'ea_project_javafx/target/release-lib')
+    parser.add_argument('--aapt', help='Percorso di aapt per verificare la versione effettiva dell’APK')
     parser.add_argument('--apksigner', help='Richiesto per release se apksigner non è nel PATH')
     parser.add_argument('--allow-dirty', action='store_true', help='Solo anteprima locale, marcata dirty nel manifest')
     args = parser.parse_args()
-    if not re.fullmatch(r'\d+\.\d+\.\d+(?:-[A-Za-z0-9.-]+)?', args.version):
-        parser.error('Versione non valida.')
+    versions = project_versions()
+    args.version = args.version or versions['ea-project']
+    if not re.fullmatch(r'\d+\.\d+\.\d+', args.version):
+        parser.error('La distribuzione RTM richiede una versione stabile X.Y.Z, per esempio 1.0.0.')
+    if any(version != args.version for version in versions.values()):
+        parser.error('Allinea le versioni di backend, JavaFX e Android alla versione richiesta prima di creare la RTM.')
     dirty = bool(git('status', '--porcelain').strip())
     if dirty and not args.allow_dirty:
         parser.error('Ci sono modifiche non committate. Rilascia da un checkout pulito o usa --allow-dirty solo per una prova locale.')
     try:
-        backend = args.backend_jar or one_jar(ROOT / 'ea-project/target/release-dist')
-        desktop = args.desktop_jar or one_jar(ROOT / 'ea_project_javafx/target')
+        backend = args.backend_jar or one_jar(ROOT / 'ea-project/target/release-dist', args.version)
+        desktop = args.desktop_jar or one_jar(ROOT / 'ea_project_javafx/target', args.version)
         for jar in [backend, desktop]:
             inspect_jar(jar)
+            if jar_version(jar) != args.version:
+                raise ValueError('JAR di una versione diversa: ricompila ' + jar.name)
         with zipfile.ZipFile(desktop) as archive:
             if 'it/unical/ea_project_javafx/Launcher.class' not in archive.namelist():
                 raise ValueError('Ricompila JavaFX: manca il Launcher della distribuzione.')
@@ -86,6 +134,11 @@ def main():
         with zipfile.ZipFile(args.android_apk) as apk:
             if 'AndroidManifest.xml' not in apk.namelist():
                 raise ValueError('Il file indicato non è un APK Android.')
+        aapt = android_aapt(args.aapt)
+        badging = subprocess.run([aapt, 'dump', 'badging', str(args.android_apk)], capture_output=True, text=True)
+        version = re.search(r"versionName='([^']+)'", badging.stdout)
+        if badging.returncode or not version or version.group(1) != args.version:
+            raise ValueError('La versione dell’APK non coincide con la RTM: ricompila o scegli il file corretto.')
         if args.android_kind == 'release':
             signer = args.apksigner or shutil.which('apksigner')
             if not signer:
@@ -118,7 +171,7 @@ def main():
                 raise ValueError('Link simbolico nei sorgenti: verificare manualmente prima del packaging.')
             if path.is_file():
                 archive.write(path, name)
-    metadata = {'version': args.version, 'commit': git('rev-parse', 'HEAD').decode().strip(), 'dirty': dirty,
+    metadata = {'version': args.version, 'release_stage': 'RTM', 'module_versions': versions, 'commit': git('rev-parse', 'HEAD').decode().strip(), 'dirty': dirty,
                 'created_at': datetime.now(timezone.utc).isoformat(), 'desktop_target': target,
                 'android_kind': args.android_kind, 'backend_sha256': checksum(backend),
                 'desktop_sha256': checksum(desktop), 'android_sha256': checksum(args.android_apk),

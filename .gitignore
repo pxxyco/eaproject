@@ -271,3 +271,6 @@ application-local.yml
 # Local distribution bundles and operational backups
 /dist/
 /backups/
+
+# Docker release checksums are distributed with their archives
+/*.tar.sha256

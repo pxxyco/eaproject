@@ -1,6 +1,8 @@
-# EA Project vVERSION
+# EA Project vVERSION — RTM
 
 <!-- Sostituire VERSION e completare le sezioni sulla versione effettiva, poi eliminare i commenti. -->
+
+Tipo di pubblicazione: release stabile, non pre-release.
 
 ## Novità
 

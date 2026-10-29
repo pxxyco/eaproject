@@ -1,6 +1,6 @@
-# Preparare e pubblicare una release
+# Preparare e pubblicare la RTM 1.0.0
 
-La distribuzione comprende **due pacchetti integrati** e un archivio sorgenti dello stesso checkout:
+**RTM 1.0.0 è la prima build ufficiale stabile di EA Project**, tag Git `v1.0.0`. La distribuzione comprende **due pacchetti integrati** e un archivio sorgenti dello stesso checkout:
 
 | Asset | Contenuto |
 |---|---|
@@ -13,7 +13,7 @@ La distribuzione comprende **due pacchetti integrati** e un archivio sorgenti de
 
 ## 1. Scegliere commit e versione
 
-Lavora su un checkout pulito del commit approvato. Allinea `versionName` e `versionCode` Android, versioni dei moduli e note prima della pubblicazione. Un tag come `v1.0.0` identifica una release stabile; `v1.0.0-rc.1` una candidata. Non pubblicare un tag riutilizzato per binari diversi.
+Lavora su un checkout pulito del commit approvato. Allinea `versionName` e `versionCode` Android, versioni dei moduli e note prima della pubblicazione. Backend Maven, JavaFX Maven e `versionName` Android devono essere `1.0.0`; `versionCode=1` identifica la prima pubblicazione Android. Il tag ufficiale è `v1.0.0`. Non pubblicare un tag riutilizzato per binari diversi.
 
 Lo script rifiuta modifiche non committate. `--allow-dirty` è disponibile soltanto per prove locali e marca i pacchetti come anteprima: non considerarle release definitive.
 
@@ -62,10 +62,10 @@ Verifica la firma con `apksigner verify --print-certs percorso/app-release.apk`.
 
 ## 5. Creare i pacchetti
 
-Esempio per una consegna locale (versione da sostituire con quella approvata):
+Build dimostrativa locale della stessa versione RTM (APK debug, distinto dall’APK release firmato):
 
 ```bash
-python3 scripts/package-release.py --version 1.0.0-rc.1 --android-kind demo --android-apk ea_project_application/app/build/outputs/apk/debug/app-debug.apk
+python3 scripts/package-release.py --version 1.0.0 --android-kind demo --android-apk ea_project_application/app/build/outputs/apk/debug/app-debug.apk
 ```
 
 Per un APK release firmato:
@@ -74,14 +74,14 @@ Per un APK release firmato:
 python3 scripts/package-release.py --version 1.0.0 --android-kind release --android-apk /percorso/app-release.apk --apksigner /percorso/android-sdk/build-tools/VERSION/apksigner
 ```
 
-`--backend-jar`, `--desktop-jar` e `--desktop-lib` consentono di indicare percorsi diversi. L’output è in `dist/VERSION/`, ignorato da Git. Gli artefatti esistenti non vengono sovrascritti.
+Il packager controlla che le versioni Maven e Android siano allineate, verifica la versione effettiva dei JAR e dell’APK e registra `release_stage: RTM` nel manifest. `--backend-jar`, `--desktop-jar`, `--desktop-lib` e `--aapt` consentono di indicare percorsi diversi. L’output è in `dist/VERSION/`, ignorato da Git. Gli artefatti esistenti non vengono sovrascritti.
 
 Ogni ZIP integrato contiene sorgenti e guide, `backend/app.jar` e i file del client sotto `client/`. **START_HERE.md** spiega l’avvio. Dalla radice del pacchetto si può buildare il backend con il Compose incluso; keystore e credenziali restano esterni. Con `java -jar backend/app.jar` occorre esportare le variabili documentate: Java non legge `.env` automaticamente.
 
 Controlla gli hash prima e dopo il trasferimento:
 
 ```bash
-cd dist/1.0.0-rc.1
+cd dist/1.0.0
 sha256sum -c SHA256SUMS.txt
 ```
 
@@ -98,19 +98,30 @@ Estrai ogni ZIP in una cartella nuova e segui START_HERE, senza dipendere dalle 
 3. Crea/seleziona il tag scelto e verifica il commit/ramo di destinazione.
 4. Compila il [modello di note](RELEASE_NOTES_TEMPLATE.md), includendo limiti, configurazione e collaudi effettivi.
 5. Allega i due ZIP integrati, il sorgente e SHA256SUMS. Gli archivi “Source code” generati da GitHub non contengono automaticamente JAR o APK.
-6. Per una candidata abilita **pre-release**. Salva come bozza e controlla i download prima di pubblicare.
+6. Per la RTM lascia disattivato **Set as a pre-release** e seleziona la release stabile come Latest. Salva inizialmente come bozza e controlla i download prima della pubblicazione.
 7. Pubblica soltanto dopo la revisione finale del team.
 
 Non caricare `.env`, keystore TLS/firma, database personali o log. La CI inclusa non esegue questo passaggio di pubblicazione.
 
-## Consegna offline opzionale
+## Consegna offline con le immagini Docker
 
-Dopo una build Docker verificata puoi esportare le immagini già disponibili, per esempio:
+Il pacchetto ufficiale è `ea-project-images-1.0.0.tar`, con `ea-project-backend:1.0.0` e `postgres:17-alpine`. Va generato dalla build RTM corrente; non riutilizzare il contenuto di un precedente archivio cambiandone soltanto il nome.
+
+Dalla radice, con Docker avviato:
 
 ```bash
-docker image save ea-project-backend:rc postgres:17-alpine -o ea-project-images.tar
+docker build --tag ea-project-backend:1.0.0 ea-project
+docker pull postgres:17-alpine
+docker image save ea-project-backend:1.0.0 postgres:17-alpine -o ea-project-images-1.0.0.tar
+sha256sum ea-project-images-1.0.0.tar > ea-project-images-1.0.0.tar.sha256
 ```
 
-Allega il TAR separatamente, indicandone piattaforma, tag e checksum. Il Compose corrente usa il tag backend `rc`: se scegli un tag diverso, adatta anche il Compose consegnato e prova `docker load` su una macchina pulita. Un’immagine PostgreSQL standard non contiene i dati del database; eventuali seed demo autorizzati richiedono una consegna distinta e documentata. Non esportare il database reale come immagine demo.
+Il build del backend non richiede il `.env` del server: i segreti restano esterni all’immagine. Il Dockerfile compila il JAR 1.0.0 e imposta i metadati OCI di versione e licenza. Registra nelle note OS e architettura effettivi delle immagini esportate.
+
+PostgreSQL standard inizializza un database vuoto su un volume nuovo. Un dataset demo autorizzato va preparato e distribuito come immagine separata con il suo tag versionato; in quel caso adegua il `.env`, l’elenco delle immagini esportate e le note della consegna. `docker image save` non esporta i dati presenti nei volumi di container in esecuzione.
+
+I destinatari usano `docker load -i ea-project-images-1.0.0.tar` e `docker compose up -d --no-build --pull never`, con i tag RTM nel `.env` e `certs/server.p12` ricevuto separatamente. La procedura completa è in [Primi passi](GETTING_STARTED.md#con-il-pacchetto-docker-rtm).
+
+Il `.env` e il keystore contengono segreti e vanno condivisi nel canale privato del team, non tra gli asset pubblici. Prova il pacchetto su un progetto Compose nuovo, separato dai dati esistenti, prima di allegarlo alla release ufficiale.
 
 [Procedura ufficiale GitHub](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository).

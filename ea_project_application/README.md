@@ -1,5 +1,7 @@
 # ea_project_application – Client Android
 
+**Versione ufficiale: RTM 1.0.0** · Backend compatibile: 1.0.0.
+
 Client mobile dell'applicazione, scritto in **Kotlin** con **Jetpack Compose** e Material 3.
 
 ## Requisiti

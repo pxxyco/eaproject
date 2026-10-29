@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """API release smoke test. Creates disposable fixture users/offers; use a test database."""
 import argparse
+from pathlib import Path
+import ssl
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, timedelta
 import json
@@ -12,12 +14,18 @@ from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--url', default='http://127.0.0.1:8080')
-parser.add_argument('--allow-write', action='store_true', help='Required: creates RC test data')
+parser.add_argument('--url', default='https://localhost:8443')
+parser.add_argument('--ca-file', type=Path, default=Path(__file__).resolve().parents[1] / 'ea_project_javafx/src/main/resources/it/unical/ea_project_javafx/certs/dev-ca.crt', help='Certificato pubblico aggiuntivo attendibile per HTTPS')
+parser.add_argument('--allow-write', action='store_true', help='Required: creates RTM test data')
 args = parser.parse_args()
 if not args.allow_write:
     parser.error('Usa --allow-write soltanto su un database di collaudo.')
 base = args.url.rstrip('/')
+tls = None
+if base.startswith('https://'):
+    tls = ssl.create_default_context()
+    certificate = args.ca_file.read_bytes()
+    tls.load_verify_locations(cadata=certificate.decode() if certificate.startswith(b'-----BEGIN') else certificate)
 suffix = uuid.uuid4().hex[:10]
 
 
@@ -31,7 +39,7 @@ def request(method, path, data=None, auth=None, expected=200, extra=None):
         raw = json.dumps(data).encode()
     req = Request(base + path, raw, headers, method=method)
     try:
-        response = urlopen(req, timeout=15)
+        response = urlopen(req, timeout=15, context=tls)
     except HTTPError as error:
         response = error
     with response:
@@ -47,19 +55,19 @@ def upload(path, field, auth):
     png = b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('!2I5B', 1, 1, 8, 2, 0, 0, 0))
     png += chunk(b'IDAT', zlib.compress(b'\0\xff\0\0')) + chunk(b'IEND', b'')
     boundary = uuid.uuid4().hex
-    body = (f'--{boundary}\r\nContent-Disposition: form-data; name="{field}"; filename="rc.png"'
+    body = (f'--{boundary}\r\nContent-Disposition: form-data; name="{field}"; filename="rtm.png"'
             '\r\nContent-Type: image/png\r\n\r\n').encode() + png + f'\r\n--{boundary}--\r\n'.encode()
     headers = {'Authorization': auth, 'Content-Type': 'multipart/form-data; boundary=' + boundary}
-    with urlopen(Request(base + path, body, headers, method='POST'), timeout=15) as result:
+    with urlopen(Request(base + path, body, headers, method='POST'), timeout=15, context=tls) as result:
         assert result.status == 200
         return json.loads(result.read())
 
 
 def account(role, number):
-    name = f'rc_{suffix}_{number}'
-    password = uuid.uuid4().hex + '!Rc9'
+    name = f'rtm_{suffix}_{number}'
+    password = uuid.uuid4().hex + '!Rtm9'
     user, _ = request('POST', '/api/users', {'username': name, 'email': name + '@example.test',
-                    'fullName': 'Collaudo RC', 'password': password, 'role': role}, expected=201)
+                    'fullName': 'Collaudo RTM', 'password': password, 'role': role}, expected=201)
     _, headers = request('POST', '/api/users/login', {'identifier': name, 'password': password})
     return user, headers['Authorization'], headers['X-Refresh-Token']
 
@@ -84,7 +92,7 @@ removed, _ = request('DELETE', '/api/users/me/profile-photo', auth=token)
 assert removed['profilePhotoUrl'] is None
 request('GET', replacement, expected=404)
 start = date.today() + timedelta(days=10)
-trip_body = {'title': f'RC {suffix}', 'description': 'Collaudo riproducibile', 'destinationCity': 'Roma',
+trip_body = {'title': f'RTM {suffix}', 'description': 'Collaudo riproducibile', 'destinationCity': 'Roma',
              'destinationCountry': 'Italia', 'startDate': str(start), 'endDate': str(start + timedelta(days=1)),
              'maxSeats': 5, 'totalPrice': 20, 'status': 'PUBLISHED', 'stages': []}
 trip, _ = request('POST', '/api/trips', trip_body, org)
@@ -116,7 +124,7 @@ statistics, _ = request('GET', '/api/payments/organizer/statistics', auth=org)
 assert statistics['periodPaid'] == 40 and len(statistics['months']) == 12
 request('GET', '/api/recommendations/mine', auth=token)
 request('GET', '/api/recommendations/mine', auth=org, expected=403)
-collection, _ = request('POST', '/api/favorite-lists', {'name': 'Piano RC', 'visibility': 'SHARED'}, token, 201)
+collection, _ = request('POST', '/api/favorite-lists', {'name': 'Piano RTM', 'visibility': 'SHARED'}, token, 201)
 list_id = collection['id']
 request('GET', f'/api/itineraries/{list_id}', auth=other, expected=403)
 request('POST', '/api/list-sharings', {'listId': list_id, 'identifier': collaborator['username'], 'permission': 'EDIT'}, token, 201)
@@ -135,7 +143,7 @@ ready = threading.Event()
 
 def live_event():
     req = Request(base + '/api/chat/events', headers={'Authorization': org, 'Accept': 'text/event-stream'})
-    with urlopen(req, timeout=12) as response:
+    with urlopen(req, timeout=12, context=tls) as response:
         for raw in response:
             line = raw.decode().strip()
             if line == 'event:ready':
@@ -165,7 +173,7 @@ limited = False
 for attempt in range(25):
     probe = Request(base + '/api/users/exists?email=rc_probe%40example.test', headers={'X-Forwarded-For': f'192.0.2.{attempt + 1}'})
     try:
-        response = urlopen(probe, timeout=10)
+        response = urlopen(probe, timeout=10, context=tls)
     except HTTPError as error:
         response = error
     with response:

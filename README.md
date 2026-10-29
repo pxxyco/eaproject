@@ -4,6 +4,8 @@
 
 **Viaggi, attività e itinerari condivisi, dal desktop al telefono.**
 
+**Prima build ufficiale: RTM 1.0.0** · Tag di release: `v1.0.0`.
+
 Piattaforma realizzata per il corso **Enterprise Applications 2025/2026 dell’Università della Calabria**, con API Spring Boot, client JavaFX e app Android. Traveler e Organizer condividono lo stesso backend e gli stessi dati.
 
 [Guida iniziale](docs/GETTING_STARTED.md) · [Documentazione](docs/README.md) · [FAQ](docs/FAQ.md) · [Release](docs/RELEASING.md) · [Contribuire](CONTRIBUTING.md)
@@ -38,12 +40,29 @@ Le funzioni comuni sono protette da JWT, ruoli e controlli di proprietà sul bac
 
 Occorrono JDK 21, Python 3 e Docker con Compose. Per Android servono Android Studio e SDK 37; il dispositivo può usare Android 11/API 30 o superiore. I wrapper Maven e Gradle sono inclusi.
 
-Il backend HTTPS locale richiede il keystore del team e la relativa configurazione privata. Copiali come indicato nella [guida iniziale](docs/GETTING_STARTED.md); non sono distribuiti nella repository.
+### Backend con le immagini consegnate
+
+Metti `ea-project-images-1.0.0.tar`, il `.env` della consegna e `certs/server.p12` accanto a `compose.yaml`. Nel `.env` deve esserci `BACKEND_IMAGE=ea-project-backend:1.0.0` e `DB_IMAGE=postgres:17-alpine`, per usare le immagini della consegna RTM:
+
+```bash
+docker load -i ea-project-images-1.0.0.tar
+docker compose up -d --no-build --pull never
+```
+
+Il pacchetto Docker RTM viene esportato con `ea-project-backend:1.0.0` e `postgres:17-alpine`; il database standard parte vuoto su un volume nuovo. [File necessari, verifica e gestione dei dati](docs/GETTING_STARTED.md#con-il-pacchetto-docker-rtm).
+
+### Backend dal codice
+
+Copia `keystore.p12` e `application-dev.properties` del team in `ea-project/src/main/resources/`, poi:
 
 ```bash
 python3 scripts/setup-local-env.py
 docker compose up -d --build
 ```
+
+Il setup non sovrascrive un `.env` esistente. [Guida completa Docker e avvio senza Docker](docs/GETTING_STARTED.md#avvio-con-docker).
+
+### Client
 
 JavaFX, da un altro terminale nella cartella principale:
 
@@ -68,7 +87,7 @@ Il certificato locale è di sviluppo: per una distribuzione pubblica servono un 
 - [Test e collaudi](docs/TESTING.md): API, concorrenza, componenti desktop, JVM Android e prove su dispositivo.
 - [Segnalare un problema](https://github.com/pxxyco/untitled_ea_project/issues/new/choose): modelli per bug, richieste e domande.
 - [Policy di sicurezza](SECURITY.md): segnalazioni riservate e dati da non pubblicare.
-- [Cronologia](CHANGELOG.md), [autori](AUTHORS.md) e [dipendenze/asset](THIRD_PARTY_NOTICES.md).
+- [Versioni ufficiali](https://github.com/pxxyco/untitled_ea_project/releases), [autori](AUTHORS.md) e [dipendenze/asset](THIRD_PARTY_NOTICES.md).
 
 ## Licenza
 

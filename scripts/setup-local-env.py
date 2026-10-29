@@ -30,7 +30,7 @@ if keystore.exists() and not server_keystore.exists():
 elif not server_keystore.exists():
     print('ATTENZIONE: manca certs/server.p12. Copia il keystore del team prima di avviare Docker.')
 
-content = ('DB_NAME=eaproject\nDB_USER=eaproject\nDB_PASSWORD=' + secrets.token_hex(24)
+content = ('BACKEND_IMAGE=ea-project-backend:1.0.0\nDB_IMAGE=postgres:17-alpine\nDB_NAME=eaproject\nDB_USER=eaproject\nDB_PASSWORD=' + secrets.token_hex(24)
            + '\nJWT_SECRET=' + base64.b64encode(secrets.token_bytes(32)).decode()
            + '\nBACKEND_HOST=127.0.0.1\nBACKEND_PORT=8443\nSERVER_SSL_ENABLED=true'
            + '\nSSL_KEYSTORE=file:/app/certs/server.p12\nSSL_KEYSTORE_PASSWORD=' + keystore_password() + '\n')

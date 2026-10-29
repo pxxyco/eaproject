@@ -13,7 +13,7 @@
 
 	<groupId>it.unical</groupId>
 	<artifactId>ea-project</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>ea-project</name>
 	<description>Backend project with Log4j2 and Spring Security</description>
 

@@ -33,3 +33,15 @@ Non avviare più emulatori o build pesanti insieme su un computer con poca RAM. 
 - Avvio dei pacchetti su una macchina pulita, collegamento al backend e riavvio con dati persistenti.
 
 La CI compila e testa i moduli senza credenziali di sviluppo. La pubblicazione è un passaggio separato e manuale. I numeri dei test vanno riportati nelle note della release effettiva, non fissati nel README.
+
+## Smoke test delle API sulla configurazione RTM
+
+Lo script usa per default `https://localhost:8443` e verifica il certificato con le CA di sistema più il certificato pubblico di sviluppo incluso. Il parametro `--ca-file` permette di indicare un certificato aggiuntivo diverso; non viene disabilitata la verifica TLS.
+
+Su un’installazione di collaudo con database dedicato:
+
+```bash
+python3 scripts/verify-backend.py --url https://localhost:8443 --allow-write
+```
+
+Lo script crea utenti e offerte di prova RTM. Non eseguirlo sul database reale della consegna. L’eventuale uso di HTTP con `--url` serve soltanto a un backend di test esplicitamente configurato per HTTP.
