@@ -8,7 +8,7 @@ public final class AppConfig {
     private AppConfig() {
     }
 
-    public static final String APP_TITLE = "EA Project - Release Candidate";
+    public static final String APP_TITLE = "EA Project";
 
     public static final Image APP_ICON = new Image(
             Objects.requireNonNull(
