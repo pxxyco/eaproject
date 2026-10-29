@@ -133,8 +133,6 @@ public class ReviewItemController {
         refreshResponse();
     }
 
-    // ---------- Risposta ----------
-
     private void refreshResponse() {
         ResponseDTO response = review.getResponse();
         boolean hasResponse = response != null;

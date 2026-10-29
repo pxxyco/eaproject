@@ -25,9 +25,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-/**
- * Bounded image decoding and atomic writes for public offer photos and avatars.
- */
 @Service
 public class PhotoStorageService {
     private final Path storageRoot;

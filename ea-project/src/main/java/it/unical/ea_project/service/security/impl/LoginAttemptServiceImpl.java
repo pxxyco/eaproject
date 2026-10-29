@@ -16,7 +16,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-/** Five failed logins, one minute cooldown; username/email share the account key. */
 @Service
 public class LoginAttemptServiceImpl implements LoginAttemptService {
     private static final Logger AUDIT = LogManager.getLogger("AUDIT");

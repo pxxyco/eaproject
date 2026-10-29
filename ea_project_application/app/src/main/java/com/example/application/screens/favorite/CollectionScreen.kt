@@ -7,6 +7,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
+import com.example.application.device.CalendarEvent
+import com.example.application.device.openCalendar
+import com.example.application.ui.effects.LocalNavigationTail
+import com.example.application.dto.canCancel
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.application.dto.BookingItemDTO
@@ -23,10 +28,6 @@ private data class CollectionAction(
     val run: suspend () -> Unit,
     val leave: Boolean = false
 )
-
-private fun BookingItemDTO.isCancellable(): Boolean =
-    bookingId != null &&
-            (bookingStatus.equals("PENDING", true) || bookingStatus.equals("CONFIRMED", true))
 
 private fun BookingItemDTO.experienceRef(): ExperienceRef? =
     tripId?.let { ExperienceRef(ExperienceType.TRIP, it) }
@@ -45,6 +46,7 @@ fun CollectionScreen(
         MyTripRepository.removeItem(targetItem, id, trip)
     }
 ) {
+    val context = LocalContext.current
     var busy by remember(target) { mutableStateOf(false) }
     BackHandler(enabled = !busy, onBack = onBack)
     var data by remember(target) { mutableStateOf(CollectionItemsDTO()) }
@@ -92,10 +94,10 @@ fun CollectionScreen(
             Text(it, color = MaterialTheme.colorScheme.error)
             TextButton(onClick = { reload++ }, enabled = !busy) { Text("Riprova") }
         }
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        LazyColumn(contentPadding = PaddingValues(bottom = LocalNavigationTail.current), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             if (target == MyTripRepository.HubTarget.Bookings) {
                 items(data.bookings) { booking ->
-                    val cancellable = booking.isCancellable()
+                    val cancellable = booking.canCancel()
                     CollectionEntry(
                         title = booking.itemTitle ?: "Prenotazione",
                         location = listOfNotNull(
@@ -115,6 +117,13 @@ fun CollectionScreen(
                             )
                         }
                     )
+                    if (!booking.bookingStatus.equals("CANCELLED", true)) {
+                        CalendarEvent.from(booking.itemTitle, booking.itemLocation, booking.itemDate, booking.itemEndDate)?.let { event ->
+                            OutlinedButton(onClick = { context.openCalendar(event)?.let { error = it } }, enabled = !busy) {
+                                Text("Aggiungi al calendario")
+                            }
+                        }
+                    }
                 }
             } else {
                 items(data.trips.orEmpty()) { trip ->

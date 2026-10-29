@@ -11,6 +11,8 @@ RUN addgroup -S -g 10001 app && adduser -S -u 10001 -G app app \
     && mkdir -p /app/storage/photo /app/storage/private-chat /app/logs \
     && chown -R app:app /app
 WORKDIR /app
+# Demo photos seed the media volume the first time it is created.
+COPY --chown=app:app demo-photo/ /app/storage/photo/
 COPY --from=build --chown=app:app /build/target/ea-project-0.0.1-SNAPSHOT.jar /app/app.jar
 ENV SPRING_PROFILES_ACTIVE=container \
     JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=70 -XX:ActiveProcessorCount=2 -Djava.awt.headless=true -Duser.timezone=Europe/Rome"

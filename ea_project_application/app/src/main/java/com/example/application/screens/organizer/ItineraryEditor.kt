@@ -37,7 +37,6 @@ private fun normalizeStageTimes(stage: JsonObject) {
     }
 }
 
-/** Keeps identifiers and attributes from the desktop when modifying an existing stage. */
 internal fun itineraryPayload(stages: List<JsonObject>, start: String, end: String): JsonArray {
     val first = LocalDate.parse(start.trim())
     val last = LocalDate.parse(end.trim())

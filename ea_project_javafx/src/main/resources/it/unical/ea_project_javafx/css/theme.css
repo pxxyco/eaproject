@@ -1,8 +1,3 @@
-/* Global palette. This is the only stylesheet containing literal colors.
- * JavaFX looked-up colors are inherited by every screen and popup.
- * -app-accent is updated by UiEffects from the daily Bing wallpaper.
- * Default font and size are defined here; components own their size hierarchy.
- */
 .root {
     -app-accent: #d0b38b;
     -ea-glass: rgba(25, 34, 31, .65);

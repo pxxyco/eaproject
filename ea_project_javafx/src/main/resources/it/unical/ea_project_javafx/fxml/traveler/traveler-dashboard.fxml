@@ -14,7 +14,6 @@
     fx:id="dashboardRoot"
     fx:controller="it.unical.ea_project_javafx.controller.traveler.TravelerDashboardController"
     spacing="34.0" styleClass="traveler-dashboard-content">
-    <!-- Introduzione + riepilogo reale, senza ripetere i contatori in una seconda sezione. -->
     <HBox alignment="CENTER_LEFT" spacing="22.0" styleClass="dashboard-welcome">
         <VBox alignment="CENTER_LEFT" spacing="13.0" minWidth="250.0" HBox.hgrow="ALWAYS"
             styleClass="dashboard-welcome-intro">

@@ -8,7 +8,6 @@ import java.time.temporal.ChronoUnit;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-/** One validation policy for offers, itinerary stages and reserved capacity. */
 public final class ExperienceValidation {
         private ExperienceValidation() {
         }

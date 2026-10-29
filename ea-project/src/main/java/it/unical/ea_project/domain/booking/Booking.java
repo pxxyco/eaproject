@@ -65,12 +65,10 @@ public class Booking {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
-    // -- enum per il tipo di prenotazione --
     public enum BookingType {
         TRIP, ACTIVITY
     }
 
-    // -- enum per lo stato della prenotazione --
     public enum BookingStatus {
         PENDING, COMPLETED, CONFIRMED, CANCELLED
     }

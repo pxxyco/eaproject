@@ -25,9 +25,6 @@ import lombok.ToString;
 @Table(name = "\"FAVORITE_LIST\"")
 public class FavoriteList {
 
-    /**
-     * Visibility
-     */
     public enum Visibility {
 
         PRIVATE,
@@ -44,7 +41,6 @@ public class FavoriteList {
     @Column(name = "list_id")
     private Long id;
 
-    // FK user_id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

@@ -11,7 +11,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-/** Default certificate validation plus the team's development CA; hostname validation stays enabled. */
 public final class TlsSupport {
     private static final SSLContext CONTEXT = buildSslContext();
     private TlsSupport() {}

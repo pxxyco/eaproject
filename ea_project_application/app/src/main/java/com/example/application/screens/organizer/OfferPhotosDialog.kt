@@ -1,9 +1,14 @@
 package com.example.application.screens.organizer
 
+import com.example.application.screens.common.readPhotoBytes
+import com.example.application.screens.common.PhotoTooLargeException
+
 import android.content.ContentResolver
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.PickVisualMediaRequest
+import com.example.application.device.launchPhotoPicker
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -77,10 +82,10 @@ internal fun OfferPhotosDialog(offer: OrganizerOffer, onDismiss: () -> Unit, onC
             } finally { busy = false }
         }
     }
-    val coverPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+    val coverPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         if (uri != null) { remaining.clear(); remaining.add(uri); coverUpload = true; uploadSelection() }
     }
-    val photosPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
+    val photosPicker = rememberLauncherForActivityResult(ActivityResultContracts.PickMultipleVisualMedia(20)) { uris ->
         if (uris.isNotEmpty()) { remaining.clear(); remaining.addAll(uris.distinct()); coverUpload = false; uploadSelection() }
     }
     LaunchedEffect(tick) {
@@ -99,8 +104,8 @@ internal fun OfferPhotosDialog(offer: OrganizerOffer, onDismiss: () -> Unit, onC
                 Text("Foto · ${offer.title}", style = MaterialTheme.typography.titleLarge)
                 Text("La prima foto è la copertina. Puoi cambiarla o aggiungere altre immagini. Massimo 10 MB per foto.")
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    OutlinedButton(enabled = !busy && !loading, onClick = { coverPicker.launch("image/*") }, modifier = Modifier.weight(1f)) { Text("Scegli copertina") }
-                    OutlinedButton(enabled = !busy && !loading, onClick = { photosPicker.launch("image/*") }, modifier = Modifier.weight(1f)) { Text("Aggiungi foto") }
+                    OutlinedButton(enabled = !busy && !loading, onClick = { launchPhotoPicker { coverPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }?.let { error = it } }, modifier = Modifier.weight(1f)) { Text("Scegli copertina") }
+                    OutlinedButton(enabled = !busy && !loading, onClick = { launchPhotoPicker { photosPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }?.let { error = it } }, modifier = Modifier.weight(1f)) { Text("Aggiungi foto") }
                 }
                 if (loading || busy) LinearProgressIndicator(Modifier.fillMaxWidth())
                 loadError?.let { Text(it, color = MaterialTheme.colorScheme.error) }

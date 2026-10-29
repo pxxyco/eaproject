@@ -91,7 +91,7 @@ public class BookingHistoryController implements AutoCloseable {
     public void initialize() {
         BackgroundHelper.setupBackground(bgImageView);
         loadNavbar();
-        historyFilterCombo.getItems().setAll("Tutte", "Terminate / completate", "Cancellate", "Da recensire",
+        historyFilterCombo.getItems().setAll("Tutte", "Concluse", "Cancellate", "Scadute", "Da recensire",
                 "Con recensione");
         historyFilterCombo.getSelectionModel().selectFirst();
         historyHost.getChildren().clear();
@@ -146,7 +146,6 @@ public class BookingHistoryController implements AutoCloseable {
                 .filter(node -> node instanceof ListCell<?> cell && !cell.isEmpty()
                         && cell.getIndex() >= historyList.getItems().size() - 2)
                 .anyMatch(node -> {
-                    // VirtualFlow also keeps spare cells in a separate, hidden group.
                     boolean inViewport = false;
                     for (Node parent = node; parent != null; parent = parent.getParent()) {
                         if (!parent.isVisible())
@@ -174,8 +173,9 @@ public class BookingHistoryController implements AutoCloseable {
         String query = URLEncoder.encode(searchField.getText().strip(),
                 StandardCharsets.UTF_8);
         String filter = switch (historyFilterCombo.getValue()) {
-            case "Terminate / completate" -> "COMPLETED";
+            case "Concluse" -> "COMPLETED";
             case "Cancellate" -> "CANCELLED";
+            case "Scadute" -> "EXPIRED";
             case "Da recensire" -> "REVIEWABLE";
             case "Con recensione" -> "REVIEWED";
             default -> "ALL";
@@ -538,19 +538,12 @@ public class BookingHistoryController implements AutoCloseable {
         scroll.setFitToWidth(true);
         scroll.setPrefViewportHeight(385);
         scroll.getStyleClass().add("history-modal-scroll");
-        // Header remains visible; only the form body scrolls on small screens.
         panel.getChildren().add(scroll);
         showInAppModal(panel);
     }
 
     private boolean canReview(BookingDTO booking) {
-        if (booking == null || isCancelledEntry(booking) || !("CONFIRMED".equalsIgnoreCase(booking.getBookingStatus())
-                || "COMPLETED".equalsIgnoreCase(booking.getBookingStatus())))
-            return false;
-        return "COMPLETED".equalsIgnoreCase(booking.getBookingStatus())
-                || "COMPLETED".equalsIgnoreCase(booking.getItemStatus())
-                || (BookingPresentation.eventEndDateTime(booking) != null
-                        && !BookingPresentation.eventEndDateTime(booking).isAfter(LocalDateTime.now()));
+        return BookingPresentation.canReview(booking, LocalDateTime.now());
     }
 
     private ReviewDTO reviewFor(BookingDTO booking) {
@@ -575,15 +568,7 @@ public class BookingHistoryController implements AutoCloseable {
     }
 
     private String bookingStatus(BookingDTO booking) {
-        if (booking == null || booking.getBookingStatus() == null)
-            return "Non disponibile";
-        return switch (booking.getBookingStatus().toUpperCase(Locale.ROOT)) {
-            case "PENDING" -> "In attesa";
-            case "CONFIRMED" -> "Confermata";
-            case "COMPLETED" -> "Completata";
-            case "CANCELLED" -> "Cancellata";
-            default -> booking.getBookingStatus();
-        };
+        return BookingPresentation.displayStatus(booking, evaluationTime);
     }
 
     private String itemStatus(BookingDTO booking) {
@@ -591,7 +576,7 @@ public class BookingHistoryController implements AutoCloseable {
             return "Non disponibile";
         return switch (booking.getItemStatus().toUpperCase(Locale.ROOT)) {
             case "PUBLISHED" -> "Pubblicata";
-            case "COMPLETED" -> "Completata";
+            case "COMPLETED" -> "Conclusa";
             case "CANCELLED" -> "Annullata dall'organizzatore";
             case "DRAFT" -> "Bozza";
             default -> booking.getItemStatus();
@@ -602,25 +587,19 @@ public class BookingHistoryController implements AutoCloseable {
         String status = BookingPresentation.displayStatus(booking, evaluationTime);
         if (status.startsWith("Prenotazione cancellata") || status.startsWith("Esperienza annullata"))
             return "history-status-cancelled";
-        if ("Completata".equals(status) || "Terminata".equals(status))
+        if ("Conclusa".equals(status))
             return "history-status-completed";
         if ("Confermata".equals(status))
             return "history-status-confirmed";
-        if (status.contains("attesa"))
+        if (status.contains("attesa") || "Scaduta".equals(status) || "Da pagare".equals(status))
             return "history-status-pending";
         return "history-status-neutral";
     }
 
     private String paymentStatus(BookingDTO booking) {
-        if (booking == null || booking.getPaymentStatus() == null || booking.getPaymentStatus().isBlank())
-            return "Nessun pagamento registrato";
-        return switch (booking.getPaymentStatus().toUpperCase(Locale.ROOT)) {
-            case "PENDING" -> "In attesa";
-            case "CONFIRMED" -> "Confermato";
-            case "COMPLETED" -> "Completato";
-            case "CANCELLED" -> "Annullato";
-            default -> booking.getPaymentStatus();
-        };
+        if (booking == null) return "Non disponibile";
+        if (booking.getPrice() != null && booking.getPrice().signum() == 0) return "Non dovuto";
+        return BookingPresentation.paymentStatus(booking.getPaymentStatus());
     }
 
     private String reviewSummary(ReviewDTO review) {

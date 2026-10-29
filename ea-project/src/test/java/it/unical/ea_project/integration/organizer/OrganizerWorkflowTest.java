@@ -11,6 +11,7 @@ import it.unical.ea_project.repository.payment.PaymentRepository;
 import it.unical.ea_project.repository.user.UserRepository;
 import it.unical.ea_project.service.activity.impl.ActivityServiceImpl;
 import it.unical.ea_project.service.booking.impl.BookingServiceImpl;
+import it.unical.ea_project.service.booking.BookingLockService;
 import it.unical.ea_project.service.payment.impl.PaymentServiceImpl;
 import it.unical.ea_project.service.trip.impl.TripServiceImpl;
 import java.math.BigDecimal;
@@ -19,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
 import org.springframework.context.annotation.Import;
@@ -29,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DataJpaTest(showSql = false)
-@Import({TripServiceImpl.class, ActivityServiceImpl.class, BookingServiceImpl.class, PaymentServiceImpl.class})
+@Import({TripServiceImpl.class, ActivityServiceImpl.class, BookingServiceImpl.class, BookingLockService.class, PaymentServiceImpl.class})
 class OrganizerWorkflowTest {
     @Autowired TripServiceImpl trips;
     @Autowired ActivityServiceImpl activities;
@@ -110,7 +112,7 @@ class OrganizerWorkflowTest {
         assertEquals(2, bookings.getPrenotazioniOrganizzatore(owner.getId()).size());
         assertEquals(0, payments.getPaidAmountForOrganizer(owner.getId()).compareTo(new BigDecimal("50.00")));
         // Deleting an offer marks it CANCELLED: the existing booking cancellation policy still applies.
-        assertThrows(IllegalArgumentException.class, () -> bookings.cancella(booking.getBookingId(), traveler.getId()));
+        assertEquals(409, assertThrows(ResponseStatusException.class, () -> bookings.cancella(booking.getBookingId(), traveler.getId())).getStatusCode().value());
         assertEquals(8, trip.getAvailableSeats());
     }
 

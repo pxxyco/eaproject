@@ -26,10 +26,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.util.Duration;
 
-/**
- * Gestisce il popup in-scene per aggiungere, modificare e revocare
- * condivisioni.
- */
 public class ListSharingPopupController {
     private static final Pattern ID_PATTERN = Pattern.compile("#(\\d+)\\s*$");
 

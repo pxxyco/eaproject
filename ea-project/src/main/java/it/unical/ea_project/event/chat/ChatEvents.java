@@ -23,10 +23,6 @@ import org.springframework.transaction.event.TransactionalEventListener;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-/**
- * Events contain only a conversation ID. Database history is the source of
- * truth after reconnect.
- */
 @Component
 @EnableScheduling
 public class ChatEvents {

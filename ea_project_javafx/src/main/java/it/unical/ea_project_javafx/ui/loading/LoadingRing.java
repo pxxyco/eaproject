@@ -20,10 +20,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.image.WritableImage;
 import javafx.util.Duration;
 
-/**
- * A white rotating arc with a fading tail; invisible rings consume no animation
- * pulses.
- */
 public final class LoadingRing extends Region {
     private static final Color DEFAULT_COLOR = Color.rgb(245, 245, 244);
     private static final CssMetaData<LoadingRing, Color> PROGRESS_COLOR = new CssMetaData<>(
@@ -141,8 +137,6 @@ public final class LoadingRing extends Region {
         if (size <= 0 || Math.abs(size - renderedSize) < .01)
             return;
         renderedSize = size;
-        // Rasterize once per resize, not once per animation frame. Per-pixel alpha
-        // avoids the seams produced by overlapping translucent arc segments.
         int resolution = Math.max(1, (int) Math.ceil(size * 2));
         WritableImage image = new WritableImage(resolution, resolution);
         double radius = .415, halfStroke = .0425, end = Math.toRadians(390);

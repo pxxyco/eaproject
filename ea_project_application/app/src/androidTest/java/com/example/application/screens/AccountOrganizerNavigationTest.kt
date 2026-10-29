@@ -42,7 +42,7 @@ class AccountOrganizerNavigationTest {
         compose.runOnIdle { assertEquals(1, logouts) }
         compose.onNodeWithText("Dashboard").assertDoesNotExist()
         compose.onNodeWithText("Preferiti").performClick()
-        compose.onNodeWithText("Accedi").assertIsDisplayed()
+        compose.onNodeWithText("Accedi per vedere le tue liste").assertIsDisplayed()
     }
 
     @Test fun guestCanExploreAndProtectedTabOffersLoginOrReturnToExplore() {
@@ -52,12 +52,12 @@ class AccountOrganizerNavigationTest {
         compose.onNodeWithText("Home di prova").assertIsDisplayed()
         compose.onNodeWithText("Dashboard").assertDoesNotExist()
         compose.onNodeWithText("Preferiti").performClick()
-        compose.onNodeWithText("Accedi").assertIsDisplayed()
+        compose.onNodeWithText("Accedi per vedere le tue liste").assertIsDisplayed()
         compose.onNodeWithText("Esplora").performClick()
         compose.onNodeWithText("Home di prova").assertIsDisplayed()
         compose.onNodeWithText("Preferiti").performClick()
         compose.onNodeWithText("Accedi").performClick()
-        compose.onNodeWithText("Accedi per vedere le tue liste").assertDoesNotExist()
+        compose.onNodeWithText("I tuoi viaggi, in un unico posto").assertDoesNotExist()
         compose.onNodeWithText("Account").assertIsSelected()
     }
 
@@ -73,6 +73,6 @@ class AccountOrganizerNavigationTest {
         compose.onNodeWithText("Gestione organizzatore").assertDoesNotExist()
         compose.runOnIdle { user = null }
         compose.onNodeWithText("Viaggi di prova").assertDoesNotExist()
-        compose.onNodeWithText("Accedi").assertIsDisplayed()
+        compose.onNodeWithText("Accedi per vedere le tue liste").assertIsDisplayed()
     }
 }

@@ -12,6 +12,7 @@ import it.unical.ea_project_javafx.navigation.SceneNavigator;
 import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.service.api.ApiService;
 import it.unical.ea_project_javafx.ui.UiText;
+import it.unical.ea_project_javafx.ui.BookingPresentation;
 import it.unical.ea_project_javafx.ui.dialog.PopupFactory;
 import it.unical.ea_project_javafx.ui.scroll.ScrollSupport;
 import it.unical.ea_project_javafx.ui.animation.PageTransitions;
@@ -67,18 +68,12 @@ import static it.unical.ea_project_javafx.ui.BookingPresentation.displayStatus;
 import static it.unical.ea_project_javafx.ui.BookingPresentation.eventStartDateTime;
 import static it.unical.ea_project_javafx.ui.BookingPresentation.formatBookedAt;
 import static it.unical.ea_project_javafx.ui.BookingPresentation.formatEventPeriod;
-import static it.unical.ea_project_javafx.ui.BookingPresentation.hasEventStarted;
 import static it.unical.ea_project_javafx.ui.BookingPresentation.isCancelled;
 import static it.unical.ea_project_javafx.ui.BookingPresentation.isEventEnded;
 import static it.unical.ea_project_javafx.ui.BookingPresentation.isHistorical;
 import static it.unical.ea_project_javafx.ui.BookingPresentation.isTrip;
 import static it.unical.ea_project_javafx.ui.BookingPresentation.statusCell;
 
-/**
- * Traveler dashboard: data-backed discovery, booking summary and the same
- * operational booking table
- * available in the former dedicated bookings page.
- */
 public class TravelerDashboardController implements ProfileDashboardController {
     @FXML
     private VBox dashboardRoot;
@@ -214,10 +209,6 @@ public class TravelerDashboardController implements ProfileDashboardController {
 
     private boolean missingWelcomeBindingsReported;
 
-    /**
-     * Evita che un FXML rimasto obsoleto in target/classes faccia fallire tutta la
-     * navigazione.
-     */
     private void setLabelText(Label injectedLabel, String fxId, String value) {
         Label target = resolveLabel(injectedLabel, fxId);
         if (target != null)
@@ -343,7 +334,6 @@ public class TravelerDashboardController implements ProfileDashboardController {
         }
         discoveryTitle.setText(selectedCategory.getText());
         discoverySubtitle.setText("Esplora le esperienze di questa categoria.");
-        // Retain the current page while the category request is in flight.
         boolean trips = category.equals("TRIP");
         long request = ++discoveryGeneration;
         String endpoint = trips ? "/api/trips/search?page=0&size=9"
@@ -452,7 +442,7 @@ public class TravelerDashboardController implements ProfileDashboardController {
     private void setupBookingFilters() {
         bookingsPeriodFilter.getItems().setAll("Tutte", "In programma", "Storico");
         bookingsPeriodFilter.getSelectionModel().selectFirst();
-        bookingsStatusFilter.getItems().setAll("Tutti", "In attesa", "Confermate", "Completate / terminate",
+        bookingsStatusFilter.getItems().setAll("Tutti", "Da pagare", "Confermate", "In corso", "Concluse", "Scadute",
                 "Cancellate");
         bookingsStatusFilter.getSelectionModel().selectFirst();
         bookingsSearchField.textProperty().addListener((obs, oldValue, newValue) -> filterBookings());
@@ -509,9 +499,7 @@ public class TravelerDashboardController implements ProfileDashboardController {
                     return;
                 }
                 boolean cancelled = isCancelled(booking);
-                boolean canCancel = !cancelled && !isHistorical(booking, evaluationTime)
-                        && !hasEventStarted(booking, evaluationTime)
-                        && !"COMPLETED".equalsIgnoreCase(booking.getBookingStatus());
+                boolean canCancel = BookingPresentation.canCancel(booking, evaluationTime);
                 export.setVisible(!cancelled);
                 export.setManaged(!cancelled);
                 cancel.setVisible(canCancel);
@@ -588,9 +576,6 @@ public class TravelerDashboardController implements ProfileDashboardController {
     }
 
     private void renderUpcomingExperiences() {
-        // Un FXML ancora presente in target/classes potrebbe non avere questa sezione
-        // nuova.
-        // La schermata deve rimanere navigabile e la build clean aggiornerà la risorsa.
         if (upcomingExperienceContainer == null)
             return;
         upcomingExperienceContainer.getChildren().clear();
@@ -701,21 +686,20 @@ public class TravelerDashboardController implements ProfileDashboardController {
     private boolean matchesStatus(BookingDTO b, String selected) {
         if (selected == null || "Tutti".equalsIgnoreCase(selected))
             return true;
-        String status = UiText.orDefault(b.getBookingStatus(), "").toUpperCase(Locale.ROOT);
+        String display = displayStatus(b, evaluationTime);
         return switch (selected) {
-            case "In attesa" -> "PENDING".equals(status) && !isCancelled(b) && !isHistorical(b, evaluationTime);
-            case "Confermate" -> "CONFIRMED".equals(status) && !isCancelled(b) && !isHistorical(b, evaluationTime);
-            case "Completate / terminate" -> !isCancelled(b) && ("COMPLETED".equals(status)
-                    || "COMPLETED".equalsIgnoreCase(b.getItemStatus()) || isEventEnded(b, evaluationTime));
+            case "Da pagare" -> "Da pagare".equals(display);
+            case "Confermate" -> "Confermata".equals(display);
+            case "In corso" -> "In corso".equals(display);
+            case "Concluse" -> "Conclusa".equals(display);
+            case "Scadute" -> "Scaduta".equals(display);
             case "Cancellate" -> isCancelled(b);
             default -> true;
         };
     }
 
     private void requestCancel(BookingDTO booking) {
-        if (booking == null || booking.getBookingId() == null || isCancelled(booking)
-                || isHistorical(booking, evaluationTime)
-                || hasEventStarted(booking, evaluationTime)) {
+        if (!BookingPresentation.canCancel(booking, LocalDateTime.now())) {
             bookingFeedback("Questa prenotazione non può più essere cancellata.", true);
             return;
         }

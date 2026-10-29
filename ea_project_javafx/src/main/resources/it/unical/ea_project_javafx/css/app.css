@@ -1,5 +1,3 @@
-/* Application entry point: palette -> foundations -> reusable components.
- * Screens import this file; components never import screens. No import cycles. */
 @import "theme.css";
 @import "components/layout.css";
 @import "components/typography.css";

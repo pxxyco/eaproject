@@ -27,9 +27,6 @@ import lombok.ToString;
 @Table(name = "\"LIST_SHARING\"")
 public class ListSharing {
 
-    /**
-     * SharingPermission
-     */
     public enum SharingPermission {
 
         VIEW,

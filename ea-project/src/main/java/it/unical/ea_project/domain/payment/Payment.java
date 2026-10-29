@@ -53,7 +53,6 @@ public class Payment {
     @Column(name = "deleted_at", updatable = false)
     private LocalDateTime deletedAt;
 
-    // --- Enum dedicato per lo Stato del Pagamento ---
     public enum PaymentStatus {
         PENDING, COMPLETED, CONFIRMED, CANCELLED
     }

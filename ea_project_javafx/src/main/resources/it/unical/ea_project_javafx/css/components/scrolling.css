@@ -1,5 +1,3 @@
-/* Reusable component: scrolling. Theme: css/theme.css. */
-
 .profile-horizontal-scroll,
 .profile-horizontal-scroll>.viewport {
     -fx-background-color: transparent;

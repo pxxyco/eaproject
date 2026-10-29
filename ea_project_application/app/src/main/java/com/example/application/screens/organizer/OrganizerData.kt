@@ -14,7 +14,6 @@ import java.util.Locale
 internal fun JsonObject.text(key: String): String {
     val value = get(key)?.takeUnless { it.isJsonNull } ?: return ""
     if (value.isJsonPrimitive) return value.asString
-    // Jackson can serialize java.time values as numeric arrays instead of ISO strings.
     if (value.isJsonArray && key in setOf("startDate", "endDate", "createdAt", "updatedAt", "deletedAt")) {
         return runCatching {
             val parts = value.asJsonArray.map { it.asInt }
@@ -64,11 +63,9 @@ internal suspend fun loadOrganizerList(path: String): ApiResult<List<JsonObject>
         is ApiResult.RateLimited -> result
     }
 
-/** Builds an update without discarding fields that are not exposed in the mobile form. */
 internal fun offerPayload(offer: OrganizerOffer, fields: Map<String, String>): JsonObject {
     val payload = offer.data.deepCopy()
     listOf("createdAt", "updatedAt", "deletedAt", "createdByUserId", "images", "averageRating", "icsUid").forEach(payload::remove)
-    // Details-only updates preserve the itinerary; the editor attaches an explicit list when editing stages.
     if (offer.trip) payload.remove("stages")
     fields.forEach { (key, value) -> payload.addProperty(key, value.trim()) }
     val priceKey = if (offer.trip) "totalPrice" else "price"

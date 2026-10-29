@@ -1,5 +1,3 @@
-/* Reusable component: search. Theme: css/theme.css. */
-
 .search-field {
     -fx-background-color: -tone-ink-260;
     -fx-border-color: -tone-white-160;
@@ -45,3 +43,12 @@
 .traveler-search-type .arrow {
     -fx-background-color: -color-text-secondary;
 }
+
+.booking-search-box .search-field { -fx-min-height: 68; -fx-pref-height: 68; -fx-alignment: top-left; -fx-spacing: 4; }
+.booking-search-box .field-label { -fx-min-height: 20; -fx-pref-height: 20; -fx-alignment: center-left; }
+.booking-search-box .transparent-input,
+.booking-search-box .transparent-combo,
+.booking-search-box .transparent-datepicker { -fx-min-height: 30; -fx-pref-height: 30; -fx-max-height: 30; -fx-padding: 0; }
+.booking-search-box .transparent-combo > .list-cell,
+.booking-search-box .transparent-datepicker > .text-field,
+.booking-search-box .transparent-input { -fx-padding: 4 0; -fx-alignment: center-left; -fx-font-size: 14px; }

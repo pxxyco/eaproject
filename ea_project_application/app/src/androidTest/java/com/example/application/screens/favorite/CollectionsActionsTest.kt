@@ -39,12 +39,31 @@ class CollectionsActionsTest {
         compose.onNodeWithText("Conferma").performClick()
         compose.runOnIdle { assertEquals(3L, deleted); assertTrue(back) }
     }
+    @Test fun bookingCardOpensTheExperienceWithoutCancellingIt() {
+        var opened: ExperienceRef? = null
+        var cancelled = false
+        compose.setContent { MaterialTheme {
+            CollectionScreen(MyTripRepository.HubTarget.Bookings, {},
+                onExperienceClick = { opened = it },
+                load = { CollectionItemsDTO(bookings = listOf(
+                    BookingItemDTO(bookingId = 42, activityId = 7, itemTitle = "Museo prenotato",
+                        bookingStatus = "CONFIRMED", itemDate = "2099-01-01T12:00:00")
+                )) }, cancelBooking = { cancelled = true })
+        } }
+        compose.onNodeWithText("Museo prenotato").performClick()
+        compose.runOnIdle {
+            assertEquals(ExperienceRef(ExperienceType.ACTIVITY, 7), opened)
+            assertFalse(cancelled)
+        }
+        compose.onNodeWithText("Annullare la prenotazione?").assertDoesNotExist()
+    }
+
     @Test fun cancellingBookingUsesBookingIdRatherThanActivityId() {
         var removed: Long? = null
         compose.setContent { MaterialTheme {
             CollectionScreen(MyTripRepository.HubTarget.Bookings, {}, load = { CollectionItemsDTO(bookings = listOf(
                 BookingItemDTO(bookingId = 42, activityId = 7, bookingStatus = "CONFIRMED", itemDate = "2099-01-01T12:00:00")
-            )) }, remove = { _, id, _ -> removed = id })
+            )) }, cancelBooking = { id -> removed = id })
         } }
         compose.onNodeWithText("Annulla prenotazione").performClick()
         compose.onNodeWithText("Conferma").performClick()

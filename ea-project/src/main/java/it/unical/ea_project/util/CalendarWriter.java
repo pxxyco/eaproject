@@ -5,9 +5,6 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
-/**
- * RFC 5545 escaping and folding, shared by offer and personal booking exports.
- */
 public final class CalendarWriter {
     private CalendarWriter() {
     }

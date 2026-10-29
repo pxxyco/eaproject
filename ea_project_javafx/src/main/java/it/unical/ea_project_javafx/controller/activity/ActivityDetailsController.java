@@ -7,6 +7,12 @@ import it.unical.ea_project_javafx.controller.activity.reviews.ReviewsContainerC
 import it.unical.ea_project_javafx.controller.chat.ChatController;
 import it.unical.ea_project_javafx.controller.common.LoadingOverlayController;
 import it.unical.ea_project_javafx.dto.activity.ActivityDTO;
+import it.unical.ea_project_javafx.dto.booking.BookingDTO;
+import it.unical.ea_project_javafx.ui.BookingPresentation;
+import it.unical.ea_project_javafx.ui.payment.MockCheckoutDialog;
+import com.google.gson.reflect.TypeToken;
+import java.util.ArrayList;
+import java.util.Comparator;
 import it.unical.ea_project_javafx.dto.review.ReviewDTO;
 import it.unical.ea_project_javafx.dto.trip.TripDTO;
 import it.unical.ea_project_javafx.navigation.SceneNavigator;
@@ -14,6 +20,9 @@ import it.unical.ea_project_javafx.security.UserSession;
 import it.unical.ea_project_javafx.service.api.ApiService;
 import it.unical.ea_project_javafx.service.favorites.FavoriteService;
 import it.unical.ea_project_javafx.ui.ViewSupport;
+import it.unical.ea_project_javafx.ui.UiText;
+import javafx.geometry.Insets;
+import java.math.RoundingMode;
 import it.unical.ea_project_javafx.ui.animation.PageTransitions;
 import it.unical.ea_project_javafx.ui.background.BackgroundHelper;
 import it.unical.ea_project_javafx.ui.dialog.FullscreenPhotoViewer;
@@ -55,6 +64,14 @@ import javafx.stage.Stage;
 
 public class ActivityDetailsController implements AutoCloseable {
     private boolean closed;
+    private boolean bookingsLoaded;
+    private boolean bookingBusy;
+    private List<BookingDTO> ownBookings = List.of();
+    private BookingDTO currentBooking;
+    @FXML private Button btnCancelBooking;
+    @FXML private Button btnPayBooking;
+    @FXML private Button btnManageBookings;
+    @FXML private Label bookingTotalCaption;
 
     @Override
     public void close() {
@@ -188,6 +205,7 @@ public class ActivityDetailsController implements AutoCloseable {
 
         myType = type;
         this.id = id;
+        refreshOwnBookings();
 
         switch (type) {
             case ACTIVITY -> {
@@ -297,8 +315,8 @@ public class ActivityDetailsController implements AutoCloseable {
         lblRating.setText("★ " + formatRating(activity.getAverageRating()));
 
         BigDecimal prezzo = activity.getPrice() != null ? BigDecimal.valueOf(activity.getPrice()) : null;
-        lblPrezzo.setText(setMoneyCurrency(prezzo));
-        lblTotale.setText(setMoneyCurrency(prezzo));
+        lblPrezzo.setText(UiText.money(prezzo));
+        lblTotale.setText(UiText.money(prezzo));
         updateBookingAvailability();
         updateExperienceSummary();
 
@@ -321,8 +339,8 @@ public class ActivityDetailsController implements AutoCloseable {
         lblTitolo.setText(trip.getTitle());
 
         lblRating.setText("★ " + formatRating(trip.getAverageRating()));
-        lblPrezzo.setText(setMoneyCurrency(trip.getTotalPrice()));
-        lblTotale.setText(setMoneyCurrency(trip.getTotalPrice()));
+        lblPrezzo.setText(UiText.money(trip.getTotalPrice()));
+        lblTotale.setText(UiText.money(trip.getTotalPrice()));
         updateBookingAvailability();
         updateExperienceSummary();
 
@@ -450,6 +468,7 @@ public class ActivityDetailsController implements AutoCloseable {
                 rcc.setOnEditReviewRequested(this::openEditReview);
                 rcc.setOnReviewsChanged(this::refreshRating);
                 recensioniController = rcc;
+                updateReviewEligibility();
             }
 
             if (myType == Type.ACTIVITY && activity != null
@@ -533,7 +552,6 @@ public class ActivityDetailsController implements AutoCloseable {
     }
 
     private void showSection(Node node) {
-        // Keep only the two deliberately preloaded sections between tab changes.
         bodyContainer.getChildren()
                 .removeIf(child -> child != node && child != descrizioneNode && child != itinerarioNode);
         for (Node child : bodyContainer.getChildren()) {
@@ -626,21 +644,133 @@ public class ActivityDetailsController implements AutoCloseable {
     }
 
     private void updateBookingAvailability() {
+        if (myType == null || myType == Type.TRIP && trip == null || myType == Type.ACTIVITY && activity == null)
+            return;
         boolean organizer = "ORGANIZER".equalsIgnoreCase(UserSession.getInstance().getRole());
-        String reason = organizer ? "Le prenotazioni sono riservate agli account Traveler."
-                : bookingUnavailableReason();
-        btnPrenota.setDisable(reason != null);
-        btnPrenota.setText(reason == null ? "Prenota Ora" : "Non prenotabile");
-        bookingAvailabilityLabel.setText(reason == null ? "Prenota per la data indicata nel programma." : reason);
-        spinnerPartecipanti.setDisable(reason != null);
-        if (reason == null) {
+        String reason = organizer ? "Le prenotazioni sono riservate agli account Traveler." : bookingUnavailableReason();
+        btnPrenota.setDisable(bookingBusy || !bookingsLoaded || currentBooking != null || reason != null);
+        btnPrenota.setText(!bookingsLoaded ? "Verifica prenotazioni…" : currentBooking != null ? "Già prenotata" : reason == null ? "Prenota ora" : "Non prenotabile");
+        bookingTotalCaption.setText(currentBooking == null ? "Totale" : "Totale prenotato");
+        long count = matchingBookings().stream().filter(b -> !BookingPresentation.isCancelled(b)).count();
+        String summary = currentBooking == null ? reason == null ? "Prenota per la data indicata nel programma." : reason
+                : "La tua prenotazione: " + BookingPresentation.displayStatus(currentBooking, LocalDateTime.now())
+                    + " · " + currentBooking.getSeats() + " partecipanti."
+                    + (count > 1 ? " Sono presenti " + count + " prenotazioni precedenti per questa esperienza: puoi gestirle dalle tue prenotazioni." : "");
+        bookingAvailabilityLabel.setText(bookingsLoaded ? summary : "Verifica delle tue prenotazioni in corso.");
+        spinnerPartecipanti.setDisable(bookingBusy || !bookingsLoaded || currentBooking != null || reason != null);
+        if (currentBooking != null && currentBooking.getSeats() != null) {
+            int seats = currentBooking.getSeats();
+            spinnerPartecipanti.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Math.max(1, seats), Math.max(1, seats)));
+            if (currentBooking.getPrice() != null && seats > 0) {
+                lblPrezzo.setText(UiText.money(currentBooking.getPrice().divide(BigDecimal.valueOf(seats), 2, RoundingMode.HALF_UP)));
+                lblTotale.setText(UiText.money(currentBooking.getPrice()));
+            }
+        } else if (reason == null) {
             int available = myType == Type.TRIP ? trip.getAvailableSeats() : activity.getAvailableSeats();
             int selected = spinnerPartecipanti.getValue() == null ? 1 : spinnerPartecipanti.getValue();
-            spinnerPartecipanti.setValueFactory(
-                    new SpinnerValueFactory.IntegerSpinnerValueFactory(1, available, Math.min(selected, available)));
+            spinnerPartecipanti.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, available, Math.min(selected, available)));
         }
+        boolean cancel = currentBooking != null && BookingPresentation.canCancel(currentBooking, LocalDateTime.now());
+        btnManageBookings.setVisible(count > 1); btnManageBookings.setManaged(count > 1); btnManageBookings.setDisable(bookingBusy);
+        btnCancelBooking.setVisible(cancel); btnCancelBooking.setManaged(cancel); btnCancelBooking.setDisable(bookingBusy);
+        boolean pay = MockCheckoutDialog.eligible(currentBooking);
+        btnPayBooking.setVisible(pay); btnPayBooking.setManaged(pay); btnPayBooking.setDisable(bookingBusy);
         datePicker.setDisable(true);
         datePicker.setTooltip(new Tooltip("La data è stabilita dal programma dell'esperienza."));
+        updateReviewEligibility();
+    }
+
+    private List<BookingDTO> matchingBookings() {
+        return ownBookings.stream().filter(b -> myType == Type.TRIP
+                ? b.getTripId() != null && b.getTripId().toString().equals(id)
+                : b.getActivityId() != null && b.getActivityId().toString().equals(id)).toList();
+    }
+
+    private void updateReviewEligibility() {
+        if (recensioniController != null)
+            recensioniController.setReviewEligible(bookingsLoaded && matchingBookings().stream()
+                    .anyMatch(b -> BookingPresentation.canReview(b, LocalDateTime.now())));
+    }
+
+    private void refreshOwnBookings() {
+        var session = UserSession.getInstance();
+        if (!session.isLoggedIn() || !"TRAVELER".equalsIgnoreCase(session.getRole())) {
+            ownBookings = List.of(); currentBooking = null; bookingsLoaded = true; updateBookingAvailability(); return;
+        }
+        bookingsLoaded = false;
+        ApiService.callDetailed(ApiService.BASE_URL + "/api/bookings/mine/experience?" + (myType == Type.TRIP ? "tripId=" : "activityId=") + id, null, ApiService.Method.GET, response -> {
+            if (closed) return;
+            List<BookingDTO> loaded = ApiService.fromJson(response.body(), new TypeToken<List<BookingDTO>>() {}.getType());
+            ownBookings = loaded == null ? List.of() : loaded;
+            currentBooking = matchingBookings().stream().filter(b -> !BookingPresentation.isCancelled(b))
+                .sorted(Comparator.comparingInt((BookingDTO b) -> "CONFIRMED".equals(b.getPaymentStatus()) || "COMPLETED".equals(b.getPaymentStatus()) ? 0 : 1)
+                    .thenComparing(b -> b.getBookingId() == null ? Long.MAX_VALUE : b.getBookingId()))
+                .findFirst().orElse(null);
+            bookingsLoaded = true;
+            bookingBusy = false;
+            updateBookingAvailability();
+        }, message -> { if (!closed) { bookingBusy = false; bookingAvailabilityLabel.setText("Impossibile verificare le prenotazioni. Riapri la scheda per riprovare."); btnPrenota.setDisable(true); } }, null);
+    }
+
+    private void refreshBookingState() {
+        bookingBusy = true;
+        updateBookingAvailability();
+        String endpoint = myType == Type.TRIP ? "/api/trips/" : "/api/activities/";
+        ApiService.callDetailed(ApiService.BASE_URL + endpoint + id, null, ApiService.Method.GET, response -> {
+            if (closed) return;
+            if (myType == Type.TRIP) { trip = ApiService.fromJson(response.body(), TripDTO.class); setTripData(); }
+            else { activity = ApiService.fromJson(response.body(), ActivityDTO.class); setActivityData(); }
+            refreshOwnBookings();
+        }, message -> { if (!closed) { bookingBusy = false; updateBookingAvailability(); showBookingFailure(message); } }, null);
+    }
+
+    @FXML private void handlePayBooking() {
+        MockCheckoutDialog.show(root, currentBooking, this::refreshBookingState);
+    }
+
+    @FXML private void handleManageBookings() {
+        VBox panel = new VBox(14);
+        panel.setMaxWidth(580);
+        Label heading = new Label("Prenotazioni per questa esperienza");
+        heading.getStyleClass().add("app-modal-title");
+        Label explanation = new Label("Qui trovi le prenotazioni precedenti per la stessa data. Puoi annullare le copie non desiderate: i pagamenti registrati restano nello storico.");
+        explanation.setWrapText(true);
+        VBox entries = new VBox(12);
+        for (BookingDTO booking : matchingBookings()) {
+            if (BookingPresentation.isCancelled(booking)) continue;
+            VBox entry = new VBox(6);
+            entry.getStyleClass().add("surface-card"); entry.setPadding(new Insets(14));
+            Label detail = new Label(BookingPresentation.displayStatus(booking, LocalDateTime.now()) + " · " + booking.getSeats() + " partecipanti · " + UiText.money(booking.getPrice()));
+            detail.setWrapText(true);
+            Label payment = new Label("Pagamento: " + BookingPresentation.paymentStatus(booking.getPaymentStatus()));
+            entry.getChildren().addAll(detail, payment);
+            if (BookingPresentation.canCancel(booking, LocalDateTime.now())) {
+                Button cancel = new Button("Annulla questa prenotazione");
+                cancel.getStyleClass().add("btn-secondary");
+                cancel.setOnAction(event -> { closeInAppModal(); requestCancellation(booking); });
+                entry.getChildren().add(cancel);
+            }
+            entries.getChildren().add(entry);
+        }
+        ScrollPane scroll = new ScrollPane(entries);
+        scroll.setFitToWidth(true); scroll.setMaxHeight(320);
+        Button close = new Button("Chiudi"); close.getStyleClass().add("btn-secondary"); close.setOnAction(event -> closeInAppModal());
+        panel.getChildren().addAll(heading, explanation, scroll, close);
+        closeInAppModal(); activeInAppModal = PopupFactory.show(root, panel, PopupFactory.Size.COMPACT);
+    }
+
+    @FXML private void handleCancelBooking() {
+        requestCancellation(currentBooking);
+    }
+
+    private void requestCancellation(BookingDTO booking) {
+        if (booking == null || bookingBusy || !BookingPresentation.canCancel(booking, LocalDateTime.now())) return;
+        PopupFactory.showConfirmation(root, "Annulla prenotazione", "Vuoi annullare la prenotazione per questa esperienza? I posti torneranno disponibili.", PopupFactory.Size.COMPACT, () -> {
+            bookingBusy = true; updateBookingAvailability();
+            ApiService.callDetailed(ApiService.BASE_URL + "/api/bookings/" + booking.getBookingId(), null, ApiService.Method.DELETE,
+                response -> { if (!closed) { booking.setBookingStatus("CANCELLED"); refreshBookingState(); } },
+                message -> { if (!closed) { bookingBusy = false; updateBookingAvailability(); showBookingFailure(message); } }, null);
+        });
     }
 
     @FXML
@@ -657,6 +787,10 @@ public class ActivityDetailsController implements AutoCloseable {
             return;
         }
 
+        if (!bookingsLoaded || bookingBusy || currentBooking != null) {
+            updateBookingAvailability();
+            return;
+        }
         String unavailable = bookingUnavailableReason();
         if (unavailable != null) {
             updateBookingAvailability();
@@ -695,7 +829,7 @@ public class ActivityDetailsController implements AutoCloseable {
         HBox seatsRow = new HBox(8, new Label("Partecipanti"), new Region(), new Label(String.valueOf(seats)));
         seatsRow.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(seatsRow.getChildren().get(1), Priority.ALWAYS);
-        HBox totalRow = new HBox(8, new Label("Totale stimato"), new Region(), new Label(setMoneyCurrency(total)));
+        HBox totalRow = new HBox(8, new Label("Totale stimato"), new Region(), new Label(UiText.money(total)));
         totalRow.setAlignment(Pos.CENTER_LEFT);
         HBox.setHgrow(totalRow.getChildren().get(1), Priority.ALWAYS);
         totalRow.getChildren().get(2).getStyleClass().add("checkout-total");
@@ -718,6 +852,8 @@ public class ActivityDetailsController implements AutoCloseable {
     }
 
     private void submitBooking(int seats, Button confirmButton) {
+        if (bookingBusy) return;
+        bookingBusy = true;
         confirmButton.setDisable(true);
         confirmButton.setText("Registrazione in corso…");
         String endpoint = myType == Type.TRIP
@@ -725,16 +861,21 @@ public class ActivityDetailsController implements AutoCloseable {
                 : "/api/bookings/activities/" + activity.getActivityId();
         ApiService.callDetailed(ApiService.BASE_URL + endpoint + "?seats=" + seats, null, ApiService.Method.POST,
                 response -> Platform.runLater(() -> {
-                    if (myType == Type.TRIP)
-                        trip.setAvailableSeats(trip.getAvailableSeats() - seats);
-                    else
-                        activity.setAvailableSeats(activity.getAvailableSeats() - seats);
+                    if (closed) return;
+                    bookingBusy = false;
+                    currentBooking = ApiService.fromJson(response.body(), BookingDTO.class);
+                    ownBookings = new ArrayList<>(ownBookings);
+                    ownBookings.add(0, currentBooking);
+                    bookingsLoaded = true;
                     updateBookingAvailability();
                     closeInAppModal();
-                    showAlert(Alert.AlertType.INFORMATION, "Prenotazione completata",
-                            "La prenotazione è stata registrata correttamente.");
+                    refreshBookingState();
+                    showAlert(Alert.AlertType.INFORMATION, "Prenotazione registrata",
+                            currentBooking != null && "PENDING".equals(currentBooking.getBookingStatus())
+                                ? "Prenotazione registrata. Completa il pagamento dalla scheda o dalle tue prenotazioni."
+                                : "La prenotazione è stata confermata.");
                 }),
-                message -> Platform.runLater(() -> showBookingFailure(message)),
+                message -> Platform.runLater(() -> { if (!closed) { refreshBookingState(); showBookingFailure(message); } }),
                 null);
     }
 
@@ -745,7 +886,7 @@ public class ActivityDetailsController implements AutoCloseable {
         VBox panel = new VBox(14);
         panel.setMaxWidth(480);
         panel.setMaxHeight(Region.USE_PREF_SIZE);
-        Label title = new Label("Prenotazione non completata");
+        Label title = new Label("Impossibile prenotare");
         title.getStyleClass().add("app-modal-title");
         Label body = new Label(message);
         body.setWrapText(true);
@@ -793,6 +934,7 @@ public class ActivityDetailsController implements AutoCloseable {
     }
 
     private void aggiornaPrezzoTotale(Integer newValue) {
+        if (currentBooking != null) { lblTotale.setText(UiText.money(currentBooking.getPrice())); return; }
         Integer partecipanti = spinnerPartecipanti.getValue();
         BigDecimal prezzo = (myType == Type.ACTIVITY)
                 ? (activity.getPrice() != null ? BigDecimal.valueOf(activity.getPrice()) : BigDecimal.ZERO)
@@ -800,11 +942,7 @@ public class ActivityDetailsController implements AutoCloseable {
 
         BigDecimal totale = (prezzo != null) ? (prezzo.multiply(BigDecimal.valueOf(partecipanti))) : BigDecimal.ZERO;
 
-        lblTotale.setText(setMoneyCurrency(totale));
-    }
-
-    private String setMoneyCurrency(BigDecimal amount) {
-        return amount + "€";
+        lblTotale.setText(UiText.money(totale));
     }
 
     private void setActiveButton(Button active) {

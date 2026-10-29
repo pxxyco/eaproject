@@ -6,10 +6,6 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.Tooltip;
 
-/**
- * Text columns share readable empty values and a full-text tooltip for clipped
- * content.
- */
 public final class TableSupport {
     private TableSupport() {
     }

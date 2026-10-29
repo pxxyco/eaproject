@@ -8,6 +8,8 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
@@ -37,28 +39,30 @@
                     <Label fx:id="statusMessageLabel" managed="false" visible="false"
                         wrapText="true" />
                     <Separator styleClass="nav-divider" />
-                    <HBox spacing="12.0" styleClass="history-stat-row">
-                        <VBox styleClass="booking-count-card" HBox.hgrow="ALWAYS">
-                            <Label fx:id="historyTotalLabel"
-                                styleClass="booking-count-value" text="0" />
-                            <Label styleClass="stat-label" text="Nello storico" />
+                    <GridPane hgap="12.0" styleClass="history-stat-row">
+                        <columnConstraints>
+                            <ColumnConstraints percentWidth="25" fillWidth="true" />
+                            <ColumnConstraints percentWidth="25" fillWidth="true" />
+                            <ColumnConstraints percentWidth="25" fillWidth="true" />
+                            <ColumnConstraints percentWidth="25" fillWidth="true" />
+                        </columnConstraints>
+                        <VBox styleClass="booking-count-card" alignment="CENTER_LEFT" prefWidth="0" maxWidth="Infinity" GridPane.columnIndex="0">
+                            <Label fx:id="historyTotalLabel" styleClass="booking-count-value" text="0" maxWidth="Infinity" alignment="CENTER_LEFT" minHeight="48" prefHeight="48" />
+                            <Label styleClass="stat-label" text="Nello storico" wrapText="true" minHeight="32" prefHeight="32" />
                         </VBox>
-                        <VBox styleClass="booking-count-card" HBox.hgrow="ALWAYS">
-                            <Label fx:id="historyCompletedLabel"
-                                styleClass="booking-count-value" text="0" />
-                            <Label styleClass="stat-label" text="Terminate / completate" />
+                        <VBox styleClass="booking-count-card" alignment="CENTER_LEFT" prefWidth="0" maxWidth="Infinity" GridPane.columnIndex="1">
+                            <Label fx:id="historyCompletedLabel" styleClass="booking-count-value" text="0" maxWidth="Infinity" alignment="CENTER_LEFT" minHeight="48" prefHeight="48" />
+                            <Label styleClass="stat-label" text="Concluse" wrapText="true" minHeight="32" prefHeight="32" />
                         </VBox>
-                        <VBox styleClass="booking-count-card" HBox.hgrow="ALWAYS">
-                            <Label fx:id="historyCancelledLabel"
-                                styleClass="booking-count-value" text="0" />
-                            <Label styleClass="stat-label" text="Cancellate" />
+                        <VBox styleClass="booking-count-card" alignment="CENTER_LEFT" prefWidth="0" maxWidth="Infinity" GridPane.columnIndex="2">
+                            <Label fx:id="historyCancelledLabel" styleClass="booking-count-value" text="0" maxWidth="Infinity" alignment="CENTER_LEFT" minHeight="48" prefHeight="48" />
+                            <Label styleClass="stat-label" text="Cancellate" wrapText="true" minHeight="32" prefHeight="32" />
                         </VBox>
-                        <VBox styleClass="booking-count-card" HBox.hgrow="ALWAYS">
-                            <Label fx:id="historyReviewableLabel"
-                                styleClass="booking-count-value" text="0" />
-                            <Label styleClass="stat-label" text="Da recensire" />
+                        <VBox styleClass="booking-count-card" alignment="CENTER_LEFT" prefWidth="0" maxWidth="Infinity" GridPane.columnIndex="3">
+                            <Label fx:id="historyReviewableLabel" styleClass="booking-count-value" text="0" maxWidth="Infinity" alignment="CENTER_LEFT" minHeight="48" prefHeight="48" />
+                            <Label styleClass="stat-label" text="Da recensire" wrapText="true" minHeight="32" prefHeight="32" />
                         </VBox>
-                    </HBox>
+                    </GridPane>
                     <HBox alignment="CENTER_LEFT" spacing="10.0">
                         <TextField fx:id="searchField"
                             promptText="Cerca per titolo, luogo o data..."

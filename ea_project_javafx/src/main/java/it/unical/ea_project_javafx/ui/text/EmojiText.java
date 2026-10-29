@@ -6,10 +6,6 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 
-/**
- * Uses platform emoji fonts with an outline fallback: bitmap-only CBDT fonts
- * are invisible in JavaFX on Linux.
- */
 public final class EmojiText {
     private static final String EMOJI_FONT = List
             .of("Apple Color Emoji", "Segoe UI Emoji", "Noto Emoji", "Noto Sans Symbols 2")

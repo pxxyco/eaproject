@@ -22,7 +22,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
+import it.unical.ea_project.service.booking.BookingLifecycle;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -74,7 +74,7 @@ public class ReviewServiceImpl implements ReviewService {
         lockOffer(review.getTripId(), review.getActivityId());
         if (!hasEligibleCompletedBooking(review.getUserId(), review.getTripId(), review.getActivityId())) {
             throw new IllegalArgumentException(
-                    "Puoi recensire soltanto un'esperienza prenotata e terminata, non cancellata.");
+                    "Puoi recensire un'esperienza con prenotazione confermata, non annullata.");
         }
 
         boolean alreadyReviewed = reviewRepository.findAllByUserId(review.getUserId()).stream()
@@ -162,8 +162,6 @@ public class ReviewServiceImpl implements ReviewService {
 
         if (data.getRating() != null)
             review.setRating(data.getRating());
-        // PUT represents the current review form: a null/blank comment means the author
-        // cleared it.
         review.setComment(normalizeComment(data.getComment()));
 
         Long tripId = review.getTrip() != null ? review.getTrip().getTripId() : null;
@@ -217,54 +215,11 @@ public class ReviewServiceImpl implements ReviewService {
 
     private boolean hasEligibleCompletedBooking(Long userId, Long tripId, Long activityId) {
         LocalDateTime now = LocalDateTime.now();
-        return bookingRepository.findByUserIdAndDeletedAtIsNullOrderByCreatedAtDesc(userId).stream()
-                .filter(booking -> booking.getBookingStatus() != Booking.BookingStatus.CANCELLED)
-                .filter(booking -> booking.getBookingStatus() == Booking.BookingStatus.CONFIRMED
-                        || booking.getBookingStatus() == Booking.BookingStatus.COMPLETED)
-                .filter(booking -> !isEventCancelled(booking))
+        return bookingRepository.findForExperience(userId, tripId, activityId).stream()
                 .filter(booking -> tripId != null
                         ? booking.getTrip() != null && tripId.equals(booking.getTrip().getTripId())
                         : booking.getActivity() != null && activityId.equals(booking.getActivity().getActivityId()))
-                .anyMatch(booking -> booking.getBookingStatus() == Booking.BookingStatus.COMPLETED
-                        || isEventCompleted(booking)
-                        || eventEndDateTime(booking) != null && !eventEndDateTime(booking).isAfter(now));
-    }
-
-    private boolean isEventCompleted(Booking booking) {
-        if (booking.getTrip() != null) {
-            return booking.getTrip().getStatus() == Trip.TripStatus.COMPLETED;
-        }
-        return booking.getActivity() != null
-                && booking.getActivity().getStatus() == Activity.Status.COMPLETED;
-    }
-
-    private boolean isEventCancelled(Booking booking) {
-        if (booking.getTrip() != null) {
-            return booking.getTrip().getStatus() == Trip.TripStatus.CANCELLED;
-        }
-        return booking.getActivity() != null
-                && booking.getActivity().getStatus() == Activity.Status.CANCELLED;
-    }
-
-    private LocalDateTime eventEndDateTime(Booking booking) {
-        if (booking.getTrip() != null) {
-            LocalDate end = booking.getTrip().getEndDate() != null
-                    ? booking.getTrip().getEndDate()
-                    : booking.getTrip().getStartDate();
-            return end == null ? null : end.atTime(LocalTime.MAX);
-        }
-        if (booking.getActivity() != null) {
-            Activity activity = booking.getActivity();
-            if (activity.getEndDate() != null)
-                return activity.getEndDate();
-            if (activity.getStartDate() == null)
-                return null;
-            int minutes = activity.getDurationMinutes() == null || activity.getDurationMinutes() < 1
-                    ? 60
-                    : activity.getDurationMinutes();
-            return activity.getStartDate().plusMinutes(minutes);
-        }
-        return null;
+                .anyMatch(booking -> BookingLifecycle.reviewable(booking, now));
     }
 
     private void updateAverageRating(Long tripId, Long activityId) {

@@ -25,6 +25,7 @@ sealed interface ExperienceDetail {
     val availableSeats: Int?
     val coverUrl: String?
     val description: String?
+    val ownerId: Long?
 
     data class Activity(val dto: ActivityDetailDTO) : ExperienceDetail {
         override val ref get() = ExperienceRef(ExperienceType.ACTIVITY, dto.activityId ?: 0)
@@ -36,6 +37,7 @@ sealed interface ExperienceDetail {
         override val availableSeats get() = dto.availableSeats
         override val coverUrl get() = dto.images.orEmpty().minByOrNull { it.orderIndex ?: Int.MAX_VALUE }?.imageUrl
         override val description get() = dto.description
+        override val ownerId get() = dto.createdByUserId
     }
 
     data class Trip(val dto: TripDetailDTO) : ExperienceDetail {
@@ -48,5 +50,6 @@ sealed interface ExperienceDetail {
         override val availableSeats get() = dto.availableSeats
         override val coverUrl get() = dto.coverPhotoUrl
         override val description get() = dto.description
+        override val ownerId get() = dto.createdByUserId
     }
 }

@@ -13,13 +13,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.application.dto.ExperienceDetail
 import com.example.application.ui.theme.GlassBorder
 import com.example.application.ui.theme.GlassFill
-import com.example.application.ui.theme.ScreenBackground
 import com.example.application.ui.theme.Stone200
 import com.example.application.ui.theme.Stone400
 
@@ -35,7 +33,6 @@ internal fun DescriptionSection(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(ScreenBackground)
             .padding(20.dp)
     ) {
         Text(
@@ -58,7 +55,7 @@ internal fun DescriptionSection(
                 Text(
                     text = "Note aggiuntive",
                     style = MaterialTheme.typography.titleSmall,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(Modifier.height(8.dp))

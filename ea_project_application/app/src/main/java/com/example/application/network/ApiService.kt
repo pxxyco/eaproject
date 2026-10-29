@@ -80,24 +80,26 @@ object ApiService {
         .authenticator(authenticator)
         .build()
 
-    // ---------- API pubblica ----------
-
     suspend fun <T> get(path: String, type: Class<T>) = call("GET", path, null, type)
     suspend fun <T> post(path: String, body: Any?, type: Class<T>) = call("POST", path, body, type)
     suspend fun <T> put(path: String, body: Any?, type: Class<T>) = call("PUT", path, body, type)
     suspend fun <T> delete(path: String, type: Class<T>) = call("DELETE", path, null, type)
 
-    /** Uses the same authenticated client and token refresh as ordinary API calls. */
     suspend fun uploadPhoto(path: String, field: String, bytes: ByteArray, mimeType: String): ApiResult<Unit> =
+        uploadPhoto(path, field, bytes, mimeType, Unit::class.java)
+
+    suspend fun <T> uploadPhoto(path: String, field: String, bytes: ByteArray, mimeType: String, type: Class<T>): ApiResult<T> =
         withContext(Dispatchers.IO) {
             try {
                 val body = okhttp3.MultipartBody.Builder().setType(okhttp3.MultipartBody.FORM)
                     .addFormDataPart(field, "photo", bytes.toRequestBody(mimeType.toMediaType())).build()
                 val request = Request.Builder().url(resolveUrl(path)).post(body).build()
-                client.newCall(request).execute().use { mapResponse(it, Unit::class.java) }
+                client.newCall(request).execute().use { mapResponse(it, type) }
             } catch (exception: IOException) {
                 reportNetworkFailure()
                 ApiResult.NetworkError(exception)
+            } catch (exception: com.google.gson.JsonParseException) {
+                ApiResult.HttpError(502, "Risposta JSON non valida")
             }
         }
 
@@ -177,8 +179,6 @@ object ApiService {
             false
         }
     }
-
-    // ---------- interni ----------
 
     private fun buildRequest(method: String, path: String, body: Any?): Request {
         val json = when (body) {

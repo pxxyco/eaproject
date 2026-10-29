@@ -180,10 +180,6 @@ public class CreateOfferController {
 
     }
 
-    /**
-     * Consente al form di essere ospitato dalla PopupFactory senza creare un nuovo
-     * Stage.
-     */
     public void setCloseAction(Runnable closeAction) {
         this.closeAction = closeAction;
         if (closeAction != null) {

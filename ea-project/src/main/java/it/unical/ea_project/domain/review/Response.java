@@ -29,12 +29,10 @@ public class Response {
     @Column(name = "response_id")
     private Long id;
 
-    // FK user_id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organizer_id", nullable = false)
     private User organizer;
 
-    // FK review_id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "review_id", nullable = false)
     private Review review;

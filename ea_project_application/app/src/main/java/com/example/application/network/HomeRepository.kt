@@ -12,6 +12,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import java.lang.reflect.Type
 import java.net.URLEncoder
+import java.time.LocalDate
 import java.util.concurrent.ConcurrentHashMap
 
 object HomeRepository {
@@ -224,5 +225,22 @@ object HomeRepository {
                     cache.remove(entry.key, entry.value)
                 }
         }
+    }
+    suspend fun searchActivities(query: String, page: Int = 0, date: LocalDate? = null): List<ActivityHomeDTO> {
+        val path = buildString {
+            append("/api/activities/search?page=$page&size=$PAGE_SIZE")
+            append("&query=").append(encode(query.trim()))
+            if (date != null) append("&date=").append(date)
+        }
+        return getList(path, activityListType)
+    }
+
+    suspend fun searchTrips(query: String, page: Int = 0, date: LocalDate? = null): List<TripHomeDTO> {
+        val path = buildString {
+            append("/api/trips/search?page=$page&size=$PAGE_SIZE")
+            append("&query=").append(encode(query.trim()))
+            if (date != null) append("&date=").append(date)
+        }
+        return getList(path, tripListType)
     }
 }

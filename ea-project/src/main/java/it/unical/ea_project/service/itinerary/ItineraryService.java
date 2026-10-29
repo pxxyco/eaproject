@@ -13,10 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-/**
- * Personal plans belong to a favorite list; collaborators never edit catalog
- * offers.
- */
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -44,7 +40,6 @@ public class ItineraryService {
         validate(input);
         ItineraryStop stop;
         if (id == null) {
-            // access() already locks this list, serializing the size check.
             if (stops.countByListId(list) >= 500)
                 throw new IllegalArgumentException("Un itinerario può contenere al massimo 500 tappe.");
             stop = new ItineraryStop();

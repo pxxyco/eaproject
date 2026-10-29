@@ -17,13 +17,12 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 
-/** No card data is collected or transmitted by this demonstrative checkout. */
 public final class MockCheckoutDialog {
     private MockCheckoutDialog() {
     }
 
     public static boolean eligible(BookingDTO b) {
-        return b != null && b.getBookingId() != null && !BookingPresentation.isCancelled(b)
+        return b != null && b.getPrice() != null && b.getPrice().signum() > 0 && b.getBookingId() != null && !BookingPresentation.isCancelled(b)
                 && !BookingPresentation.isHistorical(b, LocalDateTime.now())
                 && !BookingPresentation.hasEventStarted(b, LocalDateTime.now())
                 && !"COMPLETED".equals(b.getPaymentStatus()) && !"CONFIRMED".equals(b.getPaymentStatus());

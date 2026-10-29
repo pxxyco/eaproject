@@ -43,10 +43,6 @@ import javafx.scene.layout.VBox;
 import it.unical.ea_project_javafx.ui.chart.OrganizerEconomy;
 import javafx.scene.layout.StackPane;
 
-/**
- * Operational organizer workspace: the dashboard is bounded, the catalog is
- * paged and virtualized.
- */
 public class OrganizerDashboardController implements ProfileDashboardController, AutoCloseable {
     @FXML
     private StackPane rootStackPane, navbarContainer;

@@ -14,10 +14,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-/**
- * Local bounded token buckets. Uses the socket peer, never untrusted forwarding
- * headers.
- */
 public class RateLimitFilter extends OncePerRequestFilter {
     private static final Logger AUDIT = LogManager.getLogger("AUDIT");
     private final Cache<String, Bucket> buckets = Caffeine.newBuilder().maximumSize(50_000)
@@ -60,10 +56,13 @@ public class RateLimitFilter extends OncePerRequestFilter {
         String bucket = "general";
         int capacity = 180;
         int seconds = 60;
-        if (path.equals("/api/users/login") || path.equals("/api/users") || path.equals("/api/users/exists")) {
+        if (path.equals("/api/users/login") || path.equals("/api/users")) {
             bucket = "auth";
             capacity = 10;
-        } else if (path.equals("/api/users/refresh")) {
+        } else if (path.equals("/api/users/exists")) {
+            bucket = "exists";
+            capacity = 30;
+        } else if (path.equals("/api/users/refresh"))  {
             bucket = "refresh";
             capacity = 30;
         } else if (path.equals("/api/account/tickets") && method.equals("POST")) {
@@ -118,9 +117,6 @@ public class RateLimitFilter extends OncePerRequestFilter {
                 "{\"code\":\"ERR-104\",\"message\":\"Troppe richieste. Attendi " + wait + " secondi e riprova.\"}");
     }
 
-    /**
-     * Rejects abusive peers before JWT signature verification and database lookup.
-     */
     public static final class PeerGuard extends OncePerRequestFilter {
         private final Cache<String, Bucket> peers = Caffeine.newBuilder().maximumSize(25_000)
                 .expireAfterAccess(Duration.ofMinutes(10)).build();

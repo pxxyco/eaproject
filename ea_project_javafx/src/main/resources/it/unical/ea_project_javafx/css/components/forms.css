@@ -1,5 +1,3 @@
-/* Reusable component: forms. Theme: css/theme.css. */
-
 .text-field,
 .password-field,
 .text-area,
@@ -216,3 +214,19 @@
 .titled-pane .arrow {
     -fx-background-color: -color-text-secondary;
 }
+
+.date-picker > .arrow-button {
+    -fx-background-color: -color-menu; -fx-border-color: -tone-ivory-160;
+    -fx-background-radius: 8; -fx-border-radius: 8;
+}
+.date-picker > .arrow-button:hover { -fx-background-color: derive(-color-menu, 18%); }
+.date-picker > .arrow-button > .arrow { -fx-background-color: -app-accent; }
+.date-picker-popup { -fx-background-color: -color-menu; -fx-border-color: -app-accent; -fx-padding: 8; }
+.date-picker-popup > .month-year-pane,
+.date-picker-popup > .calendar-grid { -fx-background-color: -color-menu; }
+.date-picker-popup .day-cell { -fx-background-color: -color-menu; -fx-text-fill: -color-ivory; -fx-border-color: transparent; }
+.date-picker-popup .day-cell:hover { -fx-background-color: derive(-color-menu, 18%); }
+.date-picker-popup .selected { -fx-background-color: -app-accent; -fx-text-fill: -color-text-inverse; }
+.date-picker-popup .today { -fx-border-color: -app-accent; }
+.date-picker-popup .previous-month, .date-picker-popup .next-month { -fx-text-fill: -color-text-muted; }
+.date-picker-popup .label { -fx-text-fill: -color-ivory; }

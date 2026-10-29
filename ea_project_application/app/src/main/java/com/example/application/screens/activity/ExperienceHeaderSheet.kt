@@ -1,6 +1,5 @@
 package com.example.application.screens.activity
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,17 +18,18 @@ import androidx.compose.ui.unit.dp
 import com.example.application.dto.ExperienceDetail
 import com.example.application.ui.theme.OverlayDark
 import com.example.application.ui.theme.RatingAmber
-import com.example.application.ui.theme.ScreenBackground
 import com.example.application.ui.theme.Stone400
 import java.util.Locale
 
 @Composable
-internal fun ExperienceHeaderSheet(detail: ExperienceDetail) {
+internal fun ExperienceHeaderSheet(
+    detail: ExperienceDetail,
+    rating: Double? = detail.averageRating
+) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-            .background(ScreenBackground)
             .padding(20.dp)
     ) {
         Surface(
@@ -48,7 +48,7 @@ internal fun ExperienceHeaderSheet(detail: ExperienceDetail) {
         Text(
             text = detail.title,
             style = MaterialTheme.typography.headlineSmall,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.Bold
         )
 
@@ -62,7 +62,7 @@ internal fun ExperienceHeaderSheet(detail: ExperienceDetail) {
         }
 
         Text(
-            text = "⭐ " + (detail.averageRating?.let { "%.1f".format(Locale.ITALY, it) } ?: "-"),
+            text = "⭐ " + (rating?.let { "%.1f".format(Locale.ITALY, it) } ?: "-"),
             style = MaterialTheme.typography.bodyMedium,
             color = RatingAmber,
             fontWeight = FontWeight.Bold

@@ -26,6 +26,13 @@ import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import com.example.application.ui.theme.PopupSurface
 
 private fun formatDateRange(start: String?, end: String?): String {
     if (start.isNullOrBlank() || end.isNullOrBlank()) return ""
@@ -47,7 +54,7 @@ private fun formatTripPrice(price: BigDecimal?): String =
     price?.setScale(2, RoundingMode.HALF_UP)?.let { "€$it" } ?: "N/D"
 
 @Composable
-private fun ActivityCardItem(
+internal fun ActivityCardItem(
     item: ActivityHomeDTO,
     onExperienceClick: (ExperienceRef) -> Unit,
     modifier: Modifier = Modifier.width(180.dp)
@@ -68,7 +75,7 @@ private fun ActivityCardItem(
 }
 
 @Composable
-private fun TripCardItem(
+internal fun TripCardItem(
     item: TripHomeDTO,
     onExperienceClick: (ExperienceRef) -> Unit
 ) {
@@ -84,7 +91,7 @@ private fun TripCardItem(
         }
     )
 }
-
+private val ACTIVITY_CARD_HEIGHT = 230.dp
 @Composable
 internal fun ActivityRow(
     list: PagedList<ActivityHomeDTO>,
@@ -100,11 +107,11 @@ internal fun ActivityRow(
         }
         if (list.hasMore) {
             item(key = "load_more") {
-                LoadMoreButton(
+                LoadMoreCard(
                     loading = list.loadingMore,
                     hasError = list.error != null,
                     onClick = onLoadMore,
-                    modifier = Modifier.width(130.dp)
+                    modifier = Modifier.width(120.dp).height(ACTIVITY_CARD_HEIGHT)
                 )
             }
         }
@@ -126,11 +133,11 @@ internal fun TripRow(
         }
         if (list.hasMore) {
             item(key = "load_more") {
-                LoadMoreButton(
+                LoadMoreCard(
                     loading = list.loadingMore,
                     hasError = list.error != null,
                     onClick = onLoadMore,
-                    modifier = Modifier.width(130.dp)
+                    modifier = Modifier.width(120.dp).height(200.dp)
                 )
             }
         }
@@ -192,10 +199,53 @@ internal fun LoadMoreButton(
             )
         } else {
             Text(
-                text = if (hasError) "Riprova" else "Carica altro",
+                text = if (hasError) "Errore" else "+",
                 color = Stone200,
                 maxLines = 1
             )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun LoadMoreCard(
+    loading: Boolean,
+    hasError: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        onClick = onClick,
+        enabled = !loading,
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = PopupSurface)
+    ) {
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            if (loading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(28.dp),
+                    strokeWidth = 3.dp,
+                    color = Stone200
+                )
+            } else {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        tint = Stone200,
+                        modifier = Modifier.size(32.dp)
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = if (hasError) "Riprova" else "Carica altro",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = Stone200,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
         }
     }
 }
@@ -205,7 +255,7 @@ internal fun SectionTitle(title: String) {
     Text(
         text = title,
         style = MaterialTheme.typography.titleLarge,
-        color = Color.White,
+        color = MaterialTheme.colorScheme.onSurface,
         fontSize = 21.sp,
         fontWeight = FontWeight.ExtraBold
     )

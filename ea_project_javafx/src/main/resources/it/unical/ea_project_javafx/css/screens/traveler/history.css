@@ -1,4 +1,3 @@
-/* Screen layout: history. Theme: css/theme.css. */
 @import "../../app.css";
 
 .history-feed>.virtual-flow,
@@ -149,4 +148,23 @@
 
 .history-header {
     -fx-padding: 0 0 18;
+}
+
+.history-stat-row .booking-count-card {
+    -fx-alignment: center-left;
+    -fx-spacing: 6px;
+    -fx-padding: 18px;
+    -fx-min-height: 132px;
+    -fx-pref-height: 132px;
+}
+
+.history-stat-row .booking-count-value {
+    -fx-alignment: center-left;
+    -fx-padding: 0;
+}
+
+.history-feed, .history-feed .list-cell, .history-feed .list-cell:hover,
+.history-feed .list-cell:selected, .history-feed .list-cell:focused,
+.history-feed .list-cell:filled:hover, .history-feed .list-cell:filled:selected {
+    -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent;
 }

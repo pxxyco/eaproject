@@ -1,5 +1,6 @@
 package com.example.application.screens.home
 
+import com.example.application.ui.effects.LocalNavigationTail
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -23,6 +24,7 @@ import com.example.application.dto.ExperienceRef
 import com.example.application.dto.SearchSuggestion
 import com.example.application.dto.TripHomeDTO
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 @Composable
 internal fun HomeScreenContent(
@@ -32,6 +34,8 @@ internal fun HomeScreenContent(
     homeError: String?,
     searchQuery: String,
     onQueryChange: (String) -> Unit,
+    selectedDate: LocalDate?,
+    onDateChange: (LocalDate?) -> Unit,
     suggestions: List<SearchSuggestion>,
     onSuggestionClick: (SearchSuggestion) -> Unit,
     onDismissSuggestions: () -> Unit,
@@ -49,6 +53,7 @@ internal fun HomeScreenContent(
     onLoadMoreSearchTrips: () -> Unit
 ) {
     val listState = rememberLazyListState()
+    val recommendationsState = remember { RecommendationsState() }
     val scope = rememberCoroutineScope()
 
     var submittedQuery by remember { mutableStateOf("") }
@@ -78,6 +83,12 @@ internal fun HomeScreenContent(
             onClear = { resetSearchAndScroll() }
         )
 
+        DateFilterBar(
+            date = selectedDate,
+            onDateChange = onDateChange
+        )
+        Spacer(Modifier.height(4.dp))
+
         val shownError = if (hasSearched) searchError else homeError
 
         LazyColumn(
@@ -85,7 +96,7 @@ internal fun HomeScreenContent(
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth(),
-            contentPadding = PaddingValues(horizontal = 16.dp)
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = LocalNavigationTail.current)
         ) {
             item(key = "top_space") {
                 Spacer(Modifier.height(16.dp))
@@ -127,7 +138,11 @@ internal fun HomeScreenContent(
                 if (searchActivityResults.items.isEmpty() && searchError == null) {
                     item(key = "search_activities_empty") {
                         Text(
-                            text = "Attività con titolo \"$submittedQuery\" non trovata",
+                            text = if (submittedQuery.isBlank()) {
+                                "Nessuna attività trovata per la data selezionata"
+                            } else {
+                                "Attività con titolo \"$submittedQuery\" non trovata"
+                            },
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -137,6 +152,15 @@ internal fun HomeScreenContent(
                 }
 
             } else if (homeError == null) {
+                item(key = "recommendations") {
+                    Column {
+                        RecommendationsSection(
+                            onExperienceClick = onExperienceClick,
+                            state = recommendationsState
+                        )
+                        Spacer(Modifier.height(28.dp))
+                    }
+                }
 
                 item(key = "top_activities_title") {
                     Column {
@@ -145,7 +169,10 @@ internal fun HomeScreenContent(
                     }
                 }
                 item(key = "top_activities_row") {
-                    ActivityRow(activities, onExperienceClick, onLoadMoreTopActivities)
+                    if (activities.items.isEmpty()) {
+                        Text("Non ci sono attività prenotabili al momento. Qui compaiono le attività pubblicate, non ancora iniziate e con posti disponibili.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
+                    } else ActivityRow(activities, onExperienceClick, onLoadMoreTopActivities)
                 }
 
                 item(key = "trips_title") {
