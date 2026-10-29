@@ -73,6 +73,10 @@ public class NavbarController {
     private StackPane notificationBellContainer;
     @FXML
     private Label notificationBadge;
+    @FXML
+    private Button messagesButton;
+    @FXML
+    private Label messagesBadge;
 
     @FXML
     private Label dashboardNavItem;
@@ -85,7 +89,7 @@ public class NavbarController {
     @FXML
     private Label travelerFavoritesNavItem;
     @FXML
-    private MenuItem chatMenuItem, recommendationsMenuItem, itineraryMenuItem;
+    private MenuItem recommendationsMenuItem, itineraryMenuItem;
     @FXML
     private Label organizerEventsNavItem;
     @FXML
@@ -118,6 +122,7 @@ public class NavbarController {
         bindVisibilityToManaged(loginLabel);
         bindVisibilityToManaged(userMenuButton);
         bindVisibilityToManaged(notificationBellContainer);
+        bindVisibilityToManaged(messagesButton);
         bindVisibilityToManaged(dashboardNavItem);
         bindVisibilityToManaged(travelerHistoryNavItem);
         bindVisibilityToManaged(travelerFavoritesNavItem);
@@ -166,7 +171,8 @@ public class NavbarController {
             markActive(organizerEventsNavItem, path.endsWith("events.fxml") || path.endsWith("create-offer.fxml"),
                     active);
             markActive(organizerAttendeesNavItem, path.endsWith("attendees.fxml"), active);
-            markMenuActive(chatMenuItem, path.endsWith("chat/chat.fxml"));
+            if (messagesButton != null)
+                messagesButton.pseudoClassStateChanged(active, path.endsWith("chat/chat.fxml"));
             markMenuActive(profileMenuItem, path.endsWith("profile/profile.fxml"));
             markMenuActive(settingsMenuItem, path.endsWith("settings.fxml"));
             markMenuActive(paymentsMenuItem, path.endsWith("payment-methods.fxml"));
@@ -223,8 +229,8 @@ public class NavbarController {
             travelerItineraryNavItem.setManaged(isTraveler);
         }
 
-        if (chatMenuItem != null)
-            chatMenuItem.setVisible(isLoggedIn);
+        if (messagesButton != null)
+            messagesButton.setVisible(isLoggedIn);
         if (recommendationsMenuItem != null)
             recommendationsMenuItem.setVisible(isTraveler);
         if (itineraryMenuItem != null)
@@ -375,6 +381,13 @@ public class NavbarController {
             return;
         notificationSubscription = NotificationPollingService.getInstance().subscribe(snapshot -> {
             updateNotificationBadge(snapshot.unreadCount());
+            if (messagesBadge != null) {
+                messagesBadge.setVisible(snapshot.unreadMessages() > 0);
+                messagesBadge.setManaged(snapshot.unreadMessages() > 0);
+                messagesButton.setAccessibleText(
+                        snapshot.unreadMessages() > 0 ? "Messaggi, " + snapshot.unreadMessages() + " non letti"
+                                : "Messaggi");
+            }
             if (snapshot.newNotification() != null) {
                 if (notificationPopup != null && notificationPopup.isShowing())
                     NotificationPollingService.getInstance().fetchUnreadForTray(this::showNotificationTray, null);

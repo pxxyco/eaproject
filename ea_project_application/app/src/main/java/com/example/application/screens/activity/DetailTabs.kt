@@ -4,9 +4,6 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,6 +16,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.example.application.ui.theme.*
@@ -34,9 +32,10 @@ internal fun DetailTabs(
     modifier: Modifier = Modifier,
     edgePadding: Dp = 16.dp
 ) {
+    val scale = LocalDensity.current.fontScale
     val shape = RoundedCornerShape(20.dp)
     BoxWithConstraints(modifier.fillMaxWidth().padding(horizontal = edgePadding, vertical = 8.dp)) {
-        val compact = maxWidth < 370.dp
+        val compact = maxWidth < 370.dp || scale > 1.2f
         val labels = DetailTab.entries
         val groups = if (compact) labels.chunked(2) else listOf(labels)
         Column(Modifier.fillMaxWidth().clip(shape)

@@ -8,8 +8,8 @@ internal fun ExperienceDetail.isBookable(now: LocalDateTime = LocalDateTime.now(
     if ((availableSeats ?: 0) <= 0) return false
     return when (this) {
         is ExperienceDetail.Activity -> dto.status == "PUBLISHED" &&
-            runCatching { LocalDateTime.parse(dto.startDate).isAfter(now) }.getOrDefault(false)
+            runCatching { !LocalDateTime.parse(dto.startDate).toLocalDate().isBefore(now.toLocalDate()) }.getOrDefault(false)
         is ExperienceDetail.Trip -> dto.status == "PUBLISHED" &&
-            runCatching { LocalDate.parse(dto.startDate).isAfter(now.toLocalDate()) }.getOrDefault(false)
+            runCatching { !LocalDate.parse(dto.startDate).isBefore(now.toLocalDate()) }.getOrDefault(false)
     }
 }

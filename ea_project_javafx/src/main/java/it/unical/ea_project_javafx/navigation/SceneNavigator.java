@@ -9,6 +9,8 @@ import java.net.URL;
 import javafx.animation.PauseTransition;
 import javafx.util.Duration;
 import java.util.function.Consumer;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -19,6 +21,12 @@ public class SceneNavigator {
 
     private static SceneNavigator instance;
     private Stage mainStage;
+
+    private record Destination(String path, Consumer<Object> initializer) {
+    }
+
+    private final Deque<Destination> history = new ArrayDeque<>();
+    private Destination currentDestination;
     private final PauseTransition navigationDelay = new PauseTransition(Duration.millis(40));
 
     private SceneNavigator() {
@@ -36,6 +44,8 @@ public class SceneNavigator {
 
     public void init(Stage stage) {
         this.mainStage = stage;
+        history.clear();
+        currentDestination = null;
         stage.addEventHandler(WindowEvent.WINDOW_HIDDEN, event -> {
             if (stage.getScene() == null)
                 return;
@@ -59,6 +69,18 @@ public class SceneNavigator {
     }
 
     private void performLoad(String fxmlPath, Consumer<Object> controllerInitializer) {
+        performLoad(fxmlPath, controllerInitializer, true);
+    }
+
+    public void goBack() {
+        navigationDelay.stop();
+        Destination destination = history.pollLast();
+        if (destination == null)
+            destination = new Destination("/it/unical/ea_project_javafx/fxml/home/mainview.fxml", null);
+        performLoad(destination.path(), destination.initializer(), false);
+    }
+
+    private void performLoad(String fxmlPath, Consumer<Object> controllerInitializer, boolean remember) {
 
         if (mainStage == null) {
             throw new IllegalStateException("SceneNavigator non inizializzato.");
@@ -77,6 +99,17 @@ public class SceneNavigator {
             if (controllerInitializer != null) {
                 controllerInitializer.accept(loader.getController());
             }
+
+            if (fxmlPath.endsWith("login/login.fxml") || fxmlPath.endsWith("splash-screen.fxml")) {
+                history.clear();
+                currentDestination = null;
+            }
+            if (remember && currentDestination != null && !currentDestination.path().equals(fxmlPath)) {
+                if (history.size() >= 16)
+                    history.removeFirst();
+                history.addLast(currentDestination);
+            }
+            currentDestination = new Destination(fxmlPath, controllerInitializer);
 
             Scene scene = mainStage.getScene();
             if (scene == null)

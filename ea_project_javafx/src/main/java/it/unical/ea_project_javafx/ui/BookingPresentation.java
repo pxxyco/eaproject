@@ -59,7 +59,7 @@ public final class BookingPresentation {
         if (booking == null)
             return false;
         return isCancelled(booking)
-                || "PENDING".equalsIgnoreCase(booking.getBookingStatus()) && hasEventStarted(booking, now)
+                || "PENDING".equalsIgnoreCase(booking.getBookingStatus()) && bookingClosed(booking, now)
                 || "COMPLETED".equalsIgnoreCase(booking.getBookingStatus())
                 || "COMPLETED".equalsIgnoreCase(booking.getItemStatus())
                 || isEventEnded(booking, now);
@@ -67,12 +67,17 @@ public final class BookingPresentation {
 
     public static boolean isEventEnded(BookingDTO booking, LocalDateTime now) {
         LocalDateTime end = eventEndDateTime(booking);
-        return end != null && !end.isAfter(now);
+        return end != null && end.toLocalDate().isBefore(now.toLocalDate());
     }
 
     public static boolean hasEventStarted(BookingDTO booking, LocalDateTime now) {
         LocalDateTime start = eventStartDateTime(booking);
         return start != null && !start.isAfter(now);
+    }
+
+    public static boolean bookingClosed(BookingDTO booking, LocalDateTime now) {
+        LocalDateTime start = eventStartDateTime(booking);
+        return start == null || start.toLocalDate().isBefore(now.toLocalDate());
     }
 
     public static boolean isCancelled(BookingDTO booking) {
@@ -157,8 +162,8 @@ public final class BookingPresentation {
         boolean pending = "PENDING".equals(status);
         if (isHistorical(booking, evaluationTime))
             return pending ? "Scaduta" : "Conclusa";
-        if (hasEventStarted(booking, evaluationTime))
-            return pending ? "Scaduta" : "In corso";
+        if (!pending && hasEventStarted(booking, evaluationTime))
+            return "In corso";
         if (pending || booking.getPrice() != null && booking.getPrice().signum() > 0
                 && !"COMPLETED".equalsIgnoreCase(booking.getPaymentStatus())
                 && !"CONFIRMED".equalsIgnoreCase(booking.getPaymentStatus()))
@@ -170,15 +175,19 @@ public final class BookingPresentation {
 
     public static boolean canCancel(BookingDTO booking, LocalDateTime now) {
         return booking != null && booking.getBookingId() != null && !isHistorical(booking, now)
-                && !hasEventStarted(booking, now)
+                && !bookingClosed(booking, now)
                 && ("PENDING".equalsIgnoreCase(booking.getBookingStatus())
-                    || "CONFIRMED".equalsIgnoreCase(booking.getBookingStatus()));
+                        || "CONFIRMED".equalsIgnoreCase(booking.getBookingStatus()));
     }
 
     public static boolean canReview(BookingDTO booking, LocalDateTime now) {
         return booking != null && !isCancelled(booking)
                 && ("CONFIRMED".equalsIgnoreCase(booking.getBookingStatus())
-                    || "COMPLETED".equalsIgnoreCase(booking.getBookingStatus()));
+                        || "COMPLETED".equalsIgnoreCase(booking.getBookingStatus()))
+                && (isHistorical(booking, now)
+                        || "CONFIRMED".equalsIgnoreCase(booking.getPaymentStatus())
+                        || "COMPLETED".equalsIgnoreCase(booking.getPaymentStatus())
+                        || booking.getPrice() != null && booking.getPrice().signum() == 0);
     }
 
     public static String paymentStatus(String status) {

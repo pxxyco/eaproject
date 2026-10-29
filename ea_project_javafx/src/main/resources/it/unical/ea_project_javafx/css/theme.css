@@ -5,6 +5,7 @@
     -ea-glass-border: rgba(232, 245, 237, .18);
     -color-accent: #d0b38b;
     -color-danger: #fecaca;
+    -color-unread: #ef4444;
     -color-danger-soft: #fca5a5;
     -color-ink: #101010;
     -color-ivory: #e7e5e4;
@@ -93,7 +94,7 @@
     -fx-font-size: 14px;
     -fx-base: -color-menu;
     -fx-background: -color-ink;
-    -fx-accent: -color-ivory;
+    -fx-accent: -app-accent;
     -fx-focus-color: transparent;
     -fx-faint-focus-color: transparent;
 }

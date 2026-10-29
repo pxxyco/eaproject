@@ -37,28 +37,36 @@ internal fun ProfileEditor(user: UserDTO, actions: AccountActions, gateway: Acco
     var username by rememberSaveable { mutableStateOf(user.username.orEmpty()) }
     var email by rememberSaveable { mutableStateOf(user.email.orEmpty()) }
     var selected by remember { mutableStateOf<Uri?>(null) }
+    var captured by remember { mutableStateOf<ByteArray?>(null) }
+    var showCamera by rememberSaveable { mutableStateOf(false) }
     val context = LocalContext.current
-    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { selected = it }
+    val picker = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        if (uri != null) { selected = uri; captured = null }
+    }
+    if (showCamera) ProfileCameraDialog(onDismiss = { showCamera = false }, onPhoto = {
+        captured = it; selected = null; showCamera = false
+    })
     AccountPanel("Una foto per farti riconoscere", "PNG o JPG, fino a 5 MB.") {
         val choose = {
             launchPhotoPicker { picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) }
                 ?.let { error -> actions.run { error } }
             Unit
         }
-        ProfilePhotoHeader(user, selected, !actions.busy, choose)
-        if (selected != null) {
+        ProfilePhotoHeader(user, captured ?: selected, !actions.busy, choose, { showCamera = true })
+        if (selected != null || captured != null) {
             Button(modifier = Modifier.fillMaxWidth(), enabled = !actions.busy, onClick = {
-                val uri = selected ?: return@Button
+                val uri = selected
+                val photo = captured
                 actions.run {
                     try {
-                        val mime = context.contentResolver.getType(uri)
+                        val mime = if (photo != null) "image/jpeg" else uri?.let { context.contentResolver.getType(it) }
                         if (mime !in listOf("image/jpeg", "image/png")) return@run "Scegli un’immagine PNG o JPG."
-                        val bytes = withContext(Dispatchers.IO) {
-                            context.contentResolver.openInputStream(uri)?.use { readPhotoBytes(it, 5 * 1024 * 1024) }
+                        val bytes = photo ?: withContext(Dispatchers.IO) {
+                            uri?.let { context.contentResolver.openInputStream(it) }?.use { readPhotoBytes(it, 5 * 1024 * 1024) }
                                 ?: throw IOException("Immagine non disponibile")
                         }
                         when (val result = gateway.uploadPhoto(bytes, mime!!)) {
-                            is ApiResult.Success -> { UserSession.setSession(result.data); selected = null; "Foto profilo aggiornata." }
+                            is ApiResult.Success -> { UserSession.setSession(result.data); selected = null; captured = null; "Foto profilo aggiornata." }
                             else -> result.accountError()
                         }
                     } catch (_: PhotoTooLargeException) { "La foto supera il limite di 5 MB." }
@@ -66,9 +74,9 @@ internal fun ProfileEditor(user: UserDTO, actions: AccountActions, gateway: Acco
                     catch (_: SecurityException) { "Accesso alla foto non disponibile. Selezionala nuovamente." }
                 }
             }) { Text("Carica foto") }
-            OutlinedButton(modifier = Modifier.fillMaxWidth(), onClick = { selected = null }, enabled = !actions.busy) { Text("Annulla selezione") }
+            OutlinedButton(modifier = Modifier.fillMaxWidth(), onClick = { selected = null; captured = null }, enabled = !actions.busy) { Text("Annulla selezione") }
         }
-        if (!user.profilePhotoUrl.isNullOrBlank() && selected == null) OutlinedButton(
+        if (!user.profilePhotoUrl.isNullOrBlank() && selected == null && captured == null) OutlinedButton(
             colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
             enabled = !actions.busy, onClick = {
             actions.run {
@@ -100,7 +108,7 @@ internal fun ProfileEditor(user: UserDTO, actions: AccountActions, gateway: Acco
 }
 
 @Composable
-private fun ProfilePhotoHeader(user: UserDTO, selected: Uri?, enabled: Boolean, choose: () -> Unit) {
+private fun ProfilePhotoHeader(user: UserDTO, selected: Any?, enabled: Boolean, choose: () -> Unit, takePhoto: () -> Unit) {
     Surface(shape = RoundedCornerShape(22.dp), color = GlassFillStrong, contentColor = MaterialTheme.colorScheme.onSurface) {
         Column(Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(18.dp)) {
@@ -112,9 +120,11 @@ private fun ProfilePhotoHeader(user: UserDTO, selected: Uri?, enabled: Boolean, 
                             else AsyncImage(selected, "Anteprima foto selezionata", modifier = Modifier.fillMaxSize().clip(CircleShape), contentScale = ContentScale.Crop)
                         }
                     }
-                    Surface(Modifier.align(Alignment.BottomEnd), shape = CircleShape, color = MaterialTheme.colorScheme.primary,
+                    Surface(onClick = takePhoto, enabled = enabled, modifier = Modifier.align(Alignment.BottomEnd).size(48.dp), shape = CircleShape, color = MaterialTheme.colorScheme.primary,
                         contentColor = MaterialTheme.colorScheme.onPrimary, border = BorderStroke(2.dp, MaterialTheme.colorScheme.surface)) {
-                        Icon(painterResource(R.drawable.ic_scan_camera), null, Modifier.padding(8.dp).size(18.dp))
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(painterResource(R.drawable.ic_scan_camera), "Scatta foto profilo", Modifier.size(21.dp))
+                        }
                     }
                 }
                 Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {

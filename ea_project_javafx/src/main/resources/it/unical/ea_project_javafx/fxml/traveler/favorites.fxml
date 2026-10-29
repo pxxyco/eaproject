@@ -2,7 +2,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.image.ImageView?>
-<StackPane stylesheets="@../../css/screens/traveler/favorites.css" xmlns:fx="http://javafx.com/fxml/1"
+<StackPane stylesheets="@../../css/screens/traveler/favorites.css"
+    xmlns:fx="http://javafx.com/fxml/1"
     fx:controller="it.unical.ea_project_javafx.controller.traveler.FavoritesController"
     styleClass="favorites-page-root, favorites-simple">
     <ImageView fx:id="bgImageView" preserveRatio="false" mouseTransparent="true" />
@@ -26,11 +27,13 @@
                         <TabPane tabClosingPolicy="UNAVAILABLE" styleClass="favorites-tabs">
                             <Tab text="Le mie raccolte">
                                 <VBox spacing="24">
-                                    <VBox spacing="14" styleClass="favorites-create-inline">
+                                    <VBox spacing="14"
+                                        styleClass="surface-card, favorites-create-inline">
                                         <Label
                                             text="Dai un nome alla raccolta e scegli chi può vederla."
                                             styleClass="section-subtitle" wrapText="true" />
-                                        <HBox spacing="12" alignment="CENTER_LEFT">
+                                        <HBox spacing="12" alignment="CENTER_LEFT"
+                                            styleClass="favorites-create-controls">
                                             <TextField fx:id="newListNameField"
                                                 promptText="Es. Weekend in Sicilia"
                                                 styleClass="custom-input" HBox.hgrow="ALWAYS" />
@@ -40,11 +43,18 @@
                                                 styleClass="btn-primary" />
                                         </HBox>
                                     </VBox>
-                                    <HBox spacing="24" alignment="TOP_LEFT">
-                                        <VBox prefWidth="240" minWidth="210" spacing="14">
+                                    <GridPane hgap="24" alignment="TOP_LEFT"
+                                        styleClass="favorites-workspace">
+                                        <columnConstraints>
+                                            <ColumnConstraints percentWidth="28" fillWidth="true" />
+                                            <ColumnConstraints percentWidth="72" fillWidth="true" />
+                                        </columnConstraints>
+                                        <VBox minWidth="0" prefWidth="0" maxWidth="Infinity"
+                                            spacing="18" GridPane.columnIndex="0"
+                                            styleClass="surface-card, favorites-sidebar">
                                             <Label text="Scegli una raccolta"
                                                 styleClass="section-header" />
-                                            <ListView fx:id="listsListView" prefHeight="340"
+                                            <ListView fx:id="listsListView" prefHeight="360"
                                                 styleClass="favorites-list-view" />
                                             <TitledPane text="Modifica raccolta" expanded="false"
                                                 animated="true">
@@ -68,9 +78,11 @@
                                                 </VBox>
                                             </TitledPane>
                                         </VBox>
-                                        <VBox spacing="20" minWidth="0" HBox.hgrow="ALWAYS"
-                                            styleClass="favorites-content">
-                                            <HBox spacing="12" alignment="CENTER_LEFT">
+                                        <VBox spacing="20" minWidth="0" prefWidth="0"
+                                            maxWidth="Infinity" GridPane.columnIndex="1"
+                                            styleClass="surface-card, favorites-content">
+                                            <HBox spacing="12" alignment="CENTER_LEFT"
+                                                minHeight="54">
                                                 <VBox spacing="6" HBox.hgrow="ALWAYS">
                                                     <Label fx:id="selectedListNameLabel"
                                                         text="I tuoi preferiti"
@@ -89,7 +101,7 @@
                                                 <Tab text="Viaggi">
                                                     <VBox spacing="16">
                                                         <ListView fx:id="savedTripsListView"
-                                                            prefHeight="270"
+                                                            prefHeight="360"
                                                             styleClass="favorites-list-view" />
                                                         <Button fx:id="removeTripButton"
                                                             text="Rimuovi il viaggio selezionato"
@@ -123,7 +135,7 @@
                                                 <Tab text="Attività">
                                                     <VBox spacing="16">
                                                         <ListView fx:id="savedActivitiesListView"
-                                                            prefHeight="270"
+                                                            prefHeight="360"
                                                             styleClass="favorites-list-view" />
                                                         <Button fx:id="removeActivityButton"
                                                             text="Rimuovi l’attività selezionata"
@@ -157,7 +169,7 @@
                                                 </Tab>
                                             </TabPane>
                                         </VBox>
-                                    </HBox>
+                                    </GridPane>
                                 </VBox>
                             </Tab>
                             <Tab text="Condivise con me">

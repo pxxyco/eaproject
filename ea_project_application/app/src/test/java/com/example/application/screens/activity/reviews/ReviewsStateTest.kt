@@ -18,7 +18,7 @@ class ReviewsStateTest {
         state.reload()
         assertFalse(state.canWrite)
         state.openNew(); assertNull(state.form)
-        booking = booking.copy(bookingStatus = "CONFIRMED")
+        booking = booking.copy(bookingStatus = "CONFIRMED", paymentStatus = "CONFIRMED")
         state.refreshParticipation(); assertTrue(state.canWrite)
         state.openNew(); assertEquals(ReviewForm.New, state.form)
         state.closeForm()

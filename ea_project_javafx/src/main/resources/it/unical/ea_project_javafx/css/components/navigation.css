@@ -112,10 +112,43 @@
     -fx-border-radius: 24;
 }
 
-.navbar .menu-button > .arrow-button > .arrow {
+.navbar .menu-button>.arrow-button>.arrow {
     -fx-background-color: -color-text-secondary;
 }
 
 .nav-item:hover {
     -fx-text-fill: -color-white;
+}
+
+.nav-messages-button {
+    -fx-padding: 0;
+    -fx-content-display: graphic-only;
+}
+
+.nav-message-icon {
+    -fx-fill: transparent;
+    -fx-stroke: -color-text;
+    -fx-stroke-width: 1.35;
+    -fx-stroke-line-cap: round;
+    -fx-stroke-line-join: miter;
+}
+
+.nav-messages-button:active .nav-message-icon {
+    -fx-stroke: -app-accent;
+}
+
+.nav-message-badge {
+    -fx-min-width: 10;
+    -fx-pref-width: 10;
+    -fx-max-width: 10;
+    -fx-min-height: 10;
+    -fx-pref-height: 10;
+    -fx-max-height: 10;
+    -fx-background-color: -color-unread;
+    -fx-background-radius: 50;
+    -fx-border-color: -color-menu;
+    -fx-border-radius: 50;
+    -fx-border-width: 1.5;
+    -fx-translate-x: 11;
+    -fx-translate-y: -10;
 }

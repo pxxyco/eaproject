@@ -72,6 +72,11 @@ public class ChatService {
         return pageRows.stream().map(c -> view(c, user, unread.getOrDefault(c.getId(), 0L))).toList();
     }
 
+    @Transactional(readOnly = true)
+    public long unreadCount(Long user) {
+        return messages.unreadCount(user);
+    }
+
     @Transactional
     public ConversationView open(Long travelerId, Long organizerId) {
         return openPair(travelerId, organizerId, travelerId);
@@ -199,6 +204,7 @@ public class ChatService {
             c.setTravelerReadId(Math.max(c.getTravelerReadId() == null ? 0 : c.getTravelerReadId(), through));
         else
             c.setOrganizerReadId(Math.max(c.getOrganizerReadId() == null ? 0 : c.getOrganizerReadId(), through));
+        events.publishEvent(new ChatEvents.Changed(conversation, user, user));
     }
 
     private long cleared(Conversation c, Long user) {
@@ -226,7 +232,6 @@ public class ChatService {
         Long latest = messages.latest(conversation);
         if (latest != null)
             read(conversation, user, latest);
-        events.publishEvent(new ChatEvents.Changed(conversation, user, user));
     }
 
     @Transactional

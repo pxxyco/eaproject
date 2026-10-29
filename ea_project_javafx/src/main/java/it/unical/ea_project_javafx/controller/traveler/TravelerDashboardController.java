@@ -401,6 +401,9 @@ public class TravelerDashboardController implements ProfileDashboardController {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(
                     "/it/unical/ea_project_javafx/fxml/home/experience-card.fxml"));
             VBox card = loader.load();
+            card.setMinHeight(378);
+            card.setPrefHeight(378);
+            card.setMaxHeight(378);
             ExperienceCardController controller = loader.getController();
             if (trip)
                 controller.setData((TripHomeDTO) item);
@@ -567,7 +570,7 @@ public class TravelerDashboardController implements ProfileDashboardController {
         long upcoming = allBookings.stream().filter(b -> !isCancelled(b) && !isHistorical(b, evaluationTime))
                 .filter(b -> {
                     LocalDateTime start = eventStartDateTime(b);
-                    return start != null && start.isAfter(evaluationTime);
+                    return start != null && !BookingPresentation.bookingClosed(b, evaluationTime);
                 }).count();
         setLabelText(upcomingBookingValue, "upcomingBookingValue", String.valueOf(upcoming));
         setLabelText(historicalBookingValue, "historicalBookingValue",
@@ -584,7 +587,7 @@ public class TravelerDashboardController implements ProfileDashboardController {
                 .filter(b -> b.getBookingId() != null && !isCancelled(b) && !isHistorical(b, evaluationTime))
                 .filter(b -> {
                     LocalDateTime start = eventStartDateTime(b);
-                    return start != null && start.isAfter(evaluationTime);
+                    return start != null && !BookingPresentation.bookingClosed(b, evaluationTime);
                 })
                 .sorted((a, b) -> {
                     LocalDateTime aStart = eventStartDateTime(a), bStart = eventStartDateTime(b);
@@ -611,16 +614,30 @@ public class TravelerDashboardController implements ProfileDashboardController {
         for (BookingDTO booking : upcoming) {
             VBox card = new VBox(9);
             card.getStyleClass().add("dashboard-upcoming-card");
+            card.setMinWidth(0);
+            card.setPrefWidth(0);
+            card.setMaxWidth(Double.MAX_VALUE);
             Label type = new Label(isTrip(booking) ? "VIAGGIO" : "ATTIVITÀ");
             type.getStyleClass().add("dashboard-upcoming-type");
             Label title = new Label(UiText.orDefault(booking.getItemTitle(), "Esperienza"));
             title.getStyleClass().add("dashboard-upcoming-title");
             title.setWrapText(true);
+            title.setMinHeight(48);
+            title.setPrefHeight(48);
+            title.setMaxHeight(48);
+            title.setAlignment(Pos.TOP_LEFT);
             Label date = new Label(formatEventPeriod(booking));
             date.getStyleClass().add("dashboard-upcoming-date");
+            date.setWrapText(true);
+            date.setMinHeight(36);
+            date.setPrefHeight(36);
+            date.setAlignment(Pos.TOP_LEFT);
             Label location = new Label(UiText.orDefault(booking.getItemLocation(), "Luogo da confermare"));
             location.getStyleClass().add("dashboard-upcoming-location");
             location.setWrapText(true);
+            location.setMinHeight(36);
+            location.setPrefHeight(36);
+            location.setAlignment(Pos.TOP_LEFT);
             Region spacer = new Region();
             VBox.setVgrow(spacer, Priority.ALWAYS);
             Button open = new Button("Vai alla prenotazione →");

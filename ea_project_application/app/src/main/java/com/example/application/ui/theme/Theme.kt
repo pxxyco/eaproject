@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import com.example.application.device.findActivity
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -54,7 +55,8 @@ val AppTypography = Typography(
 
 @Composable
 fun ApplicationTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
-    val colors = (if (darkTheme) DarkAppColors else LightAppColors).withWallpaper(WallpaperPalette.accent, darkTheme)
+    val accent = WallpaperPalette.accent
+    val colors = remember(accent, darkTheme) { (if (darkTheme) DarkAppColors else LightAppColors).withWallpaper(accent, darkTheme) }
     val view = LocalView.current
     if (!view.isInEditMode) SideEffect {
         view.context.findActivity()?.window?.let { window ->

@@ -63,26 +63,41 @@ public final class UiEffects {
     public static void useWallpaper(Scene scene, Image image) {
         if (image != null && !image.isError() && image.getPixelReader() != null && paletteImage != image) {
             int[] counts = new int[4096];
-            for (int y = 1; y < 25; y++) for (int x = 1; x < 33; x++) {
-                Color c = image.getPixelReader().getColor((int) (image.getWidth() * x / 33), (int) (image.getHeight() * y / 25));
-                if (c.getBrightness() < .11 || c.getBrightness() > .96) continue;
-                int bucket = ((int)(c.getRed() * 255) >> 4) << 8 | ((int)(c.getGreen() * 255) >> 4) << 4 | ((int)(c.getBlue() * 255) >> 4);
-                counts[bucket]++;
-            }
+            for (int y = 1; y < 25; y++)
+                for (int x = 1; x < 33; x++) {
+                    Color c = image.getPixelReader().getColor((int) (image.getWidth() * x / 33),
+                            (int) (image.getHeight() * y / 25));
+                    if (c.getBrightness() < .11 || c.getBrightness() > .96)
+                        continue;
+                    int bucket = ((int) (c.getRed() * 255) >> 4) << 8 | ((int) (c.getGreen() * 255) >> 4) << 4
+                            | ((int) (c.getBlue() * 255) >> 4);
+                    counts[bucket]++;
+                }
             int dominant = 0;
-            for (int i = 1; i < counts.length; i++) if (counts[i] > counts[dominant]) dominant = i;
-            Color sample = counts[dominant] == 0 ? Color.web("#b8a48b") : Color.rgb(((dominant >> 8) & 15) * 16 + 8, ((dominant >> 4) & 15) * 16 + 8, (dominant & 15) * 16 + 8);
+            for (int i = 1; i < counts.length; i++)
+                if (counts[i] > counts[dominant])
+                    dominant = i;
+            Color sample = counts[dominant] == 0 ? Color.web("#b8a48b")
+                    : Color.rgb(((dominant >> 8) & 15) * 16 + 8, ((dominant >> 4) & 15) * 16 + 8,
+                            (dominant & 15) * 16 + 8);
             accent = sample.interpolate(Color.WHITE, .45);
             paletteImage = image;
         }
         install(scene);
         if (scene != null) {
             Parent root = scene.getRoot();
-            String base = root.getStyle().replaceAll("-(?:app-accent|color-accent|color-menu(?:-hover)?|ea-glass(?:-inset|-border)?|tone-forest-[0-9]+)\\s*:[^;]*;?", "").replaceAll(";\\s*;", ";").strip();
+            String base = root.getStyle().replaceAll(
+                    "-(?:app-accent|color-accent|color-text-secondary|color-menu(?:-hover)?|ea-glass(?:-inset|-border)?|tone-(?:forest|mint)-[0-9]+)\\s*:[^;]*;?",
+                    "").replaceAll(";\\s*;", ";").strip();
             String styled = (base.isBlank() ? "" : base + (base.endsWith(";") ? "" : ";")) + " -app-accent: "
-                    + css(accent) + "; -color-accent: " + css(accent) + "; -color-menu: " + css(tintedSurface()) + "; -color-menu-hover: " + css(tintedSurface().interpolate(accent, .2)) + ";";
-            for (String level : new String[]{"180", "550", "650", "780", "940", "980"})
-                styled += " -tone-forest-" + level + ": " + rgba(tintedSurface(), Integer.parseInt(level) / 1000d) + ";";
+                    + css(accent) + "; -color-accent: " + css(accent) + "; -color-menu: " + css(tintedSurface())
+                    + "; -color-menu-hover: " + css(tintedSurface().interpolate(accent, .2)) + ";";
+            for (String level : new String[] { "180", "550", "650", "780", "940", "980" })
+                styled += " -tone-forest-" + level + ": " + rgba(tintedSurface(), Integer.parseInt(level) / 1000d)
+                        + ";";
+            for (String level : new String[] { "080", "120", "160", "180", "260", "320" })
+                styled += " -tone-mint-" + level + ": " + rgba(accent, Integer.parseInt(level) / 1000d) + ";";
+            styled += " -color-text-secondary: " + css(accent.interpolate(Color.WHITE, .65)) + ";";
             styled += " -ea-glass: " + rgba(tintedSurface(), .72) + "; -ea-glass-border: " + rgba(accent, .2) + ";";
             if (root.getStyle().equals(styled))
                 return;
@@ -173,7 +188,8 @@ public final class UiEffects {
     private static boolean eligible(Region node) {
         if (node instanceof javafx.scene.control.ListCell<?>) {
             for (Node parent = node; parent != null; parent = parent.getParent())
-                if (parent.getStyleClass().contains("history-feed")) return false;
+                if (parent.getStyleClass().contains("history-feed"))
+                    return false;
         }
         if (node.getStyleClass().contains("history-feed") || node.getStyleClass().contains("password-reveal")
                 || node.getStyleClass().contains("favorites-tabs") || node.getStyleClass().contains("back-link"))
@@ -195,9 +211,13 @@ public final class UiEffects {
                         || c.endsWith("-card") || c.endsWith("-panel") || c.endsWith("-tray") || c.endsWith("-toast"));
     }
 
-    private static Color tintedSurface() { return Color.web("#141414").interpolate(accent, .12); }
+    private static Color tintedSurface() {
+        return Color.web("#141414").interpolate(accent, .12);
+    }
+
     private static String rgba(Color c, double opacity) {
-        return String.format(java.util.Locale.ROOT, "rgba(%d,%d,%d,%.3f)", (int)(c.getRed()*255), (int)(c.getGreen()*255), (int)(c.getBlue()*255), opacity);
+        return String.format(java.util.Locale.ROOT, "rgba(%d,%d,%d,%.3f)", (int) (c.getRed() * 255),
+                (int) (c.getGreen() * 255), (int) (c.getBlue() * 255), opacity);
     }
 
     private static Color alpha(Color c, double a) {
@@ -365,7 +385,9 @@ public final class UiEffects {
                 for (BackgroundFill fill : background.getFills()) {
                     var paint = fill.getFill();
                     if (paint instanceof Color c) {
-                        if (node.getStyleClass().stream().anyMatch(name -> name.endsWith("-card") || name.endsWith("-panel") || name.equals("btn-create-offer"))) c = alpha(tintedSurface(), c.getOpacity());
+                        if (node.getStyleClass().stream().anyMatch(name -> name.endsWith("-card")
+                                || name.endsWith("-panel") || name.equals("btn-create-offer")))
+                            c = alpha(tintedSurface(), c.getOpacity());
                         paint = node.getStyleClass().contains("menu-item")
                                 ? c.interpolate(alpha(accent, .18), amount)
                                 : c.interpolate(alpha(accent, Math.max(c.getOpacity(), .08)), amount * .13);

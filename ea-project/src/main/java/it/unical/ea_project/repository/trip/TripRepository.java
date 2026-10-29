@@ -15,7 +15,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface TripRepository extends JpaRepository<Trip, Long> {
-        @Query("select t from Trip t where t.deletedAt is null and t.status=it.unical.ea_project.domain.trip.Trip.TripStatus.PUBLISHED and t.startDate>:today and t.availableSeats>0 and not exists (select b.bookingId from Booking b where b.user.id=:user and b.trip=t and b.bookingStatus<>it.unical.ea_project.domain.booking.Booking.BookingStatus.CANCELLED) order by t.startDate,t.tripId")
+        @Query("select t from Trip t where t.deletedAt is null and t.status=it.unical.ea_project.domain.trip.Trip.TripStatus.PUBLISHED and t.startDate>=:today and t.availableSeats>0 and not exists (select b.bookingId from Booking b where b.user.id=:user and b.trip=t and b.bookingStatus<>it.unical.ea_project.domain.booking.Booking.BookingStatus.CANCELLED) order by t.startDate,t.tripId")
         List<Trip> recommendationCandidates(@Param("today") LocalDate today, @Param("user") Long user,
                         Pageable page);
 
@@ -50,7 +50,7 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
                         FROM Trip t
                         WHERE t.deletedAt IS NULL
                         AND t.status = :status
-                        AND t.startDate > :today
+                        AND t.startDate >= :today
                         AND t.availableSeats > 0
                         ORDER BY COALESCE(t.averageRating, 0) DESC, t.tripId DESC
                         """)
@@ -76,7 +76,7 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
                         FROM Trip t
                         WHERE t.deletedAt IS NULL
                         AND t.status = :status
-                        AND t.startDate > :today
+                        AND t.startDate >= :today
                         AND t.availableSeats > 0
                         AND (
                             LOWER(t.title) LIKE LOWER(CONCAT(:query, '%'))
@@ -93,7 +93,7 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
                         FROM Trip t
                         WHERE t.deletedAt IS NULL
                         AND t.status = :status
-                        AND t.startDate > :today
+                        AND t.startDate >= :today
                         AND t.availableSeats > 0
                         AND (
                             :query = ''
@@ -111,7 +111,7 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
                         FROM Trip t
                         WHERE t.deletedAt IS NULL
                         AND t.status = :status
-                        AND t.startDate > :today
+                        AND t.startDate >= :today
                         AND t.availableSeats > 0
                         AND (
                             :query = ''
@@ -130,7 +130,7 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
                                 SELECT COUNT(t) FROM Trip t
                                 WHERE t.deletedAt IS NULL
                                 AND t.status = :status
-                                AND t.startDate > :today
+                                AND t.startDate >= :today
                                 AND t.availableSeats > 0
                                 AND (
                                     :query = ''
@@ -146,7 +146,7 @@ public interface TripRepository extends JpaRepository<Trip, Long> {
                                 SELECT COUNT(t) FROM Trip t
                                 WHERE t.deletedAt IS NULL
                                 AND t.status = :status
-                                AND t.startDate > :today
+                                AND t.startDate >= :today
                                 AND t.availableSeats > 0
                                 AND (
                                     :query = ''

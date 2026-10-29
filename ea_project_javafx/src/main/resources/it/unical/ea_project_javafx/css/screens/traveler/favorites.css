@@ -261,3 +261,35 @@
     -fx-pref-height: 40;
     -fx-max-height: 40;
 }
+
+.favorites-simple .favorites-create-inline {
+    -fx-padding: 20;
+    -fx-spacing: 14;
+}
+
+.favorites-simple .favorites-sidebar,
+.favorites-simple .favorites-content {
+    -fx-padding: 20;
+    -fx-border-width: 1;
+    -fx-border-color: -tone-ivory-180;
+    -fx-fill-width: true;
+}
+
+.favorites-simple .favorites-sidebar>.section-header {
+    -fx-min-height: 54;
+    -fx-pref-height: 54;
+    -fx-alignment: top-left;
+    -fx-wrap-text: true;
+}
+
+.favorites-create-controls>.text-field,
+.favorites-create-controls>.combo-box,
+.favorites-create-controls>.button {
+    -fx-min-height: 44;
+    -fx-pref-height: 44;
+    -fx-max-height: 44;
+}
+
+.favorites-simple .favorites-content .tab-content-area {
+    -fx-padding: 18 0 0;
+}

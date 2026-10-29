@@ -9,6 +9,8 @@ import it.unical.ea_project.dto.review.ReviewDTO;
 import it.unical.ea_project.mapper.review.ReviewMapper;
 import it.unical.ea_project.repository.activity.ActivityRepository;
 import it.unical.ea_project.repository.booking.BookingRepository;
+import it.unical.ea_project.repository.payment.PaymentRepository;
+import it.unical.ea_project.domain.payment.Payment;
 import it.unical.ea_project.repository.review.ResponseRepository;
 import it.unical.ea_project.repository.review.ReviewRepository;
 import it.unical.ea_project.repository.trip.TripRepository;
@@ -41,13 +43,14 @@ public class ReviewServiceImpl implements ReviewService {
     private final ActivityRepository activityRepository;
     private final ResponseRepository responseRepository;
     private final BookingRepository bookingRepository;
+    private final PaymentRepository paymentRepository;
 
     public ReviewServiceImpl(ReviewRepository reviewRepository,
             UserRepository userRepository,
             TripRepository tripRepository,
             ActivityRepository activityRepository,
             ResponseRepository responseRepository,
-            BookingRepository bookingRepository, EntityManager entities) {
+            BookingRepository bookingRepository, PaymentRepository paymentRepository, EntityManager entities) {
         this.entities = entities;
         this.reviewRepository = reviewRepository;
         this.userRepository = userRepository;
@@ -55,6 +58,7 @@ public class ReviewServiceImpl implements ReviewService {
         this.activityRepository = activityRepository;
         this.responseRepository = responseRepository;
         this.bookingRepository = bookingRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     @Transactional
@@ -72,9 +76,9 @@ public class ReviewServiceImpl implements ReviewService {
         }
 
         lockOffer(review.getTripId(), review.getActivityId());
-        if (!hasEligibleCompletedBooking(review.getUserId(), review.getTripId(), review.getActivityId())) {
+        if (!hasEligibleBooking(review.getUserId(), review.getTripId(), review.getActivityId())) {
             throw new IllegalArgumentException(
-                    "Puoi recensire un'esperienza con prenotazione confermata, non annullata.");
+                    "Completa il pagamento per recensire. Per le esperienze gratuite basta la conferma; sono ammesse anche le partecipazioni già concluse e non annullate.");
         }
 
         boolean alreadyReviewed = reviewRepository.findAllByUserId(review.getUserId()).stream()
@@ -213,13 +217,23 @@ public class ReviewServiceImpl implements ReviewService {
         return normalized.isEmpty() ? null : normalized;
     }
 
-    private boolean hasEligibleCompletedBooking(Long userId, Long tripId, Long activityId) {
+    private boolean hasEligibleBooking(Long userId, Long tripId, Long activityId) {
         LocalDateTime now = LocalDateTime.now();
-        return bookingRepository.findForExperience(userId, tripId, activityId).stream()
+        var candidates = bookingRepository.findForExperience(userId, tripId, activityId).stream()
                 .filter(booking -> tripId != null
                         ? booking.getTrip() != null && tripId.equals(booking.getTrip().getTripId())
                         : booking.getActivity() != null && activityId.equals(booking.getActivity().getActivityId()))
-                .anyMatch(booking -> BookingLifecycle.reviewable(booking, now));
+                .filter(booking -> BookingLifecycle.reviewable(booking, now)).toList();
+        if (candidates.isEmpty())
+            return false;
+        var paidIds = paymentRepository
+                .findBookingPaymentsBatch(candidates.stream().map(Booking::getBookingId).toList()).stream()
+                .filter(payment -> payment.getStatus() == Payment.PaymentStatus.CONFIRMED
+                        || payment.getStatus() == Payment.PaymentStatus.COMPLETED)
+                .map(payment -> payment.getBooking().getBookingId()).collect(Collectors.toSet());
+        return candidates.stream().anyMatch(booking -> paidIds.contains(booking.getBookingId())
+                || booking.getPrice() != null && booking.getPrice().signum() == 0
+                || BookingLifecycle.ended(booking, now));
     }
 
     private void updateAverageRating(Long tripId, Long activityId) {

@@ -12,6 +12,7 @@ import it.unical.ea_project.repository.payment.PaymentRepository;
 import it.unical.ea_project.repository.trip.TripRepository;
 import it.unical.ea_project.repository.user.UserRepository;
 import it.unical.ea_project.service.booking.BookingService;
+import it.unical.ea_project.service.booking.BookingLifecycle;
 import it.unical.ea_project.service.booking.BookingLockService;
 import java.math.BigDecimal;
 import it.unical.ea_project.util.CalendarWriter;
@@ -64,8 +65,9 @@ public class BookingServiceImpl implements BookingService {
         Trip trip = tripRepository.findActiveForUpdate(tripId)
                 .orElseThrow(() -> new IllegalArgumentException("Viaggio non trovato"));
         if (trip.getStatus() != Trip.TripStatus.PUBLISHED || trip.getStartDate() == null
-                || !trip.getStartDate().isAfter(LocalDate.now())) {
-            throw new IllegalArgumentException("Il viaggio non è prenotabile: deve essere pubblicato e futuro.");
+                || trip.getStartDate().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException(
+                    "Il viaggio non è prenotabile: deve essere pubblicato e previsto per oggi o una data futura.");
         }
         rejectDuplicate(userId, tripId, null);
         reserveSeats(trip.getAvailableSeats(), seats);
@@ -76,7 +78,8 @@ public class BookingServiceImpl implements BookingService {
         b.setTrip(trip);
         b.setSeats(seats);
         b.setBookingType(Booking.BookingType.TRIP);
-        b.setBookingStatus(trip.getTotalPrice().signum() == 0 ? Booking.BookingStatus.CONFIRMED : Booking.BookingStatus.PENDING);
+        b.setBookingStatus(
+                trip.getTotalPrice().signum() == 0 ? Booking.BookingStatus.CONFIRMED : Booking.BookingStatus.PENDING);
         b.setPrice(trip.getTotalPrice().multiply(BigDecimal.valueOf(seats)));
         return toDto(bookingRepository.save(b));
 
@@ -90,8 +93,9 @@ public class BookingServiceImpl implements BookingService {
         Activity activity = activityRepository.findActiveForUpdate(activityId)
                 .orElseThrow(() -> new IllegalArgumentException("Attività non trovata"));
         if (activity.getStatus() != Activity.Status.PUBLISHED || activity.getStartDate() == null
-                || !activity.getStartDate().isAfter(LocalDateTime.now())) {
-            throw new IllegalArgumentException("L'attività non è prenotabile: deve essere pubblicata e futura.");
+                || activity.getStartDate().toLocalDate().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException(
+                    "L'attività non è prenotabile: deve essere pubblicata e prevista per oggi o una data futura.");
         }
         rejectDuplicate(userId, null, activityId);
         reserveSeats(activity.getAvailableSeats(), seats);
@@ -138,9 +142,9 @@ public class BookingServiceImpl implements BookingService {
                     "Non puoi cancellare una prenotazione relativa a un'esperienza già completata.");
         }
 
-        LocalDateTime eventStart = getEventStartDateTime(b);
-        if (eventStart != null && !eventStart.isAfter(LocalDateTime.now())) {
-            throw new IllegalArgumentException("Non puoi cancellare una prenotazione per un'esperienza già iniziata.");
+        if (BookingLifecycle.bookingClosed(b, LocalDateTime.now())) {
+            throw new IllegalArgumentException(
+                    "Il termine per annullare la prenotazione è scaduto (fine del giorno di inizio).");
         }
 
         b.setBookingStatus(Booking.BookingStatus.CANCELLED);
@@ -296,16 +300,6 @@ public class BookingServiceImpl implements BookingService {
 
     }
 
-    private LocalDateTime getEventStartDateTime(Booking booking) {
-        if (booking.getTrip() != null && booking.getTrip().getStartDate() != null) {
-            return booking.getTrip().getStartDate().atStartOfDay();
-        }
-        if (booking.getActivity() != null) {
-            return booking.getActivity().getStartDate();
-        }
-        return null;
-    }
-
     private int restoredSeats(Integer available, Integer capacity, int seats) {
         long restored = Math.max(0, available == null ? 0 : available) + (long) seats;
         return (int) Math.min(capacity == null ? Integer.MAX_VALUE : Math.max(0, capacity), restored);
@@ -321,7 +315,8 @@ public class BookingServiceImpl implements BookingService {
 
     private void rejectDuplicate(Long userId, Long tripId, Long activityId) {
         if (bookingRepository.existsReservation(userId, tripId, activityId))
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Hai già una prenotazione per questa esperienza e questa data. Gestiscila dalle tue prenotazioni.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Hai già una prenotazione per questa esperienza e questa data. Gestiscila dalle tue prenotazioni.");
     }
 
     private void validateSeats(Integer seats) {

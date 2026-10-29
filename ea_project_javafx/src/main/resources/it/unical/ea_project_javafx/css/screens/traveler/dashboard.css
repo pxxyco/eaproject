@@ -49,8 +49,8 @@
 .dashboard-upcoming-card {
     -fx-padding: 17px;
     -fx-spacing: 9px;
-    -fx-min-width: 180px;
-    -fx-pref-width: 250px;
+    -fx-min-width: 0;
+    -fx-pref-width: 0;
     -fx-min-height: 178px;
 }
 

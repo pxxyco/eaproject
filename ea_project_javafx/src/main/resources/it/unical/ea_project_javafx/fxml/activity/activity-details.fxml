@@ -13,7 +13,8 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.FlowPane?>
-<StackPane stylesheets="@../../css/screens/activity/details.css" xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:id="root"
+<StackPane stylesheets="@../../css/screens/activity/details.css"
+    xmlns="http://javafx.com/javafx/21.0.2" xmlns:fx="http://javafx.com/fxml/1" fx:id="root"
     prefHeight="760" prefWidth="1300" styleClass="app-root, experience-detail"
     fx:controller="it.unical.ea_project_javafx.controller.activity.ActivityDetailsController">
     <!-- Immagine di sfondo e overlay -->
@@ -46,7 +47,7 @@
                                     <VBox maxWidth="1120" minWidth="0" spacing="26.0"
                                         styleClass="content-wrapper" HBox.hgrow="ALWAYS">
                                         <children>
-                                            <Button text="← Torna alle esperienze"
+                                            <Button text="← Indietro"
                                                 onAction="#handleBackToExperiences"
                                                 styleClass="back-link" />
                                             <VBox alignment="TOP_LEFT" spacing="8"
@@ -143,7 +144,8 @@
                                                         <VBox alignment="CENTER_LEFT" spacing="4"
                                                             minWidth="130">
                                                             <children>
-                                                                <Label fx:id="bookingTotalCaption" styleClass="field-label"
+                                                                <Label fx:id="bookingTotalCaption"
+                                                                    styleClass="field-label"
                                                                     text="Totale" />
                                                                 <Label fx:id="lblTotale"
                                                                     styleClass="price-total"
@@ -154,9 +156,21 @@
                                                             onAction="#handlePrenota"
                                                             styleClass="btn-primary"
                                                             text="Prenota Ora" />
-                                                        <Button fx:id="btnManageBookings" onAction="#handleManageBookings" styleClass="btn-secondary" text="Gestisci prenotazioni precedenti" visible="false" managed="false" />
-                                                        <Button fx:id="btnPayBooking" onAction="#handlePayBooking" styleClass="btn-primary" text="Completa pagamento" visible="false" managed="false" />
-                                                        <Button fx:id="btnCancelBooking" onAction="#handleCancelBooking" styleClass="btn-secondary" text="Annulla prenotazione" visible="false" managed="false" />
+                                                        <Button fx:id="btnManageBookings"
+                                                            onAction="#handleManageBookings"
+                                                            styleClass="btn-secondary"
+                                                            text="Gestisci prenotazioni precedenti"
+                                                            visible="false" managed="false" />
+                                                        <Button fx:id="btnPayBooking"
+                                                            onAction="#handlePayBooking"
+                                                            styleClass="btn-primary"
+                                                            text="Completa pagamento"
+                                                            visible="false" managed="false" />
+                                                        <Button fx:id="btnCancelBooking"
+                                                            onAction="#handleCancelBooking"
+                                                            styleClass="btn-secondary"
+                                                            text="Annulla prenotazione"
+                                                            visible="false" managed="false" />
                                                         <Label fx:id="bookingAvailabilityLabel"
                                                             wrapText="true"
                                                             styleClass="section-subtitle"

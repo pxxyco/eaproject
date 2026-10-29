@@ -100,7 +100,9 @@ public class ReviewsContainerController implements ActivitySectionController, Tr
 
     private void setReviews() {
 
-        ownReview = reviews.stream().filter(review -> Objects.equals(review.getUserId(), UserSession.getInstance().getId())).findFirst().orElse(null);
+        ownReview = reviews.stream()
+                .filter(review -> Objects.equals(review.getUserId(), UserSession.getInstance().getId())).findFirst()
+                .orElse(null);
         updateReviewAction();
         bodyContainer.getChildren().clear();
 
@@ -143,18 +145,25 @@ public class ReviewsContainerController implements ActivitySectionController, Tr
     }
 
     private void updateReviewAction() {
-        if (btnNew == null) return;
+        if (btnNew == null)
+            return;
         btnNew.setText("+");
         btnNew.setAccessibleText(ownReview != null ? "Modifica la tua recensione" : "Aggiungi recensione");
         btnNew.setDisable(ownReview == null && !reviewEligible);
-        btnNew.setTooltip(new Tooltip(ownReview != null ? "Puoi aggiornare la tua recensione anche dopo altre partecipazioni."
-            : "Serve una prenotazione confermata e non annullata per questa esperienza."));
+        btnNew.setTooltip(new Tooltip(ownReview != null
+                ? "Puoi aggiornare la tua recensione anche dopo altre partecipazioni."
+                : reviewEligible ? "Aggiungi una recensione alla tua esperienza."
+                        : "Completa il pagamento per recensire. Per le esperienze gratuite basta la conferma."));
     }
 
     @FXML
     public void handleNewButton(ActionEvent actionEvent) {
-        if (ownReview != null && onEditReviewRequested != null) { onEditReviewRequested.accept(ownReview); return; }
-        if (!reviewEligible) return;
+        if (ownReview != null && onEditReviewRequested != null) {
+            onEditReviewRequested.accept(ownReview);
+            return;
+        }
+        if (!reviewEligible)
+            return;
         if (onNewReviewRequested != null) {
             onNewReviewRequested.run();
         }

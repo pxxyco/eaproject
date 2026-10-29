@@ -54,22 +54,40 @@ fun dominantWallpaperColor(pixels: IntArray): Color {
 }
 
 fun ColorScheme.withWallpaper(accent: Color?, darkTheme: Boolean): ColorScheme {
-    if (accent == null) return this
-    val strong = if (darkTheme) accent else lerp(accent, Color.Black, .55f)
-    val surfaceTint = if (darkTheme) .12f else .06f
+    val sample = accent ?: Color(0xFFB8A48B)
+    val high = maxOf(sample.red, sample.green, sample.blue)
+    val low = minOf(sample.red, sample.green, sample.blue)
+    val delta = high - low
+    val hue = if (delta < .001f) 30f else {
+        val sector = when (high) {
+            sample.red -> (sample.green - sample.blue) / delta
+            sample.green -> (sample.blue - sample.red) / delta + 2f
+            else -> (sample.red - sample.green) / delta + 4f
+        }
+        (sector * 60f + 360f) % 360f
+    }
+    val saturation = if (high == 0f) 0f else delta / high
+    val tint = (saturation * .3f).coerceAtMost(.16f)
+    fun surface(light: Float) = Color.hsl(hue, tint, light)
+    fun accentColor(light: Float) = Color.hsl(hue, saturation.coerceIn(.10f, .45f), light)
     return copy(
-        primary = strong,
-        secondary = lerp(secondary, strong, .5f),
-        secondaryContainer = lerp(secondaryContainer, accent, if (darkTheme) .3f else .4f),
-        inversePrimary = lerp(inversePrimary, accent, .5f),
-        background = lerp(background, accent, surfaceTint / 2),
-        surface = lerp(surface, accent, surfaceTint / 2),
-        surfaceContainerLow = lerp(surfaceContainerLow, accent, surfaceTint),
-        surfaceContainer = lerp(surfaceContainer, accent, surfaceTint),
-        surfaceContainerHigh = lerp(surfaceContainerHigh, accent, surfaceTint),
-        surfaceContainerHighest = lerp(surfaceContainerHighest, accent, surfaceTint),
-        outline = lerp(outline, accent, .3f),
-        outlineVariant = lerp(outlineVariant, accent, .2f),
+        primary = accentColor(if (darkTheme) .83f else .27f), onPrimary = surface(if (darkTheme) .10f else .99f),
+        secondary = accentColor(if (darkTheme) .76f else .32f), onSecondary = surface(if (darkTheme) .10f else .99f),
+        primaryContainer = surface(if (darkTheme) .24f else .88f), onPrimaryContainer = surface(if (darkTheme) .95f else .12f),
+        secondaryContainer = surface(if (darkTheme) .24f else .88f), onSecondaryContainer = surface(if (darkTheme) .95f else .12f),
+        tertiary = accentColor(if (darkTheme) .76f else .32f), onTertiary = surface(if (darkTheme) .10f else .99f),
+        tertiaryContainer = surface(if (darkTheme) .24f else .88f), onTertiaryContainer = surface(if (darkTheme) .95f else .12f),
+        background = surface(if (darkTheme) .07f else .97f), onBackground = surface(if (darkTheme) .96f else .10f),
+        surface = surface(if (darkTheme) .12f else .97f), onSurface = surface(if (darkTheme) .96f else .10f),
+        surfaceVariant = surface(if (darkTheme) .23f else .90f), onSurfaceVariant = surface(if (darkTheme) .80f else .29f),
+        surfaceTint = accentColor(if (darkTheme) .83f else .27f),
+        outline = surface(if (darkTheme) .58f else .45f), outlineVariant = surface(if (darkTheme) .35f else .73f),
+        surfaceDim = surface(if (darkTheme) .07f else .87f), surfaceBright = surface(if (darkTheme) .22f else .98f),
+        surfaceContainerLowest = surface(if (darkTheme) .05f else .99f),
+        surfaceContainerLow = surface(if (darkTheme) .10f else .96f), surfaceContainer = surface(if (darkTheme) .14f else .94f),
+        surfaceContainerHigh = surface(if (darkTheme) .18f else .92f), surfaceContainerHighest = surface(if (darkTheme) .22f else .89f),
+        inverseSurface = surface(if (darkTheme) .94f else .16f), inverseOnSurface = surface(if (darkTheme) .12f else .97f),
+        inversePrimary = accentColor(if (darkTheme) .27f else .83f)
     )
 }
 

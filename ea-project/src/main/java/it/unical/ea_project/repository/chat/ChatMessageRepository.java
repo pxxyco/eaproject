@@ -10,6 +10,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface ChatMessageRepository extends JpaRepository<ChatMessage, Long> {
+    @Query("select count(m) from ChatMessage m join m.conversation c where m.senderId<>:user and ((c.traveler.id=:user and c.travelerDeletedAt is null and m.id>coalesce(c.travelerReadId,0) and m.id>coalesce(c.travelerClearedThroughId,0)) or (c.organizer.id=:user and c.organizerDeletedAt is null and m.id>coalesce(c.organizerReadId,0) and m.id>coalesce(c.organizerClearedThroughId,0)))")
+    long unreadCount(@Param("user") Long user);
+
     @EntityGraph(attributePaths = { "replyTo" })
     @Query("select m from ChatMessage m where m.conversation.id=:conversation and m.id>:cleared and (:before is null or m.id<:before) order by m.id desc")
     List<ChatMessage> history(@Param("conversation") Long conversation, @Param("before") Long before,

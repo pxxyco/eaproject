@@ -11,6 +11,7 @@ data class BookingItemDTO(
     val itemLocation: String? = null,
     val bookingType: String? = null,
     val bookingStatus: String? = null,
-    val price: Double? = null
+    val price: Double? = null,
+    val paymentStatus: String? = null
 )
 

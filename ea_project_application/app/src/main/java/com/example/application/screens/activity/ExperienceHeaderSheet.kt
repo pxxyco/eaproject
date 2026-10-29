@@ -12,11 +12,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.application.dto.ExperienceDetail
-import com.example.application.ui.theme.OverlayDark
+import com.example.application.ui.theme.NavigationSelection
+import com.example.application.ui.theme.NavigationAccent
 import com.example.application.ui.theme.RatingAmber
 import com.example.application.ui.theme.Stone400
 import java.util.Locale
@@ -33,14 +33,14 @@ internal fun ExperienceHeaderSheet(
             .padding(20.dp)
     ) {
         Surface(
-            shape = RoundedCornerShape(8.dp),
-            color = OverlayDark
+            shape = RoundedCornerShape(50),
+            color = NavigationSelection
         ) {
             Text(
                 text = detail.categoryLabel,
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.White,
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                style = MaterialTheme.typography.labelMedium,
+                color = NavigationAccent,
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
             )
         }
         Spacer(Modifier.height(10.dp))

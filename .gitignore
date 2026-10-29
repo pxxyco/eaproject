@@ -267,3 +267,7 @@ application-local.yml
 
 # Foto demo
 /ea-project/demo-photo/**/*.jpg
+
+# Local distribution bundles and operational backups
+/dist/
+/backups/

@@ -1,0 +1,24 @@
+name: Domanda o aiuto
+description: Chiedi chiarimenti dopo aver consultato le guide.
+title: "[Domanda] "
+labels: [question]
+body:
+  - type: markdown
+    attributes:
+      value: "Consulta prima docs/FAQ.md. Non condividere credenziali o dati reali."
+  - type: textarea
+    id: question
+    attributes:
+      label: Domanda
+    validations:
+      required: true
+  - type: textarea
+    id: attempted
+    attributes:
+      label: Cosa hai già provato?
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Versione e ambiente

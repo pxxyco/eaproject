@@ -11,7 +11,10 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
-<BorderPane stylesheets="@../../css/app.css" styleClass="navbar" xmlns="http://javafx.com/javafx/21.0.2"
+<?import javafx.scene.shape.SVGPath?>
+<?import javafx.scene.control.Button?>
+<BorderPane stylesheets="@../../css/app.css" styleClass="navbar"
+    xmlns="http://javafx.com/javafx/21.0.2"
     xmlns:fx="http://javafx.com/fxml/1"
     fx:controller="it.unical.ea_project_javafx.controller.common.NavbarController">
     <left>
@@ -73,6 +76,19 @@
                     <Label fx:id="notificationBadge" text="" styleClass="notification-badge"
                         visible="false" managed="false" />
                 </StackPane>
+                <Button fx:id="messagesButton" onAction="#handleChat"
+                    styleClass="notification-bell-container, nav-messages-button"
+                    visible="false" managed="false" accessibleText="Messaggi">
+                    <graphic>
+                        <StackPane>
+                            <SVGPath
+                                content="M 3 1 L 13 1 Q 16 1 16 4 L 16 10 Q 16 13 13 13 L 7 13 L 2 17 L 3 13 Q 0 13 0 10 L 0 4 Q 0 1 3 1 Z"
+                                styleClass="nav-message-icon" />
+                            <Label fx:id="messagesBadge" styleClass="nav-message-badge"
+                                visible="false" managed="false" mouseTransparent="true" />
+                        </StackPane>
+                    </graphic>
+                </Button>
                 <MenuButton fx:id="userMenuButton" styleClass="btn-nav-login" text=""
                     prefHeight="48" minHeight="48" maxHeight="48"
                     accessibleText="Menu utente">
@@ -91,8 +107,6 @@
                         </HBox>
                     </graphic>
                     <items>
-                        <MenuItem fx:id="chatMenuItem" onAction="#handleChat" text="Messaggi" />
-                        <SeparatorMenuItem />
                         <MenuItem fx:id="profileMenuItem" onAction="#handleProfileInfos"
                             text="Il mio Profilo" />
                         <MenuItem fx:id="settingsMenuItem" onAction="#handleSettings"

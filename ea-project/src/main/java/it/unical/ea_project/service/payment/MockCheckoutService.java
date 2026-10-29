@@ -2,6 +2,7 @@ package it.unical.ea_project.service.payment;
 
 import it.unical.ea_project.domain.booking.Booking;
 import it.unical.ea_project.service.booking.BookingLockService;
+import it.unical.ea_project.service.booking.BookingLifecycle;
 import it.unical.ea_project.domain.trip.Trip;
 import it.unical.ea_project.domain.activity.Activity;
 import it.unical.ea_project.domain.payment.Payment;
@@ -45,27 +46,27 @@ public class MockCheckoutService {
         var others = bookings.findForExperience(traveler,
                 booking.getTrip() == null ? null : booking.getTrip().getTripId(),
                 booking.getActivity() == null ? null : booking.getActivity().getActivityId()).stream()
-                .filter(b -> !java.util.Objects.equals(b.getBookingId(), bookingId) && b.getBookingStatus() != Booking.BookingStatus.CANCELLED)
+                .filter(b -> !java.util.Objects.equals(b.getBookingId(), bookingId)
+                        && b.getBookingStatus() != Booking.BookingStatus.CANCELLED)
                 .map(Booking::getBookingId).toList();
         if (!others.isEmpty() && payments.findBookingPaymentsBatch(others).stream()
-                .anyMatch(p -> p.getStatus() == Payment.PaymentStatus.COMPLETED || p.getStatus() == Payment.PaymentStatus.CONFIRMED))
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Hai già una prenotazione pagata per questa esperienza. Gestisci prima le prenotazioni precedenti.");
-        LocalDateTime start;
+                .anyMatch(p -> p.getStatus() == Payment.PaymentStatus.COMPLETED
+                        || p.getStatus() == Payment.PaymentStatus.CONFIRMED))
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Hai già una prenotazione pagata per questa esperienza. Gestisci prima le prenotazioni precedenti.");
         if (booking.getTrip() != null) {
             var trip = booking.getTrip();
             if (trip.getDeletedAt() != null || trip.getStatus() != Trip.TripStatus.PUBLISHED)
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Il viaggio non è più prenotabile.");
-            start = trip.getStartDate() == null ? null : trip.getStartDate().atStartOfDay();
         } else {
             var activity = booking.getActivity();
             if (activity.getDeletedAt() != null || activity.getStatus() != Activity.Status.PUBLISHED)
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "L'attività non è più prenotabile.");
-            start = activity.getStartDate();
         }
-        if (start == null || !start.isAfter(LocalDateTime.now())
+        if (BookingLifecycle.bookingClosed(booking, LocalDateTime.now())
                 || booking.getBookingStatus() == Booking.BookingStatus.COMPLETED)
             throw new ResponseStatusException(HttpStatus.CONFLICT,
-                    "Non puoi pagare un'esperienza già iniziata o conclusa.");
+                    "Il termine di pagamento è scaduto (fine del giorno di inizio).");
         if (booking.getPrice() == null || booking.getPrice().signum() < 0)
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Importo della prenotazione non valido.");
         Payment payment = previous.stream().filter(p -> p.getStatus() == Payment.PaymentStatus.PENDING).findFirst()

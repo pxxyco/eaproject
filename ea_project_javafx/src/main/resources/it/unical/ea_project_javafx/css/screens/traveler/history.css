@@ -136,13 +136,13 @@
     -fx-border-color: transparent;
 }
 
-.history-feed .list-cell {
+.history-feed>.virtual-flow .sheet>.list-cell {
     -fx-border-color: transparent;
     -fx-background-color: transparent;
     -fx-padding: 12 0;
 }
 
-.history-feed .list-cell:empty {
+.history-feed>.virtual-flow .sheet>.list-cell:empty {
     -fx-padding: 0;
 }
 
@@ -163,8 +163,28 @@
     -fx-padding: 0;
 }
 
-.history-feed, .history-feed .list-cell, .history-feed .list-cell:hover,
-.history-feed .list-cell:selected, .history-feed .list-cell:focused,
-.history-feed .list-cell:filled:hover, .history-feed .list-cell:filled:selected {
-    -fx-background-color: transparent; -fx-background-insets: 0; -fx-border-color: transparent;
+.history-filters>.text-field,
+.history-filters>.combo-box {
+    -fx-min-height: 44;
+    -fx-pref-height: 44;
+    -fx-max-height: 44;
+}
+
+.history-feed,
+.history-feed>.virtual-flow .sheet>.list-cell,
+.history-feed>.virtual-flow .sheet>.list-cell:hover,
+.history-feed>.virtual-flow .sheet>.list-cell:selected,
+.history-feed>.virtual-flow .sheet>.list-cell:focused,
+.history-feed>.virtual-flow .sheet>.list-cell:filled:hover,
+.history-feed>.virtual-flow .sheet>.list-cell:filled:selected {
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+    -fx-border-color: transparent;
+}
+
+.history-filters>.combo-box>.list-cell {
+    -fx-padding: 0 8;
+    -fx-alignment: center-left;
+    -fx-background-color: transparent;
+    -fx-font-size: 13;
 }

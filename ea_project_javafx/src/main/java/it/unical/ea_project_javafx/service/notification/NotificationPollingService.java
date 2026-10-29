@@ -39,6 +39,8 @@ public final class NotificationPollingService {
     private JsonArray latestUnread = new JsonArray();
     private long snapshotAt;
     private int lastUnreadCount;
+    private long lastUnreadMessages;
+    private boolean messagesRequestInFlight;
     private long retryAfterEpochMillis;
     private long sessionGeneration;
     private String lastRateLimitMessage = "ERR-104 — Troppe richieste. Riprova tra 60 secondi.";
@@ -56,7 +58,7 @@ public final class NotificationPollingService {
             throw new IllegalArgumentException("Il listener delle notifiche è obbligatorio.");
         listeners.add(listener);
         if (hasSnapshot)
-            listener.accept(new Snapshot(lastUnreadCount, null));
+            listener.accept(new Snapshot(lastUnreadCount, null, lastUnreadMessages));
         if (chatSubscription == null) {
             chatRefresh.setOnFinished(e -> pollNow());
             chatSubscription = ChatEventHub
@@ -112,9 +114,10 @@ public final class NotificationPollingService {
         latestUnread = new JsonArray();
         snapshotAt = 0;
         lastUnreadCount = 0;
+        lastUnreadMessages = 0;
         retryAfterEpochMillis = 0L;
         lastRateLimitMessage = "ERR-104 — Troppe richieste. Riprova tra 60 secondi.";
-        publish(new Snapshot(0, null));
+        publish(new Snapshot(0, null, 0));
     }
 
     private void pollNow() {
@@ -123,6 +126,7 @@ public final class NotificationPollingService {
             return;
         requestInFlight = true;
         long requestGeneration = sessionGeneration;
+        refreshMessageCount(requestGeneration);
         ApiService.callDetailed(UNREAD_URL, null, ApiService.Method.GET, response -> {
             requestInFlight = false;
             if (requestGeneration != sessionGeneration) {
@@ -162,7 +166,8 @@ public final class NotificationPollingService {
                     snapshotAt = System.currentTimeMillis();
                     lastUnreadCount = unread.size();
                     hasSnapshot = true;
-                    publish(new Snapshot(lastUnreadCount, trayCallbacks.isEmpty() ? firstNew : null));
+                    publish(new Snapshot(lastUnreadCount, trayCallbacks.isEmpty() ? firstNew : null,
+                            lastUnreadMessages));
                     notifyTraySuccess(unread);
                 } catch (RuntimeException ignored) {
                     notifyTrayFailure("Non è stato possibile leggere le notifiche.");
@@ -187,6 +192,23 @@ public final class NotificationPollingService {
             }
             notifyTrayFailure(failure);
         }, null);
+    }
+
+    private void refreshMessageCount(long generation) {
+        if (messagesRequestInFlight)
+            return;
+        messagesRequestInFlight = true;
+        ApiService.callDetailed(ApiService.BASE_URL + "/api/chat/unread-count", null, ApiService.Method.GET,
+                response -> {
+                    messagesRequestInFlight = false;
+                    if (generation != sessionGeneration || !UserSession.getInstance().isLoggedIn())
+                        return;
+                    try {
+                        lastUnreadMessages = Math.max(0, Long.parseLong(response.body().strip()));
+                        publish(new Snapshot(lastUnreadCount, null, lastUnreadMessages));
+                    } catch (NumberFormatException ignored) {
+                    }
+                }, message -> messagesRequestInFlight = false, null);
     }
 
     private boolean isRateLimitBackoffActive() {
@@ -220,7 +242,7 @@ public final class NotificationPollingService {
         List<Consumer<Snapshot>> copy = new ArrayList<>(listeners);
         for (int i = 0; i < copy.size(); i++) {
             Consumer<Snapshot> listener = copy.get(i);
-            listener.accept(i == 0 ? snapshot : new Snapshot(snapshot.unreadCount(), null));
+            listener.accept(i == 0 ? snapshot : new Snapshot(snapshot.unreadCount(), null, snapshot.unreadMessages()));
         }
     }
 
@@ -248,7 +270,7 @@ public final class NotificationPollingService {
         }
     }
 
-    public record Snapshot(int unreadCount, JsonObject newNotification) {
+    public record Snapshot(int unreadCount, JsonObject newNotification, long unreadMessages) {
     }
 
     public static final class Subscription implements AutoCloseable {

@@ -1,0 +1,52 @@
+name: Segnala un bug
+description: Un comportamento errato e riproducibile.
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: "Non inserire token, password, carte reali o dati personali. Per vulnerabilità consulta SECURITY.md."
+  - type: dropdown
+    id: component
+    attributes:
+      label: Componente
+      options: [Backend, JavaFX, Android, Docker, Documentazione, Altro]
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Versione o commit
+      placeholder: "Tag della release o hash del commit"
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Ambiente
+      description: Sistema operativo, versione Android/Java, variante debug/release e modalità di avvio.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Passaggi per riprodurre
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Risultato atteso
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Risultato effettivo
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Screenshot o log ripuliti
+      description: Allega solo i dettagli necessari, senza credenziali o dati personali.

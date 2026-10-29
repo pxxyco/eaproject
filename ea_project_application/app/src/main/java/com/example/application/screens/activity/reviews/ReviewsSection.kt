@@ -45,7 +45,7 @@ internal fun LazyListScope.reviewsSection(state: ReviewsState) {
                 }
             } else if (UserSession.role.equals("TRAVELER", true) && reviews != null && state.myReview == null) {
                 Spacer(Modifier.height(8.dp))
-                Text("Per aggiungere una recensione serve una prenotazione confermata e non annullata.",
+                Text("Completa il pagamento per recensire. Per le esperienze gratuite basta la conferma.",
                     style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }

@@ -37,6 +37,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.testTag
@@ -191,7 +193,9 @@ internal fun ExperienceDetailContent(detail: ExperienceDetail, onBookClick: (() 
                     .testTag("experience_cover")
                     .fillMaxWidth()
                     .height(HEADER_HEIGHT)
+                    .padding(horizontal = 16.dp)
                     .graphicsLayer { translationY = -headerOffset }
+                    .clip(RoundedCornerShape(24.dp))
             )
 
             LazyColumn(
@@ -199,7 +203,7 @@ internal fun ExperienceDetailContent(detail: ExperienceDetail, onBookClick: (() 
                 modifier = Modifier.fillMaxSize().testTag("experience_detail_scroll"),
                 contentPadding = PaddingValues(bottom = scrollTail)
             ) {
-                item { Spacer(Modifier.height(HEADER_HEIGHT - 24.dp)) }
+                item { Spacer(Modifier.height(HEADER_HEIGHT)) }
                 item { ExperienceHeaderSheet(detail, rating = if (reviewsState.reviews != null) reviewsState.average else detail.averageRating) }
                 item {
                     Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 8.dp),

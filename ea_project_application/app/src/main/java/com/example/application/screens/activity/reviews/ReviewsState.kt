@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.example.application.dto.BookingItemDTO
+import com.example.application.dto.canReview
 import com.example.application.network.BookingRepository
 import com.example.application.dto.ExperienceRef
 import com.example.application.dto.ResponseDTO
@@ -78,7 +79,7 @@ internal class ReviewsState(
         get() = UserSession.role.equals("TRAVELER", ignoreCase = true) &&
                 reviews != null && participationLoaded && !participationBusy &&
                 myReview == null && bookings.any {
-                    it.bookingStatus in listOf("CONFIRMED", "COMPLETED") && it.itemStatus != "CANCELLED"
+                    it.canReview()
                 }
 
     val average: Double?

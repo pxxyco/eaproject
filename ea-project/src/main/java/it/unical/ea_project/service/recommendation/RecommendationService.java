@@ -91,7 +91,8 @@ public class RecommendationService {
                 if (personalized) {
                     signal(affinity, "city", b.getActivity().getCity(), weight);
                     signal(affinity, "category",
-                            b.getActivity().getCategory() == null ? null : b.getActivity().getCategory().name(), weight);
+                            b.getActivity().getCategory() == null ? null : b.getActivity().getCategory().name(),
+                            weight);
                 }
             }
         }
@@ -115,7 +116,8 @@ public class RecommendationService {
                 if (r.getActivity() != null) {
                     signal(affinity, "city", r.getActivity().getCity(), weight);
                     signal(affinity, "category",
-                            r.getActivity().getCategory() == null ? null : r.getActivity().getCategory().name(), weight);
+                            r.getActivity().getCategory() == null ? null : r.getActivity().getCategory().name(),
+                            weight);
                 }
             }
         }
@@ -132,7 +134,8 @@ public class RecommendationService {
                     normalize(t.getDestinationCity())));
         }
         var activityCandidates = new ArrayList<Candidate<Activity>>();
-        for (var a : activities.recommendationCandidates(LocalDateTime.now(), userId, PageRequest.of(0, 200))) {
+        for (var a : activities.recommendationCandidates(LocalDate.now().atStartOfDay(), userId,
+                PageRequest.of(0, 200))) {
             if (bookedActivities.contains(a.getActivityId()))
                 continue;
             double city = score(affinity, "city", a.getCity()),
@@ -164,7 +167,8 @@ public class RecommendationService {
                 chosenActivities.stream().map(c -> {
                     var a = c.item();
                     return new ActivityPick(new ActivityHomeDTO(a.getActivityId(), a.getTitle(), a.getCity(),
-                            a.getCategory() == null ? "OTHER" : a.getCategory().name(), a.getPrice(), a.getAverageRating(), covers.get(a.getActivityId()),
+                            a.getCategory() == null ? "OTHER" : a.getCategory().name(), a.getPrice(),
+                            a.getAverageRating(), covers.get(a.getActivityId()),
                             a.getStartDate(), a.getEndDate()), c.reason());
                 }).toList());
     }

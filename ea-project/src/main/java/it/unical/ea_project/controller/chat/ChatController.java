@@ -52,6 +52,11 @@ public class ChatController {
         return service.inbox(user.id(), page);
     }
 
+    @GetMapping("/unread-count")
+    public long unreadCount(@AuthenticationPrincipal AuthUser user) {
+        return service.unreadCount(user.id());
+    }
+
     @PostMapping("/conversations")
     public ChatService.ConversationView open(@AuthenticationPrincipal AuthUser user, @RequestBody Open request) {
         if ("ORGANIZER".equals(user.role()) && request.travelerId() != null)

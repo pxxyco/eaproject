@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ArrayList;
 import java.util.UUID;
+import org.springframework.data.domain.PageRequest;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -191,17 +192,30 @@ class RequiredFlowsIntegrationTest {
 
         @Test
         void twoLegacyCopiesCannotBothBePaidEvenConcurrently() throws Exception {
-                Trip t = trip(20); t.setAvailableSeats(18); trips.save(t);
+                Trip t = trip(20);
+                t.setAvailableSeats(18);
+                trips.save(t);
                 List<Long> ids = new ArrayList<>();
                 for (int i = 0; i < 2; i++) {
-                        Booking b = new Booking(); b.setUser(traveler); b.setTrip(t); b.setSeats(1); b.setPrice(BigDecimal.TEN);
-                        b.setBookingType(Booking.BookingType.TRIP); b.setBookingStatus(Booking.BookingStatus.PENDING);
+                        Booking b = new Booking();
+                        b.setUser(traveler);
+                        b.setTrip(t);
+                        b.setSeats(1);
+                        b.setPrice(BigDecimal.TEN);
+                        b.setBookingType(Booking.BookingType.TRIP);
+                        b.setBookingStatus(Booking.BookingStatus.PENDING);
                         ids.add(bookings.save(b).getBookingId());
                 }
                 try (var pool = Executors.newFixedThreadPool(2)) {
                         CountDownLatch start = new CountDownLatch(1);
-                        var first = pool.submit(() -> { start.await(); return call("POST", "/api/payments/mock/bookings/" + ids.get(0), null, traveler); });
-                        var second = pool.submit(() -> { start.await(); return call("POST", "/api/payments/mock/bookings/" + ids.get(1), null, traveler); });
+                        var first = pool.submit(() -> {
+                                start.await();
+                                return call("POST", "/api/payments/mock/bookings/" + ids.get(0), null, traveler);
+                        });
+                        var second = pool.submit(() -> {
+                                start.await();
+                                return call("POST", "/api/payments/mock/bookings/" + ids.get(1), null, traveler);
+                        });
                         start.countDown();
                         var codes = List.of(first.get().statusCode(), second.get().statusCode());
                         assertEquals(1, codes.stream().filter(code -> code == 200).count());
@@ -213,11 +227,18 @@ class RequiredFlowsIntegrationTest {
         @Test
         void concurrentPaymentAndCancellationDoNotDeadlockOrRestoreSeatsTwice() throws Exception {
                 Trip t = trip(10);
-                long id = id(call("POST", "/api/bookings/trips/" + t.getTripId() + "?seats=1", null, traveler), "bookingId");
+                long id = id(call("POST", "/api/bookings/trips/" + t.getTripId() + "?seats=1", null, traveler),
+                                "bookingId");
                 try (var pool = Executors.newFixedThreadPool(2)) {
                         CountDownLatch start = new CountDownLatch(1);
-                        var paid = pool.submit(() -> { start.await(); return call("POST", "/api/payments/mock/bookings/" + id, null, traveler); });
-                        var cancelled = pool.submit(() -> { start.await(); return call("DELETE", "/api/bookings/" + id, null, traveler); });
+                        var paid = pool.submit(() -> {
+                                start.await();
+                                return call("POST", "/api/payments/mock/bookings/" + id, null, traveler);
+                        });
+                        var cancelled = pool.submit(() -> {
+                                start.await();
+                                return call("DELETE", "/api/bookings/" + id, null, traveler);
+                        });
                         start.countDown();
                         int paymentCode = paid.get().statusCode();
                         assertTrue(paymentCode == 200 || paymentCode == 409);
@@ -231,35 +252,76 @@ class RequiredFlowsIntegrationTest {
 
         @Test
         void activityOccurrencesAreUniquePerUserAndFreeOccurrencesNeedNoPayment() throws Exception {
-                Activity a = new Activity(); a.setCreatedBy(owner); a.setTitle("Visita ricorrente"); a.setCity("Roma");
-                a.setCategory(Activity.Category.VISIT); a.setPrice(0d); a.setMaxSeats(10); a.setAvailableSeats(10);
-                a.setStatus(Activity.Status.PUBLISHED); a.setStartDate(LocalDateTime.now().plusDays(2)); a.setEndDate(a.getStartDate().plusHours(1));
+                Activity a = new Activity();
+                a.setCreatedBy(owner);
+                a.setTitle("Visita ricorrente");
+                a.setCity("Roma");
+                a.setCategory(Activity.Category.VISIT);
+                a.setPrice(0d);
+                a.setMaxSeats(10);
+                a.setAvailableSeats(10);
+                a.setStatus(Activity.Status.PUBLISHED);
+                a.setStartDate(LocalDateTime.now().plusDays(2));
+                a.setEndDate(a.getStartDate().plusHours(1));
                 a = activities.save(a);
                 var booked = call("POST", "/api/bookings/activities/" + a.getActivityId() + "?seats=2", null, traveler);
-                assertEquals(200, booked.statusCode(), booked.body()); assertTrue(booked.body().contains("CONFIRMED"));
-                assertEquals(409, call("POST", "/api/bookings/activities/" + a.getActivityId() + "?seats=1", null, traveler).statusCode());
-                Activity later = new Activity(); later.setCreatedBy(owner); later.setTitle(a.getTitle()); later.setCity("Roma");
-                later.setCategory(Activity.Category.VISIT); later.setPrice(0d); later.setMaxSeats(10); later.setAvailableSeats(10);
-                later.setStatus(Activity.Status.PUBLISHED); later.setStartDate(a.getStartDate().plusDays(1)); later.setEndDate(later.getStartDate().plusHours(1));
+                assertEquals(200, booked.statusCode(), booked.body());
+                assertTrue(booked.body().contains("CONFIRMED"));
+                assertEquals(200, call("POST", "/api/reviews",
+                                "{\"activityId\":" + a.getActivityId() + ",\"rating\":5}", traveler).statusCode());
+                assertEquals(409, call("POST", "/api/bookings/activities/" + a.getActivityId() + "?seats=1", null,
+                                traveler).statusCode());
+                Activity later = new Activity();
+                later.setCreatedBy(owner);
+                later.setTitle(a.getTitle());
+                later.setCity("Roma");
+                later.setCategory(Activity.Category.VISIT);
+                later.setPrice(0d);
+                later.setMaxSeats(10);
+                later.setAvailableSeats(10);
+                later.setStatus(Activity.Status.PUBLISHED);
+                later.setStartDate(a.getStartDate().plusDays(1));
+                later.setEndDate(later.getStartDate().plusHours(1));
                 later = activities.save(later);
-                assertEquals(200, call("POST", "/api/bookings/activities/" + later.getActivityId() + "?seats=1", null, traveler).statusCode());
+                assertEquals(200, call("POST", "/api/bookings/activities/" + later.getActivityId() + "?seats=1", null,
+                                traveler).statusCode());
         }
 
         @Test
-        void historyUsesDurationAndDistinguishesExpiredReservationsFromCompletedParticipation() {
-                Activity a = new Activity(); a.setCreatedBy(owner); a.setTitle("Esperienza lunga"); a.setCity("Roma");
-                a.setCategory(Activity.Category.VISIT); a.setPrice(0d); a.setMaxSeats(10); a.setAvailableSeats(9);
-                a.setStatus(Activity.Status.PUBLISHED); a.setStartDate(LocalDateTime.now().minusMinutes(10)); a.setDurationMinutes(120);
+        void historyUsesDayExpiryAndDistinguishesExpiredReservationsFromCompletedParticipation() {
+                Activity a = new Activity();
+                a.setCreatedBy(owner);
+                a.setTitle("Esperienza lunga");
+                a.setCity("Roma");
+                a.setCategory(Activity.Category.VISIT);
+                a.setPrice(0d);
+                a.setMaxSeats(10);
+                a.setAvailableSeats(9);
+                a.setStatus(Activity.Status.PUBLISHED);
+                a.setStartDate(LocalDate.now().atStartOfDay());
+                a.setDurationMinutes(120);
                 a = activities.save(a);
-                Booking b = new Booking(); b.setUser(traveler); b.setActivity(a); b.setSeats(1); b.setPrice(BigDecimal.ZERO);
-                b.setBookingType(Booking.BookingType.ACTIVITY); b.setBookingStatus(Booking.BookingStatus.CONFIRMED); b = bookings.save(b);
+                Booking b = new Booking();
+                b.setUser(traveler);
+                b.setActivity(a);
+                b.setSeats(1);
+                b.setPrice(BigDecimal.ZERO);
+                b.setBookingType(Booking.BookingType.ACTIVITY);
+                b.setBookingStatus(Booking.BookingStatus.CONFIRMED);
+                b = bookings.save(b);
                 assertEquals(0, history.page(traveler.getId(), "", "ALL", 0, 6).total());
-                a.setStartDate(LocalDateTime.now().minusHours(3)); activities.save(a);
+                a.setStartDate(LocalDate.now().minusDays(1).atTime(12, 0));
+                activities.save(a);
                 var ended = history.page(traveler.getId(), "", "ALL", 0, 6);
-                assertEquals(1, ended.total()); assertEquals(1, ended.completed()); assertEquals(1, ended.reviewable());
-                b.setBookingStatus(Booking.BookingStatus.PENDING); bookings.save(b);
+                assertEquals(1, ended.total());
+                assertEquals(1, ended.completed());
+                assertEquals(1, ended.reviewable());
+                b.setBookingStatus(Booking.BookingStatus.PENDING);
+                bookings.save(b);
                 var expired = history.page(traveler.getId(), "", "EXPIRED", 0, 6);
-                assertEquals(1, expired.matched()); assertEquals(0, expired.completed()); assertEquals(0, expired.reviewable());
+                assertEquals(1, expired.matched());
+                assertEquals(0, expired.completed());
+                assertEquals(0, expired.reviewable());
         }
 
         @Test
@@ -270,10 +332,13 @@ class RequiredFlowsIntegrationTest {
                 assertEquals(200, first.statusCode(), first.body());
                 assertEquals(409, call("POST", path, null, traveler).statusCode());
                 assertEquals(18, trips.findById(t.getTripId()).orElseThrow().getAvailableSeats());
-                assertTrue(call("GET", "/api/bookings/mine/experience?tripId=" + t.getTripId(), null, traveler).body().contains("bookingId"));
-                assertEquals("[]", call("GET", "/api/bookings/mine/experience?tripId=" + t.getTripId(), null, secondTraveler).body());
+                assertTrue(call("GET", "/api/bookings/mine/experience?tripId=" + t.getTripId(), null, traveler).body()
+                                .contains("bookingId"));
+                assertEquals("[]", call("GET", "/api/bookings/mine/experience?tripId=" + t.getTripId(), null,
+                                secondTraveler).body());
                 assertEquals(400, call("GET", "/api/bookings/mine/experience", null, traveler).statusCode());
-                assertEquals(204, call("DELETE", "/api/bookings/" + id(first, "bookingId"), null, traveler).statusCode());
+                assertEquals(204,
+                                call("DELETE", "/api/bookings/" + id(first, "bookingId"), null, traveler).statusCode());
                 assertEquals(200, call("POST", path, null, traveler).statusCode());
                 assertEquals(18, trips.findById(t.getTripId()).orElseThrow().getAvailableSeats());
         }
@@ -284,8 +349,14 @@ class RequiredFlowsIntegrationTest {
                 String path = "/api/bookings/trips/" + t.getTripId() + "?seats=1";
                 try (var pool = Executors.newFixedThreadPool(2)) {
                         CountDownLatch start = new CountDownLatch(1);
-                        var first = pool.submit(() -> { start.await(); return call("POST", path, null, traveler); });
-                        var second = pool.submit(() -> { start.await(); return call("POST", path, null, traveler); });
+                        var first = pool.submit(() -> {
+                                start.await();
+                                return call("POST", path, null, traveler);
+                        });
+                        var second = pool.submit(() -> {
+                                start.await();
+                                return call("POST", path, null, traveler);
+                        });
                         start.countDown();
                         var codes = List.of(first.get().statusCode(), second.get().statusCode());
                         assertEquals(1, codes.stream().filter(code -> code == 200).count());
@@ -298,17 +369,28 @@ class RequiredFlowsIntegrationTest {
         void anOlderCompletedParticipationAllowsReviewEvenWithLaterPendingOrCancelledRecords() throws Exception {
                 Trip t = trip(20);
                 var booked = call("POST", "/api/bookings/trips/" + t.getTripId() + "?seats=1", null, traveler);
-                assertEquals(200, call("POST", "/api/payments/mock/bookings/" + id(booked, "bookingId"), null, traveler).statusCode());
-                t.setStartDate(LocalDate.now().minusDays(4)); t.setEndDate(LocalDate.now().minusDays(3)); trips.save(t);
+                assertEquals(200, call("POST", "/api/payments/mock/bookings/" + id(booked, "bookingId"), null, traveler)
+                                .statusCode());
+                t.setStartDate(LocalDate.now().minusDays(4));
+                t.setEndDate(LocalDate.now().minusDays(3));
+                trips.save(t);
                 for (int i = 0; i < 4; i++) {
-                        Booking old = new Booking(); old.setUser(traveler); old.setTrip(t); old.setSeats(1); old.setPrice(BigDecimal.TEN);
+                        Booking old = new Booking();
+                        old.setUser(traveler);
+                        old.setTrip(t);
+                        old.setSeats(1);
+                        old.setPrice(BigDecimal.TEN);
                         old.setBookingType(Booking.BookingType.TRIP);
-                        old.setBookingStatus(i % 2 == 0 ? Booking.BookingStatus.PENDING : Booking.BookingStatus.CANCELLED);
+                        old.setBookingStatus(
+                                        i % 2 == 0 ? Booking.BookingStatus.PENDING : Booking.BookingStatus.CANCELLED);
                         bookings.save(old);
                 }
                 var review = call("POST", "/api/reviews", "{\"tripId\":" + t.getTripId() + ",\"rating\":4}", traveler);
                 assertEquals(200, review.statusCode(), review.body());
-                assertEquals(200, call("PUT", "/api/reviews/" + id(review, "reviewId"), "{\"rating\":5,\"comment\":\"Esperienza aggiornata\"}", traveler).statusCode());
+                assertEquals(200,
+                                call("PUT", "/api/reviews/" + id(review, "reviewId"),
+                                                "{\"rating\":5,\"comment\":\"Esperienza aggiornata\"}", traveler)
+                                                .statusCode());
         }
 
         @Test
@@ -602,12 +684,17 @@ class RequiredFlowsIntegrationTest {
         @Test
         void chatDeletionIsPersonalAndNewMessagesRestoreOnlyNewHistory() throws Exception {
                 long c = chat(traveler, owner);
+                assertEquals("0", call("GET", "/api/chat/unread-count", null, traveler).body());
                 var first = message(c, owner, "Primo messaggio", null);
                 assertEquals(200, first.statusCode(), first.body());
+                assertEquals("1", call("GET", "/api/chat/unread-count", null, traveler).body());
+                assertEquals("0", call("GET", "/api/chat/unread-count", null, owner).body());
+                assertEquals("0", call("GET", "/api/chat/unread-count", null, secondTraveler).body());
                 String base = "/api/chat/conversations/" + c;
                 assertEquals(403, call("GET", base + "/messages", null, secondTraveler).statusCode());
                 assertEquals(403, call("DELETE", base, null, secondTraveler).statusCode());
                 assertEquals(204, call("DELETE", base, null, traveler).statusCode());
+                assertEquals("0", call("GET", "/api/chat/unread-count", null, traveler).body());
                 assertEquals("[]", call("GET", "/api/chat/conversations", null, traveler).body());
                 assertEquals(200,
                                 call("POST", "/api/chat/conversations", "{\"travelerId\":" + traveler.getId() + "}",
@@ -616,11 +703,16 @@ class RequiredFlowsIntegrationTest {
                 assertEquals("[]", call("GET", "/api/chat/conversations", null, traveler).body());
                 assertEquals("[]", call("GET", base + "/messages", null, traveler).body());
                 assertTrue(call("GET", base + "/messages", null, owner).body().contains("Primo messaggio"));
-                assertEquals(200, message(c, owner, "Dopo eliminazione", null).statusCode());
+                var second = message(c, owner, "Dopo eliminazione", null);
+                assertEquals(200, second.statusCode());
+                assertEquals("1", call("GET", "/api/chat/unread-count", null, traveler).body());
                 String history = call("GET", base + "/messages", null, traveler).body();
                 assertTrue(history.contains("Dopo eliminazione"));
                 assertTrue(!history.contains("Primo messaggio"));
                 assertTrue(call("GET", "/api/chat/conversations", null, traveler).body().contains("Dopo eliminazione"));
+                assertEquals(204, call("POST", base + "/read", "{\"throughId\":" + id(second, "id") + "}", traveler)
+                                .statusCode());
+                assertEquals("0", call("GET", "/api/chat/unread-count", null, traveler).body());
         }
 
         @Test
@@ -919,9 +1011,12 @@ class RequiredFlowsIntegrationTest {
         void concurrentReviewsAreUniqueAndAggregateRatingsStayConsistent() throws Exception {
                 Trip t = trip(5);
                 var firstBooking = call("POST", "/api/bookings/trips/" + t.getTripId() + "?seats=1", null, traveler);
-                assertEquals(200, call("POST", "/api/payments/mock/bookings/" + id(firstBooking, "bookingId"), null, traveler).statusCode());
-                var secondBooking = call("POST", "/api/bookings/trips/" + t.getTripId() + "?seats=1", null, secondTraveler);
-                assertEquals(200, call("POST", "/api/payments/mock/bookings/" + id(secondBooking, "bookingId"), null, secondTraveler).statusCode());
+                assertEquals(200, call("POST", "/api/payments/mock/bookings/" + id(firstBooking, "bookingId"), null,
+                                traveler).statusCode());
+                var secondBooking = call("POST", "/api/bookings/trips/" + t.getTripId() + "?seats=1", null,
+                                secondTraveler);
+                assertEquals(200, call("POST", "/api/payments/mock/bookings/" + id(secondBooking, "bookingId"), null,
+                                secondTraveler).statusCode());
                 t.setStatus(Trip.TripStatus.COMPLETED);
                 trips.save(t);
                 String content = "{\"tripId\":" + t.getTripId() + ",\"rating\":4,\"comment\":\"Ottimo\"}";
@@ -951,7 +1046,8 @@ class RequiredFlowsIntegrationTest {
         void organizerResponsesRejectEmptyContentAndConcurrentDuplicates() throws Exception {
                 Trip t = trip(5);
                 var booked = call("POST", "/api/bookings/trips/" + t.getTripId() + "?seats=1", null, traveler);
-                assertEquals(200, call("POST", "/api/payments/mock/bookings/" + id(booked, "bookingId"), null, traveler).statusCode());
+                assertEquals(200, call("POST", "/api/payments/mock/bookings/" + id(booked, "bookingId"), null, traveler)
+                                .statusCode());
                 t.setStatus(Trip.TripStatus.COMPLETED);
                 trips.save(t);
                 long review = id(call("POST", "/api/reviews", "{\"tripId\":" + t.getTripId() + ",\"rating\":5}",
@@ -1007,18 +1103,27 @@ class RequiredFlowsIntegrationTest {
                         assertEquals(name, users.findByUsernameIgnoreCase(name).orElseThrow().getUsername());
                 }
         }
+
         @Test
         void paymentUnlocksReviewWithoutWaitingForDepartureAndDuplicateReviewIsRejected() throws Exception {
                 Trip t = trip(6);
-                String review = "{\"tripId\":" + t.getTripId() + ",\"rating\":5,\"comment\":\"Prenotazione confermata\"}";
+                String review = "{\"tripId\":" + t.getTripId()
+                                + ",\"rating\":5,\"comment\":\"Prenotazione confermata\"}";
                 var reserved = call("POST", "/api/bookings/trips/" + t.getTripId() + "?seats=2", null, traveler);
                 assertEquals(200, reserved.statusCode(), reserved.body());
                 long booking = id(reserved, "bookingId");
                 assertEquals(400, call("POST", "/api/reviews", review, traveler).statusCode());
+                var legacy = bookings.findById(booking).orElseThrow();
+                legacy.setBookingStatus(Booking.BookingStatus.CONFIRMED);
+                bookings.save(legacy);
+                assertEquals(400, call("POST", "/api/reviews", review, traveler).statusCode());
+                legacy.setBookingStatus(Booking.BookingStatus.PENDING);
+                bookings.save(legacy);
                 assertEquals(200, call("POST", "/api/payments/mock/bookings/" + booking, null, traveler).statusCode());
                 assertEquals(200, call("POST", "/api/payments/mock/bookings/" + booking, null, traveler).statusCode());
                 assertEquals(4, trips.findById(t.getTripId()).orElseThrow().getAvailableSeats());
-                assertEquals(409, call("POST", "/api/bookings/trips/" + t.getTripId() + "?seats=1", null, traveler).statusCode());
+                assertEquals(409, call("POST", "/api/bookings/trips/" + t.getTripId() + "?seats=1", null, traveler)
+                                .statusCode());
                 var created = call("POST", "/api/reviews", review, traveler);
                 assertEquals(200, created.statusCode(), created.body());
                 assertEquals(400, call("POST", "/api/reviews", review, traveler).statusCode());
@@ -1026,17 +1131,76 @@ class RequiredFlowsIntegrationTest {
                 assertEquals(6, trips.findById(t.getTripId()).orElseThrow().getAvailableSeats());
                 assertEquals(400, call("POST", "/api/reviews", review, traveler).statusCode());
         }
+
+        @Test
+        void publishingForTodayShowsInHomeSearchSuggestionsAndRecommendationsAndCanBeBooked() throws Exception {
+                LocalDate today = LocalDate.now();
+                String activityJson = "{\"title\":\"Oggitest attivita\",\"city\":\"Roma\",\"category\":\"VISIT\",\"price\":10,\"maxSeats\":8,\"status\":\"PUBLISHED\",\"startDate\":\""
+                                + today + "T00:00:00\",\"endDate\":\"" + today + "T01:00:00\"}";
+                var createdActivity = call("POST", "/api/activities", activityJson, owner);
+                assertEquals(201, createdActivity.statusCode(), createdActivity.body());
+                long activity = id(createdActivity, "activityId");
+                String tripJson = "{\"title\":\"Oggitest viaggio\",\"destinationCity\":\"Roma\",\"destinationCountry\":\"Italia\",\"totalPrice\":10,\"maxSeats\":8,\"status\":\"PUBLISHED\",\"startDate\":\""
+                                + today + "\",\"endDate\":\"" + today + "\"}";
+                var createdTrip = call("POST", "/api/trips", tripJson, owner);
+                assertEquals(200, createdTrip.statusCode(), createdTrip.body());
+                long trip = id(createdTrip, "tripId");
+                for (String path : List.of("/api/activities/top/cards", "/api/activities/search?query=Oggitest",
+                                "/api/activities/search?query=Oggitest&date=" + today,
+                                "/api/activities/suggest?query=Oggitest")) {
+                        var response = call("GET", path, null, traveler);
+                        assertEquals(200, response.statusCode(), response.body());
+                        assertTrue(response.body().contains("\"activityId\":" + activity),
+                                        path + ": " + response.body());
+                }
+                for (String path : List.of("/api/trips/top", "/api/trips/search?query=Oggitest",
+                                "/api/trips/search?query=Oggitest&date=" + today,
+                                "/api/trips/suggest?query=Oggitest")) {
+                        var response = call("GET", path, null, traveler);
+                        assertEquals(200, response.statusCode(), response.body());
+                        assertTrue(response.body().contains("\"tripId\":" + trip), path + ": " + response.body());
+                }
+                var picks = call("GET", "/api/recommendations/mine?limit=24", null, traveler);
+                assertEquals(200, picks.statusCode(), picks.body());
+                assertTrue(picks.body().contains("\"tripId\":" + trip));
+                assertTrue(picks.body().contains("\"activityId\":" + activity));
+                for (String path : List.of("/api/bookings/activities/" + activity, "/api/bookings/trips/" + trip)) {
+                        var booked = call("POST", path + "?seats=2", null, traveler);
+                        assertEquals(200, booked.statusCode(), booked.body());
+                        assertEquals(409, call("POST", path + "?seats=1", null, traveler).statusCode());
+                        long booking = id(booked, "bookingId");
+                        assertEquals(200, call("POST", "/api/payments/mock/bookings/" + booking, null, traveler)
+                                        .statusCode());
+                        assertEquals(204, call("DELETE", "/api/bookings/" + booking, null, traveler).statusCode());
+                }
+                assertFalse(activities
+                                .findBookableOrderByRating(today.plusDays(1).atStartOfDay(), PageRequest.of(0, 20))
+                                .stream().anyMatch(a -> a.getActivityId() == activity));
+                assertFalse(trips.findTopTrips(Trip.TripStatus.PUBLISHED, today.plusDays(1), PageRequest.of(0, 20))
+                                .stream().anyMatch(t -> t.getTripId() == trip));
+        }
+
         @Test
         void activityDuplicatesAreRejectedAndCancellationAllowsRebooking() throws Exception {
-                Activity a = new Activity(); a.setCreatedBy(owner); a.setTitle("Museo"); a.setCity("Roma");
-                a.setCategory(Activity.Category.VISIT); a.setPrice(10d); a.setMaxSeats(20); a.setAvailableSeats(20);
-                a.setStartDate(LocalDateTime.now().plusDays(2)); a.setEndDate(LocalDateTime.now().plusDays(2).plusHours(2));
-                a.setStatus(Activity.Status.PUBLISHED); a = activities.save(a);
+                Activity a = new Activity();
+                a.setCreatedBy(owner);
+                a.setTitle("Museo");
+                a.setCity("Roma");
+                a.setCategory(Activity.Category.VISIT);
+                a.setPrice(10d);
+                a.setMaxSeats(20);
+                a.setAvailableSeats(20);
+                a.setStartDate(LocalDateTime.now().plusDays(2));
+                a.setEndDate(LocalDateTime.now().plusDays(2).plusHours(2));
+                a.setStatus(Activity.Status.PUBLISHED);
+                a = activities.save(a);
                 String path = "/api/bookings/activities/" + a.getActivityId() + "?seats=2";
-                var first = call("POST", path, null, traveler); assertEquals(200, first.statusCode(), first.body());
+                var first = call("POST", path, null, traveler);
+                assertEquals(200, first.statusCode(), first.body());
                 assertEquals(409, call("POST", path, null, traveler).statusCode());
                 assertEquals(18, activities.findById(a.getActivityId()).orElseThrow().getAvailableSeats());
-                assertEquals(204, call("DELETE", "/api/bookings/" + id(first, "bookingId"), null, traveler).statusCode());
+                assertEquals(204,
+                                call("DELETE", "/api/bookings/" + id(first, "bookingId"), null, traveler).statusCode());
                 assertEquals(20, activities.findById(a.getActivityId()).orElseThrow().getAvailableSeats());
                 assertEquals(200, call("POST", path, null, traveler).statusCode());
                 assertEquals(18, activities.findById(a.getActivityId()).orElseThrow().getAvailableSeats());
