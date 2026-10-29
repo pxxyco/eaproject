@@ -256,7 +256,8 @@ private fun NewListDialog(
 }
 
 @Composable
-internal fun LoginRequired(modifier: Modifier = Modifier, onLoginClick: () -> Unit) {
+internal fun LoginRequired(modifier: Modifier = Modifier, title: String = "Accedi per vedere le tue liste",
+    description: String = "Prenotazioni, preferiti e liste personalizzate sono disponibili solo con un account.", onLoginClick: () -> Unit) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -266,14 +267,14 @@ internal fun LoginRequired(modifier: Modifier = Modifier, onLoginClick: () -> Un
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Accedi per vedere le tue liste",
+            text = title,
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            text = "Prenotazioni, preferiti e liste personalizzate sono disponibili solo con un account.",
+            text = description,
             style = MaterialTheme.typography.bodyMedium,
             color = Stone300,
             textAlign = TextAlign.Center

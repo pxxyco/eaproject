@@ -1,5 +1,11 @@
 package com.example.application.screens.activity
 
+import com.example.application.dto.canPay
+import com.example.application.screens.payment.MockPaymentDialog
+import com.example.application.dto.BookingItemDTO
+import androidx.compose.material3.Button
+import androidx.compose.material3.TextButton
+import com.example.application.screens.chat.LocalChatState
 import android.widget.Toast
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
@@ -121,6 +127,8 @@ internal fun ExperienceDetailContent(detail: ExperienceDetail, onBookClick: (() 
     val scrollTail = LocalNavigationTail.current.coerceAtLeast(72.dp)
     var selectedTab by rememberSaveable { mutableStateOf(DetailTab.DESCRIPTION) }
     var openPhoto by remember { mutableStateOf<PhotoViewerRequest?>(null) }
+    val chat = LocalChatState.current
+    var payment by remember { mutableStateOf<BookingItemDTO?>(null) }
     val user = UserSession.user
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -213,6 +221,12 @@ internal fun ExperienceDetailContent(detail: ExperienceDetail, onBookClick: (() 
                     }
                 }
 
+                if (traveler && ownerId != null) item {
+                    TextButton(enabled = chat != null && !chat.busy, onClick = { scope.launch { chat?.openOrganizer(ownerId); chat?.error?.let { Toast.makeText(context, it, Toast.LENGTH_LONG).show() } } }, modifier = Modifier.padding(horizontal = 16.dp)) { Text("Contatta organizzatore") }
+                }
+                reviewsState.bookings.firstOrNull { it.canPay() }?.let { pending -> item {
+                    Button(onClick = { payment = pending }, modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)) { Text("Completa il pagamento") }
+                } }
                 stickyHeader {
                     DetailTabs(
                         selected = selectedTab,
@@ -257,7 +271,7 @@ internal fun ExperienceDetailContent(detail: ExperienceDetail, onBookClick: (() 
             Toast.makeText(context, "Aggiunto a $name", Toast.LENGTH_SHORT).show()
         })
         bookingSeats?.let { seats ->
-            BookingSheet(detail.title, detail.price, seats, onDismiss = { bookingSeats = null }, onConfirm = { selected ->
+            BookingSheet(detail.title, detail.price, seats, onDismiss = { bookingSeats = null }, onPaid = { reviewsState.refreshParticipation() }, onConfirm = { selected ->
                 val booking = BookingRepository.book(detail.ref, selected)
                 reviewsState.refreshParticipation()
                 try { onRefresh() } catch (e: CancellationException) { throw e }
@@ -265,6 +279,7 @@ internal fun ExperienceDetailContent(detail: ExperienceDetail, onBookClick: (() 
                 booking
             })
         }
+        payment?.let { booking -> MockPaymentDialog(booking, onDismiss = { payment = null }, onPaid = { reviewsState.refreshParticipation() }) }
         ReviewDialogs(reviewsState)
         openPhoto?.let { request ->
             PhotoViewer(request = request, onDismiss = { openPhoto = null })

@@ -31,4 +31,12 @@ class BookingRulesTest {
         assertTrue(b.canCancel(now.toLocalDate().atTime(java.time.LocalTime.MAX)))
         assertFalse(b.canCancel(now.toLocalDate().plusDays(1).atStartOfDay()))
     }
+    @Test fun paymentIsAllowedForPendingBookingsUntilEndOfStartDayOnly() {
+        val pending = future.copy(bookingStatus = "PENDING", price = 20.0, itemDate = "2026-10-26")
+        assertTrue(pending.canPay(now.toLocalDate().atTime(java.time.LocalTime.MAX)))
+        assertFalse(pending.canPay(now.plusDays(1)))
+        assertFalse(pending.copy(bookingStatus = "CANCELLED").canPay(now))
+        assertFalse(pending.copy(paymentStatus = "CONFIRMED").canPay(now))
+        assertFalse(pending.copy(price = 0.0).canPay(now))
+    }
 }

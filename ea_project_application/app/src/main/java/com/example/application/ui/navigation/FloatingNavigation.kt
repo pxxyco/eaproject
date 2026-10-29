@@ -30,7 +30,7 @@ import com.example.application.ui.theme.NavigationOutline
 
 @Composable
 internal fun FloatingNavigation(destinations: List<AppDestinations>, selected: AppDestinations, onSelect: (AppDestinations) -> Unit,
-    modifier: Modifier = Modifier) {
+    modifier: Modifier = Modifier, unreadMessages: Long = 0) {
     val shape = RoundedCornerShape(32.dp)
     Box(modifier.widthIn(max = 560.dp).fillMaxWidth().testTag("floating_navigation")) {
         Box(Modifier.matchParentSize().dropShadow(shape, Shadow(radius = 12.dp, color = Color.Black.copy(alpha = .18f), offset = DpOffset(0.dp, 4.dp))).clip(shape).background(GlassFill).border(1.dp, GlassBorder, shape))
@@ -45,7 +45,9 @@ internal fun FloatingNavigation(destinations: List<AppDestinations>, selected: A
                     .selectable(active, role = Role.Tab, interactionSource = interactions, indication = null, onClick = { onSelect(destination) })
                     .heightIn(min = 64.dp).padding(vertical = 9.dp),
                     verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterVertically), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(painterResource(destination.icon), null, Modifier.size(26.dp), tint = tint)
+                    BadgedBox(badge = { if (destination == AppDestinations.MESSAGES && unreadMessages > 0) Badge { Text(if (unreadMessages > 99) "99+" else unreadMessages.toString()) } }) {
+                        Icon(painterResource(destination.icon), null, Modifier.size(26.dp), tint = tint)
+                    }
                     Text(destination.label, style = MaterialTheme.typography.labelMedium, color = tint, maxLines = 1)
                 }
             }

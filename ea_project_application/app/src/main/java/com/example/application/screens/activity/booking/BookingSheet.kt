@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.application.screens.payment.MockPaymentDialog
 import com.example.application.dto.BookingItemDTO
 import com.example.application.ui.theme.PopupSurface
 import com.example.application.ui.theme.Stone200
@@ -46,11 +47,14 @@ internal fun BookingSheet(
     price: Double?,
     availableSeats: Int,
     onDismiss: () -> Unit,
+    onPaid: suspend () -> Unit = {},
     onConfirm: suspend (seats: Int) -> BookingItemDTO
 ) {
     var seats by rememberSaveable { mutableIntStateOf(1) }
     var saving by remember { mutableStateOf(false) }
     var done by remember { mutableStateOf(false) }
+    var savedBooking by remember { mutableStateOf<BookingItemDTO?>(null) }
+    var payment by remember { mutableStateOf(false) }
     var awaitingPayment by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
@@ -80,6 +84,7 @@ internal fun BookingSheet(
                     color = Stone200
                 )
                 Spacer(Modifier.height(16.dp))
+                if (awaitingPayment) Button(onClick = { payment = true }, modifier = Modifier.fillMaxWidth()) { Text("Paga ora") }
                 Button(
                     onClick = onDismiss,
                     modifier = Modifier.fillMaxWidth(),
@@ -165,7 +170,9 @@ internal fun BookingSheet(
                         error = null
                         scope.launch {
                             try {
-                                awaitingPayment = onConfirm(seats).bookingStatus == "PENDING"
+                                savedBooking = onConfirm(seats)
+                                awaitingPayment = savedBooking?.bookingStatus == "PENDING"
+                                payment = awaitingPayment
                                 done = true
                             } catch (e: CancellationException) {
                                 throw e
@@ -194,5 +201,11 @@ internal fun BookingSheet(
                 }
             }
         }
+    }
+    if (payment) savedBooking?.let { booking ->
+        MockPaymentDialog(booking, onDismiss = { payment = false }, onPaid = {
+            awaitingPayment = false
+            onPaid()
+        })
     }
 }

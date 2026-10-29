@@ -274,3 +274,6 @@ application-local.yml
 
 # Docker release checksums are distributed with their archives
 /*.tar.sha256
+
+# Kotlin compiler local state
+**/.kotlin/

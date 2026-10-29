@@ -1,5 +1,6 @@
 package com.example.application.screens.organizer
 
+import com.example.application.screens.chat.LocalChatState
 import com.example.application.ui.effects.LocalNavigationTail
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
@@ -32,6 +33,7 @@ fun OrganizerDashboardScreen(userId: Long, modifier: Modifier = Modifier) {
 
 @Composable
 private fun Dashboard(userId: Long, modifier: Modifier) {
+    val chat = LocalChatState.current
     val scope = rememberCoroutineScope()
     var offers by remember { mutableStateOf<List<OrganizerOffer>>(emptyList()) }
     var bookings by remember { mutableStateOf<List<JsonObject>>(emptyList()) }
@@ -146,6 +148,9 @@ private fun Dashboard(userId: Long, modifier: Modifier) {
                 Text(booking.text("participantName").ifBlank { "Partecipante" }, style = MaterialTheme.typography.titleMedium)
                 Text(booking.text("participantEmail"), color = Stone400)
                 Text(booking.text("itemTitle"))
+                booking.text("userId").toLongOrNull()?.let { traveler ->
+                    TextButton(enabled = chat != null && !chat.busy, onClick = { scope.launch { chat?.openTraveler(traveler); chat?.error?.let { error = it } } }) { Text("Contatta partecipante") }
+                }
                 Text(when (booking.text("bookingStatus")) { "PENDING" -> "In attesa"; "CONFIRMED" -> "Confermata"; "COMPLETED" -> "Completata"; else -> booking.text("bookingStatus") })
                 Text("${dateLabel(booking.text("createdAt"))} · ${booking.number("seats")} posti", color = Stone400)
             }

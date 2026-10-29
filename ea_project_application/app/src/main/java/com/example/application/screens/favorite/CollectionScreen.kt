@@ -11,6 +11,8 @@ import androidx.compose.ui.platform.LocalContext
 import com.example.application.device.CalendarEvent
 import com.example.application.device.openCalendar
 import com.example.application.ui.effects.LocalNavigationTail
+import com.example.application.dto.canPay
+import com.example.application.screens.payment.MockPaymentDialog
 import com.example.application.dto.canCancel
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -47,6 +49,7 @@ fun CollectionScreen(
     }
 ) {
     val context = LocalContext.current
+    var payment by remember(target) { mutableStateOf<BookingItemDTO?>(null) }
     var busy by remember(target) { mutableStateOf(false) }
     BackHandler(enabled = !busy, onBack = onBack)
     var data by remember(target) { mutableStateOf(CollectionItemsDTO()) }
@@ -117,6 +120,7 @@ fun CollectionScreen(
                             )
                         }
                     )
+                    if (booking.canPay()) Button(enabled = !busy, onClick = { payment = booking }) { Text("Completa il pagamento") }
                     if (!booking.bookingStatus.equals("CANCELLED", true)) {
                         CalendarEvent.from(booking.itemTitle, booking.itemLocation, booking.itemDate, booking.itemEndDate)?.let { event ->
                             OutlinedButton(onClick = { context.openCalendar(event)?.let { error = it } }, enabled = !busy) {
@@ -167,6 +171,7 @@ fun CollectionScreen(
         }
     }
 
+    payment?.let { booking -> MockPaymentDialog(booking, onDismiss = { payment = null }, onPaid = { reload++ }) }
     pending?.let { action ->
         AlertDialog(
             onDismissRequest = { if (!busy) pending = null },

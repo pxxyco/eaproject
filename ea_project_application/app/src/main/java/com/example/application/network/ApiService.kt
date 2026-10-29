@@ -80,6 +80,10 @@ object ApiService {
         .authenticator(authenticator)
         .build()
 
+    internal fun eventCall(path: String): okhttp3.Call = client.newBuilder()
+        .readTimeout(45, TimeUnit.SECONDS).build()
+        .newCall(Request.Builder().url(resolveUrl(path)).header("Accept", "text/event-stream").build())
+
     suspend fun <T> get(path: String, type: Class<T>) = call("GET", path, null, type)
     suspend fun <T> post(path: String, body: Any?, type: Class<T>) = call("POST", path, body, type)
     suspend fun <T> put(path: String, body: Any?, type: Class<T>) = call("PUT", path, body, type)
@@ -88,11 +92,12 @@ object ApiService {
     suspend fun uploadPhoto(path: String, field: String, bytes: ByteArray, mimeType: String): ApiResult<Unit> =
         uploadPhoto(path, field, bytes, mimeType, Unit::class.java)
 
-    suspend fun <T> uploadPhoto(path: String, field: String, bytes: ByteArray, mimeType: String, type: Class<T>): ApiResult<T> =
+    suspend fun <T> uploadPhoto(path: String, field: String, bytes: ByteArray, mimeType: String, type: Class<T>, fields: Map<String, String> = emptyMap()): ApiResult<T> =
         withContext(Dispatchers.IO) {
             try {
-                val body = okhttp3.MultipartBody.Builder().setType(okhttp3.MultipartBody.FORM)
-                    .addFormDataPart(field, "photo", bytes.toRequestBody(mimeType.toMediaType())).build()
+                val builder = okhttp3.MultipartBody.Builder().setType(okhttp3.MultipartBody.FORM)
+                fields.forEach { (key, value) -> builder.addFormDataPart(key, value) }
+                val body = builder.addFormDataPart(field, "photo", bytes.toRequestBody(mimeType.toMediaType())).build()
                 val request = Request.Builder().url(resolveUrl(path)).post(body).build()
                 client.newCall(request).execute().use { mapResponse(it, type) }
             } catch (exception: IOException) {
@@ -172,8 +177,7 @@ object ApiService {
     suspend fun isBackendReachable(): Boolean = withContext(Dispatchers.IO) {
         try {
             bareClient.newCall(Request.Builder().url("$BASE_URL/api/health").build())
-                .execute().use { Log.d(TAG, "Health check: HTTP ${it.code}") }
-            true
+                .execute().use { Log.d(TAG, "Health check: HTTP ${it.code}"); it.isSuccessful }
         } catch (e: Exception) {
             Log.e(TAG, "Health check fallito verso $BASE_URL: ${e::class.simpleName}: ${e.message}")
             false

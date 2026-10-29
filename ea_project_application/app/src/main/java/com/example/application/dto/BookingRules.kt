@@ -26,3 +26,7 @@ private fun parseBookingDate(value: String?, endOfDay: Boolean = false): LocalDa
     return runCatching { LocalDateTime.parse(value) }.getOrNull()
         ?: runCatching { LocalDate.parse(value).atTime(if (endOfDay) LocalTime.MAX else LocalTime.MIN) }.getOrNull()
 }
+
+internal fun BookingItemDTO.canPay(now: LocalDateTime = LocalDateTime.now()): Boolean =
+    bookingId != null && bookingStatus == "PENDING" && (price ?: 0.0) > 0.0 &&
+        paymentStatus !in listOf("CONFIRMED", "COMPLETED", "REFUNDED") && canCancel(now)

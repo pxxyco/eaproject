@@ -36,6 +36,8 @@ L'app si collega a `https://localhost:8443` (`network/ApiService.kt`).
 
 Il backend usa un certificato self-signed. La variante **debug** si fida di quel certificato tramite `src/debug/res/xml/network_security_config.xml` e `src/debug/res/raw/ea_cert.cer`. Il certificato è valido per `localhost`, `127.0.0.1` e `10.0.2.2`. La variante release non si fida del certificato di sviluppo.
 
+Con Docker usa il Compose principale con TLS attivo (impostazione predefinita), porta host `8443` e lo stesso keystore di sviluppo in `certs/server.p12`. Esegui sempre `adb reverse tcp:8443 tcp:8443`, anche su dispositivo USB. Non disabilitare HTTPS: la variante debug si fida della CA solo per lo sviluppo, senza disabilitare la verifica del nome host.
+
 ## Funzionalità
 
 **Viaggiatore**
@@ -43,9 +45,10 @@ Il backend usa un certificato self-signed. La variante **debug** si fida di quel
 - Home con viaggi e attività, ricerca con suggerimenti, filtro per data, categorie e caricamento progressivo
 - Raccomandazioni personalizzate
 - Dettaglio di viaggi e attività: descrizione, itinerario con timeline delle tappe, galleria foto, recensioni
-- Prenotazione e annullamento
+- Prenotazione, annullamento e pagamento mock con ricevuta e ripresa delle prenotazioni in attesa
 - Recensioni (creazione, modifica, cancellazione)
 - Preferiti e liste (creazione, rinomina, eliminazione, aggiunta e rimozione di elementi)
+- Chat Traveler–Organizer in tempo reale, badge non letti, risposte ai messaggi e foto private caricate su richiesta
 - Account: profilo, foto profilo, cambio password, carte salvate (anche lette con fotocamera o NFC), centro assistenza
 
 **Organizzatore**
@@ -55,7 +58,9 @@ Il backend usa un certificato self-signed. La variante **debug** si fida di quel
 
 ## Funzioni disponibili solo nel client JavaFX
 
-Pagamento mock delle prenotazioni, condivisione delle liste con utenti specifici, notifiche, chat, itinerari collaborativi, export `.ics`, mappa.
+Condivisione delle liste con utenti specifici, centro notifiche, itinerari collaborativi, export `.ics`, mappa.
+
+La chat mobile usa un solo collegamento SSE autenticato mentre l’app è in primo piano; si riconnette con attesa crescente e aggiorna i messaggi senza polling continuo. Foto inviate e ricevute non vengono salvate dall’app su disco. Gli avvisi della chat sono in-app: questa funzione non introduce notifiche push quando l’app è chiusa.
 
 ## Struttura del codice
 

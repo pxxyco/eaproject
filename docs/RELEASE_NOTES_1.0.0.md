@@ -10,7 +10,8 @@ Prima build ufficiale stabile di EA Project per il corso Enterprise Applications
 - Prenotazioni con disponibilità controllata, protezione dai duplicati e gestione delle richieste concorrenti.
 - Offerte per il giorno corrente visibili e prenotabili fino alle 23:59 del giorno di inizio.
 - Profili, foto, recensioni, preferiti e strumenti Organizer.
-- In JavaFX: pagamento mock, chat in tempo reale, notifiche, raccolte condivise, itinerari collaborativi, export calendario e mappa.
+- Pagamento mock con ricevuta e chat in tempo reale con risposte e foto su JavaFX e Android.
+- In JavaFX: notifiche, raccolte condivise, itinerari collaborativi, export calendario e mappa.
 - Logging applicativo e audit, rate limiting, Swagger e test automatici.
 
 La matrice delle funzioni dei due client è nel [README](../README.md).

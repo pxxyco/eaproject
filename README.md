@@ -19,9 +19,10 @@ Piattaforma realizzata per il corso **Enterprise Applications 2025/2026 dell’U
 | Prenotazioni, annullamento e recensioni | Sì | Sì |
 | Preferiti e raccolte personali | Sì | Sì |
 | Gestione offerte e prenotazioni dell’Organizer | Sì | Sì |
-| Pagamento mock delle prenotazioni | Sì | Tramite JavaFX |
+| Pagamento mock delle prenotazioni | Sì | Sì |
 | Condivisione delle raccolte e itinerari collaborativi | Sì | Gestione personale delle raccolte |
-| Chat in tempo reale, notifiche in-app, export `.ics` e mappa | Sì | Vedi [funzioni mobile](ea_project_application/README.md) |
+| Chat in tempo reale con risposte e foto | Sì | Sì |
+| Centro notifiche, export `.ics` e mappa | Sì | Vedi [funzioni mobile](ea_project_application/README.md) |
 
 Le funzioni comuni sono protette da JWT, ruoli e controlli di proprietà sul backend. I pagamenti sono **mock**, senza addebiti reali. I dettagli operativi sono nel [manuale utente](docs/USER_GUIDE.md).
 

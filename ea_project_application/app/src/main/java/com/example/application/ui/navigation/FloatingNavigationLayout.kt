@@ -21,6 +21,7 @@ internal fun FloatingNavigationLayout(
     selected: AppDestinations,
     onSelect: (AppDestinations) -> Unit,
     fadeContent: Boolean = true,
+    unreadMessages: Long = 0,
     content: @Composable (Modifier) -> Unit
 ) {
     val loadingHost = remember { ScreenLoadingHost() }
@@ -44,6 +45,7 @@ internal fun FloatingNavigationLayout(
         }
         FloatingNavigation(
             destinations = destinations,
+            unreadMessages = unreadMessages,
             selected = selected,
             onSelect = onSelect,
             modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding()
