@@ -44,10 +44,10 @@ private fun Dashboard(userId: Long, modifier: Modifier) {
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     var refresh by remember { mutableIntStateOf(0) }
-    var editor by remember { mutableStateOf<OrganizerOffer?>(null) }
+    var editor by rememberSaveable(stateSaver = OrganizerOfferSaver) { mutableStateOf<OrganizerOffer?>(null) }
     var deleting by remember { mutableStateOf<OrganizerOffer?>(null) }
-    var choosing by remember { mutableStateOf(false) }
-    var photoOffer by remember { mutableStateOf<OrganizerOffer?>(null) }
+    var choosing by rememberSaveable { mutableStateOf(false) }
+    var photoOffer by rememberSaveable(stateSaver = OrganizerOfferSaver) { mutableStateOf<OrganizerOffer?>(null) }
     var query by rememberSaveable { mutableStateOf("") }
     var statusFilter by rememberSaveable { mutableStateOf("ALL") }
     var bookingQuery by rememberSaveable { mutableStateOf("") }
@@ -203,13 +203,13 @@ internal fun OfferEditor(offer: OrganizerOffer, onDismiss: () -> Unit, onSaved: 
         "endDate" to (if (offer.trip) "Data di fine" else "Data e ora di fine"),
         (if (offer.trip) "totalPrice" else "price") to "Prezzo (€)", "maxSeats" to "Posti totali"
     ).apply { if (!offer.trip) { put("durationMinutes", "Durata (minuti)"); put("latitude", "Latitudine (facoltativa)"); put("longitude", "Longitudine (facoltativa)"); put("notes", "Note (facoltative)") } } }
-    val fields = remember(offer) { mutableStateMapOf<String, String>().apply { labels.keys.forEach { put(it, offer.data.text(it)) } } }
-    var category by remember { mutableStateOf(offer.data.text("category").ifBlank { "EXCURSION" }) }
-    var status by remember { mutableStateOf(offer.data.text("status").ifBlank { "PUBLISHED" }) }
-    val stages = remember(offer) { mutableStateListOf<JsonObject>().apply {
+    val fields = rememberSaveable(offer, saver = OfferFieldsSaver) { mutableStateMapOf<String, String>().apply { labels.keys.forEach { put(it, offer.data.text(it)) } } }
+    var category by rememberSaveable { mutableStateOf(offer.data.text("category").ifBlank { "EXCURSION" }) }
+    var status by rememberSaveable { mutableStateOf(offer.data.text("status").ifBlank { "PUBLISHED" }) }
+    val stages = rememberSaveable(offer, saver = OfferStagesSaver) { mutableStateListOf<JsonObject>().apply {
         offer.data.get("stages")?.takeIf { it.isJsonArray }?.asJsonArray?.forEach { if (it.isJsonObject) add(it.asJsonObject.deepCopy()) }
     } }
-    var persisted by remember { mutableStateOf<OrganizerOffer?>(null) }
+    var persisted by rememberSaveable(stateSaver = OrganizerOfferSaver) { mutableStateOf<OrganizerOffer?>(null) }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     Dialog(onDismissRequest = { if (!busy) onDismiss() }, properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnBackPress = !busy, dismissOnClickOutside = false)) {

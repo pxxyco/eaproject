@@ -9,6 +9,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import com.example.application.ui.theme.FavoriteRed
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -50,7 +55,9 @@ internal fun BookingBar(
     price: Double?,
     availableSeats: Int?,
     onBookClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    actionLabel: String? = null
 ) {
     val soldOut = availableSeats != null && availableSeats <= 0
     val shape = RoundedCornerShape(28.dp)
@@ -93,13 +100,13 @@ internal fun BookingBar(
             val bookingButton: @Composable (Modifier) -> Unit = { buttonModifier ->
                 Button(
                     onClick = onBookClick,
-                    enabled = !soldOut,
+                    enabled = enabled && !soldOut,
                     modifier = buttonModifier.heightIn(min = 52.dp),
                     shape = RoundedCornerShape(18.dp),
                     contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = colors.primary, contentColor = colors.onPrimary)
                 ) {
-                    Text(if (soldOut) "Esaurito" else "Prenota", style = MaterialTheme.typography.labelLarge)
+                    Text(actionLabel ?: if (soldOut) "Esaurito" else "Prenota", style = MaterialTheme.typography.labelLarge)
                 }
             }
             if (stacked) {
@@ -113,6 +120,26 @@ internal fun BookingBar(
                     bookingButton(Modifier.widthIn(min = 128.dp))
                 }
             }
+        }
+    }
+}
+
+@Composable
+internal fun FavoriteButton(favorite: Boolean, enabled: Boolean, onToggle: () -> Unit, modifier: Modifier = Modifier) {
+    Surface(modifier, shape = RoundedCornerShape(18.dp), color = GlassFill, border = BorderStroke(1.dp, GlassBorder)) {
+        IconButton(onClick = onToggle, enabled = enabled, modifier = Modifier.size(48.dp)) {
+            Icon(if (favorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                if (favorite) "Rimuovi dai preferiti" else "Aggiungi ai preferiti",
+                tint = if (favorite) FavoriteRed else MaterialTheme.colorScheme.onSurface)
+        }
+    }
+}
+
+@Composable
+internal fun AddToListButton(onClick: () -> Unit, modifier: Modifier = Modifier) {
+    Surface(modifier, shape = RoundedCornerShape(18.dp), color = GlassFill, border = BorderStroke(1.dp, GlassBorder)) {
+        IconButton(onClick = onClick, modifier = Modifier.size(48.dp)) {
+            Icon(Icons.AutoMirrored.Filled.List, "Aggiungi a una lista", tint = MaterialTheme.colorScheme.onSurface)
         }
     }
 }

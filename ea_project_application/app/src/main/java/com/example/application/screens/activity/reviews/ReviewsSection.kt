@@ -16,8 +16,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
+import com.example.application.network.UserSession
 import com.example.application.ui.theme.Stone200
 import com.example.application.ui.theme.Stone400
 
@@ -36,11 +38,15 @@ internal fun LazyListScope.reviewsSection(state: ReviewsState) {
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Stone200,
-                        contentColor = Color.Black
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 ) {
-                    Text("Scrivi una recensione")
+                    Text("+", modifier = Modifier.semantics { contentDescription = "Aggiungi recensione" })
                 }
+            } else if (UserSession.role.equals("TRAVELER", true) && reviews != null && state.myReview == null) {
+                Spacer(Modifier.height(8.dp))
+                Text("Per aggiungere una recensione serve una prenotazione confermata e non annullata.",
+                    style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }

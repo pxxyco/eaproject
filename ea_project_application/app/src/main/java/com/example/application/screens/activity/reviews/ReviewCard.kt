@@ -31,7 +31,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.application.dto.ResponseDTO
@@ -175,7 +174,7 @@ private fun ReviewMenu(
         ) {
             if (onEdit != null) {
                 DropdownMenuItem(
-                    text = { Text("Modifica", color = Color.White) },
+                    text = { Text("Modifica", color = MaterialTheme.colorScheme.onSurface) },
                     onClick = {
                         expanded = false
                         onEdit()

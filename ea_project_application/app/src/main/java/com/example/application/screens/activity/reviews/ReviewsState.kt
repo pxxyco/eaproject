@@ -5,6 +5,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.example.application.dto.BookingItemDTO
+import com.example.application.network.BookingRepository
 import com.example.application.dto.ExperienceRef
 import com.example.application.dto.ResponseDTO
 import com.example.application.dto.ReviewDTO
@@ -25,7 +27,9 @@ internal sealed interface ResponseForm {
 
 internal class ReviewsState(
     private val ref: ExperienceRef,
-    private val ownerId: Long?
+    private val ownerId: Long?,
+    private val loadBookings: suspend (ExperienceRef) -> List<BookingItemDTO> = { BookingRepository.mine(it) },
+    private val loadReviews: suspend (ExperienceRef) -> List<ReviewDTO> = { ReviewRepository.getReviews(it) }
 ) {
     var form by mutableStateOf<ReviewForm?>(null)
         private set
@@ -45,6 +49,24 @@ internal class ReviewsState(
         private set
 
     private var loaded = false
+    var bookings by mutableStateOf<List<BookingItemDTO>>(emptyList())
+        private set
+    var participationLoaded by mutableStateOf(false)
+        private set
+
+    var participationBusy by mutableStateOf(false)
+        private set
+
+    suspend fun refreshParticipation() {
+        participationBusy = true
+        participationLoaded = false
+        try {
+            bookings = if (UserSession.role.equals("TRAVELER", true)) loadBookings(ref) else emptyList()
+            participationLoaded = true
+        } catch (e: CancellationException) { throw e }
+        catch (e: Exception) { bookings = emptyList(); error = "Impossibile verificare le prenotazioni. Riprova." }
+        finally { participationBusy = false }
+    }
 
     val myReview: ReviewDTO?
         get() {
@@ -54,8 +76,10 @@ internal class ReviewsState(
 
     val canWrite: Boolean
         get() = UserSession.role.equals("TRAVELER", ignoreCase = true) &&
-                reviews != null &&
-                myReview == null
+                reviews != null && participationLoaded && !participationBusy &&
+                myReview == null && bookings.any {
+                    it.bookingStatus in listOf("CONFIRMED", "COMPLETED") && it.itemStatus != "CANCELLED"
+                }
 
     val average: Double?
         get() = reviews
@@ -88,7 +112,7 @@ internal class ReviewsState(
     fun askDeleteResponse(review: ReviewDTO) { pendingResponseDelete = review.response }
     fun cancelDeleteResponse() { pendingResponseDelete = null }
 
-    fun openNew() { form = ReviewForm.New }
+    fun openNew() { if (canWrite) form = ReviewForm.New }
     fun openEdit(review: ReviewDTO) { form = ReviewForm.Edit(review) }
     fun closeForm() { form = null }
 
@@ -147,7 +171,8 @@ internal class ReviewsState(
     suspend fun reload() {
         error = null
         try {
-            reviews = ReviewRepository.getReviews(ref)
+            reviews = loadReviews(ref)
+            refreshParticipation()
             loaded = true
         } catch (e: CancellationException) {
             throw e

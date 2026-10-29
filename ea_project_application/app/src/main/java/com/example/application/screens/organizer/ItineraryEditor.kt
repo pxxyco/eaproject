@@ -5,6 +5,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.google.gson.JsonArray
@@ -75,7 +76,7 @@ internal fun stagePayload(original: JsonObject, fields: Map<String, String>, cat
 
 @Composable
 internal fun ItineraryEditor(stages: MutableList<JsonObject>, enabled: Boolean) {
-    var selected by remember { mutableStateOf<Int?>(null) }
+    var selected by rememberSaveable { mutableStateOf<Int?>(null) }
     Text("Itinerario", style = MaterialTheme.typography.titleLarge)
     Text("Le tappe sono ordinate per giorno; puoi riordinare quelle dello stesso giorno.")
     if (stages.isEmpty()) Text("Aggiungi le tappe del viaggio, oppure salva senza itinerario.")
@@ -116,8 +117,8 @@ private fun StageForm(original: JsonObject, onDismiss: () -> Unit, onSave: (Json
     val labels = linkedMapOf("title" to "Titolo tappa", "day" to "Giorno del viaggio", "locationName" to "Luogo",
         "city" to "Città", "description" to "Descrizione", "latitude" to "Latitudine (facoltativa)", "longitude" to "Longitudine (facoltativa)",
         "startTime" to "Ora inizio HH:mm (facoltativa)", "endTime" to "Ora fine HH:mm, stesso giorno (facoltativa)")
-    val fields = remember { mutableStateMapOf<String, String>().apply { labels.keys.forEach { put(it, if (it in listOf("startTime", "endTime")) original.stageTime(it) else original.text(it)) } } }
-    var category by remember { mutableStateOf(original.text("category").ifBlank { "OTHER" }) }
+    val fields = rememberSaveable(saver = OfferFieldsSaver) { mutableStateMapOf<String, String>().apply { labels.keys.forEach { put(it, if (it in listOf("startTime", "endTime")) original.stageTime(it) else original.text(it)) } } }
+    var category by rememberSaveable { mutableStateOf(original.text("category").ifBlank { "OTHER" }) }
     var error by remember { mutableStateOf<String?>(null) }
     AlertDialog(onDismissRequest = onDismiss, title = { Text("Tappa del viaggio") }, text = {
         Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {

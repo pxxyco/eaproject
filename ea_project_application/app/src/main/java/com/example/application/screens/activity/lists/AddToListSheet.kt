@@ -105,7 +105,7 @@ internal fun AddToListSheet(
             Text(
                 text = "Aggiungi a una lista",
                 style = MaterialTheme.typography.titleLarge,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(12.dp))
@@ -129,7 +129,7 @@ internal fun AddToListSheet(
                         Text(
                             text = list.name,
                             style = MaterialTheme.typography.bodyLarge,
-                            color = Color.White,
+                            color = MaterialTheme.colorScheme.onSurface,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable(enabled = !saving) { addTo(list) }
@@ -156,8 +156,8 @@ internal fun AddToListSheet(
                     singleLine = true,
                     enabled = !saving,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                         focusedBorderColor = Stone200,
                         unfocusedBorderColor = GlassBorder,
                         focusedPlaceholderColor = Stone400,
@@ -172,7 +172,7 @@ internal fun AddToListSheet(
                     enabled = newName.isNotBlank() && !saving,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Stone200,
-                        contentColor = Color.Black
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 ) {
                     Text("Crea")

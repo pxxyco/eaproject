@@ -66,7 +66,7 @@ internal fun ResponseFormSheet(
             Text(
                 text = if (initialComment == null) "Rispondi alla recensione" else "Modifica la risposta",
                 style = MaterialTheme.typography.titleLarge,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold
             )
 
@@ -87,8 +87,8 @@ internal fun ResponseFormSheet(
                     )
                 },
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                     focusedBorderColor = Stone200,
                     unfocusedBorderColor = GlassBorder,
                     focusedLabelColor = Stone200,
@@ -134,12 +134,12 @@ internal fun ResponseFormSheet(
                     enabled = comment.isNotBlank() && !saving,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Stone200,
-                        contentColor = Color.Black
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 ) {
                     if (saving) {
                         CircularProgressIndicator(
-                            color = Color.Black,
+                            color = MaterialTheme.colorScheme.onPrimary,
                             strokeWidth = 2.dp,
                             modifier = Modifier.size(18.dp)
                         )

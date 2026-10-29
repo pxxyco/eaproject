@@ -65,7 +65,8 @@ internal fun MainNavigation(
         val experience = openExperience
         if (experience != null) {
             key(experience) {
-                ExperienceDetailScreen(experience, onBack = { openExperience = null }, modifier = contentModifier)
+                ExperienceDetailScreen(experience, onBack = { openExperience = null }, modifier = contentModifier,
+                    onLoginRequired = { openExperience = null; destination = AppDestinations.PROFILE })
             }
         } else key(user?.id, user?.role) {
             when (current) {

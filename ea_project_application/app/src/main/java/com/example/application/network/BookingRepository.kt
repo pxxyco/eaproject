@@ -1,16 +1,22 @@
 package com.example.application.network
 
+import com.example.application.dto.BookingItemDTO
 import com.example.application.dto.ExperienceRef
 import com.example.application.dto.ExperienceType
 
 object BookingRepository {
 
-    suspend fun book(ref: ExperienceRef, seats: Int) {
+    suspend fun book(ref: ExperienceRef, seats: Int): BookingItemDTO {
         val path = when (ref.type) {
             ExperienceType.ACTIVITY -> "/api/bookings/activities/${ref.id}?seats=$seats"
             ExperienceType.TRIP -> "/api/bookings/trips/${ref.id}?seats=$seats"
         }
-        ApiService.post(path, null, Unit::class.java).orThrow()
+        return ApiService.post(path, null, BookingItemDTO::class.java).orThrow()
+    }
+
+    suspend fun mine(ref: ExperienceRef): List<BookingItemDTO> {
+        val key = if (ref.type == ExperienceType.TRIP) "tripId" else "activityId"
+        return ApiService.get("/api/bookings/mine/experience?$key=${ref.id}", Array<BookingItemDTO>::class.java).orThrow().toList()
     }
 
     private data class ApiErrorBody(val message: String? = null)

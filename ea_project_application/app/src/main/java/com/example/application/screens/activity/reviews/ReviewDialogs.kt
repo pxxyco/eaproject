@@ -75,7 +75,7 @@ private fun ConfirmDeleteDialog(
     AlertDialog(
         onDismissRequest = { if (!deleting) onCancel() },
         containerColor = PopupSurface,
-        title = { Text(title, color = Color.White) },
+        title = { Text(title, color = MaterialTheme.colorScheme.onSurface) },
         text = {
             Text(
                 text = error ?: "L'operazione non si può annullare.",

@@ -72,3 +72,5 @@ fun ColorScheme.withWallpaper(accent: Color?, darkTheme: Boolean): ColorScheme {
         outlineVariant = lerp(outlineVariant, accent, .2f),
     )
 }
+
+val FavoriteRed = Color(0xFFEF4444)

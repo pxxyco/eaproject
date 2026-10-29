@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.application.dto.BookingItemDTO
 import com.example.application.ui.theme.PopupSurface
 import com.example.application.ui.theme.Stone200
 import com.example.application.ui.theme.Stone400
@@ -45,11 +46,12 @@ internal fun BookingSheet(
     price: Double?,
     availableSeats: Int,
     onDismiss: () -> Unit,
-    onConfirm: suspend (seats: Int) -> Unit
+    onConfirm: suspend (seats: Int) -> BookingItemDTO
 ) {
     var seats by rememberSaveable { mutableIntStateOf(1) }
     var saving by remember { mutableStateOf(false) }
     var done by remember { mutableStateOf(false) }
+    var awaitingPayment by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
 
@@ -63,9 +65,9 @@ internal fun BookingSheet(
                 .padding(start = 20.dp, end = 20.dp, bottom = 24.dp)
         ) {
             Text(
-                text = if (done) "Prenotazione confermata" else "Prenota",
+                text = if (done) { if (awaitingPayment) "In attesa di pagamento" else "Prenotazione confermata" } else "Prenota",
                 style = MaterialTheme.typography.titleLarge,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold
             )
             Text(text = title, style = MaterialTheme.typography.bodyMedium, color = Stone400)
@@ -83,7 +85,7 @@ internal fun BookingSheet(
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Stone200,
-                        contentColor = Color.Black
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 ) {
                     Text("Chiudi")
@@ -96,7 +98,7 @@ internal fun BookingSheet(
                 Text(
                     text = "Posti",
                     style = MaterialTheme.typography.titleMedium,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f)
                 )
                 OutlinedIconButton(
@@ -108,7 +110,7 @@ internal fun BookingSheet(
                 Text(
                     text = seats.toString(),
                     style = MaterialTheme.typography.titleLarge,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
                 OutlinedIconButton(
@@ -129,13 +131,13 @@ internal fun BookingSheet(
                 Text(
                     text = "Totale",
                     style = MaterialTheme.typography.titleMedium,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f)
                 )
                 Text(
                     text = price?.let { "€ %.2f".format(Locale.ITALY, it * seats) } ?: "N/D",
                     style = MaterialTheme.typography.titleLarge,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -163,7 +165,7 @@ internal fun BookingSheet(
                         error = null
                         scope.launch {
                             try {
-                                onConfirm(seats)
+                                awaitingPayment = onConfirm(seats).bookingStatus == "PENDING"
                                 done = true
                             } catch (e: CancellationException) {
                                 throw e
@@ -177,12 +179,12 @@ internal fun BookingSheet(
                     enabled = !saving,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Stone200,
-                        contentColor = Color.Black
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 ) {
                     if (saving) {
                         CircularProgressIndicator(
-                            color = Color.Black,
+                            color = MaterialTheme.colorScheme.onPrimary,
                             strokeWidth = 2.dp,
                             modifier = Modifier.size(18.dp)
                         )

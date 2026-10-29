@@ -70,7 +70,7 @@ internal fun ReviewFormSheet(
             Text(
                 text = if (initial == null) "Scrivi una recensione" else "Modifica la recensione",
                 style = MaterialTheme.typography.titleLarge,
-                color = Color.White,
+                color = MaterialTheme.colorScheme.onSurface,
                 fontWeight = FontWeight.Bold
             )
             Spacer(Modifier.height(16.dp))
@@ -89,8 +89,8 @@ internal fun ReviewFormSheet(
                     )
                 },
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
                     focusedBorderColor = Stone200,
                     unfocusedBorderColor = GlassBorder,
                     focusedLabelColor = Stone200,
@@ -136,12 +136,12 @@ internal fun ReviewFormSheet(
                     enabled = rating > 0 && !saving,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = Stone200,
-                        contentColor = Color.Black
+                        contentColor = MaterialTheme.colorScheme.onPrimary
                     )
                 ) {
                     if (saving) {
                         CircularProgressIndicator(
-                            color = Color.Black,
+                            color = MaterialTheme.colorScheme.onPrimary,
                             strokeWidth = 2.dp,
                             modifier = Modifier.size(18.dp)
                         )
